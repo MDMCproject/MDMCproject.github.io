@@ -94,6 +94,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/building-a-universe.html">Building an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 </ul>
@@ -216,8 +217,66 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="viewer">
-<h1>viewer<a class="headerlink" href="#viewer" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-MDMC.MD.ase.viewer">
+<span id="viewer"></span><h1>viewer<a class="headerlink" href="#module-MDMC.MD.ase.viewer" title="Permalink to this headline">¶</a></h1>
+<p>This module is the interface to the Atomic Simulation Environment (ASE,
+<a class="reference external" href="https://wiki.fysik.dtu.dk/ase/">https://wiki.fysik.dtu.dk/ase/</a>) GUI, which enables a molecular viewer to be
+launched. This viewer allows the visualization of atomic positions and bonds.</p>
+<dl class="class">
+<dt id="MDMC.MD.ase.viewer.Viewer">
+<em class="property">class </em><code class="sig-prename descclassname">MDMC.MD.ase.viewer.</code><code class="sig-name descname">Viewer</code><span class="sig-paren">(</span><em class="sig-param">images=None</em>, <em class="sig-param">rotations=''</em>, <em class="sig-param">expr=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/viewer.html#Viewer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.viewer.Viewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subclasses the ASE GUI to provide a molecular viewer for MDMC.</p>
+<p>It modifies how bonds are plotted by using an alternative <cite>get_bonds</cite>
+function in the <cite>set_atoms</cite> method.</p>
+<p>It removes GUI menu options that are not applicable in MDMC.</p>
+<dl class="method">
+<dt id="MDMC.MD.ase.viewer.Viewer.get_menu_data">
+<code class="sig-name descname">get_menu_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/viewer.html#Viewer.get_menu_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.viewer.Viewer.get_menu_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subset of default ASE GUI menu options which are applicable to MDMC</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MDMC.MD.ase.viewer.Viewer.set_atoms">
+<code class="sig-name descname">set_atoms</code><span class="sig-paren">(</span><em class="sig-param">atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/viewer.html#Viewer.set_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.viewer.Viewer.set_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Almost an exact copy from ASE</p>
+<p>This method is defined purely so that an alternative to the
+<cite>get_bonds</cite> function is used. Now the bonds are set during __init__.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>atoms</strong> (<a class="reference internal" href="conversions.html#MDMC.MD.ase.conversions.ASEAtoms" title="MDMC.MD.ase.conversions.ASEAtoms"><em>ASEAtoms</em></a>) – The atoms which will be set</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="MDMC.MD.ase.viewer.get_bonds">
+<code class="sig-prename descclassname">MDMC.MD.ase.viewer.</code><code class="sig-name descname">get_bonds</code><span class="sig-paren">(</span><em class="sig-param">atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/viewer.html#get_bonds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.viewer.get_bonds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds (0, 0, 0,) to each bonded atom pair defined within an <cite>ASEAtoms</cite>
+object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>atoms</strong> (<a class="reference internal" href="conversions.html#MDMC.MD.ase.conversions.ASEAtoms" title="MDMC.MD.ase.conversions.ASEAtoms"><em>ASEAtoms</em></a>) – The ASEAtoms object for which the bonds are required for plotting</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MDMC.MD.ase.viewer.view">
+<code class="sig-prename descclassname">MDMC.MD.ase.viewer.</code><code class="sig-name descname">view</code><span class="sig-paren">(</span><em class="sig-param">atoms</em>, <em class="sig-param">cell=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/viewer.html#view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.viewer.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launches the ASE GUI for a collection of atoms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>list</em>) – A list of Atom objects (MDMC.MD.structural_unit.Atom) to view</p></li>
+<li><p><strong>cell</strong> (<em>array</em><em>, </em><em>optional</em>) – An array of floats specifying the dimensions of the cell to view. The
+default is None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 

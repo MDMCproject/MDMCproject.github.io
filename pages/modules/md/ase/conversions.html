@@ -94,6 +94,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/building-a-universe.html">Building an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 </ul>
@@ -216,8 +217,152 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="conversions">
-<h1>conversions<a class="headerlink" href="#conversions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-MDMC.MD.ase.conversions">
+<span id="conversions"></span><h1>conversions<a class="headerlink" href="#module-MDMC.MD.ase.conversions" title="Permalink to this headline">¶</a></h1>
+<p>This module enables conversion between MDMC StructuralUnit objects and ASE
+Atom and Atoms objects.</p>
+<dl class="class">
+<dt id="MDMC.MD.ase.conversions.ASEAtoms">
+<em class="property">class </em><code class="sig-prename descclassname">MDMC.MD.ase.conversions.</code><code class="sig-name descname">ASEAtoms</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/conversions.html#ASEAtoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.conversions.ASEAtoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>A subclass of <cite>ase.atoms.Atoms</cite> with explicit bonds defined between atoms</p>
+<dl class="attribute">
+<dt id="MDMC.MD.ase.conversions.ASEAtoms.bonds">
+<code class="sig-name descname">bonds</code><a class="headerlink" href="#MDMC.MD.ase.conversions.ASEAtoms.bonds" title="Permalink to this definition">¶</a></dt>
+<dd><p>An array of tuples, where each tuple is an atom pair, which are
+specified by the indexes (int) of each atom.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If there are not the same number of IDs as there are atoms</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MDMC.MD.ase.conversions.convert_bond">
+<code class="sig-prename descclassname">MDMC.MD.ase.conversions.</code><code class="sig-name descname">convert_bond</code><span class="sig-paren">(</span><em class="sig-param">bond</em>, <em class="sig-param">index_conv=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/conversions.html#convert_bond"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.conversions.convert_bond" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts <cite>Bond</cite> objects into the form required by the ASE GUI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bond</strong> (<a class="reference internal" href="../structural_units.html#MDMC.MD.structural_units.Bond" title="MDMC.MD.structural_units.Bond"><em>Bond</em></a>) – The bond which will be converted.</p></li>
+<li><p><strong>index_conv</strong> (<em>dict</em>) – A dictionary of MDMC_ID: ASE_index pairs, where MDMC_ID is an int
+specifying an <cite>Atom.ID</cite>, and ASE_index is the corresponding
+<cite>ase.atom.Atom.index</cite>. The default is <cite>None</cite>, which means that the
+IDs and indexes will be assumed to be identical.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An array of 2 element lists where each element is the integer index of
+an atom between which the bond exists.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MDMC.MD.ase.conversions.convert_bonds">
+<code class="sig-prename descclassname">MDMC.MD.ase.conversions.</code><code class="sig-name descname">convert_bonds</code><span class="sig-paren">(</span><em class="sig-param">bonds</em>, <em class="sig-param">index_conv=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/conversions.html#convert_bonds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.conversions.convert_bonds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts <cite>Bond</cite> objects into the form required by the ASE GUI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bonds</strong> (<em>list</em>) – The list of bonds to be converted</p></li>
+<li><p><strong>index_conv</strong> (<em>dict</em>) – A dictionary of MDMC_ID: ASE_index pairs, where MDMC_ID is an int
+specifying an <cite>Atom.ID</cite>, and ASE_index is the corresponding
+<cite>ase.atom.Atom.index</cite>. The default is <cite>None</cite>, which means that the
+IDs and indexes will be assumed to be identical.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An array of 2 element lists where each element is the integer index of
+an atom between which the bond exists.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MDMC.MD.ase.conversions.convert_from_ase_atom">
+<code class="sig-prename descclassname">MDMC.MD.ase.conversions.</code><code class="sig-name descname">convert_from_ase_atom</code><span class="sig-paren">(</span><em class="sig-param">ase_atom</em>, <em class="sig-param">atom_type=None</em>, <em class="sig-param">name=None</em>, <em class="sig-param">set_charge=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/conversions.html#convert_from_ase_atom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.conversions.convert_from_ase_atom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an <cite>ase.atom.Atom</cite> to an MDMC <cite>Atom</cite>.</p>
+<p>As MDMC automatically generates atom IDs, <cite>ase_atom.index</cite> is not passed
+when initializing an <cite>Atom</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ase_atom</strong> (<em>ASEAtom</em>) – An <cite>ASEAtom</cite> object to be converted to an MDMC <cite>Atom</cite> object</p></li>
+<li><p><strong>atom_type</strong> (<em>int</em>) – The atom_type of the MDMC <cite>Atom</cite> object.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – A name for the MDMC <cite>Atom</cite>. The default is the element symbol.</p></li>
+<li><p><strong>set_charge</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the charge is set to the charge of the ase.atom.Atom, or left
+unset. All ase.atom.Atom objects have a charge, which is set to 0. if it
+is uninitialized. As MDMC Atom objects can have charge=None, in some
+cases it might be preferential to leave the charge unset. The default is
+to set the charge.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An MDMC <cite>Atom</cite> object which is equivalent to <cite>ase_atom</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../structural_units.html#MDMC.MD.structural_units.Atom" title="MDMC.MD.structural_units.Atom">Atom</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MDMC.MD.ase.conversions.convert_to_ase_atom">
+<code class="sig-prename descclassname">MDMC.MD.ase.conversions.</code><code class="sig-name descname">convert_to_ase_atom</code><span class="sig-paren">(</span><em class="sig-param">atom</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/conversions.html#convert_to_ase_atom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.conversions.convert_to_ase_atom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an MDMC <cite>Atom</cite> to an <cite>ase.atom.Atom</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atom</strong> (<a class="reference internal" href="../structural_units.html#MDMC.MD.structural_units.Atom" title="MDMC.MD.structural_units.Atom"><em>Atom</em></a>) – An MDMC <cite>Atom</cite> object to be converted to an ase.atom.Atom object</p></li>
+<li><p><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – The index of the <cite>ase.atom.Atom</cite> object which is created. If this is
+not set, the MDMC <cite>Atom.ID</cite> is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An ASE <cite>Atom</cite> object which is equivalent to <cite>atom</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ase.atom.Atom</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MDMC.MD.ase.conversions.get_ase_atoms">
+<code class="sig-prename descclassname">MDMC.MD.ase.conversions.</code><code class="sig-name descname">get_ase_atoms</code><span class="sig-paren">(</span><em class="sig-param">atoms</em>, <em class="sig-param">cell=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/ase/conversions.html#get_ase_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.MD.ase.conversions.get_ase_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets an <cite>ASEAtoms</cite> object equivalent to <cite>atoms</cite>, including the bonding</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>iterable</em>) – An iterable of MDMC Atom objects to be converted to an ASEAtoms
+object</p></li>
+<li><p><strong>cell</strong> (<em>array</em><em>, </em><em>optional</em>) – A 3 element array specifying the unit cell of the ASEAtoms object. The
+default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An ASEAtoms object which is equivalent to <cite>atoms</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#MDMC.MD.ase.conversions.ASEAtoms" title="MDMC.MD.ase.conversions.ASEAtoms">ASEAtoms</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
