@@ -1,0 +1,724 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Reading atoms from configuration files &mdash; MDMC 0.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Applying a ForceField" href="applying-a-forcefield.html" />
+    <link rel="prev" title="Building an MDMC Universe" href="building-a-universe.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MDMC
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pages/introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/installation.html">2. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/simulations.html">3. Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/parameter-refinement.html">4. Parameter Refinement</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="building-a-universe.html">Building an MDMC Universe</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reading atoms from configuration files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Equivalence-specified-by-atom_types">Equivalence specified by <code class="docutils literal notranslate"><span class="pre">atom_types</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Equivalence-specified-by-names">Equivalence specified by <code class="docutils literal notranslate"><span class="pre">names</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-a-simulation.html">Running a Simulation in MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-a-refinement.html">Running a Refinement</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pages/modules/common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/modules/control.html">Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/modules/gui.html">gui</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/modules/md.html">MD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/modules/readers.html">readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/modules/refinement.html">refinement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/modules/trajectory_analysis.html">trajectory_analysis</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDMC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Reading atoms from configuration files</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/read-configurations.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container,
+div.nbinput.container div.prompt,
+div.nbinput.container div.input_area,
+div.nbinput.container div[class*=highlight],
+div.nbinput.container div[class*=highlight] pre,
+div.nboutput.container,
+div.nboutput.container div.prompt,
+div.nboutput.container div.output_area,
+div.nboutput.container div[class*=highlight],
+div.nboutput.container div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    min-width: 5ex;
+    padding-top: 0.3rem;
+    padding-right: 0.3rem;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 0.3rem;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Reading-atoms-from-configuration-files">
+<h1>Reading atoms from configuration files<a class="headerlink" href="#Reading-atoms-from-configuration-files" title="Permalink to this headline">¶</a></h1>
+<p>MDMC enables reading atomic configurations and topologies (if included) from configuration files.</p>
+<p>The implemented file formats are:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.iucr.org/resources/cif/documentation">Crystallographic Information File</a> (CIF)</p></li>
+</ul>
+<p>In theory, it is possible to read a configuration file by simply passing it to the <code class="docutils literal notranslate"><span class="pre">read</span></code> function, as MDMC will determine the file format from the extension, if it is a supported format:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">MDMC.readers.configurations</span> <span class="k">import</span> <span class="n">read</span>
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/Paracetamol.cif&#39;</span><span class="p">)</span>
+
+<span class="c1"># The return type of read is a list of atoms</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The return type is: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">atoms</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The return type is: &lt;class &#39;list&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># We can use this to create a Molecule</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structural_units</span> <span class="k">import</span> <span class="n">Molecule</span>
+<span class="n">paracetamol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The paracetamol <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> read from the CIF file can be visualized using the <code class="docutils literal notranslate"><span class="pre">view</span></code> function:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">MDMC.gui</span> <span class="k">import</span> <span class="n">view</span>
+<span class="n">view</span><span class="p">(</span><span class="n">paracetamol</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The display should show:</p>
+<p><img alt="Display for paracetamol" src="../_images/gui_paracetamol.png" /></p>
+<p>From this it appears that the configuration and topology has been correctly read; however, MDMC does not automatically determine if certain atoms or bonded interactions are equivalent. For example, all three hydrogens in the methyl group are equivalent, as are the bonds, bond angles and dihedrals these hydrogens are involved in. In the case of paracetamol, there are 20 bonds in total, however only 12 of them are unique.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># To see all of the Bond interactions, we can filter the paracetamol interactions by name</span>
+<span class="n">bonds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Bond&#39;</span><span class="p">,</span> <span class="n">paracetamol</span><span class="o">.</span><span class="n">interactions</span><span class="p">))</span>
+
+<span class="c1"># There are 20 bonds in total</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of bonds: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bonds</span><span class="p">)))</span>
+
+<span class="c1"># We can cast the list of bonds to a set to see the number of unique bonds - in this case it is still 20</span>
+<span class="n">unique_bonds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">bonds</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of uniquie bonds: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_bonds</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of bonds: 20
+Number of uniquie bonds: 20
+</pre></div></div>
+</div>
+<p>There are two methods for specifying which atoms are equivalent; these can be seen by viewing the documentation relevant to the file format of the configuartion file, which can be accessed by passing <code class="docutils literal notranslate"><span class="pre">docstring=True</span></code> when calling <code class="docutils literal notranslate"><span class="pre">read</span></code>. For example, with a CIF file:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Paracetamol.cif&#39;</span><span class="p">,</span> <span class="n">docstring</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on method parse in module MDMC.readers.configurations.cif:
+
+parse(**settings) method of MDMC.readers.configurations.cif.CIF instance
+    Reads a configuration file and returns a list of `Atom` objects.
+
+    These Atom objects can optionally have `Coulombic` interactions and also
+    `BondedInteraction` objects if bonded interactions are defined in the CIF
+    file.
+
+    If `names` or `atom_types` is passed, then equivalent interactions
+    (`Coulombic` and `BondedInteraction`, if bonded interactions are defined in
+    the CIF file) will be initialized as a single object. For instance if the
+    CIF file includes a benzene ring, then as long as the correct `names` or
+    `atom_types` are passed, then there will only be a single C-C `Bond` object,
+    which will include all 6 of the atom pairs.
+    If both `names` and `atom_types` are passed, `atom_types` will be used to
+    group `Atom` objects.
+    If neither `names` or `atom_types` is passed then each interaction will
+    become a separate object.
+
+    .. note:: Not all CIF files contain bonded interactions (it is only common
+    for biomolecules).
+
+    .. note:: improper dihedrals are not explicitly defined in CIF, so these
+    must be set after initialization of `DihedralAngle` objects.
+
+    .. note:: CIF reader cannot parse CIF files with user defined text sections,
+    so these must be stripped out before reading.
+
+    Parameters
+    ----------
+    file : File, str
+        A `File` object, or the absolute file name of the configuration file
+    **settings
+        index : int, optional
+            The index of the configuration in the CIF file. Only a single
+            configuration can be read from a CIF file, with the default being
+            the first (index=0) configuration.
+        names : list of str
+            A list of names for the atoms in the CIF file. These names must have
+            the same order as the order the atoms in the file. A `name` must be
+            be provided for each atom in the CIF file.
+        atom_types : list of int
+            A list of int for atom types of the atoms in the CIF file. These
+            names must have the same order as the order the atoms in the file.
+            An `atom_type` must be provided for each atom in the CIF file.
+        cutoff : float
+            A distance (in Ang) at which the `Coulombic` interactions are
+            cutoff. If this is not passed, the `cutoff` will be set to 10.
+        add_bonds : bool, optional
+            Whether or not any bonded interactions defined in the CIF file will
+            be included. By default this is True.
+        add_charges : bool, optional
+            Whether or not each atom in the CIF file will be assigned a
+            `Coulombic` interaction with a `Coulomb` function. CIF files do not
+            contain charge information, so the charge of the `Coulombic`
+            interaction will be set to 0. This enables the charges to be set by
+            the application of a `ForceField` object. By default this is True.
+
+    Returns
+    -------
+    list of Atom
+        The `Atom` objects corresponding to the data in the CIF file
+
+</pre></div></div>
+</div>
+<p>So it is possible to define equivalent atoms either by specifying the <code class="docutils literal notranslate"><span class="pre">name</span></code> of each <code class="docutils literal notranslate"><span class="pre">Atom</span></code> or the <code class="docutils literal notranslate"><span class="pre">atom_type</span></code> of each <code class="docutils literal notranslate"><span class="pre">Atom</span></code>. <strong>These names or atom types must be passed in the same order as the atoms are defined within the CIF file (i.e. in the _atom_site_label identifier).</strong></p>
+<div class="section" id="Equivalence-specified-by-atom_types">
+<h2>Equivalence specified by <code class="docutils literal notranslate"><span class="pre">atom_types</span></code><a class="headerlink" href="#Equivalence-specified-by-atom_types" title="Permalink to this headline">¶</a></h2>
+<p>As with all <code class="docutils literal notranslate"><span class="pre">atom_types</span></code> specified in MDMC the integers used should be monotonically increasing.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># from MDMC.readers.configurations import read</span>
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/Paracetamol.cif&#39;</span><span class="p">,</span> <span class="n">atom_types</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="c1"># Oxygens</span>
+                                           <span class="mi">3</span><span class="p">,</span> <span class="c1"># Nitrogen</span>
+                                           <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="c1"># Carbons</span>
+                                           <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">])</span> <span class="c1"># Hydrogens</span>
+<span class="n">paracetamol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">)</span>
+
+<span class="c1"># Print the total number of bonds and the number of unique bonds</span>
+<span class="n">bonds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Bond&#39;</span><span class="p">,</span> <span class="n">paracetamol</span><span class="o">.</span><span class="n">interactions</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of bonds: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bonds</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of unique bonds: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">bonds</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of bonds: 20
+Number of unique bonds: 12
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Equivalence-specified-by-names">
+<h2>Equivalence specified by <code class="docutils literal notranslate"><span class="pre">names</span></code><a class="headerlink" href="#Equivalence-specified-by-names" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">names</span></code> must be strings which are only shared by equivalent atoms. These set the <code class="docutils literal notranslate"><span class="pre">name</span></code> attribute for each <code class="docutils literal notranslate"><span class="pre">Atom</span></code>. As covered in the tutorial <a class="reference internal" href="applying-a-forcefield.html"><span class="doc">Applying a Forcefield</span></a>, if each <code class="docutils literal notranslate"><span class="pre">Atom</span></code> has an <code class="docutils literal notranslate"><span class="pre">Atom.name</span></code> which is defined in a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code>, the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> can be applied to set the <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> values for all interactions. An example of this is shown below, where the <code class="docutils literal notranslate"><span class="pre">names</span></code> provided are the OPLSAA atom types:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># from MDMC.readers.configurations import read</span>
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/Paracetamol.cif&#39;</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;109&#39;</span><span class="p">,</span> <span class="s1">&#39;177&#39;</span><span class="p">,</span> <span class="c1"># Oxygens</span>
+                                            <span class="s1">&#39;207&#39;</span><span class="p">,</span> <span class="c1"># Nitrogen</span>
+                                            <span class="s1">&#39;208&#39;</span><span class="p">,</span> <span class="s1">&#39;108&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;178&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;185&#39;</span><span class="p">,</span> <span class="c1"># Carbons</span>
+                                            <span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;183&#39;</span><span class="p">,</span> <span class="s1">&#39;110&#39;</span><span class="p">])</span> <span class="c1"># Hydrogens</span>
+<span class="n">paracetamol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">)</span>
+
+<span class="c1"># Print the total number of bonds and the number of unique bonds</span>
+<span class="n">bonds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Bond&#39;</span><span class="p">,</span> <span class="n">paracetamol</span><span class="o">.</span><span class="n">interactions</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of bonds: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bonds</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of unique bonds: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">bonds</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of bonds: 20
+Number of unique bonds: 12
+</pre></div></div>
+</div>
+<p>The paracetamol can now be added to a <code class="docutils literal notranslate"><span class="pre">Universe</span></code> and the OPLSAA <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> can be applied to set the <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> values:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="k">import</span> <span class="n">Universe</span>
+<span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">add_structural_unit</span><span class="p">(</span><span class="n">paracetamol</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="s1">&#39;OPLSAA&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The effect of this can be seen if we visualize the paracetamol molecule and select <code class="docutils literal notranslate"><span class="pre">View</span> <span class="pre">-&gt;</span> <span class="pre">Charges</span></code> from the GUI menu bar.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">view</span><span class="p">(</span><span class="n">paracetamol</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p><img alt="Display for paracetamol with charges" src="../_images/gui_paracetamol_charges.png" /></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="applying-a-forcefield.html" class="btn btn-neutral float-right" title="Applying a ForceField" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="building-a-universe.html" class="btn btn-neutral float-left" title="Building an MDMC Universe" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Thomas Farmer
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

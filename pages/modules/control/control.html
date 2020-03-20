@@ -83,7 +83,7 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents</span></p>
+              <p class="caption"><span class="caption-text">Overview</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">1. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">2. Installation</a></li>
@@ -93,10 +93,13 @@
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/building-a-universe.html">Building an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Modules</span></p>
 <ul class="current">
@@ -205,12 +208,12 @@
 <p>A module for performing the refinement</p>
 <dl class="class">
 <dt id="MDMC.control.control.Control">
-<em class="property">class </em><code class="sig-prename descclassname">MDMC.control.control.</code><code class="sig-name descname">Control</code><span class="sig-paren">(</span><em class="sig-param">MD_engine</em>, <em class="sig-param">exp_datasets</em>, <em class="sig-param">fit_params</em>, <em class="sig-param">MC_norm=1.0</em>, <em class="sig-param">minimizer_type='MMC'</em>, <em class="sig-param">FoM_type='standard'</em>, <em class="sig-param">reset_config=True</em>, <em class="sig-param">**settings</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.control.control.Control" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">MDMC.control.control.</code><code class="sig-name descname">Control</code><span class="sig-paren">(</span><em class="sig-param">simulation</em>, <em class="sig-param">exp_datasets</em>, <em class="sig-param">fit_params</em>, <em class="sig-param">MC_norm=1.0</em>, <em class="sig-param">minimizer_type='MMC'</em>, <em class="sig-param">FoM_type='standard'</em>, <em class="sig-param">reset_config=True</em>, <em class="sig-param">**settings</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.control.control.Control" title="Permalink to this definition">¶</a></dt>
 <dd><p>Controls the MDMC refinement</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>MD_engine</strong> (<a class="reference internal" href="../md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine" title="MDMC.MD.engine_facades.facade.MDEngine"><em>MDEngine</em></a>) – Performs a simulation for a given set of potential parameters.</p></li>
+<li><p><strong>simulation</strong> (<em>simulation</em>) – Performs a simulation for a given set of potential parameters.</p></li>
 <li><p><strong>exp_datasets</strong> (<em>list of dicts</em>) – Each dictionary is an experimental dataset, containing the file name
 (‘file_name’), the type of observable (‘type’), the reader required for
 the file (‘reader’), and the weighting of the dataset in the Figure of
@@ -238,11 +241,12 @@ state. Default is true.</p></li>
 </pre></div>
 </div>
 <dl class="attribute">
-<dt id="MDMC.control.control.Control.MD_engine">
-<code class="sig-name descname">MD_engine</code><a class="headerlink" href="#MDMC.control.control.Control.MD_engine" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dt id="MDMC.control.control.Control.simulation">
+<code class="sig-name descname">simulation</code><a class="headerlink" href="#MDMC.control.control.Control.simulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">Simulation</span></code> on which is used to perform the refinement</p>
+<dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine" title="MDMC.MD.engine_facades.facade.MDEngine">MDEngine</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../md/simulation.html#MDMC.MD.simulation.Simulation" title="MDMC.MD.simulation.Simulation">Simulation</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -250,7 +254,8 @@ state. Default is true.</p></li>
 <dl class="attribute">
 <dt id="MDMC.control.control.Control.exp_datasets">
 <code class="sig-name descname">exp_datasets</code><a class="headerlink" href="#MDMC.control.control.Control.exp_datasets" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>One <code class="docutils literal notranslate"><span class="pre">dict</span></code> per experimental dataset used for the refinement</p>
+<dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>list of dicts</p>
 </dd>
@@ -260,7 +265,8 @@ state. Default is true.</p></li>
 <dl class="attribute">
 <dt id="MDMC.control.control.Control.fit_params">
 <code class="sig-name descname">fit_params</code><a class="headerlink" href="#MDMC.control.control.Control.fit_params" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>All Parameter objects which will be refined</p>
+<dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="../md/parameters.html#MDMC.MD.parameters.Parameters" title="MDMC.MD.parameters.Parameters">Parameters</a></p>
 </dd>
@@ -279,9 +285,14 @@ state. Default is true.</p></li>
 </dd></dl>
 
 <dl class="attribute">
-<dt>
-<code class="sig-name descname">settings - dict</code></dt>
+<dt id="MDMC.control.control.Control.settings">
+<code class="sig-name descname">settings</code><a class="headerlink" href="#MDMC.control.control.Control.settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>settings for the MD and minimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">

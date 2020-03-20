@@ -83,7 +83,7 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents</span></p>
+              <p class="caption"><span class="caption-text">Overview</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">1. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">2. Installation</a></li>
@@ -93,10 +93,13 @@
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/building-a-universe.html">Building an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Modules</span></p>
 <ul class="current">
@@ -452,15 +455,24 @@ type.</p>
 <dl class="class">
 <dt id="MDMC.refinement.FoM.StandardFoMCalculator">
 <em class="property">class </em><code class="sig-prename descclassname">MDMC.refinement.FoM.</code><code class="sig-name descname">StandardFoMCalculator</code><span class="sig-paren">(</span><em class="sig-param">obs_pairs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/refinement/FoM.html#StandardFoMCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.refinement.FoM.StandardFoMCalculator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the error normalised square difference, with an optional
-weighting</p>
+<dd><p>Calculates the error normalised square difference:</p>
+<div class="math notranslate nohighlight">
+\[FoM = \sum_{i} w_{i} \frac{F_{i}^{exp} - F_{i}^{sim}}{\sigma_{i}^{exp}}\]</div>
+<p>where the sum is over the total number of experimental datasets,
+<span class="math notranslate nohighlight">\(w_{i}\)</span> is an importance weighting assigned to each dataset,
+<span class="math notranslate nohighlight">\(F_{i}\)</span> is a 1-D or 2-D array of the experimental <code class="docutils literal notranslate"><span class="pre">Observable</span></code>
+(<span class="math notranslate nohighlight">\(exp\)</span>) or simulated <code class="docutils literal notranslate"><span class="pre">Observable</span></code> (<span class="math notranslate nohighlight">\(sim\)</span>), and
+<span class="math notranslate nohighlight">\(\sigma_{i}^{exp}\)</span> is a 1-D or 2-D array of the errors on the
+experimental <code class="docutils literal notranslate"><span class="pre">Observable</span></code>. The subtraction and divison over the arrays are
+element-wise.</p>
 <dl class="method">
 <dt id="MDMC.refinement.FoM.StandardFoMCalculator.calculate_single_FoM">
 <code class="sig-name descname">calculate_single_FoM</code><span class="sig-paren">(</span><em class="sig-param">obs_pair</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/refinement/FoM.html#StandardFoMCalculator.calculate_single_FoM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MDMC.refinement.FoM.StandardFoMCalculator.calculate_single_FoM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Performs the error normalised square difference for an ObservablePair</p>
+<dd><p>Performs the error normalised square difference for an
+<code class="docutils literal notranslate"><span class="pre">ObservablePair</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obs_pair</strong> (<a class="reference internal" href="#MDMC.refinement.FoM.ObservablePair" title="MDMC.refinement.FoM.ObservablePair"><em>ObservablePair</em></a>) – An ObservablePair for which the FoM is calculated</p>
+<dd class="field-odd"><p><strong>obs_pair</strong> (<a class="reference internal" href="#MDMC.refinement.FoM.ObservablePair" title="MDMC.refinement.FoM.ObservablePair"><em>ObservablePair</em></a>) – An <code class="docutils literal notranslate"><span class="pre">ObservablePair</span></code> for which the FoM is calculated</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The FoM for the obs_pair</p>

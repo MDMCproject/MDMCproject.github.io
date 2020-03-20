@@ -81,7 +81,7 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents</span></p>
+              <p class="caption"><span class="caption-text">Overview</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/introduction.html">1. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/installation.html">2. Installation</a></li>
@@ -91,10 +91,13 @@
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/building-a-universe.html">Building an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Modules</span></p>
 <ul>
@@ -181,7 +184,7 @@
     <span class="kn">import</span> <span class="nn">ObservableFactory</span>
 
 
-<div class="viewcode-block" id="Control"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control">[docs]</a><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;MD_engine&#39;</span><span class="p">,</span> <span class="s1">&#39;exp_datasets&#39;</span><span class="p">,</span> <span class="s1">&#39;FoM_calculator&#39;</span><span class="p">,</span> <span class="s1">&#39;minimizer&#39;</span><span class="p">,</span>
+<div class="viewcode-block" id="Control"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control">[docs]</a><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;simulation&#39;</span><span class="p">,</span> <span class="s1">&#39;exp_datasets&#39;</span><span class="p">,</span> <span class="s1">&#39;FoM_calculator&#39;</span><span class="p">,</span> <span class="s1">&#39;minimizer&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;reset_config&#39;</span><span class="p">,</span> <span class="s1">&#39;fit_params&#39;</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Control</span><span class="p">:</span>
 
@@ -190,7 +193,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    MD_engine : MDEngine</span>
+<span class="sd">    simulation : simulation</span>
 <span class="sd">        Performs a simulation for a given set of potential parameters.</span>
 <span class="sd">    exp_datasets : list of dicts</span>
 <span class="sd">        Each dictionary is an experimental dataset, containing the file name</span>
@@ -226,12 +229,15 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    MD_engine : MDEngine</span>
+<span class="sd">    simulation : Simulation</span>
+<span class="sd">        The ``Simulation`` on which is used to perform the refinement</span>
 <span class="sd">    exp_datasets : list of dicts</span>
+<span class="sd">        One ``dict`` per experimental dataset used for the refinement</span>
 <span class="sd">    fit_params : Parameters</span>
+<span class="sd">        All Parameter objects which will be refined</span>
 <span class="sd">    minimizer : Minimizer</span>
 <span class="sd">        Refines the potential parameters.</span>
-<span class="sd">    settings - dict</span>
+<span class="sd">    settings : dict</span>
 <span class="sd">        settings for the MD and minimization.</span>
 <span class="sd">    observable_pairs : list of ObservablePairs</span>
 <span class="sd">        Experimental observable/MD observable pairs which are used to calculate</span>
@@ -245,11 +251,11 @@
     <span class="n">MINIMIZER_DICT</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;MMC&quot;</span><span class="p">:</span><span class="n">minimizer</span><span class="o">.</span><span class="n">MMC</span><span class="p">}</span>
     <span class="n">FOM_DICT</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;standard&quot;</span><span class="p">:</span><span class="n">FoM</span><span class="o">.</span><span class="n">StandardFoMCalculator</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_engine</span><span class="p">,</span> <span class="n">exp_datasets</span><span class="p">,</span> <span class="n">fit_params</span><span class="p">,</span> <span class="n">MC_norm</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">,</span> <span class="n">exp_datasets</span><span class="p">,</span> <span class="n">fit_params</span><span class="p">,</span> <span class="n">MC_norm</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
                  <span class="n">minimizer_type</span><span class="o">=</span><span class="s1">&#39;MMC&#39;</span><span class="p">,</span> <span class="n">FoM_type</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span>
                  <span class="n">reset_config</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">MD_engine</span> <span class="o">=</span> <span class="n">MD_engine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="o">=</span> <span class="n">simulation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exp_datasets</span> <span class="o">=</span> <span class="n">exp_datasets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fit_params</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">fit_params</span><span class="p">)</span>
         <span class="c1"># Minimizer FoM_old is always initialised to infinity, so that first MC</span>
@@ -303,22 +309,22 @@
 
             <span class="n">fom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_FoM</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">fom</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">MD_engine</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">update_parameters</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">update_parameters</span><span class="p">()</span>
             <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_config</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">state_changed</span><span class="p">:</span>
                     <span class="c1"># Set MD engine to remember new config</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">MD_engine</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Set MD engine to reset to old config</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">MD_engine</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">reset_config</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">reset_config</span><span class="p">()</span>
 
         <span class="c1"># Try/except accounts for n_steps &lt;= -1</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Reset the minimizer params to those from the final FoM</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">reset_params</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">MD_engine</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">update_parameters</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">update_parameters</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">pass</span>
 
@@ -336,7 +342,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_run_MD</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MD_engine</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">)</span>
 
         <span class="c1"># TODO: Remove arbitrary normalization</span>
         <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">:</span>
@@ -355,7 +361,7 @@
 <span class="sd">        Run a molecular dynamics simulation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">MD_engine</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_read_observable_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
 
@@ -405,14 +411,14 @@
             <span class="n">exp_observable</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">observable</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_engine</span><span class="p">,</span> <span class="n">observable_pairs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">,</span> <span class="n">observable_pairs</span><span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates all of the Observables from the MD trajectory/configurations</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        MD_engine : MDEngine</span>
+<span class="sd">        simulation : simulation</span>
 <span class="sd">            MDEngine with defined trajectory attribute</span>
 <span class="sd">        observable_pairs : list of ObservablePairs</span>
 <span class="sd">            ObservablesPairs for which the MD observable will be calculated</span>
@@ -420,7 +426,7 @@
 
         <span class="c1"># slc = self._calculate_trajectory_slice(self.observable_pairs[0].exp_obs,</span>
         <span class="c1"># )</span>
-        <span class="n">trj</span> <span class="o">=</span> <span class="n">MD_engine</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">convert_trajectory</span><span class="p">()</span>
+        <span class="n">trj</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">convert_trajectory</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">observable_pairs</span><span class="p">:</span>
             <span class="n">pair</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">calculate_from_MD</span><span class="p">(</span><span class="n">trj</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
 
