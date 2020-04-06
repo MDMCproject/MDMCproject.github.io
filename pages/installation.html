@@ -87,14 +87,13 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">2. Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#non-container-installation">2.1. Non-container installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#docker">2.2. Docker</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#docker-and-jupyter-notebooks">2.2.1. Docker and Jupyter notebooks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#docker-and-gui">2.2.2. Docker and GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#docker">2.1. Docker</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#docker-and-jupyter-notebooks">2.1.1. Docker and Jupyter notebooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-and-gui">2.1.2. Docker and GUI</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#singularity">2.3. Singularity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#source-code">2.4. Source Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#singularity">2.2. Singularity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#source-code">2.3. Source Code</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">3. Simulations</a></li>
@@ -210,68 +209,26 @@
 </style>
 <div class="section" id="installation">
 <span id="installation-label"></span><h1><span class="section-number">2. </span>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>You can install MDMC in broadly two ways:</p>
-<ol class="arabic simple">
-<li><p>Non-container option: directly onto your favourite hardware and OS, e.g. Mac
-or Linux laptop or HPC hardware.</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
-<li><p><strong>However</strong> this requires that one or more molecular dynamics engines
-(e.g. <a class="reference external" href="https://lammps.sandia.gov">LAMMPS</a>) are already installed.</p></li>
-</ul>
-</div></blockquote>
-<ol class="arabic simple" start="2">
-<li><p>Container option: run MDMC in a container that already has all relevant
-external dependencies pre-installed, including molecular dynamics engines</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
-<li><p>Two container technologies are supported: Docker and Singularity. Docker has
-more widespread usage, but Singularity is targeted for HPC hardware. These
-two container technologies are similar to operate, and once you are familiar
-with one, switching to the other should be relatively straightforward.</p></li>
-</ul>
-</div></blockquote>
-<div class="section" id="non-container-installation">
-<h2><span class="section-number">2.1. </span>Non-container installation<a class="headerlink" href="#non-container-installation" title="Permalink to this headline">¶</a></h2>
-<p>Ensure you have Git, Python 3, pip and relevant molecular dynamics engines
-already installed (e.g. <a class="reference external" href="https://lammps.sandia.gov">LAMMPS</a>).</p>
-<p>MDMC is then installed using pip and Git:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/MDMCproject/MDMCv0.2_pilot#egg<span class="o">=</span>MDMC
+<p>MDMC can be installed using pip and git:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -e git+https://github.com/MDMCproject/MDMCv0.2_pilot#egg<span class="o">=</span>MDMC
 </pre></div>
 </div>
-<p>This will install MDMC and all Python dependencies; this does not include the
-molecular dynamics engines.</p>
-<p><strong>Note1: While MDMC is in a private repository, the above</strong> <cite>pip install</cite>
-<strong>require username and password</strong></p>
-<p><strong>Note2: When MDMC is made available on</strong> <a class="reference external" href="https://pypi.org">PyPI</a> <strong>, the
-installation will simply be:</strong> <cite>pip install MDMC</cite></p>
-</div>
+<p>This will install MDMC and all Python dependencies, however it will not
+install any of the molecular dynamics engines (e.g.
+<a class="reference external" href="https://lammps.sandia.gov">LAMMPS</a>); these will need to be installed
+separately by the user.</p>
 <div class="section" id="docker">
-<h2><span class="section-number">2.2. </span>Docker<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h2>
-<p>A Docker container that includes all the external dependencies MDMC needs
-can be downloaded.</p>
-<p>Instructions on how to install Docker for Windows, Mac OS X, and Linux
-distributions is <a class="reference external" href="https://docs.docker.com/install/">here</a>. If you experience
-problems with this installation, perhaps due to your specific OS version or
-otherwise, please do not hesitate to ask us questions about this.</p>
-<p>To run (start) a Docker container with MDMC external dependencies, type in
-command window:</p>
+<h2><span class="section-number">2.1. </span>Docker<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h2>
+<p>To remove the need to install external dependencies, a Docker container which
+includes the latest stable version of MDMC can be downloaded. Instructions on
+how to install Docker for Windows, Mac OS X, and Linux distributions is
+<a class="reference external" href="https://docs.docker.com/install/">here</a>.</p>
+<p>To run an interactive terminal in the container:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it mdmc/mdmc:latest
 </pre></div>
 </div>
-<p>The optional <cite>:latest</cite> part of <cite>mdmc/mdmc:latest</cite> pulls down the latest version
-of the MDMC dependencies container. These are not expected to change frequently.
-Other choices may be available in the future e.g. containers which only have
-specific molecular dynamics engines installed.</p>
-<p>Note this MDMC Docker container does not currently include the MDMC code. Hence
-for now please follow the the pip install command shown in section above.</p>
-<p><strong>Note: Once the MDMC repository is made public, the containers will come with
-the latest stable version of MDMC preinstalled (i.e. not just the
-dependencies).</strong></p>
 <div class="section" id="docker-and-jupyter-notebooks">
-<span id="docker-jupyter-label"></span><h3><span class="section-number">2.2.1. </span>Docker and Jupyter notebooks<a class="headerlink" href="#docker-and-jupyter-notebooks" title="Permalink to this headline">¶</a></h3>
+<h3><span class="section-number">2.1.1. </span>Docker and Jupyter notebooks<a class="headerlink" href="#docker-and-jupyter-notebooks" title="Permalink to this headline">¶</a></h3>
 <p>To run a Jupyter notebook from a Docker container, run the container with an
 open port 8888:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it -p <span class="m">8888</span>:8888 mdmc/mdmc:latest
@@ -282,33 +239,18 @@ open port 8888:</p>
 </pre></div>
 </div>
 <p>When running as root, <code class="code docutils literal notranslate"><span class="pre">--allow-root</span></code> must be added to the above command.
-The Jupyter notebook can then be accessed by copying the provided URL into a
-browser on the local machine (please use the URL that includes 127.0.0.1).
-<strong>Recommended</strong>: When finished using Jupyter, in terminal where the Jupyter
-server was started, please press ctrl-c and then answer “y” to shutdown the
-Jupyter server; this will exit Jupyter gracefully and help avoid conflict when
-running this setup again.</p>
+The Jupyter notebook can then be accessed by coping the provided URL into a
+browser on the local machine.</p>
 </div>
 <div class="section" id="docker-and-gui">
-<h3><span class="section-number">2.2.2. </span>Docker and GUI<a class="headerlink" href="#docker-and-gui" title="Permalink to this headline">¶</a></h3>
+<h3><span class="section-number">2.1.2. </span>Docker and GUI<a class="headerlink" href="#docker-and-gui" title="Permalink to this headline">¶</a></h3>
 <p>By default, Docker is not configured to enable GUI visualisation.  To enable
-this it is possible to use the X11 system, described below.  To also enable this
-with Jupyter, add <cite>-p 8888:8888</cite> to commands below - see
-<a class="reference internal" href="#docker-jupyter-label"><span class="std std-ref">Docker and Jupyter notebooks</span></a>.</p>
+this it is possible to use the X11 system:</p>
 <p><strong>Windows</strong></p>
-<p>To use X11, either of the following can be installed:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://sourceforge.net/projects/vcxsrv/">VcXsrv</a> - After installation, In
-Extra Settings select “Native opengl” and “Disable access control”.</p></li>
-<li><p><a class="reference external" href="https://sourceforge.net/projects/xming/">Xming</a> - After installation, run
-XLaunch to configure Xming. Use the provided defaults except in the
-“Specify parameter settings” window, select “No Access Control”.
-Optionally, use the generated <cite>config.xlaunch</cite> file when re-running Xming.</p></li>
-</ul>
-<p>Next, open a standard Windows command prompt and type <code class="code docutils literal notranslate"><span class="pre">ipconfig</span></code> to get
-the IP address (if e.g. using wireless then look for Wireless LAN adapter Wi-Fi
-and IPv4 Address) and use it to replace the two letters “IP” in the following
-command:</p>
+<p>To use X11, <a class="reference external" href="https://sourceforge.net/projects/vcxsrv/">VcXsrv</a> can be
+installed.  In Extra Settings select “Native opengl” and “Disable access
+control”. Use <code class="code docutils literal notranslate"><span class="pre">ipconfig</span></code> to get the IP address and use it instead of “IP”
+in the following command:</p>
 <div class="highlight-bat notranslate"><div class="highlight"><pre><span></span>docker run -it -e DISPLAY=IP:0.0 -v /tmp/.X11-unix:/tmp/.X11-unix mdmc/mdmc:latest
 </pre></div>
 </div>
@@ -330,7 +272,7 @@ Simply run:</p>
 </div>
 </div>
 <div class="section" id="singularity">
-<h2><span class="section-number">2.3. </span>Singularity<a class="headerlink" href="#singularity" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.2. </span>Singularity<a class="headerlink" href="#singularity" title="Permalink to this headline">¶</a></h2>
 <p>Singularity is an alternative to Docker which has been designed specifically for
 high performance computing (HPC), with the majority of HPC centres providing
 support for Singularity. If Singularity is installed, run MDMC in parallel
@@ -342,7 +284,7 @@ using:</p>
 example MDMC will be split over 12 processes.</p>
 </div>
 <div class="section" id="source-code">
-<h2><span class="section-number">2.4. </span>Source Code<a class="headerlink" href="#source-code" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.3. </span>Source Code<a class="headerlink" href="#source-code" title="Permalink to this headline">¶</a></h2>
 <p>Source code is available from <a class="reference external" href="https://github.com/MDMCproject/MDMCv0.2_pilot">https://github.com/MDMCproject/MDMCv0.2_pilot</a> and
 can be obtained using git with:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/MDMCproject/MDMCv0.2_pilot.git
@@ -371,6 +313,7 @@ can be obtained using git with:</p>
 
   <div role="contentinfo">
     <p>
+        &copy; Copyright 2019, Thomas Farmer
 
     </p>
   </div>
