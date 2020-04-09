@@ -101,8 +101,8 @@
 </ul>
 <p class="caption"><span class="caption-text">Modules</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pages/modules/common.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pages/modules/control.html">Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/modules/common.html">common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/modules/control.html">control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/modules/gui.html">gui</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/modules/md.html">MD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/modules/readers.html">readers</a></li>
@@ -176,8 +176,8 @@
 <span class="sd">It should be possible to extend the CIF reader to include the additional</span>
 <span class="sd">definitions in the mmCIF format.</span>
 
-<span class="sd">It is expected that some of the behaviour in ase_read_cif will be extracted into</span>
-<span class="sd">MDMC.readers.configurations.cif when an MDMC CIF reader is implemented</span>
+<span class="sd">It is expected that some of the behaviour in ``ase_read_cif`` will be extracted</span>
+<span class="sd">into ``MDMC.readers.configurations.cif`` when an MDMC CIF reader is implemented.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">groupby</span>
@@ -194,66 +194,66 @@
 <div class="viewcode-block" id="ase_read_cif"><a class="viewcode-back" href="../../../../pages/modules/md/ase/cif.html#MDMC.MD.ase.cif.ase_read_cif">[docs]</a><span class="k">def</span> <span class="nf">ase_read_cif</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reads a configuration file and returns a list of `Atom` objects.</span>
+<span class="sd">    Reads a configuration file and returns a list of ``Atom`` objects.</span>
 
-<span class="sd">    These Atom objects can optionally have `Coulombic` interactions and also</span>
-<span class="sd">    `BondedInteraction` objects if bonded interactions are defined in the CIF</span>
+<span class="sd">    These Atom objects can optionally have ``Coulombic`` interactions and also</span>
+<span class="sd">    ``BondedInteraction`` objects if bonded interactions are defined in the CIF</span>
 <span class="sd">    file.</span>
 
-<span class="sd">    If `names` or `atom_types` is passed, then equivalent interactions</span>
-<span class="sd">    (`Coulombic` and `BondedInteraction`, if bonded interactions are defined in</span>
-<span class="sd">    the CIF file) will be initialized as a single object. For instance if the</span>
-<span class="sd">    CIF file includes a benzene ring, then as long as the correct `names` or</span>
-<span class="sd">    `atom_types` are passed, then there will only be a single C-C `Bond` object,</span>
-<span class="sd">    which will include all 6 of the atom pairs.</span>
-<span class="sd">    If both `names` and `atom_types` are passed, `atom_types` will be used to</span>
-<span class="sd">    group `Atom` objects.</span>
-<span class="sd">    If neither `names` or `atom_types` is passed then each interaction will</span>
+<span class="sd">    If ``names`` or ``atom_types`` is passed, then equivalent interactions</span>
+<span class="sd">    (``Coulombic`` and ``BondedInteraction``, if bonded interactions are defined</span>
+<span class="sd">    in the CIF file) will be initialized as a single object. For instance if the</span>
+<span class="sd">    CIF file includes a benzene ring, then as long as the correct ``names`` or</span>
+<span class="sd">    ``atom_types`` are passed, then there will only be a single C-C ``Bond``</span>
+<span class="sd">    object, which will include all 6 of the atom pairs.</span>
+<span class="sd">    If both ``names`` and ``atom_types`` are passed, ``atom_types`` will be used</span>
+<span class="sd">    to group ``Atom`` objects.</span>
+<span class="sd">    If neither ``names`` or ``atom_types`` is passed then each interaction will</span>
 <span class="sd">    become a separate object.</span>
 
 <span class="sd">    .. note:: Not all CIF files contain bonded interactions (it is only common</span>
-<span class="sd">    for biomolecules).</span>
+<span class="sd">              for biomolecules).</span>
 
 <span class="sd">    .. note:: improper dihedrals are not explicitly defined in CIF, so these</span>
-<span class="sd">    must be set after initialization of `DihedralAngle` objects.</span>
+<span class="sd">              must be set after initialization of ``DihedralAngle`` objects.</span>
 
 <span class="sd">    .. note:: CIF reader cannot parse CIF files with user defined text sections,</span>
-<span class="sd">    so these must be stripped out before reading.</span>
+<span class="sd">              so these must be stripped out before reading.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    file : File, str</span>
-<span class="sd">        A `File` object, or the absolute file name of the configuration file</span>
+<span class="sd">    file : file, str</span>
+<span class="sd">        A ``file``, or the absolute file name of the configuration file</span>
 <span class="sd">    **settings</span>
-<span class="sd">        index : int, optional</span>
+<span class="sd">        ``index`` (`int`, optional)</span>
 <span class="sd">            The index of the configuration in the CIF file. Only a single</span>
 <span class="sd">            configuration can be read from a CIF file, with the default being</span>
-<span class="sd">            the first (index=0) configuration.</span>
-<span class="sd">        names : list of str</span>
-<span class="sd">            A list of names for the atoms in the CIF file. These names must have</span>
-<span class="sd">            the same order as the order the atoms in the file. A `name` must be</span>
-<span class="sd">            be provided for each atom in the CIF file.</span>
-<span class="sd">        atom_types : list of int</span>
-<span class="sd">            A list of int for atom types of the atoms in the CIF file. These</span>
+<span class="sd">            the first (``index=0``) configuration.</span>
+<span class="sd">        ``names`` : (`list` of `str`)</span>
+<span class="sd">            A `list` of ``names`` for the atoms in the CIF file. These ``names``</span>
+<span class="sd">            must have the same order as the order the atoms in the file. A</span>
+<span class="sd">            ``name`` must be be provided for each atom in the CIF file.</span>
+<span class="sd">        ``atom_types`` : (`list` of `int`)</span>
+<span class="sd">            A `list` of `int` for atom types of the atoms in the CIF file. These</span>
 <span class="sd">            names must have the same order as the order the atoms in the file.</span>
-<span class="sd">            An `atom_type` must be provided for each atom in the CIF file.</span>
-<span class="sd">        cutoff : float</span>
-<span class="sd">            A distance (in Ang) at which the `Coulombic` interactions are</span>
-<span class="sd">            cutoff. If this is not passed, the `cutoff` will be set to 10.</span>
-<span class="sd">        add_bonds : bool, optional</span>
+<span class="sd">            An ``atom_type`` must be provided for each atom in the CIF file.</span>
+<span class="sd">        ``cutoff`` : (`float`)</span>
+<span class="sd">            A distance (in Ang) at which the ``Coulombic`` interactions are</span>
+<span class="sd">            cutoff. If this is not passed, the ``cutoff`` will be set to 10.</span>
+<span class="sd">        ``add_bonds`` : (`bool`, optional)</span>
 <span class="sd">            Whether or not any bonded interactions defined in the CIF file will</span>
-<span class="sd">            be included. By default this is True.</span>
-<span class="sd">        add_charges : bool, optional</span>
+<span class="sd">            be included. By default this is `True`.</span>
+<span class="sd">        ``add_charges`` : (`bool`, optional)</span>
 <span class="sd">            Whether or not each atom in the CIF file will be assigned a</span>
-<span class="sd">            `Coulombic` interaction with a `Coulomb` function. CIF files do not</span>
-<span class="sd">            contain charge information, so the charge of the `Coulombic`</span>
+<span class="sd">            ``Coulombic`` interaction with a ``Coulomb`` function. CIF files do</span>
+<span class="sd">            not contain charge information, so the charge of the ``Coulombic``</span>
 <span class="sd">            interaction will be set to 0. This enables the charges to be set by</span>
-<span class="sd">            the application of a `ForceField` object. By default this is True.</span>
+<span class="sd">            the application of a ``ForceField`` object. By default this is True.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    list of Atom</span>
-<span class="sd">        The `Atom` objects corresponding to the data in the CIF file</span>
+<span class="sd">    `list` of ``Atom``</span>
+<span class="sd">        The ``Atom`` objects corresponding to the data in the CIF file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">index</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -333,11 +333,11 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    ase_atoms_info : dct</span>
-<span class="sd">        A dictionary containing site labels for one or more of bonds, angles,</span>
-<span class="sd">        and torsions. The corresponding values are a list with label (str) for</span>
-<span class="sd">        each interaction. The number of site label keys is 2 for bonds, 3 for</span>
-<span class="sd">        angles and 4 for torsions. For instance, for bonds there should be</span>
+<span class="sd">    ase_atoms_info : dict</span>
+<span class="sd">        A `dict` containing site labels for one or more of bonds, angles, and</span>
+<span class="sd">        torsions. The corresponding values are a list with label (str) for each</span>
+<span class="sd">        interaction. The number of site label keys is 2 for bonds, 3 for angles</span>
+<span class="sd">        and 4 for torsions. For instance, for bonds there should be</span>
 <span class="sd">        &#39;_geom_bond_atom_site_label_1&#39; and &#39;_geom_bond_atom_site_label_2&#39;, with</span>
 <span class="sd">        each being a list containing the first (or second) site label for each</span>
 <span class="sd">        interaction.</span>
@@ -345,18 +345,18 @@
 <span class="sd">        Specifies whether the interaction type is a bond, angle, or torsion</span>
 <span class="sd">    atoms_labels : dict</span>
 <span class="sd">        (label:atom) pairs, where label is a str with the _atom_site_label from</span>
-<span class="sd">        the CIF file, and atom is the corresponding MDMC `Atom` object.</span>
+<span class="sd">        the CIF file, and atom is the corresponding MDMC ``Atom`` object.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.array</span>
-<span class="sd">        A 2D array with dimensions (n_interactions, n_atoms_per_interaction). So</span>
-<span class="sd">        for 5 bond interactions, the dimensions of the array will be (5, 2),</span>
-<span class="sd">        with the zeroeth index containing the two Atoms involved in the zeroeth</span>
-<span class="sd">        bond, the first index containing the two Atoms involved in the first</span>
-<span class="sd">        bond etc. For bond angle and dihedral interactions, the order of the</span>
-<span class="sd">        atoms corresponds to the order required for BondAngle and DihedralAngle</span>
-<span class="sd">        interactions.</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        A 2D ``array`` with dimensions (n_interactions,</span>
+<span class="sd">        n_atoms_per_interaction). So for 5 bond interactions, the dimensions of</span>
+<span class="sd">        the array will be (5, 2), with the zeroeth index containing the two</span>
+<span class="sd">        ``Atoms`` involved in the zeroeth bond, the first index containing the</span>
+<span class="sd">        two ``Atoms`` involved in the first bond etc. For bond angle and</span>
+<span class="sd">        dihedral interactions, the order of the atoms corresponds to the order</span>
+<span class="sd">        required for ``BondAngle`` and ``DihedralAngle`` interactions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># There are a maximum of 4 atom sites in a geometry definition (for</span>
@@ -373,15 +373,16 @@
 <span class="k">def</span> <span class="nf">_create_coulombic_interactions</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates `Coulombic` interactions</span>
+<span class="sd">    Creates ``Coulombic`` interactions</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    atoms : list of Atom</span>
-<span class="sd">        The `Atom` objects for which a `Coulombic` interaction will be created</span>
+<span class="sd">        The ``Atom`` objects for which a ``Coulombic`` interaction will be</span>
+<span class="sd">        created</span>
 <span class="sd">    key : function</span>
-<span class="sd">        The key which will be used to group `Atom` objects. Grouped `Atom`</span>
-<span class="sd">        objects will have a single `Coulombic` interaction.</span>
+<span class="sd">        The key which will be used to group ``Atom`` objects. Grouped ``Atom``</span>
+<span class="sd">        objects will have a single ``Coulombic`` interaction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
@@ -395,28 +396,28 @@
 <span class="k">def</span> <span class="nf">_create_bonded_interactions</span><span class="p">(</span><span class="n">interactions_atoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates `BondedInteraction` objects</span>
+<span class="sd">    Creates ``BondedInteraction`` objects</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    interaction_atoms : np.array</span>
-<span class="sd">        A 2D array with dimensions (n_interactions, n_atoms_per_interaction). So</span>
-<span class="sd">        for 5 bond interactions, the dimensions of the array must be (5, 2),</span>
-<span class="sd">        with the zeroeth index containing the two Atoms involved in the zeroeth</span>
-<span class="sd">        bond, the first index containing the two Atoms involved in the first</span>
-<span class="sd">        bond etc. For bond angle and dihedral interactions, the order of the</span>
-<span class="sd">        atoms must correspond to the order required for BondAngle and</span>
-<span class="sd">        DihedralAngle interactions.</span>
+<span class="sd">    interaction_atoms : numpy.ndarray</span>
+<span class="sd">        A 2D ``array`` with dimensions (n_interactions,</span>
+<span class="sd">        n_atoms_per_interaction). So for 5 bond interactions, the dimensions of</span>
+<span class="sd">        the array must be (5, 2), with the zeroeth index containing the two</span>
+<span class="sd">        ``Atoms`` involved in the zeroeth bond, the first index containing the</span>
+<span class="sd">        two ``Atoms`` involved in the first bond etc. For bond angle and</span>
+<span class="sd">        dihedral interactions, the order of the atoms must correspond to the</span>
+<span class="sd">        order required for ``BondAngle`` and ``DihedralAngle`` interactions.</span>
 <span class="sd">    key : function</span>
 <span class="sd">        A function by which the atoms tuples are grouped. Each group will have a</span>
 <span class="sd">        single bonded interaction applied. For example, for a bonded interaction</span>
-<span class="sd">        where the key is atom_type, if an atom pair has atom_types (1, 2), this</span>
-<span class="sd">        will be grouped with all other atom pairs with atom_types (1, 2), and</span>
-<span class="sd">        a single `Bond` will be applied to the group.</span>
+<span class="sd">        where the key is atom_type, if an atom pair has ``atom_types`` (1, 2),</span>
+<span class="sd">        this will be grouped with all other atom pairs with ``atom_types``</span>
+<span class="sd">        (1, 2), and a single ``Bond`` will be applied to the group.</span>
 <span class="sd">    **settings</span>
-<span class="sd">        Settings to be passed for BondedInteraction initialization. For example</span>
-<span class="sd">        improper=True can be passed to initialize a DihedralAngle to be an</span>
-<span class="sd">        improper dihedral.</span>
+<span class="sd">        Settings to be passed for ``BondedInteraction`` initialization. For</span>
+<span class="sd">        example ``improper=True`` can be passed to initialize a</span>
+<span class="sd">        ``DihedralAngle`` to be an improper dihedral.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -459,15 +460,15 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    atoms : list of Atom</span>
-<span class="sd">        The `Atom` objects to be grouped</span>
+<span class="sd">        The ``Atom`` objects to be grouped</span>
 <span class="sd">    key : function</span>
-<span class="sd">        The `key` with which the Atom objects will be grouped</span>
+<span class="sd">        The ``key`` with which the ``Atom`` objects will be grouped</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    list of tuples</span>
-<span class="sd">        Where each tuple contains a group of equivalent `Atom` objects, based on</span>
-<span class="sd">        `key`</span>
+<span class="sd">        Where each tuple contains a group of equivalent ``Atom`` objects, based</span>
+<span class="sd">        on ``key``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">atoms</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
@@ -477,8 +478,8 @@
 <span class="k">def</span> <span class="nf">_reduce_ase_unit_cell</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reduces an ase.atoms.Atoms object from a unit cell of molecules to a single</span>
-<span class="sd">    molecule</span>
+<span class="sd">    Reduces an ``ase.atoms.Atoms`` object from a unit cell of molecules to a</span>
+<span class="sd">    single molecule</span>
 
 <span class="sd">    Uses the number of atoms present in the CIF file to determine the size of</span>
 <span class="sd">    the molecule</span>
@@ -486,12 +487,13 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    ase_atoms : ase.atoms.Atoms</span>
-<span class="sd">        An ase.atoms.Atoms object from which a single molecule will be extracted</span>
+<span class="sd">        An ``ase.atoms.Atoms`` object from which a single molecule will be</span>
+<span class="sd">        extracted</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    ASEAtoms</span>
-<span class="sd">        An ASEAtoms objects containing the atoms of a single molecule</span>
+<span class="sd">        An ``ASEAtoms`` object containing the atoms of a single molecule</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># The number of atoms in a molecule can be determined from info in CIF file</span>
@@ -523,7 +525,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Thomas Farmer
 
     </p>
   </div>
