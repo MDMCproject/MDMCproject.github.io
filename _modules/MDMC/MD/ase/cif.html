@@ -186,7 +186,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.MD.ase.conversions</span> <span class="k">import</span> <span class="n">ASEAtoms</span><span class="p">,</span> <span class="n">convert_from_ase_atom</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.structural_units</span> <span class="k">import</span> <span class="p">(</span><span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span><span class="p">,</span> <span class="n">Coulombic</span><span class="p">,</span> <span class="n">DihedralAngle</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structural_units</span> <span class="k">import</span> <span class="p">(</span><span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span><span class="p">,</span> <span class="n">BoundingBox</span><span class="p">,</span> <span class="n">Coulombic</span><span class="p">,</span>
+                                      <span class="n">DihedralAngle</span><span class="p">,</span>
                                       <span class="n">get_reduced_chemical_formula</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interaction_functions</span> <span class="k">import</span> <span class="n">Coulomb</span>
 
@@ -322,6 +323,8 @@
                                                              <span class="n">cif_geom_def</span><span class="p">,</span>
                                                              <span class="n">atoms_labels</span><span class="p">)</span>
                 <span class="n">_create_bonded_interactions</span><span class="p">(</span><span class="n">inters_atoms</span><span class="p">,</span> <span class="n">bonded_key</span><span class="p">)</span>
+
+    <span class="n">_make_atom_positions_valid</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">atoms</span></div>
 
@@ -513,6 +516,26 @@
                                            <span class="n">system</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ASEAtoms</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">scaled_positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">ase_atoms</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span>
                     <span class="n">info</span><span class="o">=</span><span class="n">ase_atoms</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_make_atom_positions_valid</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets the positions of all atoms are positive (including 0.)</span>
+
+<span class="sd">    This is so that all positions are valid within ``Universe``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    atoms : list</span>
+<span class="sd">        A `list` of `Atom` which will have their positions set so that relative</span>
+<span class="sd">        distances are preserved and the smallest positions are equal to 0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Offset atom positions so that they are &gt;= 0.</span>
+    <span class="n">box</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
+        <span class="n">atom</span><span class="o">.</span><span class="n">position</span> <span class="o">-=</span> <span class="n">box</span><span class="o">.</span><span class="n">min</span>
 </pre></div>
 
            </div>
