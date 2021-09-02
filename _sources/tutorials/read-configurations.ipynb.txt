@@ -27,17 +27,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "The return type is: <class 'list'>\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "from MDMC.readers.configurations import read\n",
     "atoms = read('data/Paracetamol.cif')\n",
@@ -48,7 +40,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -66,7 +58,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -78,32 +70,14 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "The display should show:\n",
-    "\n",
-    "![Display for paracetamol](../_static/images/gui_paracetamol.png)"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
     "From this it appears that the configuration and topology has been correctly read; however, MDMC does not automatically determine if certain atoms or bonded interactions are equivalent.  For example, all three hydrogens in the methyl group are equivalent, as are the bonds, bond angles and dihedrals these hydrogens are involved in.  In the case of paracetamol, there are 20 bonds in total, however only 12 of them are unique."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Number of bonds: 20\n",
-      "Number of uniquie bonds: 20\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "# To see all of the Bond interactions, we can filter the paracetamol interactions by name\n",
     "bonds = list(filter(lambda x: x.name == 'Bond', paracetamol.interactions))\n",
@@ -113,7 +87,7 @@
     "\n",
     "# We can cast the list of bonds to a set to see the number of unique bonds - in this case it is still 20\n",
     "unique_bonds = set(bonds)\n",
-    "print('Number of uniquie bonds: {}'.format(len(unique_bonds)))"
+    "print('Number of unique bonds: {}'.format(len(unique_bonds)))"
    ]
   },
   {
@@ -125,80 +99,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Help on method parse in module MDMC.readers.configurations.cif:\n",
-      "\n",
-      "parse(**settings) method of MDMC.readers.configurations.cif.CIF instance\n",
-      "    Reads a configuration file and returns a list of `Atom` objects.\n",
-      "    \n",
-      "    These Atom objects can optionally have `Coulombic` interactions and also\n",
-      "    `BondedInteraction` objects if bonded interactions are defined in the CIF\n",
-      "    file.\n",
-      "    \n",
-      "    If `names` or `atom_types` is passed, then equivalent interactions\n",
-      "    (`Coulombic` and `BondedInteraction`, if bonded interactions are defined in\n",
-      "    the CIF file) will be initialized as a single object. For instance if the\n",
-      "    CIF file includes a benzene ring, then as long as the correct `names` or\n",
-      "    `atom_types` are passed, then there will only be a single C-C `Bond` object,\n",
-      "    which will include all 6 of the atom pairs.\n",
-      "    If both `names` and `atom_types` are passed, `atom_types` will be used to\n",
-      "    group `Atom` objects.\n",
-      "    If neither `names` or `atom_types` is passed then each interaction will\n",
-      "    become a separate object.\n",
-      "    \n",
-      "    .. note:: Not all CIF files contain bonded interactions (it is only common\n",
-      "    for biomolecules).\n",
-      "    \n",
-      "    .. note:: improper dihedrals are not explicitly defined in CIF, so these\n",
-      "    must be set after initialization of `DihedralAngle` objects.\n",
-      "    \n",
-      "    .. note:: CIF reader cannot parse CIF files with user defined text sections,\n",
-      "    so these must be stripped out before reading.\n",
-      "    \n",
-      "    Parameters\n",
-      "    ----------\n",
-      "    file : File, str\n",
-      "        A `File` object, or the absolute file name of the configuration file\n",
-      "    **settings\n",
-      "        index : int, optional\n",
-      "            The index of the configuration in the CIF file. Only a single\n",
-      "            configuration can be read from a CIF file, with the default being\n",
-      "            the first (index=0) configuration.\n",
-      "        names : list of str\n",
-      "            A list of names for the atoms in the CIF file. These names must have\n",
-      "            the same order as the order the atoms in the file. A `name` must be\n",
-      "            be provided for each atom in the CIF file.\n",
-      "        atom_types : list of int\n",
-      "            A list of int for atom types of the atoms in the CIF file. These\n",
-      "            names must have the same order as the order the atoms in the file.\n",
-      "            An `atom_type` must be provided for each atom in the CIF file.\n",
-      "        cutoff : float\n",
-      "            A distance (in Ang) at which the `Coulombic` interactions are\n",
-      "            cutoff. If this is not passed, the `cutoff` will be set to 10.\n",
-      "        add_bonds : bool, optional\n",
-      "            Whether or not any bonded interactions defined in the CIF file will\n",
-      "            be included. By default this is True.\n",
-      "        add_charges : bool, optional\n",
-      "            Whether or not each atom in the CIF file will be assigned a\n",
-      "            `Coulombic` interaction with a `Coulomb` function. CIF files do not\n",
-      "            contain charge information, so the charge of the `Coulombic`\n",
-      "            interaction will be set to 0. This enables the charges to be set by\n",
-      "            the application of a `ForceField` object. By default this is True.\n",
-      "    \n",
-      "    Returns\n",
-      "    -------\n",
-      "    list of Atom\n",
-      "        The `Atom` objects corresponding to the data in the CIF file\n",
-      "\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "read('Paracetamol.cif', docstring=True)"
    ]
@@ -220,18 +123,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 8,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Number of bonds: 20\n",
-      "Number of unique bonds: 12\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "# from MDMC.readers.configurations import read\n",
     "atoms = read('data/Paracetamol.cif', atom_types=[1, 2, # Oxygens\n",
@@ -256,18 +150,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 9,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Number of bonds: 20\n",
-      "Number of unique bonds: 12\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "# from MDMC.readers.configurations import read\n",
     "atoms = read('data/Paracetamol.cif', names=['109', '177', # Oxygens\n",
@@ -291,7 +176,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 10,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -303,181 +188,18 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "cubic Universe with 20 atoms, 65 bonded interactions, 12 nonbonded interactions, and dimensions of [10. 10. 10.] Ang\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "print(universe)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "[<Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: -0.115 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [6, 8],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: -0.385 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [3],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: 0.5 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [7],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: -0.585 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [1],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: 0.06 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [10],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: -0.11 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [9],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: -0.5 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [2],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: 0.15 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [5],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: 0.115 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [11, 12],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: 0.085 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [4],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: 0.3 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [13],\n",
-       "   cutoff: 10.0 Ang}>, <Coulombic\n",
-       "  {function: <Coulomb\n",
-       "  {params: array([<Parameter\n",
-       "  {name: 'charge',\n",
-       "   value: 0.435 e,\n",
-       "   unit: 'e',\n",
-       "   fixed: False,\n",
-       "   constraints: None,\n",
-       "   interactions_name: 'Coulombic',\n",
-       "   functions_name: 'Coulomb',\n",
-       "   tied: False}>], dtype=object)}>,\n",
-       "   atom_types: [14],\n",
-       "   cutoff: 10.0 Ang}>]"
-      ]
-     },
-     "execution_count": 12,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "outputs": [],
    "source": [
     "universe.nonbonded_interactions"
    ]
@@ -486,16 +208,16 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "The effect of this can be seen if we visualize the paracetamol molecule and select `View -> Charges` from the GUI menu bar."
+    "The effect of this can be seen if we visualize the paracetamol molecule using the `'ASE'` viewer and select `View -> Charges` from the GUI menu bar."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
-    "view(paracetamol)"
+    "view(paracetamol, viewer='ASE')"
    ]
   },
   {
@@ -508,9 +230,9 @@
  ],
  "metadata": {
   "kernelspec": {
-   "display_name": "py3MDMC",
+   "display_name": "Python 3",
    "language": "python",
-   "name": "py3mdmc"
+   "name": "python3"
   },
   "language_info": {
    "codemirror_mode": {
@@ -523,6 +245,9 @@
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
    "version": "3.6.7"
+  },
+  "nbsphinx": {
+   "execute": "never"
   }
  },
  "nbformat": 4,

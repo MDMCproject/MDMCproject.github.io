@@ -11,12 +11,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "After defining the configuration and topology of a `Universe`, either manually or by reading a configuration file, it is useful to visualize the setup.  The `view` function provides a simple molecular visualizer for establishing the accuracy of a simulation setup.  It can be used visualize one or more `Atom` objects, one or more `Molecule` objects, or a `Universe`."
+    "After defining the configuration and topology of a `Universe`, either manually or by reading a configuration file, it is useful to visualize the setup.  The `view` function provides a simple molecular visualizer for establishing the accuracy of a simulation setup.  It can be used to visualize one or more `Atom` objects, one or more `Molecule` objects, or a `Universe`."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -24,19 +24,35 @@
     "from MDMC.MD import Atom, Molecule, Bond\n",
     "H1 = Atom('H', charge=0.4238)\n",
     "O = Atom('O', position=(0., 0.81649, 0.57736), charge=-0.8476)\n",
-    "atoms = [H1, O]"
+    "atoms = [H1, O]\n",
+    "atom_IDs = [1, 2]"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "The command below will start the GUI, which is a modified version of the [ASE](https://wiki.fysik.dtu.dk/ase/) GUI.  If it is not immediately visible, it may have appeared on the desktop."
+    "Two different viewers are available:\n",
+    "\n",
+    "### `'X3DOM'`\n",
+    "This is an inline viewer which displays within a Jupyter notebook.  It is ideally suited to <3000 atoms, and may suffer performance issues when displaying more than this.  `'X3DOM'` is the default viewer when `view` is called.\n",
+    "\n",
+    "### `'ASE'`\n",
+    "This is a modified version of the default [ASE](https://wiki.fysik.dtu.dk/ase/) GUI.  It displays in a separate window (which may appear on the desktop), and requires X11 forwarding to be enabled if MDMC is being run from within a Docker container. This viewer has a few additional menu options, which are discussed below.\n",
+    "\n",
+    "Both viewers require ASE to be installed."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As mentioned above, calling view without passing `viewer` uses `'X3DOM'` as the viewer, which displays inline in a Jupyter notebook. It should display:"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -48,11 +64,43 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "The GUI should show:\n",
+    "When calling `view`, either the `Atom` objects themselves or a list of their `ID`s can be passed to the same effect:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "view(atom_IDs)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Alternatively, the `'ASE'` viewer can be selected. This will open an external window, and the execution of any further Jupyter notebook cells will be paused until this window is closed. This execution being paused at the `view(atoms, viewer='ASE')` cell is denoted by a `[*]` to the left of the cell."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "view(atoms, viewer='ASE')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The ASE GUI should show:\n",
     "\n",
     "![Display for H and O atoms](../_static/images/gui_HO.png)\n",
     "\n",
-    "Within the GUI, the View menu has a options which assist in checking the setup.  For example, View -> Show Labels -> Charges, displays the charges on each atom:\n",
+    "Within the ASE GUI, the View menu has options which assist in checking the setup.  For example, View -> Show Labels -> Charges, displays the charges on each atom:\n",
     "\n",
     "![Display charges for H and O atoms](../_static/images/gui_HO_charges.png)"
    ]
@@ -61,12 +109,19 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "One option which is on by default is View -> Show bonds.  To see this in action, add a `Bond` between the atoms and view the atoms again."
+    "There are also optins to show the elements or atom ID labels."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Bonds are also displayed in both viewers.  To see this in action, add a `Bond` between the atoms and view the atoms again:"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -78,8 +133,22 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "A bond between the H and O atoms should now be visible:\n",
-    "\n",
+    "And using the `'ASE'` viewer:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "view(atoms, viewer='ASE')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "![Display bond between H and O atoms](../_static/images/gui_HO_bond.png)"
    ]
   },
@@ -94,12 +163,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "As mentioned above, `Molecule` objects can also be passed to `view`."
+    "As mentioned above, `Molecule` objects can also be passed to `view`:"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -112,7 +181,22 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "Viewed in the yz plane, the water `Molecule` should appear as:\n",
+    "And again with the `'ASE'` viewer:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "view(water, viewer='ASE')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "![Display water molecule](../_static/images/gui_water.png)"
    ]
   },
@@ -125,7 +209,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -139,6 +223,22 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "And again with the `'ASE'` viewer, which also delimits the bounds of the `Universe` with a dashed line:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "view(universe, viewer='ASE')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "When viewing a `Universe`, the bounds are delimited by a dashed line.  The `Universe`, tiled with water molecules, should appear as:\n",
     "\n",
     "![Display universe filled with water](../_static/images/gui_universe.png)"
@@ -146,22 +246,19 @@
   }
  ],
  "metadata": {
+  "interpreter": {
+   "hash": "add738a18a8c9080256f416f48e2f1975a0b0948846decec7f4bbc677823fdf5"
+  },
   "kernelspec": {
-   "display_name": "py3MDMC",
-   "language": "python",
-   "name": "py3mdmc"
+   "display_name": "Python 3.7.4 32-bit ('mdmc-venv': virtualenv)",
+   "name": "python3"
   },
   "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
    "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.6.7"
+   "version": ""
+  },
+  "nbsphinx": {
+   "execute": "never"
   }
  },
  "nbformat": 4,
