@@ -1,72 +1,32 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>MDMC.control.control &mdash; MDMC 0.2 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../../index.html" class="icon icon-home"> MDMC
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -74,18 +34,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/introduction.html">1. Introduction</a></li>
@@ -130,69 +79,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../pages/modules/trajectory_analysis.html">trajectory_analysis</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">MDMC</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
       <li>MDMC.control.control</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for MDMC.control.control</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module for performing the refinement&quot;&quot;&quot;</span>
 
@@ -200,17 +110,19 @@
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.testing</span> <span class="kn">import</span> <span class="n">assert_allclose</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span><span class="p">,</span> <span class="n">interp2d</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.common.constants</span> <span class="kn">import</span> <span class="n">h</span><span class="p">,</span> <span class="n">h_bar</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="kn">import</span> <span class="n">Simulation</span>
-<span class="kn">from</span> <span class="nn">MDMC.refinement</span> <span class="kn">import</span> <span class="n">minimizer</span><span class="p">,</span> <span class="n">FoM</span>
+<span class="kn">from</span> <span class="nn">MDMC.refinement.minimizers.minimizer_factory</span> <span class="kn">import</span> <span class="n">MinimizerFactory</span>
+<span class="kn">from</span> <span class="nn">MDMC.refinement.FoM.FoM_factory</span> <span class="kn">import</span> <span class="n">FoMFactory</span>
+<span class="kn">from</span> <span class="nn">MDMC.refinement.FoM.FoM_abs</span> <span class="kn">import</span> <span class="n">ObservablePair</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.refinement</span> <span class="kn">import</span> <span class="n">FoM</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span> \
     <span class="kn">import</span> <span class="nn">ObservableFactory</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> <span class="n">Observable</span>
@@ -346,9 +258,6 @@
 <span class="sd">        Number of molecular dynamics steps for each step of the refinement</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">MINIMIZER_DICT</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;MMC&quot;</span><span class="p">:</span><span class="n">minimizer</span><span class="o">.</span><span class="n">MMC</span><span class="p">}</span>
-    <span class="n">FOM_DICT</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;exp&quot;</span><span class="p">:</span><span class="n">FoM</span><span class="o">.</span><span class="n">ChiSquaredExpError</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span><span class="n">FoM</span><span class="o">.</span><span class="n">ChiSquaredNoError</span><span class="p">}</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">exp_datasets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
                  <span class="n">fit_parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">MC_norm</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
                  <span class="n">minimizer_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;MMC&#39;</span><span class="p">,</span> <span class="n">FoM_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -376,9 +285,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">fit_parameters</span><span class="p">)</span>
         <span class="c1"># Minimizer FoM_old is always initialised to infinity, so that first MC</span>
         <span class="c1"># step (i.e. the setup) is always accepted.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MINIMIZER_DICT</span><span class="p">[</span><span class="n">minimizer_type</span><span class="p">](</span><span class="n">MC_norm</span><span class="p">,</span>
-                                                             <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">,</span>
-                                                             <span class="n">max_parameter_change</span><span class="o">=</span><span class="n">max_parameter_change</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span> <span class="o">=</span> <span class="n">MinimizerFactory</span><span class="o">.</span><span class="n">create_minimizer</span><span class="p">(</span><span class="n">minimizer_type</span><span class="p">,</span> <span class="n">MC_norm</span><span class="p">,</span>
+                                                             <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">,</span> <span class="n">max_parameter_change</span><span class="o">=</span><span class="n">max_parameter_change</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_config</span> <span class="o">=</span> <span class="n">reset_config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">=</span> <span class="n">equilibration_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">convergence_tol</span> <span class="o">=</span> <span class="n">convergence_tol</span>
@@ -414,7 +322,7 @@
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">rescale_factor</span><span class="p">:</span>
                 <span class="n">rescale_factor</span> <span class="o">=</span> <span class="mf">1.</span>
 
-            <span class="n">observable_pair</span> <span class="o">=</span> <span class="n">FoM</span><span class="o">.</span><span class="n">ObservablePair</span><span class="p">(</span><span class="n">exp_observable</span><span class="p">,</span>
+            <span class="n">observable_pair</span> <span class="o">=</span> <span class="n">ObservablePair</span><span class="p">(</span><span class="n">exp_observable</span><span class="p">,</span>
                                                  <span class="n">MD_observable</span><span class="p">,</span>
                                                  <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">],</span>
                                                  <span class="n">rescale_factor</span><span class="o">=</span><span class="n">rescale_factor</span><span class="p">,</span>
@@ -435,8 +343,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">FoM_norm</span> <span class="o">=</span> <span class="n">FoM_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;norm&#39;</span><span class="p">)</span>
 
-        <span class="n">FoM_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FOM_DICT</span><span class="p">[</span><span class="n">FoM_error</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span> <span class="o">=</span> <span class="n">FoM_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span> <span class="o">=</span> <span class="n">FoMFactory</span><span class="o">.</span><span class="n">create_FoM</span><span class="p">(</span><span class="n">FoM_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">,</span>
                                         <span class="n">norm</span><span class="o">=</span><span class="n">FoM_norm</span><span class="p">,</span>
                                         <span class="n">n_parameters</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">))</span>
 
@@ -827,7 +734,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_minimum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable_pair</span><span class="p">:</span> <span class="n">FoM</span><span class="o">.</span><span class="n">ObservablePair</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_calculate_minimum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the minimum number of steps required for the MD engine in</span>
@@ -856,7 +763,7 @@
         <span class="k">return</span> <span class="n">traj_step</span> <span class="o">*</span> <span class="n">minimum_frames</span>
 
     <span class="k">def</span> <span class="nf">_calculate_maximum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                                    <span class="n">observable_pair</span><span class="p">:</span> <span class="n">FoM</span><span class="o">.</span><span class="n">ObservablePair</span><span class="p">):</span>
+                                    <span class="n">observable_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the maximum number of steps that ``observable_pair`` will be</span>
@@ -1074,45 +981,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-
-    </p>
+    <p></p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
