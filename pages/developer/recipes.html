@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Debugging inside Containers &mdash; MDMC 0.2 documentation</title>
+  <title>Recipes for ‘simple’ additions &mdash; MDMC 0.2 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Recipes for ‘simple’ additions" href="recipes.html" />
-    <link rel="prev" title="Containers" href="containers.html" /> 
+    <link rel="next" title="common" href="../modules/common.html" />
+    <link rel="prev" title="Debugging inside Containers" href="vscode.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -68,11 +68,11 @@
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="management.html">MDMC Software Management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Debugging inside Containers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#how-to-run-vscode-inside-a-container">How to run VSCode inside a container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vscode.html">Debugging inside Containers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Recipes for ‘simple’ additions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#new-approximation-functions">New approximation functions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="recipes.html">Recipes for ‘simple’ additions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -99,9 +99,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Debugging inside Containers</li>
+      <li>Recipes for ‘simple’ additions</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/pages/developer/vscode.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/pages/developer/recipes.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -133,21 +133,31 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="debugging-inside-containers">
-<span id="dev-doc-vscode-label"></span><h1>Debugging inside Containers<a class="headerlink" href="#debugging-inside-containers" title="Permalink to this headline"></a></h1>
-<p>MDMC’s source code has a <code class="docutils literal notranslate"><span class="pre">.devcontainer</span></code> folder that can be used by Visual Studio Code to run VSCode inside a Docker container. This is very useful for debugging or testing problems in our container setup.</p>
-<div class="section" id="how-to-run-vscode-inside-a-container">
-<h2>How to run VSCode inside a container<a class="headerlink" href="#how-to-run-vscode-inside-a-container" title="Permalink to this headline"></a></h2>
-<p>This is an abridged form of <a class="reference external" href="https://code.visualstudio.com/docs/remote/containers">this guide</a>.</p>
-<p>First, install and configure the following software:</p>
-<ul class="simple">
-<li><p>Windows: Docker Desktop 2.0+ and <a class="reference external" href="https://docs.docker.com/docker-for-windows/wsl/">set up WSL 2</a>.</p></li>
-<li><p>Mac OS: Docker Desktop 2.0+</p></li>
-<li><p>Linux: Docker 18.06+ and Docker Compose 1.21+</p></li>
-</ul>
-<p>If on Linux, add your user to the <code class="docutils literal notranslate"><span class="pre">docker</span></code> permissions group with <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">usermod</span> <span class="pre">-a</span> <span class="pre">-G</span> <span class="pre">docker</span> <span class="pre">$USER</span></code>.</p>
-<p>Next, install <a class="reference external" href="https://code.visualstudio.com/">Visual Studio Code</a> and then install the <a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack">Remote Development extension pack</a>.</p>
-<p>Finally, with the MDMC project open in VSCode, open the Command Palette (by pressing F1) and run the command <strong>Remote-Containers: Open Folder in Container…</strong> to open the MDMC project inside the MDMC container.</p>
+<div class="section" id="recipes-for-simple-additions">
+<span id="dev-doc-recipes-label"></span><h1>Recipes for ‘simple’ additions<a class="headerlink" href="#recipes-for-simple-additions" title="Permalink to this headline"></a></h1>
+<p>This page will list ‘recipes’ for how to add simple expansions to MDMC.</p>
+<div class="section" id="new-approximation-functions">
+<h2>New approximation functions<a class="headerlink" href="#new-approximation-functions" title="Permalink to this headline"></a></h2>
+<p>If you would like to add a new approximation function for Control objects (e.g. Gaussian, Lorentzian), MDMC’s handling of these functions is built to be expandable. Do the following:</p>
+<p>Let <cite>myfunction</cite> be the name of your function.</p>
+<ol class="arabic simple">
+<li><p>Change the docstrings for the <cite>Control</cite> class in <cite>control.py</cite> and the <cite>AbstractSQw</cite> class to list your function as a resolution function.</p></li>
+<li><p>go to <cite>MDMC/resolution/</cite> and add a file called myfunction.py. This file should define a subclass of Resolution named MyfunctionResolution (note the title case). This has a mandatory method, <cite>apply(self, fqt, t)</cite>, which takes your function and applies it to an FQt array.</p></li>
+</ol>
+<p>If your function is numeric, you should create another method, <cite>window_in_t(self, t)</cite> which calculates the Fourier transform of your function on an array t. <cite>apply()</cite> can then simply be:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fqt</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="n">N_Q</span><span class="p">,</span> <span class="n">N_T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">fqt</span><span class="p">)</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_in_t</span><span class="p">(</span><span class="n">t</span><span class="p">[:</span><span class="n">N_T</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="p">(</span><span class="n">N_Q</span><span class="p">,</span> <span class="n">N_T</span><span class="p">))</span> <span class="o">*</span> <span class="n">fqt</span>
+</pre></div>
+</div>
+<p>Here, you are done implementation-wise! Factory patterns will handle the actual implementation of your function. However, you should add some tests:</p>
+<ol class="arabic simple" start="6">
+<li><p>Create a new file in the directory <cite>MDMC/tests/system_tests/observables/</cite> and name it <cite>test_SQw_myfunction</cite>. In here, please add tests which validate your new function’s calculations against a benchmark (either a similar calculation made in a third-party software, or done by hand).</p></li>
+</ol>
+<p>If your function is not simply numeric (i.e. requires __init__ arguments other than a single numeric value), some tweaking of <cite>MDMC/trajectory_analysis/observables/sqw.py</cite> and <cite>tests/resolution/test_resolution_factory.py</cite> will also be necessary, and your function may take a lot more work.</p>
+<p>Now you should be done; if you create a <cite>Control</cite> object with a dataset that has resolution <cite>{‘MY_FUNCTION’: x}</cite>, it should apply your resolution function to this data.</p>
 </div>
 </div>
 
@@ -155,8 +165,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="containers.html" class="btn btn-neutral float-left" title="Containers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="recipes.html" class="btn btn-neutral float-right" title="Recipes for ‘simple’ additions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="vscode.html" class="btn btn-neutral float-left" title="Debugging inside Containers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modules/common.html" class="btn btn-neutral float-right" title="common" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

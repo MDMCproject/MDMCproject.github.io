@@ -79,6 +79,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/management.html">MDMC Software Management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/vscode.html">Debugging inside Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -642,9 +643,13 @@ CLASSES
      |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
      |              A 3 element `tuple` or ``array`` of `float` specifying the
      |              dimensions of the ``Universe`` in units of ``Ang``
-     |          ``energy_resolution` (`float`)
-     |              Optionally specify Gaussian energy resolution in units of
-     |              ueV (micro eV)
+     |          ``energy_resolution` (`dict`)
+     |              Optionally specify energy resolution and function in units of ueV (micro eV),
+     |              in the format of the one-line dict {&#39;function&#39;: value}, where `function`
+     |              is the resolution function and `value` is the desired `FWHM`.
+     |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
+     |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
+     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -662,7 +667,7 @@ CLASSES
      |      ----------
      |      dt : float
      |          The time spacing to use when performing the inverse Fourier transform in units of `fs`.
-     |          Ideally this should be the same as the frame seperation expected when applying this
+     |          Ideally this should be the same as the frame separation expected when applying this
      |          function.
      |
      |      Returns
@@ -803,16 +808,6 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
      |
-     |  e_res
-     |      Get or set the energy resolution (FWHM) used to calculate the dynamic
-     |      structure factor, S(Q, w), from the intermediate scattering function,
-     |      F(Q, t)
-     |
-     |      Returns
-     |      -------
-     |      float
-     |          The energy resolution (FWHM) in ``meV``
-     |
      |  independent_variables
      |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
      |      ``meV``)
@@ -863,14 +858,6 @@ CLASSES
      |      str
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
-     |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -977,9 +964,13 @@ CLASSES
      |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
      |              A 3 element `tuple` or ``array`` of `float` specifying the
      |              dimensions of the ``Universe`` in units of ``Ang``
-     |          ``energy_resolution` (`float`)
-     |              Optionally specify Gaussian energy resolution in units of
-     |              ueV (micro eV)
+     |          ``energy_resolution` (`dict`)
+     |              Optionally specify energy resolution and function in units of ueV (micro eV),
+     |              in the format of the one-line dict {&#39;function&#39;: value}, where `function`
+     |              is the resolution function and `value` is the desired `FWHM`.
+     |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
+     |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
+     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -997,7 +988,7 @@ CLASSES
      |      ----------
      |      dt : float
      |          The time spacing to use when performing the inverse Fourier transform in units of `fs`.
-     |          Ideally this should be the same as the frame seperation expected when applying this
+     |          Ideally this should be the same as the frame separation expected when applying this
      |          function.
      |
      |      Returns
@@ -1138,16 +1129,6 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from AbstractSQw:
      |
-     |  e_res
-     |      Get or set the energy resolution (FWHM) used to calculate the dynamic
-     |      structure factor, S(Q, w), from the intermediate scattering function,
-     |      F(Q, t)
-     |
-     |      Returns
-     |      -------
-     |      float
-     |          The energy resolution (FWHM) in ``meV``
-     |
      |  independent_variables
      |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
      |      ``meV``)
@@ -1198,14 +1179,6 @@ CLASSES
      |      str
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
-     |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -1312,9 +1285,13 @@ CLASSES
      |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
      |              A 3 element `tuple` or ``array`` of `float` specifying the
      |              dimensions of the ``Universe`` in units of ``Ang``
-     |          ``energy_resolution` (`float`)
-     |              Optionally specify Gaussian energy resolution in units of
-     |              ueV (micro eV)
+     |          ``energy_resolution` (`dict`)
+     |              Optionally specify energy resolution and function in units of ueV (micro eV),
+     |              in the format of the one-line dict {&#39;function&#39;: value}, where `function`
+     |              is the resolution function and `value` is the desired `FWHM`.
+     |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
+     |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
+     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -1332,7 +1309,7 @@ CLASSES
      |      ----------
      |      dt : float
      |          The time spacing to use when performing the inverse Fourier transform in units of `fs`.
-     |          Ideally this should be the same as the frame seperation expected when applying this
+     |          Ideally this should be the same as the frame separation expected when applying this
      |          function.
      |
      |      Returns
@@ -1473,16 +1450,6 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
      |
-     |  e_res
-     |      Get or set the energy resolution (FWHM) used to calculate the dynamic
-     |      structure factor, S(Q, w), from the intermediate scattering function,
-     |      F(Q, t)
-     |
-     |      Returns
-     |      -------
-     |      float
-     |          The energy resolution (FWHM) in ``meV``
-     |
      |  independent_variables
      |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
      |      ``meV``)
@@ -1533,14 +1500,6 @@ CLASSES
      |      str
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
-     |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -1802,14 +1761,6 @@ CLASSES
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
      |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
-     |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
      |
@@ -2070,14 +2021,6 @@ CLASSES
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
      |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
-     |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
      |
@@ -2183,9 +2126,13 @@ CLASSES
      |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
      |              A 3 element `tuple` or ``array`` of `float` specifying the
      |              dimensions of the ``Universe`` in units of ``Ang``
-     |          ``energy_resolution` (`float`)
-     |              Optionally specify Gaussian energy resolution in units of
-     |              ueV (micro eV)
+     |          ``energy_resolution` (`dict`)
+     |              Optionally specify energy resolution and function in units of ueV (micro eV),
+     |              in the format of the one-line dict {&#39;function&#39;: value}, where `function`
+     |              is the resolution function and `value` is the desired `FWHM`.
+     |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
+     |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
+     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -2203,7 +2150,7 @@ CLASSES
      |      ----------
      |      dt : float
      |          The time spacing to use when performing the inverse Fourier transform in units of `fs`.
-     |          Ideally this should be the same as the frame seperation expected when applying this
+     |          Ideally this should be the same as the frame separation expected when applying this
      |          function.
      |
      |      Returns
@@ -2344,16 +2291,6 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from AbstractSQw:
      |
-     |  e_res
-     |      Get or set the energy resolution (FWHM) used to calculate the dynamic
-     |      structure factor, S(Q, w), from the intermediate scattering function,
-     |      F(Q, t)
-     |
-     |      Returns
-     |      -------
-     |      float
-     |          The energy resolution (FWHM) in ``meV``
-     |
      |  independent_variables
      |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
      |      ``meV``)
@@ -2404,14 +2341,6 @@ CLASSES
      |      str
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
-     |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -2518,9 +2447,13 @@ CLASSES
      |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
      |              A 3 element `tuple` or ``array`` of `float` specifying the
      |              dimensions of the ``Universe`` in units of ``Ang``
-     |          ``energy_resolution` (`float`)
-     |              Optionally specify Gaussian energy resolution in units of
-     |              ueV (micro eV)
+     |          ``energy_resolution` (`dict`)
+     |              Optionally specify energy resolution and function in units of ueV (micro eV),
+     |              in the format of the one-line dict {&#39;function&#39;: value}, where `function`
+     |              is the resolution function and `value` is the desired `FWHM`.
+     |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
+     |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
+     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -2538,7 +2471,7 @@ CLASSES
      |      ----------
      |      dt : float
      |          The time spacing to use when performing the inverse Fourier transform in units of `fs`.
-     |          Ideally this should be the same as the frame seperation expected when applying this
+     |          Ideally this should be the same as the frame separation expected when applying this
      |          function.
      |
      |      Returns
@@ -2679,16 +2612,6 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
      |
-     |  e_res
-     |      Get or set the energy resolution (FWHM) used to calculate the dynamic
-     |      structure factor, S(Q, w), from the intermediate scattering function,
-     |      F(Q, t)
-     |
-     |      Returns
-     |      -------
-     |      float
-     |          The energy resolution (FWHM) in ``meV``
-     |
      |  independent_variables
      |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
      |      ``meV``)
@@ -2739,14 +2662,6 @@ CLASSES
      |      str
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
-     |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -2853,9 +2768,13 @@ CLASSES
      |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
      |              A 3 element `tuple` or ``array`` of `float` specifying the
      |              dimensions of the ``Universe`` in units of ``Ang``
-     |          ``energy_resolution` (`float`)
-     |              Optionally specify Gaussian energy resolution in units of
-     |              ueV (micro eV)
+     |          ``energy_resolution` (`dict`)
+     |              Optionally specify energy resolution and function in units of ueV (micro eV),
+     |              in the format of the one-line dict {&#39;function&#39;: value}, where `function`
+     |              is the resolution function and `value` is the desired `FWHM`.
+     |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
+     |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
+     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -2873,7 +2792,7 @@ CLASSES
      |      ----------
      |      dt : float
      |          The time spacing to use when performing the inverse Fourier transform in units of `fs`.
-     |          Ideally this should be the same as the frame seperation expected when applying this
+     |          Ideally this should be the same as the frame separation expected when applying this
      |          function.
      |
      |      Returns
@@ -3014,16 +2933,6 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
      |
-     |  e_res
-     |      Get or set the energy resolution (FWHM) used to calculate the dynamic
-     |      structure factor, S(Q, w), from the intermediate scattering function,
-     |      F(Q, t)
-     |
-     |      Returns
-     |      -------
-     |      float
-     |          The energy resolution (FWHM) in ``meV``
-     |
      |  independent_variables
      |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
      |      ``meV``)
@@ -3074,14 +2983,6 @@ CLASSES
      |      str
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
-     |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -3188,9 +3089,13 @@ CLASSES
      |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
      |              A 3 element `tuple` or ``array`` of `float` specifying the
      |              dimensions of the ``Universe`` in units of ``Ang``
-     |          ``energy_resolution` (`float`)
-     |              Optionally specify Gaussian energy resolution in units of
-     |              ueV (micro eV)
+     |          ``energy_resolution` (`dict`)
+     |              Optionally specify energy resolution and function in units of ueV (micro eV),
+     |              in the format of the one-line dict {&#39;function&#39;: value}, where `function`
+     |              is the resolution function and `value` is the desired `FWHM`.
+     |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
+     |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
+     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -3208,7 +3113,7 @@ CLASSES
      |      ----------
      |      dt : float
      |          The time spacing to use when performing the inverse Fourier transform in units of `fs`.
-     |          Ideally this should be the same as the frame seperation expected when applying this
+     |          Ideally this should be the same as the frame separation expected when applying this
      |          function.
      |
      |      Returns
@@ -3349,16 +3254,6 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
      |
-     |  e_res
-     |      Get or set the energy resolution (FWHM) used to calculate the dynamic
-     |      structure factor, S(Q, w), from the intermediate scattering function,
-     |      F(Q, t)
-     |
-     |      Returns
-     |      -------
-     |      float
-     |          The energy resolution (FWHM) in ``meV``
-     |
      |  independent_variables
      |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
      |      ``meV``)
@@ -3409,14 +3304,6 @@ CLASSES
      |      str
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
-     |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -3523,9 +3410,13 @@ CLASSES
      |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
      |              A 3 element `tuple` or ``array`` of `float` specifying the
      |              dimensions of the ``Universe`` in units of ``Ang``
-     |          ``energy_resolution` (`float`)
-     |              Optionally specify Gaussian energy resolution in units of
-     |              ueV (micro eV)
+     |          ``energy_resolution` (`dict`)
+     |              Optionally specify energy resolution and function in units of ueV (micro eV),
+     |              in the format of the one-line dict {&#39;function&#39;: value}, where `function`
+     |              is the resolution function and `value` is the desired `FWHM`.
+     |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
+     |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
+     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -3543,7 +3434,7 @@ CLASSES
      |      ----------
      |      dt : float
      |          The time spacing to use when performing the inverse Fourier transform in units of `fs`.
-     |          Ideally this should be the same as the frame seperation expected when applying this
+     |          Ideally this should be the same as the frame separation expected when applying this
      |          function.
      |
      |      Returns
@@ -3684,16 +3575,6 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
      |
-     |  e_res
-     |      Get or set the energy resolution (FWHM) used to calculate the dynamic
-     |      structure factor, S(Q, w), from the intermediate scattering function,
-     |      F(Q, t)
-     |
-     |      Returns
-     |      -------
-     |      float
-     |          The energy resolution (FWHM) in ``meV``
-     |
      |  independent_variables
      |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
      |      ``meV``)
@@ -3744,14 +3625,6 @@ CLASSES
      |      str
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
-     |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -3858,9 +3731,13 @@ CLASSES
      |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
      |              A 3 element `tuple` or ``array`` of `float` specifying the
      |              dimensions of the ``Universe`` in units of ``Ang``
-     |          ``energy_resolution` (`float`)
-     |              Optionally specify Gaussian energy resolution in units of
-     |              ueV (micro eV)
+     |          ``energy_resolution` (`dict`)
+     |              Optionally specify energy resolution and function in units of ueV (micro eV),
+     |              in the format of the one-line dict {&#39;function&#39;: value}, where `function`
+     |              is the resolution function and `value` is the desired `FWHM`.
+     |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
+     |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
+     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -3878,7 +3755,7 @@ CLASSES
      |      ----------
      |      dt : float
      |          The time spacing to use when performing the inverse Fourier transform in units of `fs`.
-     |          Ideally this should be the same as the frame seperation expected when applying this
+     |          Ideally this should be the same as the frame separation expected when applying this
      |          function.
      |
      |      Returns
@@ -4019,16 +3896,6 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
      |
-     |  e_res
-     |      Get or set the energy resolution (FWHM) used to calculate the dynamic
-     |      structure factor, S(Q, w), from the intermediate scattering function,
-     |      F(Q, t)
-     |
-     |      Returns
-     |      -------
-     |      float
-     |          The energy resolution (FWHM) in ``meV``
-     |
      |  independent_variables
      |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
      |      ``meV``)
@@ -4079,14 +3946,6 @@ CLASSES
      |      str
      |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
      |          ``&#39;MD&#39;``
-     |
-     |  resolution_functions
-     |      The resolution functions for the dependent variables
-     |
-     |      Return
-     |      ------
-     |      dict
-     |          resolution functions
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -5142,7 +5001,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='2997941f-accc-4b75-a59c-88104f018982'></div></div>
+<div id='cdd394d3-8467-4b3a-b510-ac97385202f9'></div></div>
 </div>
 <p>Therefore it is strongly recommended that you specify the <span class="math notranslate nohighlight">\(E\)</span> values for calculating the dynamic structure factor.</p>
 <p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calulate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will be probably
@@ -6233,7 +6092,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='cd844a60-6f04-45f6-87ac-3f9d2ab9748a'></div></div>
+<div id='9dd1de1b-9695-4ecc-8096-df026dd90b7a'></div></div>
 </div>
 <p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the van Well et al. Phys. Rev. A <strong>31</strong> 3391 (1985) data, which the authors corrected for instrument resolution) by reading the data into an SQwCoh object:</p>
 <div class="nbinput nblast docutils container">
@@ -6258,7 +6117,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># energy_resolution is the FWHM of the instrumentation&#39;s resolution function expressed in ueV (micro eV).</span>
 <span class="c1"># It is used to smooth the calculated S(Q,w) with a Gaussian window in order to match the values obtained experimentally.</span>
-<span class="n">sqw_coh</span><span class="o">.</span><span class="n">calculate_from_MD</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">energy_resolution</span><span class="o">=</span><span class="mf">1.0e3</span><span class="p">)</span>
+<span class="n">sqw_coh</span><span class="o">.</span><span class="n">calculate_from_MD</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">energy_resolution</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;gaussian&#39;</span><span class="p">:</span> <span class="mf">1.0e3</span><span class="p">})</span>
 
 <span class="n">plot_surface</span><span class="p">(</span><span class="n">sqw_coh</span><span class="o">.</span><span class="n">E</span><span class="p">,</span> <span class="n">sqw_coh</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="n">sqw_coh</span><span class="o">.</span><span class="n">SQw</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
@@ -7250,7 +7109,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='74b4e9d0-8ee3-4f11-a4d8-dfff3153ec46'></div></div>
+<div id='32a2c7eb-a5cf-4542-b80d-8904f9af495d'></div></div>
 </div>
 </div>
 <div class="section" id="Other-observables">

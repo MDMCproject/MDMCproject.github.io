@@ -71,6 +71,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/management.html">MDMC Software Management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/vscode.html">Debugging inside Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -379,7 +380,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="Argon-A-to-Z">
 <h1>Argon A-to-Z<a class="headerlink" href="#Argon-A-to-Z" title="Permalink to this headline"></a></h1>
-<p>This tutorial demonstrates a-to-z how to optimise Lennard Jones parameters for liquid argon, and without going into details. For details see other tuturials and wider MDMC documentation.</p>
+<p>This tutorial demonstrates a-to-z how to optimise Lennard Jones parameters for liquid argon, and without going into details. For details see other tutorials and wider MDMC documentation.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -439,7 +440,7 @@ Universe created with:
 Number of argon atoms = 216
 </pre></div></div>
 </div>
-<p>In the Jupyter cell above a box of Argon atoms are setup. However, at this point there is no interaction forces between the argon atoms! In the cell below an appropriate (for argon) force-field interaction potential is defined</p>
+<p>In the Jupyter cell above, a box of Argon atoms is set up. However, at this point there is no interaction forces between the argon atoms! In the cell below an appropriate (for argon) force-field interaction potential is defined.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -452,10 +453,10 @@ Number of argon atoms = 216
 </pre></div>
 </div>
 </div>
-<p>In this case the interaction potential chosen to be the humble Lennard Jones (to get info see doc or type <code class="docutils literal notranslate"><span class="pre">help(LennardJones)</span></code>).</p>
-<p>Also, a <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> value is chosen (see <code class="docutils literal notranslate"><span class="pre">help(Dispersion)</span></code> for more info). A <a class="reference external" href="https://en.wikipedia.org/wiki/Lennard-Jones_potential">role of thumb</a> is to pick <code class="docutils literal notranslate"><span class="pre">cutoff=2.5*sigma</span></code>. The value for argo n is recommended to be between 8 and 12 ang. <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> is not a force-field parameter and therefore will not be refined. Ideally, and for any system you want to pick at value of the <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> which is small while not compromising accuracy. For this system picking a value between 8 and 12 ang
-is found to give near identifical results.</p>
-<p>Next and before starting the refinement set up the MD engine and equilibrate the system. Note with MDMC the equilibration is just needed to be done once.</p>
+<p>In this case the interaction potential chosen is the humble Lennard Jones (to get info see doc or type <code class="docutils literal notranslate"><span class="pre">help(LennardJones)</span></code>).</p>
+<p>Also, a <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> value is chosen (see <code class="docutils literal notranslate"><span class="pre">help(Dispersion)</span></code> for more info). A <a class="reference external" href="https://en.wikipedia.org/wiki/Lennard-Jones_potential">rule of thumb for Lennard-Jones</a> is to pick <code class="docutils literal notranslate"><span class="pre">cutoff=2.5*sigma</span></code>. The value for argon is recommended to be between 8 and 12 ang. <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> is not a force-field parameter and therefore will not be refined. Ideally, and for any system you want to pick at value of the <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> which is small while not compromising accuracy. For this system picking a value
+between 8 and 12 ang is found to give near identifical results.</p>
+<p>Next (and before starting the refinement), we set up the MD engine and equilibrate the system. Note with MDMC the equilibration only needs to be done once.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -493,8 +494,8 @@ Simulation created with lammps engine and settings:
 </pre></div>
 </div>
 </div>
-<p>OK time to set up the actually refinement of the force-field parameters.</p>
-<p>First we need some data to refine against</p>
+<p>OK; time to set up the actual refinement of the force-field parameters.</p>
+<p>First we need some data to refine against:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -503,11 +504,13 @@ Simulation created with lammps engine and settings:
 <span></span><span class="c1"># exp_datasets is a list of dictionaries with one dictionary per experimental</span>
 <span class="c1"># dataset</span>
 <span class="c1"># Dataset from: van Well et al. (1985). Physical Review A, 31(5), 3391-3414</span>
+<span class="c1"># resolution is None as the original author already accounted for instrument resolution</span>
 <span class="n">exp_datasets</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;file_name&#39;</span><span class="p">:</span><span class="s1">&#39;data/Well_s_q_omega_Ar_data.xml&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;type&#39;</span><span class="p">:</span><span class="s1">&#39;SQw&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;reader&#39;</span><span class="p">:</span><span class="s1">&#39;xml_SQw&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;weight&#39;</span><span class="p">:</span><span class="mf">1.</span><span class="p">,</span>
-                 <span class="s1">&#39;auto_scale&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">}]</span>
+                 <span class="s1">&#39;auto_scale&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="s1">&#39;resolution&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">}]</span>
 </pre></div>
 </div>
 </div>
@@ -562,18 +565,27 @@ Control created with:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Step         FoM Change state      epsilon        sigma
-   0       451.9     Accepted        1.024         3.36
-   1       409.3     Accepted        1.033        3.328
-   2       434.7     Accepted        1.038        3.312
-   3       411.3     Accepted        1.042        3.324
+   0       392.8     Accepted        1.024         3.36
+   1       457.7     Rejected        1.018        3.331
+   2       398.5     Rejected        1.017        3.392
+   3       398.2     Accepted        1.015        3.374
 
 Final Parameters
  epsilon    sigma
-1.042272 3.324197
+1.014513 3.373882
 
 Automatic Scale Factors
-  data/Well_s_q_omega_Ar_data.xml  0.218445
+  data/Well_s_q_omega_Ar_data.xml  0.217164
 </pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
 </div>
 </div>
 
