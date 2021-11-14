@@ -15,7 +15,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -514,10 +514,13 @@ NAME
 DESCRIPTION
     Observables (/ indicates alias)
     -----------
-    PDF / PairDistributionFunction
     DynamicStructureFactor / SQw
-    IncoherentDynamicStructureFactor / SQwIncoherentSQwIncoh / SQw_incoh
     CoherentDynamicStructureFactor / SQwCoherent / SQwCoh / SQw_coh
+    IncoherentDynamicStructureFactor / SQwIncoherentSQwIncoh / SQw_incoh
+    IntermediateScatteringFunction / FQt
+    PDF / PairDistributionFunction
+    IncoherentIntermediateScatteringFunction / FQtIncoherentFQtIncoh / FQt_incoh
+    CoherentIntermediateScatteringFunction / FQtCoherent / FQtCoh / FQt_coh
 
     Examples
     --------
@@ -531,28 +534,33 @@ DESCRIPTION
         sqw = observables.DynamicStructureFactor()  # ...is equivalent to this line
 
 PACKAGE CONTENTS
+    fqt
+    fqt_coh
+    fqt_incoh
     obs
     obs_factory
     pdf
     sqw
-    sqw_coh
-    sqw_incoh
 
 CLASSES
+    MDMC.trajectory_analysis.observables.fqt.AbstractFQt(MDMC.trajectory_analysis.observables.sqw.SQwMixins, MDMC.trajectory_analysis.observables.obs.Observable)
+        MDMC.trajectory_analysis.observables.fqt.FQt
+        MDMC.trajectory_analysis.observables.fqt_coh.FQtCoherent
+        MDMC.trajectory_analysis.observables.fqt_incoh.FQtIncoherent
     MDMC.trajectory_analysis.observables.obs.Observable(abc.ABC)
         MDMC.trajectory_analysis.observables.pdf.PairDistributionFunction
-    MDMC.trajectory_analysis.observables.sqw.AbstractSQw(MDMC.trajectory_analysis.observables.obs.Observable)
+    MDMC.trajectory_analysis.observables.sqw.AbstractSQw(MDMC.trajectory_analysis.observables.sqw.SQwMixins, MDMC.trajectory_analysis.observables.obs.Observable)
         MDMC.trajectory_analysis.observables.sqw.SQw
-        MDMC.trajectory_analysis.observables.sqw_coh.SQwCoherent
-        MDMC.trajectory_analysis.observables.sqw_incoh.SQwIncoherent
+        MDMC.trajectory_analysis.observables.sqw.SQwCoherent
+        MDMC.trajectory_analysis.observables.sqw.SQwIncoherent
 
-    CoherentDynamicStructureFactor = class SQwCoherent(MDMC.trajectory_analysis.observables.sqw.AbstractSQw)
-     |  A class for containing, calculating and reading the coherent dynamic
-     |  structure factor
+    CoherentDynamicStructureFactor = class SQwCoherent(AbstractSQw)
+     |  A class for the coherent dynamic structure factor
      |
      |  Method resolution order:
      |      SQwCoherent
-     |      MDMC.trajectory_analysis.observables.sqw.AbstractSQw
+     |      AbstractSQw
+     |      SQwMixins
      |      MDMC.trajectory_analysis.observables.obs.Observable
      |      abc.ABC
      |      builtins.object
@@ -564,7 +572,7 @@ CLASSES
      |  name = &#39;SQw_coh&#39;
      |
      |  ----------------------------------------------------------------------
-     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
+     |  Methods inherited from AbstractSQw:
      |
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
@@ -592,15 +600,6 @@ CLASSES
      |      -------
      |      numpy.ndarray
      |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
-     |  calculate_FQt(self)
-     |      Calculates the intermediate scattering function for all ``Q_vectors``
-     |      for all time intervals
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An array of dimensions ``(len(self.Q_vectors), len(self.t))``
      |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
@@ -677,6 +676,94 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
+     |  validate_energy(self, dt)
+     |      Asserts that the user set frame separation ``dt`` leads to energy
+     |      separation that matches that of the experiment. If not, it
+     |      includes the time separation required in the error.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float
+     |          Frame separation in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      None
+     |
+     |      Raises
+     |      ------
+     |      AssertionError
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractSQw:
+     |
+     |  E
+     |
+     |  SQw
+     |
+     |  SQw_err
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      SQw, the dynamic structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      It also means that:
+     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
+     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
+     |
+     |  w
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractSQw:
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the dynamic
+     |      structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and energy E (in``meV``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from SQwMixins:
+     |
      |  maximum_frames(self)
      |      The maximum number of ``Trajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
@@ -724,107 +811,16 @@ CLASSES
      |      int
      |          The minimum number of frames
      |
-     |  validate_energy(self, dt)
-     |      Asserts that the user set frame separation ``dt`` leads to energy
-     |      separation that matches that of the experiment. If not, it
-     |      includes the time separation required in the error.
-     |
-     |      Parameters
-     |      ----------
-     |      dt : float
-     |          Frame separation in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      None
-     |
-     |      Raises
-     |      ------
-     |      AssertionError
-     |
      |  ----------------------------------------------------------------------
-     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  E
+     |  Data descriptors inherited from SQwMixins:
      |
      |  Q
      |
-     |  SQw
+     |  __dict__
+     |      dictionary for instance variables (if defined)
      |
-     |  SQw_err
-     |
-     |  data
-     |      Get the independent, dependent and error data
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
-     |  dependent_variables
-     |      Get or set the dependent variables, SQw (in ``arb``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The dependent variables
-     |
-     |  dependent_variables_structure
-     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
-     |      It also means that:
-     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
-     |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, list]
-     |          The shape of the SQw dependent variable
-     |
-     |  errors
-     |      Get or set the errors on the dependent variables
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The errors on the dependent variables
-     |
-     |  uniformity_requirements
-     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
-     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
-     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
-     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
-     |      zero.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, Dict[str, bool]]
-     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
-     |
-     |  w
-     |
-     |  ----------------------------------------------------------------------
-     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  independent_variables
-     |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
-     |      ``meV``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent variables
-     |
-     |  t
-     |      Get or set the times of the intermediate scattering function in units of
-     |      ``fs``
-     |
-     |      Returns
-     |      -------
-     |      array
-     |          1D array of times in ``fs``
+     |  __weakref__
+     |      list of weak references to the object (if defined)
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -842,13 +838,280 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  origin
+     |      Get or set the origin of the observable
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
+     |          ``&#39;MD&#39;``
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT
+
+    CoherentIntermediateScatteringFunction = class FQtCoherent(MDMC.trajectory_analysis.observables.fqt.AbstractFQt)
+     |  A class for containing, calculating and reading the intermediate scattering
+     |  function for the coherent dynamic structure factor
+     |
+     |  Method resolution order:
+     |      FQtCoherent
+     |      MDMC.trajectory_analysis.observables.fqt.AbstractFQt
+     |      MDMC.trajectory_analysis.observables.sqw.SQwMixins
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  name = &#39;FQt_coh&#39;
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |      Apply instrument resolution to an FQt object.
+     |
+     |      Parameters
+     |      ----------
+     |      resolution: Resolution
+     |          The Resolution object to apply to FQt.
+     |
+     |      Returns
+     |      -------
+     |      The FQt object with resolution applied.
+     |
+     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
+     |
+     |      In order to obtain ``len(energy)`` values in energy, we reflect the
+     |      intermediate scattering function in time to give it dimensions of
+     |      ``(len(self.Q), 2 * (len(self.t)) - 2)``. This uses the fact it is even
+     |      in time, and the number of time points is chosen to be 1 greater than
+     |      the number of energy points [Rapaport, The Art of Molecular Dynamics
+     |      Simulation (2nd Edition), 2004, page 142].
+     |
+     |      The numpy implementation of the FFT gives frequencies arranged so that
+     |      the first ``len(energy)`` points in the energy dimension correspond to
+     |      positive frequencies, and the remaining points have negative frequency.
+     |
+     |      Parameters
+     |      ----------
+     |      energy: list of floats
+     |          the list of energy (E) points at which S(Q, w) will be calculated.
+     |      resolution: Resolution (default None)
+     |          The instrument resolution object which will be applied to FQt.
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          The S(Q, w) calculated from F(Q, t)
+     |
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |      Calculates the intermediate scattering function from a trajectory.
+     |
+     |      ``independent_variables`` can either be set previously or defined within
+     |      ``**settings``.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : Trajectory
+     |          a single ``Trajectory`` object.
+     |      verbose: int, optional
+     |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
+     |          timings are collected so they can be printed at the end of the refinement.
+     |          If 0, no timings are collected. Default is 0.
+     |      **settings
+     |          ``n_Q_vectors`` (`int`)
+     |              The maximum number of ``Q_vectors`` for any ``Q`` value. The
+     |              greater the number of ``Q_vectors``, the more accurate the
+     |              calculation, but the longer it will take.
+     |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
+     |              A 3 element `tuple` or ``array`` of `float` specifying the
+     |              dimensions of the ``Universe`` in units of ``Ang``
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      FQt, the intermediate scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      It also means that:
+     |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the time &#39;t&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the intermediate scattering function ``Observables``.
+     |      If using FFT, then &#39;t&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  FQt
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the intermediate
+     |      scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and time t (in ``fs``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  t
+     |      Get or set the times of the intermediate scattering function in units of
+     |      ``fs``
+     |
+     |      Returns
+     |      -------
+     |      array
+     |          1D array of times in ``fs``
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  Q
      |
      |  __dict__
      |      dictionary for instance variables (if defined)
      |
      |  __weakref__
      |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self)
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Reads in experimental data from a file using a specified reader
+     |
+     |      Parameters
+     |      ----------
+     |      reader : str
+     |          The name of the required file reader
+     |      file_name : str
+     |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
      |
      |  origin
      |      Get or set the origin of the observable
@@ -868,12 +1131,15 @@ CLASSES
      |          Whether to use FFT
 
     DynamicStructureFactor = class SQw(AbstractSQw)
-     |  A class for containing, calculating and reading the total dynamic structure
-     |  factor
+     |  A class for the total dynamic structure factor
+     |
+     |  Calculation is done in the respective FQt object, and this is
+     |  just a reference to get the correct FQt object.
      |
      |  Method resolution order:
      |      SQw
      |      AbstractSQw
+     |      SQwMixins
      |      MDMC.trajectory_analysis.observables.obs.Observable
      |      abc.ABC
      |      builtins.object
@@ -914,15 +1180,6 @@ CLASSES
      |      numpy.ndarray
      |          An ``array`` of `float` specifying the energy in units of ``meV``
      |
-     |  calculate_FQt(self)
-     |      Calculates the intermediate scattering function for all ``Q_vectors``
-     |      for all time intervals
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An array of dimensions ``(len(self.Q_vectors), len(self.t))``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -998,6 +1255,94 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
+     |  validate_energy(self, dt)
+     |      Asserts that the user set frame separation ``dt`` leads to energy
+     |      separation that matches that of the experiment. If not, it
+     |      includes the time separation required in the error.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float
+     |          Frame separation in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      None
+     |
+     |      Raises
+     |      ------
+     |      AssertionError
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractSQw:
+     |
+     |  E
+     |
+     |  SQw
+     |
+     |  SQw_err
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      SQw, the dynamic structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      It also means that:
+     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
+     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
+     |
+     |  w
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractSQw:
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the dynamic
+     |      structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and energy E (in``meV``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from SQwMixins:
+     |
      |  maximum_frames(self)
      |      The maximum number of ``Trajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
@@ -1045,107 +1390,16 @@ CLASSES
      |      int
      |          The minimum number of frames
      |
-     |  validate_energy(self, dt)
-     |      Asserts that the user set frame separation ``dt`` leads to energy
-     |      separation that matches that of the experiment. If not, it
-     |      includes the time separation required in the error.
-     |
-     |      Parameters
-     |      ----------
-     |      dt : float
-     |          Frame separation in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      None
-     |
-     |      Raises
-     |      ------
-     |      AssertionError
-     |
      |  ----------------------------------------------------------------------
-     |  Readonly properties inherited from AbstractSQw:
-     |
-     |  E
+     |  Data descriptors inherited from SQwMixins:
      |
      |  Q
      |
-     |  SQw
+     |  __dict__
+     |      dictionary for instance variables (if defined)
      |
-     |  SQw_err
-     |
-     |  data
-     |      Get the independent, dependent and error data
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
-     |  dependent_variables
-     |      Get or set the dependent variables, SQw (in ``arb``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The dependent variables
-     |
-     |  dependent_variables_structure
-     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
-     |      It also means that:
-     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
-     |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, list]
-     |          The shape of the SQw dependent variable
-     |
-     |  errors
-     |      Get or set the errors on the dependent variables
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The errors on the dependent variables
-     |
-     |  uniformity_requirements
-     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
-     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
-     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
-     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
-     |      zero.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, Dict[str, bool]]
-     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
-     |
-     |  w
-     |
-     |  ----------------------------------------------------------------------
-     |  Data descriptors inherited from AbstractSQw:
-     |
-     |  independent_variables
-     |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
-     |      ``meV``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent variables
-     |
-     |  t
-     |      Get or set the times of the intermediate scattering function in units of
-     |      ``fs``
-     |
-     |      Returns
-     |      -------
-     |      array
-     |          1D array of times in ``fs``
+     |  __weakref__
+     |      list of weak references to the object (if defined)
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -1163,13 +1417,18 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
-     |
-     |  __dict__
-     |      dictionary for instance variables (if defined)
-     |
-     |  __weakref__
-     |      list of weak references to the object (if defined)
      |
      |  origin
      |      Get or set the origin of the observable
@@ -1188,13 +1447,1585 @@ CLASSES
      |      bool
      |          Whether to use FFT
 
-    IncoherentDynamicStructureFactor = class SQwIncoherent(MDMC.trajectory_analysis.observables.sqw.AbstractSQw)
-     |  A class for containing, calculating and reading the incoherent dynamic
-     |  structure factor
+    class FQt(AbstractFQt)
+     |  A class for containing, calculating and reading the intermediate scattering
+     |  function for the total dynamic structure factor
+     |
+     |  Method resolution order:
+     |      FQt
+     |      AbstractFQt
+     |      MDMC.trajectory_analysis.observables.sqw.SQwMixins
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  name = &#39;IntermediateScatteringFunction&#39;
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from AbstractFQt:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |      Apply instrument resolution to an FQt object.
+     |
+     |      Parameters
+     |      ----------
+     |      resolution: Resolution
+     |          The Resolution object to apply to FQt.
+     |
+     |      Returns
+     |      -------
+     |      The FQt object with resolution applied.
+     |
+     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
+     |
+     |      In order to obtain ``len(energy)`` values in energy, we reflect the
+     |      intermediate scattering function in time to give it dimensions of
+     |      ``(len(self.Q), 2 * (len(self.t)) - 2)``. This uses the fact it is even
+     |      in time, and the number of time points is chosen to be 1 greater than
+     |      the number of energy points [Rapaport, The Art of Molecular Dynamics
+     |      Simulation (2nd Edition), 2004, page 142].
+     |
+     |      The numpy implementation of the FFT gives frequencies arranged so that
+     |      the first ``len(energy)`` points in the energy dimension correspond to
+     |      positive frequencies, and the remaining points have negative frequency.
+     |
+     |      Parameters
+     |      ----------
+     |      energy: list of floats
+     |          the list of energy (E) points at which S(Q, w) will be calculated.
+     |      resolution: Resolution (default None)
+     |          The instrument resolution object which will be applied to FQt.
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          The S(Q, w) calculated from F(Q, t)
+     |
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |      Calculates the intermediate scattering function from a trajectory.
+     |
+     |      ``independent_variables`` can either be set previously or defined within
+     |      ``**settings``.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : Trajectory
+     |          a single ``Trajectory`` object.
+     |      verbose: int, optional
+     |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
+     |          timings are collected so they can be printed at the end of the refinement.
+     |          If 0, no timings are collected. Default is 0.
+     |      **settings
+     |          ``n_Q_vectors`` (`int`)
+     |              The maximum number of ``Q_vectors`` for any ``Q`` value. The
+     |              greater the number of ``Q_vectors``, the more accurate the
+     |              calculation, but the longer it will take.
+     |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
+     |              A 3 element `tuple` or ``array`` of `float` specifying the
+     |              dimensions of the ``Universe`` in units of ``Ang``
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractFQt:
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      FQt, the intermediate scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      It also means that:
+     |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the time &#39;t&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the intermediate scattering function ``Observables``.
+     |      If using FFT, then &#39;t&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractFQt:
+     |
+     |  FQt
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the intermediate
+     |      scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and time t (in ``fs``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  t
+     |      Get or set the times of the intermediate scattering function in units of
+     |      ``fs``
+     |
+     |      Returns
+     |      -------
+     |      array
+     |          1D array of times in ``fs``
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  Q
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self)
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Reads in experimental data from a file using a specified reader
+     |
+     |      Parameters
+     |      ----------
+     |      reader : str
+     |          The name of the required file reader
+     |      file_name : str
+     |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  origin
+     |      Get or set the origin of the observable
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
+     |          ``&#39;MD&#39;``
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT
+
+    FQtCoh = class FQtCoherent(MDMC.trajectory_analysis.observables.fqt.AbstractFQt)
+     |  A class for containing, calculating and reading the intermediate scattering
+     |  function for the coherent dynamic structure factor
+     |
+     |  Method resolution order:
+     |      FQtCoherent
+     |      MDMC.trajectory_analysis.observables.fqt.AbstractFQt
+     |      MDMC.trajectory_analysis.observables.sqw.SQwMixins
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  name = &#39;FQt_coh&#39;
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |      Apply instrument resolution to an FQt object.
+     |
+     |      Parameters
+     |      ----------
+     |      resolution: Resolution
+     |          The Resolution object to apply to FQt.
+     |
+     |      Returns
+     |      -------
+     |      The FQt object with resolution applied.
+     |
+     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
+     |
+     |      In order to obtain ``len(energy)`` values in energy, we reflect the
+     |      intermediate scattering function in time to give it dimensions of
+     |      ``(len(self.Q), 2 * (len(self.t)) - 2)``. This uses the fact it is even
+     |      in time, and the number of time points is chosen to be 1 greater than
+     |      the number of energy points [Rapaport, The Art of Molecular Dynamics
+     |      Simulation (2nd Edition), 2004, page 142].
+     |
+     |      The numpy implementation of the FFT gives frequencies arranged so that
+     |      the first ``len(energy)`` points in the energy dimension correspond to
+     |      positive frequencies, and the remaining points have negative frequency.
+     |
+     |      Parameters
+     |      ----------
+     |      energy: list of floats
+     |          the list of energy (E) points at which S(Q, w) will be calculated.
+     |      resolution: Resolution (default None)
+     |          The instrument resolution object which will be applied to FQt.
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          The S(Q, w) calculated from F(Q, t)
+     |
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |      Calculates the intermediate scattering function from a trajectory.
+     |
+     |      ``independent_variables`` can either be set previously or defined within
+     |      ``**settings``.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : Trajectory
+     |          a single ``Trajectory`` object.
+     |      verbose: int, optional
+     |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
+     |          timings are collected so they can be printed at the end of the refinement.
+     |          If 0, no timings are collected. Default is 0.
+     |      **settings
+     |          ``n_Q_vectors`` (`int`)
+     |              The maximum number of ``Q_vectors`` for any ``Q`` value. The
+     |              greater the number of ``Q_vectors``, the more accurate the
+     |              calculation, but the longer it will take.
+     |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
+     |              A 3 element `tuple` or ``array`` of `float` specifying the
+     |              dimensions of the ``Universe`` in units of ``Ang``
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      FQt, the intermediate scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      It also means that:
+     |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the time &#39;t&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the intermediate scattering function ``Observables``.
+     |      If using FFT, then &#39;t&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  FQt
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the intermediate
+     |      scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and time t (in ``fs``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  t
+     |      Get or set the times of the intermediate scattering function in units of
+     |      ``fs``
+     |
+     |      Returns
+     |      -------
+     |      array
+     |          1D array of times in ``fs``
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  Q
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self)
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Reads in experimental data from a file using a specified reader
+     |
+     |      Parameters
+     |      ----------
+     |      reader : str
+     |          The name of the required file reader
+     |      file_name : str
+     |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  origin
+     |      Get or set the origin of the observable
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
+     |          ``&#39;MD&#39;``
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT
+
+    class FQtCoherent(MDMC.trajectory_analysis.observables.fqt.AbstractFQt)
+     |  A class for containing, calculating and reading the intermediate scattering
+     |  function for the coherent dynamic structure factor
+     |
+     |  Method resolution order:
+     |      FQtCoherent
+     |      MDMC.trajectory_analysis.observables.fqt.AbstractFQt
+     |      MDMC.trajectory_analysis.observables.sqw.SQwMixins
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  name = &#39;FQt_coh&#39;
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |      Apply instrument resolution to an FQt object.
+     |
+     |      Parameters
+     |      ----------
+     |      resolution: Resolution
+     |          The Resolution object to apply to FQt.
+     |
+     |      Returns
+     |      -------
+     |      The FQt object with resolution applied.
+     |
+     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
+     |
+     |      In order to obtain ``len(energy)`` values in energy, we reflect the
+     |      intermediate scattering function in time to give it dimensions of
+     |      ``(len(self.Q), 2 * (len(self.t)) - 2)``. This uses the fact it is even
+     |      in time, and the number of time points is chosen to be 1 greater than
+     |      the number of energy points [Rapaport, The Art of Molecular Dynamics
+     |      Simulation (2nd Edition), 2004, page 142].
+     |
+     |      The numpy implementation of the FFT gives frequencies arranged so that
+     |      the first ``len(energy)`` points in the energy dimension correspond to
+     |      positive frequencies, and the remaining points have negative frequency.
+     |
+     |      Parameters
+     |      ----------
+     |      energy: list of floats
+     |          the list of energy (E) points at which S(Q, w) will be calculated.
+     |      resolution: Resolution (default None)
+     |          The instrument resolution object which will be applied to FQt.
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          The S(Q, w) calculated from F(Q, t)
+     |
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |      Calculates the intermediate scattering function from a trajectory.
+     |
+     |      ``independent_variables`` can either be set previously or defined within
+     |      ``**settings``.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : Trajectory
+     |          a single ``Trajectory`` object.
+     |      verbose: int, optional
+     |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
+     |          timings are collected so they can be printed at the end of the refinement.
+     |          If 0, no timings are collected. Default is 0.
+     |      **settings
+     |          ``n_Q_vectors`` (`int`)
+     |              The maximum number of ``Q_vectors`` for any ``Q`` value. The
+     |              greater the number of ``Q_vectors``, the more accurate the
+     |              calculation, but the longer it will take.
+     |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
+     |              A 3 element `tuple` or ``array`` of `float` specifying the
+     |              dimensions of the ``Universe`` in units of ``Ang``
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      FQt, the intermediate scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      It also means that:
+     |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the time &#39;t&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the intermediate scattering function ``Observables``.
+     |      If using FFT, then &#39;t&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  FQt
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the intermediate
+     |      scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and time t (in ``fs``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  t
+     |      Get or set the times of the intermediate scattering function in units of
+     |      ``fs``
+     |
+     |      Returns
+     |      -------
+     |      array
+     |          1D array of times in ``fs``
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  Q
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self)
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Reads in experimental data from a file using a specified reader
+     |
+     |      Parameters
+     |      ----------
+     |      reader : str
+     |          The name of the required file reader
+     |      file_name : str
+     |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  origin
+     |      Get or set the origin of the observable
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
+     |          ``&#39;MD&#39;``
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT
+
+    FQtIncoherentFQtIncoh = class FQtIncoherent(MDMC.trajectory_analysis.observables.fqt.AbstractFQt)
+     |  A class for containing, calculating and reading the intermediate scattering
+     |  function for the incoherent dynamic structure factor
+     |
+     |  Method resolution order:
+     |      FQtIncoherent
+     |      MDMC.trajectory_analysis.observables.fqt.AbstractFQt
+     |      MDMC.trajectory_analysis.observables.sqw.SQwMixins
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  name = &#39;IncoherentIntermediateScatteringFunction&#39;
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |      Apply instrument resolution to an FQt object.
+     |
+     |      Parameters
+     |      ----------
+     |      resolution: Resolution
+     |          The Resolution object to apply to FQt.
+     |
+     |      Returns
+     |      -------
+     |      The FQt object with resolution applied.
+     |
+     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
+     |
+     |      In order to obtain ``len(energy)`` values in energy, we reflect the
+     |      intermediate scattering function in time to give it dimensions of
+     |      ``(len(self.Q), 2 * (len(self.t)) - 2)``. This uses the fact it is even
+     |      in time, and the number of time points is chosen to be 1 greater than
+     |      the number of energy points [Rapaport, The Art of Molecular Dynamics
+     |      Simulation (2nd Edition), 2004, page 142].
+     |
+     |      The numpy implementation of the FFT gives frequencies arranged so that
+     |      the first ``len(energy)`` points in the energy dimension correspond to
+     |      positive frequencies, and the remaining points have negative frequency.
+     |
+     |      Parameters
+     |      ----------
+     |      energy: list of floats
+     |          the list of energy (E) points at which S(Q, w) will be calculated.
+     |      resolution: Resolution (default None)
+     |          The instrument resolution object which will be applied to FQt.
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          The S(Q, w) calculated from F(Q, t)
+     |
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |      Calculates the intermediate scattering function from a trajectory.
+     |
+     |      ``independent_variables`` can either be set previously or defined within
+     |      ``**settings``.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : Trajectory
+     |          a single ``Trajectory`` object.
+     |      verbose: int, optional
+     |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
+     |          timings are collected so they can be printed at the end of the refinement.
+     |          If 0, no timings are collected. Default is 0.
+     |      **settings
+     |          ``n_Q_vectors`` (`int`)
+     |              The maximum number of ``Q_vectors`` for any ``Q`` value. The
+     |              greater the number of ``Q_vectors``, the more accurate the
+     |              calculation, but the longer it will take.
+     |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
+     |              A 3 element `tuple` or ``array`` of `float` specifying the
+     |              dimensions of the ``Universe`` in units of ``Ang``
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      FQt, the intermediate scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      It also means that:
+     |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the time &#39;t&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the intermediate scattering function ``Observables``.
+     |      If using FFT, then &#39;t&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  FQt
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the intermediate
+     |      scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and time t (in ``fs``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  t
+     |      Get or set the times of the intermediate scattering function in units of
+     |      ``fs``
+     |
+     |      Returns
+     |      -------
+     |      array
+     |          1D array of times in ``fs``
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  Q
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self)
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Reads in experimental data from a file using a specified reader
+     |
+     |      Parameters
+     |      ----------
+     |      reader : str
+     |          The name of the required file reader
+     |      file_name : str
+     |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  origin
+     |      Get or set the origin of the observable
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
+     |          ``&#39;MD&#39;``
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT
+
+    FQt_coh = class FQtCoherent(MDMC.trajectory_analysis.observables.fqt.AbstractFQt)
+     |  A class for containing, calculating and reading the intermediate scattering
+     |  function for the coherent dynamic structure factor
+     |
+     |  Method resolution order:
+     |      FQtCoherent
+     |      MDMC.trajectory_analysis.observables.fqt.AbstractFQt
+     |      MDMC.trajectory_analysis.observables.sqw.SQwMixins
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  name = &#39;FQt_coh&#39;
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |      Apply instrument resolution to an FQt object.
+     |
+     |      Parameters
+     |      ----------
+     |      resolution: Resolution
+     |          The Resolution object to apply to FQt.
+     |
+     |      Returns
+     |      -------
+     |      The FQt object with resolution applied.
+     |
+     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
+     |
+     |      In order to obtain ``len(energy)`` values in energy, we reflect the
+     |      intermediate scattering function in time to give it dimensions of
+     |      ``(len(self.Q), 2 * (len(self.t)) - 2)``. This uses the fact it is even
+     |      in time, and the number of time points is chosen to be 1 greater than
+     |      the number of energy points [Rapaport, The Art of Molecular Dynamics
+     |      Simulation (2nd Edition), 2004, page 142].
+     |
+     |      The numpy implementation of the FFT gives frequencies arranged so that
+     |      the first ``len(energy)`` points in the energy dimension correspond to
+     |      positive frequencies, and the remaining points have negative frequency.
+     |
+     |      Parameters
+     |      ----------
+     |      energy: list of floats
+     |          the list of energy (E) points at which S(Q, w) will be calculated.
+     |      resolution: Resolution (default None)
+     |          The instrument resolution object which will be applied to FQt.
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          The S(Q, w) calculated from F(Q, t)
+     |
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |      Calculates the intermediate scattering function from a trajectory.
+     |
+     |      ``independent_variables`` can either be set previously or defined within
+     |      ``**settings``.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : Trajectory
+     |          a single ``Trajectory`` object.
+     |      verbose: int, optional
+     |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
+     |          timings are collected so they can be printed at the end of the refinement.
+     |          If 0, no timings are collected. Default is 0.
+     |      **settings
+     |          ``n_Q_vectors`` (`int`)
+     |              The maximum number of ``Q_vectors`` for any ``Q`` value. The
+     |              greater the number of ``Q_vectors``, the more accurate the
+     |              calculation, but the longer it will take.
+     |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
+     |              A 3 element `tuple` or ``array`` of `float` specifying the
+     |              dimensions of the ``Universe`` in units of ``Ang``
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      FQt, the intermediate scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      It also means that:
+     |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the time &#39;t&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the intermediate scattering function ``Observables``.
+     |      If using FFT, then &#39;t&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  FQt
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the intermediate
+     |      scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and time t (in ``fs``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  t
+     |      Get or set the times of the intermediate scattering function in units of
+     |      ``fs``
+     |
+     |      Returns
+     |      -------
+     |      array
+     |          1D array of times in ``fs``
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  Q
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self)
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Reads in experimental data from a file using a specified reader
+     |
+     |      Parameters
+     |      ----------
+     |      reader : str
+     |          The name of the required file reader
+     |      file_name : str
+     |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  origin
+     |      Get or set the origin of the observable
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
+     |          ``&#39;MD&#39;``
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT
+
+    FQt_incoh = class FQtIncoherent(MDMC.trajectory_analysis.observables.fqt.AbstractFQt)
+     |  A class for containing, calculating and reading the intermediate scattering
+     |  function for the incoherent dynamic structure factor
+     |
+     |  Method resolution order:
+     |      FQtIncoherent
+     |      MDMC.trajectory_analysis.observables.fqt.AbstractFQt
+     |      MDMC.trajectory_analysis.observables.sqw.SQwMixins
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  name = &#39;IncoherentIntermediateScatteringFunction&#39;
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |      Apply instrument resolution to an FQt object.
+     |
+     |      Parameters
+     |      ----------
+     |      resolution: Resolution
+     |          The Resolution object to apply to FQt.
+     |
+     |      Returns
+     |      -------
+     |      The FQt object with resolution applied.
+     |
+     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
+     |
+     |      In order to obtain ``len(energy)`` values in energy, we reflect the
+     |      intermediate scattering function in time to give it dimensions of
+     |      ``(len(self.Q), 2 * (len(self.t)) - 2)``. This uses the fact it is even
+     |      in time, and the number of time points is chosen to be 1 greater than
+     |      the number of energy points [Rapaport, The Art of Molecular Dynamics
+     |      Simulation (2nd Edition), 2004, page 142].
+     |
+     |      The numpy implementation of the FFT gives frequencies arranged so that
+     |      the first ``len(energy)`` points in the energy dimension correspond to
+     |      positive frequencies, and the remaining points have negative frequency.
+     |
+     |      Parameters
+     |      ----------
+     |      energy: list of floats
+     |          the list of energy (E) points at which S(Q, w) will be calculated.
+     |      resolution: Resolution (default None)
+     |          The instrument resolution object which will be applied to FQt.
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          The S(Q, w) calculated from F(Q, t)
+     |
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |      Calculates the intermediate scattering function from a trajectory.
+     |
+     |      ``independent_variables`` can either be set previously or defined within
+     |      ``**settings``.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : Trajectory
+     |          a single ``Trajectory`` object.
+     |      verbose: int, optional
+     |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
+     |          timings are collected so they can be printed at the end of the refinement.
+     |          If 0, no timings are collected. Default is 0.
+     |      **settings
+     |          ``n_Q_vectors`` (`int`)
+     |              The maximum number of ``Q_vectors`` for any ``Q`` value. The
+     |              greater the number of ``Q_vectors``, the more accurate the
+     |              calculation, but the longer it will take.
+     |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
+     |              A 3 element `tuple` or ``array`` of `float` specifying the
+     |              dimensions of the ``Universe`` in units of ``Ang``
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      FQt, the intermediate scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      It also means that:
+     |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the time &#39;t&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the intermediate scattering function ``Observables``.
+     |      If using FFT, then &#39;t&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  FQt
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the intermediate
+     |      scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and time t (in ``fs``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  t
+     |      Get or set the times of the intermediate scattering function in units of
+     |      ``fs``
+     |
+     |      Returns
+     |      -------
+     |      array
+     |          1D array of times in ``fs``
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  Q
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self)
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Reads in experimental data from a file using a specified reader
+     |
+     |      Parameters
+     |      ----------
+     |      reader : str
+     |          The name of the required file reader
+     |      file_name : str
+     |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  origin
+     |      Get or set the origin of the observable
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
+     |          ``&#39;MD&#39;``
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT
+
+    IncoherentDynamicStructureFactor = class SQwIncoherent(AbstractSQw)
+     |  A class for the incoherent dynamic structure factor
      |
      |  Method resolution order:
      |      SQwIncoherent
-     |      MDMC.trajectory_analysis.observables.sqw.AbstractSQw
+     |      AbstractSQw
+     |      SQwMixins
      |      MDMC.trajectory_analysis.observables.obs.Observable
      |      abc.ABC
      |      builtins.object
@@ -1206,7 +3037,7 @@ CLASSES
      |  name = &#39;SQw_incoh&#39;
      |
      |  ----------------------------------------------------------------------
-     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
+     |  Methods inherited from AbstractSQw:
      |
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
@@ -1235,15 +3066,6 @@ CLASSES
      |      numpy.ndarray
      |          An ``array`` of `float` specifying the energy in units of ``meV``
      |
-     |  calculate_FQt(self)
-     |      Calculates the intermediate scattering function for all ``Q_vectors``
-     |      for all time intervals
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An array of dimensions ``(len(self.Q_vectors), len(self.t))``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -1319,6 +3141,94 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
+     |  validate_energy(self, dt)
+     |      Asserts that the user set frame separation ``dt`` leads to energy
+     |      separation that matches that of the experiment. If not, it
+     |      includes the time separation required in the error.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float
+     |          Frame separation in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      None
+     |
+     |      Raises
+     |      ------
+     |      AssertionError
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractSQw:
+     |
+     |  E
+     |
+     |  SQw
+     |
+     |  SQw_err
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      SQw, the dynamic structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      It also means that:
+     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
+     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
+     |
+     |  w
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractSQw:
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the dynamic
+     |      structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and energy E (in``meV``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from SQwMixins:
+     |
      |  maximum_frames(self)
      |      The maximum number of ``Trajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
@@ -1366,107 +3276,16 @@ CLASSES
      |      int
      |          The minimum number of frames
      |
-     |  validate_energy(self, dt)
-     |      Asserts that the user set frame separation ``dt`` leads to energy
-     |      separation that matches that of the experiment. If not, it
-     |      includes the time separation required in the error.
-     |
-     |      Parameters
-     |      ----------
-     |      dt : float
-     |          Frame separation in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      None
-     |
-     |      Raises
-     |      ------
-     |      AssertionError
-     |
      |  ----------------------------------------------------------------------
-     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  E
+     |  Data descriptors inherited from SQwMixins:
      |
      |  Q
      |
-     |  SQw
+     |  __dict__
+     |      dictionary for instance variables (if defined)
      |
-     |  SQw_err
-     |
-     |  data
-     |      Get the independent, dependent and error data
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
-     |  dependent_variables
-     |      Get or set the dependent variables, SQw (in ``arb``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The dependent variables
-     |
-     |  dependent_variables_structure
-     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
-     |      It also means that:
-     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
-     |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, list]
-     |          The shape of the SQw dependent variable
-     |
-     |  errors
-     |      Get or set the errors on the dependent variables
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The errors on the dependent variables
-     |
-     |  uniformity_requirements
-     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
-     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
-     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
-     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
-     |      zero.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, Dict[str, bool]]
-     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
-     |
-     |  w
-     |
-     |  ----------------------------------------------------------------------
-     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  independent_variables
-     |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
-     |      ``meV``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent variables
-     |
-     |  t
-     |      Get or set the times of the intermediate scattering function in units of
-     |      ``fs``
-     |
-     |      Returns
-     |      -------
-     |      array
-     |          1D array of times in ``fs``
+     |  __weakref__
+     |      list of weak references to the object (if defined)
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -1484,13 +3303,542 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  origin
+     |      Get or set the origin of the observable
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
+     |          ``&#39;MD&#39;``
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT
+
+    IncoherentIntermediateScatteringFunction = class FQtIncoherent(MDMC.trajectory_analysis.observables.fqt.AbstractFQt)
+     |  A class for containing, calculating and reading the intermediate scattering
+     |  function for the incoherent dynamic structure factor
+     |
+     |  Method resolution order:
+     |      FQtIncoherent
+     |      MDMC.trajectory_analysis.observables.fqt.AbstractFQt
+     |      MDMC.trajectory_analysis.observables.sqw.SQwMixins
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  name = &#39;IncoherentIntermediateScatteringFunction&#39;
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |      Apply instrument resolution to an FQt object.
+     |
+     |      Parameters
+     |      ----------
+     |      resolution: Resolution
+     |          The Resolution object to apply to FQt.
+     |
+     |      Returns
+     |      -------
+     |      The FQt object with resolution applied.
+     |
+     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
+     |
+     |      In order to obtain ``len(energy)`` values in energy, we reflect the
+     |      intermediate scattering function in time to give it dimensions of
+     |      ``(len(self.Q), 2 * (len(self.t)) - 2)``. This uses the fact it is even
+     |      in time, and the number of time points is chosen to be 1 greater than
+     |      the number of energy points [Rapaport, The Art of Molecular Dynamics
+     |      Simulation (2nd Edition), 2004, page 142].
+     |
+     |      The numpy implementation of the FFT gives frequencies arranged so that
+     |      the first ``len(energy)`` points in the energy dimension correspond to
+     |      positive frequencies, and the remaining points have negative frequency.
+     |
+     |      Parameters
+     |      ----------
+     |      energy: list of floats
+     |          the list of energy (E) points at which S(Q, w) will be calculated.
+     |      resolution: Resolution (default None)
+     |          The instrument resolution object which will be applied to FQt.
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          The S(Q, w) calculated from F(Q, t)
+     |
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |      Calculates the intermediate scattering function from a trajectory.
+     |
+     |      ``independent_variables`` can either be set previously or defined within
+     |      ``**settings``.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : Trajectory
+     |          a single ``Trajectory`` object.
+     |      verbose: int, optional
+     |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
+     |          timings are collected so they can be printed at the end of the refinement.
+     |          If 0, no timings are collected. Default is 0.
+     |      **settings
+     |          ``n_Q_vectors`` (`int`)
+     |              The maximum number of ``Q_vectors`` for any ``Q`` value. The
+     |              greater the number of ``Q_vectors``, the more accurate the
+     |              calculation, but the longer it will take.
+     |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
+     |              A 3 element `tuple` or ``array`` of `float` specifying the
+     |              dimensions of the ``Universe`` in units of ``Ang``
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      FQt, the intermediate scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      It also means that:
+     |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the time &#39;t&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the intermediate scattering function ``Observables``.
+     |      If using FFT, then &#39;t&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
+     |
+     |  FQt
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the intermediate
+     |      scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and time t (in ``fs``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  t
+     |      Get or set the times of the intermediate scattering function in units of
+     |      ``fs``
+     |
+     |      Returns
+     |      -------
+     |      array
+     |          1D array of times in ``fs``
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  Q
      |
      |  __dict__
      |      dictionary for instance variables (if defined)
      |
      |  __weakref__
      |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self)
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Reads in experimental data from a file using a specified reader
+     |
+     |      Parameters
+     |      ----------
+     |      reader : str
+     |          The name of the required file reader
+     |      file_name : str
+     |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  origin
+     |      Get or set the origin of the observable
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
+     |          ``&#39;MD&#39;``
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT
+
+    IntermediateScatteringFunction = class FQt(AbstractFQt)
+     |  A class for containing, calculating and reading the intermediate scattering
+     |  function for the total dynamic structure factor
+     |
+     |  Method resolution order:
+     |      FQt
+     |      AbstractFQt
+     |      MDMC.trajectory_analysis.observables.sqw.SQwMixins
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  name = &#39;IntermediateScatteringFunction&#39;
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from AbstractFQt:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |      Apply instrument resolution to an FQt object.
+     |
+     |      Parameters
+     |      ----------
+     |      resolution: Resolution
+     |          The Resolution object to apply to FQt.
+     |
+     |      Returns
+     |      -------
+     |      The FQt object with resolution applied.
+     |
+     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
+     |
+     |      In order to obtain ``len(energy)`` values in energy, we reflect the
+     |      intermediate scattering function in time to give it dimensions of
+     |      ``(len(self.Q), 2 * (len(self.t)) - 2)``. This uses the fact it is even
+     |      in time, and the number of time points is chosen to be 1 greater than
+     |      the number of energy points [Rapaport, The Art of Molecular Dynamics
+     |      Simulation (2nd Edition), 2004, page 142].
+     |
+     |      The numpy implementation of the FFT gives frequencies arranged so that
+     |      the first ``len(energy)`` points in the energy dimension correspond to
+     |      positive frequencies, and the remaining points have negative frequency.
+     |
+     |      Parameters
+     |      ----------
+     |      energy: list of floats
+     |          the list of energy (E) points at which S(Q, w) will be calculated.
+     |      resolution: Resolution (default None)
+     |          The instrument resolution object which will be applied to FQt.
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          The S(Q, w) calculated from F(Q, t)
+     |
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |      Calculates the intermediate scattering function from a trajectory.
+     |
+     |      ``independent_variables`` can either be set previously or defined within
+     |      ``**settings``.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : Trajectory
+     |          a single ``Trajectory`` object.
+     |      verbose: int, optional
+     |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
+     |          timings are collected so they can be printed at the end of the refinement.
+     |          If 0, no timings are collected. Default is 0.
+     |      **settings
+     |          ``n_Q_vectors`` (`int`)
+     |              The maximum number of ``Q_vectors`` for any ``Q`` value. The
+     |              greater the number of ``Q_vectors``, the more accurate the
+     |              calculation, but the longer it will take.
+     |          ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)
+     |              A 3 element `tuple` or ``array`` of `float` specifying the
+     |              dimensions of the ``Universe`` in units of ``Ang``
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractFQt:
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      FQt, the intermediate scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      It also means that:
+     |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the time &#39;t&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the intermediate scattering function ``Observables``.
+     |      If using FFT, then &#39;t&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractFQt:
+     |
+     |  FQt
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the intermediate
+     |      scattering function (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and time t (in ``fs``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  t
+     |      Get or set the times of the intermediate scattering function in units of
+     |      ``fs``
+     |
+     |      Returns
+     |      -------
+     |      array
+     |          1D array of times in ``fs``
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
+     |
+     |  Q
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self)
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Reads in experimental data from a file using a specified reader
+     |
+     |      Parameters
+     |      ----------
+     |      reader : str
+     |          The name of the required file reader
+     |      file_name : str
+     |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
      |
      |  origin
      |      Get or set the origin of the observable
@@ -1662,17 +4010,9 @@ CLASSES
      |
      |  PDF
      |
-     |  data
-     |      The independent, dependent and error data in the Observable
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
      |  dependent_variables
-     |      Get or set the dependent variables, the pair distribution function (in
-     |      ``arb``)
+     |      Get or set the dependent variables: these are
+     |      PDF, the pair distribution function (in ``arb``)
      |
      |      Returns
      |      -------
@@ -1710,8 +4050,8 @@ CLASSES
      |          The errors on the ``dependent_variables``
      |
      |  independent_variables
-     |      Get or set the independent variables, the atomic separation distance r
-     |      (in ``Ang``)
+     |      Get or set the independent variable: this is
+     |      the atomic separation distance r (in ``Ang``)
      |
      |      Returns
      |      -------
@@ -1742,6 +4082,17 @@ CLASSES
      |          The name of the required file reader
      |      file_name : str
      |          The name of the file
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
      |
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -1922,17 +4273,9 @@ CLASSES
      |
      |  PDF
      |
-     |  data
-     |      The independent, dependent and error data in the Observable
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
      |  dependent_variables
-     |      Get or set the dependent variables, the pair distribution function (in
-     |      ``arb``)
+     |      Get or set the dependent variables: these are
+     |      PDF, the pair distribution function (in ``arb``)
      |
      |      Returns
      |      -------
@@ -1970,8 +4313,8 @@ CLASSES
      |          The errors on the ``dependent_variables``
      |
      |  independent_variables
-     |      Get or set the independent variables, the atomic separation distance r
-     |      (in ``Ang``)
+     |      Get or set the independent variable: this is
+     |      the atomic separation distance r (in ``Ang``)
      |
      |      Returns
      |      -------
@@ -2004,6 +4347,17 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
      |
      |  __dict__
@@ -2030,12 +4384,15 @@ CLASSES
      |          Whether to use FFT
 
     class SQw(AbstractSQw)
-     |  A class for containing, calculating and reading the total dynamic structure
-     |  factor
+     |  A class for the total dynamic structure factor
+     |
+     |  Calculation is done in the respective FQt object, and this is
+     |  just a reference to get the correct FQt object.
      |
      |  Method resolution order:
      |      SQw
      |      AbstractSQw
+     |      SQwMixins
      |      MDMC.trajectory_analysis.observables.obs.Observable
      |      abc.ABC
      |      builtins.object
@@ -2076,15 +4433,6 @@ CLASSES
      |      numpy.ndarray
      |          An ``array`` of `float` specifying the energy in units of ``meV``
      |
-     |  calculate_FQt(self)
-     |      Calculates the intermediate scattering function for all ``Q_vectors``
-     |      for all time intervals
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An array of dimensions ``(len(self.Q_vectors), len(self.t))``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -2159,53 +4507,6 @@ CLASSES
      |          A dictionary with the key &#39;SQw&#39; corresponding to function which accepts arrays of time
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
-     |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
-     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
-     |
-     |      If `True`, it is the number of energy steps + 1, in order to allow for
-     |      a reflection in time which only counts the end points once.
-     |
-     |      Otherwise, there is no limit and all frames will contribute to the
-     |      calculation.
-     |
-     |      Returns
-     |      -------
-     |      int
-     |          The maximum number of frames
-     |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
-     |      ``dependent_variables`` depends on ``self.use_FFT``.
-     |
-     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
-     |      a reflection in time which only counts the end points once.
-     |
-     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
-     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
-     |      cover at least a time period :math:`T_{min}` such that:
-     |
-     |      .. math::
-     |
-     |          T_{min} \sim \frac{h}{\Delta E_{min}}
-     |
-     |      Due to the aforementioned reflection in the time domain, to cover a
-     |      period of :math:`T_{min}` we only need :math:`N` frames:
-     |
-     |      .. math::
-     |
-     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
-     |
-     |      Parameters
-     |      ----------
-     |      dt : float, optional
-     |          The time separation of frames in ``fs``, default is `None`
-     |
-     |      Returns
-     |      -------
-     |      int
-     |          The minimum number of frames
      |
      |  validate_energy(self, dt)
      |      Asserts that the user set frame separation ``dt`` leads to energy
@@ -2230,22 +4531,13 @@ CLASSES
      |
      |  E
      |
-     |  Q
-     |
      |  SQw
      |
      |  SQw_err
      |
-     |  data
-     |      Get the independent, dependent and error data
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
      |  dependent_variables
-     |      Get or set the dependent variables, SQw (in ``arb``)
+     |      Get or set the dependent variables: this is
+     |      SQw, the dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -2265,14 +4557,6 @@ CLASSES
      |      ------
      |      Dict[str, list]
      |          The shape of the SQw dependent variable
-     |
-     |  errors
-     |      Get or set the errors on the dependent variables
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The errors on the dependent variables
      |
      |  uniformity_requirements
      |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
@@ -2291,23 +4575,84 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from AbstractSQw:
      |
+     |  errors
+     |      Get or set the errors on the dependent variables, the dynamic
+     |      structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
      |  independent_variables
-     |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
-     |      ``meV``)
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and energy E (in``meV``)
      |
      |      Returns
      |      -------
      |      dict
      |          The independent variables
      |
-     |  t
-     |      Get or set the times of the intermediate scattering function in units of
-     |      ``fs``
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from SQwMixins:
+     |
+     |  maximum_frames(self)
+     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      Otherwise, there is no limit and all frames will contribute to the
+     |      calculation.
      |
      |      Returns
      |      -------
-     |      array
-     |          1D array of times in ``fs``
+     |      int
+     |          The maximum number of frames
+     |
+     |  minimum_frames(self, dt: float = None)
+     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      ``dependent_variables`` depends on ``self.use_FFT``.
+     |
+     |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
+     |      a reflection in time which only counts the end points once.
+     |
+     |      If `self.use_FFT == False`, there is not a hard minimum on number of frames. However, to
+     |      distinguish our smallest differences in energy :math:`F(Q,t)` needs to
+     |      cover at least a time period :math:`T_{min}` such that:
+     |
+     |      .. math::
+     |
+     |          T_{min} \sim \frac{h}{\Delta E_{min}}
+     |
+     |      Due to the aforementioned reflection in the time domain, to cover a
+     |      period of :math:`T_{min}` we only need :math:`N` frames:
+     |
+     |      .. math::
+     |
+     |          N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from SQwMixins:
+     |
+     |  Q
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -2325,13 +4670,18 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
-     |
-     |  __dict__
-     |      dictionary for instance variables (if defined)
-     |
-     |  __weakref__
-     |      list of weak references to the object (if defined)
      |
      |  origin
      |      Get or set the origin of the observable
@@ -2350,13 +4700,13 @@ CLASSES
      |      bool
      |          Whether to use FFT
 
-    SQwCoh = class SQwCoherent(MDMC.trajectory_analysis.observables.sqw.AbstractSQw)
-     |  A class for containing, calculating and reading the coherent dynamic
-     |  structure factor
+    SQwCoh = class SQwCoherent(AbstractSQw)
+     |  A class for the coherent dynamic structure factor
      |
      |  Method resolution order:
      |      SQwCoherent
-     |      MDMC.trajectory_analysis.observables.sqw.AbstractSQw
+     |      AbstractSQw
+     |      SQwMixins
      |      MDMC.trajectory_analysis.observables.obs.Observable
      |      abc.ABC
      |      builtins.object
@@ -2368,7 +4718,7 @@ CLASSES
      |  name = &#39;SQw_coh&#39;
      |
      |  ----------------------------------------------------------------------
-     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
+     |  Methods inherited from AbstractSQw:
      |
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
@@ -2396,15 +4746,6 @@ CLASSES
      |      -------
      |      numpy.ndarray
      |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
-     |  calculate_FQt(self)
-     |      Calculates the intermediate scattering function for all ``Q_vectors``
-     |      for all time intervals
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An array of dimensions ``(len(self.Q_vectors), len(self.t))``
      |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
@@ -2481,6 +4822,94 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
+     |  validate_energy(self, dt)
+     |      Asserts that the user set frame separation ``dt`` leads to energy
+     |      separation that matches that of the experiment. If not, it
+     |      includes the time separation required in the error.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float
+     |          Frame separation in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      None
+     |
+     |      Raises
+     |      ------
+     |      AssertionError
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractSQw:
+     |
+     |  E
+     |
+     |  SQw
+     |
+     |  SQw_err
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      SQw, the dynamic structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      It also means that:
+     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
+     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
+     |
+     |  w
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractSQw:
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the dynamic
+     |      structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and energy E (in``meV``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from SQwMixins:
+     |
      |  maximum_frames(self)
      |      The maximum number of ``Trajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
@@ -2528,107 +4957,16 @@ CLASSES
      |      int
      |          The minimum number of frames
      |
-     |  validate_energy(self, dt)
-     |      Asserts that the user set frame separation ``dt`` leads to energy
-     |      separation that matches that of the experiment. If not, it
-     |      includes the time separation required in the error.
-     |
-     |      Parameters
-     |      ----------
-     |      dt : float
-     |          Frame separation in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      None
-     |
-     |      Raises
-     |      ------
-     |      AssertionError
-     |
      |  ----------------------------------------------------------------------
-     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  E
+     |  Data descriptors inherited from SQwMixins:
      |
      |  Q
      |
-     |  SQw
+     |  __dict__
+     |      dictionary for instance variables (if defined)
      |
-     |  SQw_err
-     |
-     |  data
-     |      Get the independent, dependent and error data
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
-     |  dependent_variables
-     |      Get or set the dependent variables, SQw (in ``arb``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The dependent variables
-     |
-     |  dependent_variables_structure
-     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
-     |      It also means that:
-     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
-     |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, list]
-     |          The shape of the SQw dependent variable
-     |
-     |  errors
-     |      Get or set the errors on the dependent variables
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The errors on the dependent variables
-     |
-     |  uniformity_requirements
-     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
-     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
-     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
-     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
-     |      zero.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, Dict[str, bool]]
-     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
-     |
-     |  w
-     |
-     |  ----------------------------------------------------------------------
-     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  independent_variables
-     |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
-     |      ``meV``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent variables
-     |
-     |  t
-     |      Get or set the times of the intermediate scattering function in units of
-     |      ``fs``
-     |
-     |      Returns
-     |      -------
-     |      array
-     |          1D array of times in ``fs``
+     |  __weakref__
+     |      list of weak references to the object (if defined)
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -2646,13 +4984,18 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
-     |
-     |  __dict__
-     |      dictionary for instance variables (if defined)
-     |
-     |  __weakref__
-     |      list of weak references to the object (if defined)
      |
      |  origin
      |      Get or set the origin of the observable
@@ -2671,13 +5014,13 @@ CLASSES
      |      bool
      |          Whether to use FFT
 
-    class SQwCoherent(MDMC.trajectory_analysis.observables.sqw.AbstractSQw)
-     |  A class for containing, calculating and reading the coherent dynamic
-     |  structure factor
+    class SQwCoherent(AbstractSQw)
+     |  A class for the coherent dynamic structure factor
      |
      |  Method resolution order:
      |      SQwCoherent
-     |      MDMC.trajectory_analysis.observables.sqw.AbstractSQw
+     |      AbstractSQw
+     |      SQwMixins
      |      MDMC.trajectory_analysis.observables.obs.Observable
      |      abc.ABC
      |      builtins.object
@@ -2689,7 +5032,7 @@ CLASSES
      |  name = &#39;SQw_coh&#39;
      |
      |  ----------------------------------------------------------------------
-     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
+     |  Methods inherited from AbstractSQw:
      |
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
@@ -2717,15 +5060,6 @@ CLASSES
      |      -------
      |      numpy.ndarray
      |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
-     |  calculate_FQt(self)
-     |      Calculates the intermediate scattering function for all ``Q_vectors``
-     |      for all time intervals
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An array of dimensions ``(len(self.Q_vectors), len(self.t))``
      |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
@@ -2802,6 +5136,94 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
+     |  validate_energy(self, dt)
+     |      Asserts that the user set frame separation ``dt`` leads to energy
+     |      separation that matches that of the experiment. If not, it
+     |      includes the time separation required in the error.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float
+     |          Frame separation in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      None
+     |
+     |      Raises
+     |      ------
+     |      AssertionError
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractSQw:
+     |
+     |  E
+     |
+     |  SQw
+     |
+     |  SQw_err
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      SQw, the dynamic structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      It also means that:
+     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
+     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
+     |
+     |  w
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractSQw:
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the dynamic
+     |      structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and energy E (in``meV``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from SQwMixins:
+     |
      |  maximum_frames(self)
      |      The maximum number of ``Trajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
@@ -2849,107 +5271,16 @@ CLASSES
      |      int
      |          The minimum number of frames
      |
-     |  validate_energy(self, dt)
-     |      Asserts that the user set frame separation ``dt`` leads to energy
-     |      separation that matches that of the experiment. If not, it
-     |      includes the time separation required in the error.
-     |
-     |      Parameters
-     |      ----------
-     |      dt : float
-     |          Frame separation in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      None
-     |
-     |      Raises
-     |      ------
-     |      AssertionError
-     |
      |  ----------------------------------------------------------------------
-     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  E
+     |  Data descriptors inherited from SQwMixins:
      |
      |  Q
      |
-     |  SQw
+     |  __dict__
+     |      dictionary for instance variables (if defined)
      |
-     |  SQw_err
-     |
-     |  data
-     |      Get the independent, dependent and error data
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
-     |  dependent_variables
-     |      Get or set the dependent variables, SQw (in ``arb``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The dependent variables
-     |
-     |  dependent_variables_structure
-     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
-     |      It also means that:
-     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
-     |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, list]
-     |          The shape of the SQw dependent variable
-     |
-     |  errors
-     |      Get or set the errors on the dependent variables
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The errors on the dependent variables
-     |
-     |  uniformity_requirements
-     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
-     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
-     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
-     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
-     |      zero.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, Dict[str, bool]]
-     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
-     |
-     |  w
-     |
-     |  ----------------------------------------------------------------------
-     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  independent_variables
-     |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
-     |      ``meV``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent variables
-     |
-     |  t
-     |      Get or set the times of the intermediate scattering function in units of
-     |      ``fs``
-     |
-     |      Returns
-     |      -------
-     |      array
-     |          1D array of times in ``fs``
+     |  __weakref__
+     |      list of weak references to the object (if defined)
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -2967,13 +5298,18 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
-     |
-     |  __dict__
-     |      dictionary for instance variables (if defined)
-     |
-     |  __weakref__
-     |      list of weak references to the object (if defined)
      |
      |  origin
      |      Get or set the origin of the observable
@@ -2992,13 +5328,13 @@ CLASSES
      |      bool
      |          Whether to use FFT
 
-    SQwIncoherentSQwIncoh = class SQwIncoherent(MDMC.trajectory_analysis.observables.sqw.AbstractSQw)
-     |  A class for containing, calculating and reading the incoherent dynamic
-     |  structure factor
+    SQwIncoherentSQwIncoh = class SQwIncoherent(AbstractSQw)
+     |  A class for the incoherent dynamic structure factor
      |
      |  Method resolution order:
      |      SQwIncoherent
-     |      MDMC.trajectory_analysis.observables.sqw.AbstractSQw
+     |      AbstractSQw
+     |      SQwMixins
      |      MDMC.trajectory_analysis.observables.obs.Observable
      |      abc.ABC
      |      builtins.object
@@ -3010,7 +5346,7 @@ CLASSES
      |  name = &#39;SQw_incoh&#39;
      |
      |  ----------------------------------------------------------------------
-     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
+     |  Methods inherited from AbstractSQw:
      |
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
@@ -3038,15 +5374,6 @@ CLASSES
      |      -------
      |      numpy.ndarray
      |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
-     |  calculate_FQt(self)
-     |      Calculates the intermediate scattering function for all ``Q_vectors``
-     |      for all time intervals
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An array of dimensions ``(len(self.Q_vectors), len(self.t))``
      |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
@@ -3123,6 +5450,94 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
+     |  validate_energy(self, dt)
+     |      Asserts that the user set frame separation ``dt`` leads to energy
+     |      separation that matches that of the experiment. If not, it
+     |      includes the time separation required in the error.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float
+     |          Frame separation in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      None
+     |
+     |      Raises
+     |      ------
+     |      AssertionError
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractSQw:
+     |
+     |  E
+     |
+     |  SQw
+     |
+     |  SQw_err
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      SQw, the dynamic structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      It also means that:
+     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
+     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
+     |
+     |  w
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractSQw:
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the dynamic
+     |      structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and energy E (in``meV``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from SQwMixins:
+     |
      |  maximum_frames(self)
      |      The maximum number of ``Trajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
@@ -3170,107 +5585,16 @@ CLASSES
      |      int
      |          The minimum number of frames
      |
-     |  validate_energy(self, dt)
-     |      Asserts that the user set frame separation ``dt`` leads to energy
-     |      separation that matches that of the experiment. If not, it
-     |      includes the time separation required in the error.
-     |
-     |      Parameters
-     |      ----------
-     |      dt : float
-     |          Frame separation in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      None
-     |
-     |      Raises
-     |      ------
-     |      AssertionError
-     |
      |  ----------------------------------------------------------------------
-     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  E
+     |  Data descriptors inherited from SQwMixins:
      |
      |  Q
      |
-     |  SQw
+     |  __dict__
+     |      dictionary for instance variables (if defined)
      |
-     |  SQw_err
-     |
-     |  data
-     |      Get the independent, dependent and error data
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
-     |  dependent_variables
-     |      Get or set the dependent variables, SQw (in ``arb``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The dependent variables
-     |
-     |  dependent_variables_structure
-     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
-     |      It also means that:
-     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
-     |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, list]
-     |          The shape of the SQw dependent variable
-     |
-     |  errors
-     |      Get or set the errors on the dependent variables
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The errors on the dependent variables
-     |
-     |  uniformity_requirements
-     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
-     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
-     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
-     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
-     |      zero.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, Dict[str, bool]]
-     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
-     |
-     |  w
-     |
-     |  ----------------------------------------------------------------------
-     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  independent_variables
-     |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
-     |      ``meV``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent variables
-     |
-     |  t
-     |      Get or set the times of the intermediate scattering function in units of
-     |      ``fs``
-     |
-     |      Returns
-     |      -------
-     |      array
-     |          1D array of times in ``fs``
+     |  __weakref__
+     |      list of weak references to the object (if defined)
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -3288,13 +5612,18 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
-     |
-     |  __dict__
-     |      dictionary for instance variables (if defined)
-     |
-     |  __weakref__
-     |      list of weak references to the object (if defined)
      |
      |  origin
      |      Get or set the origin of the observable
@@ -3313,13 +5642,13 @@ CLASSES
      |      bool
      |          Whether to use FFT
 
-    SQw_coh = class SQwCoherent(MDMC.trajectory_analysis.observables.sqw.AbstractSQw)
-     |  A class for containing, calculating and reading the coherent dynamic
-     |  structure factor
+    SQw_coh = class SQwCoherent(AbstractSQw)
+     |  A class for the coherent dynamic structure factor
      |
      |  Method resolution order:
      |      SQwCoherent
-     |      MDMC.trajectory_analysis.observables.sqw.AbstractSQw
+     |      AbstractSQw
+     |      SQwMixins
      |      MDMC.trajectory_analysis.observables.obs.Observable
      |      abc.ABC
      |      builtins.object
@@ -3331,7 +5660,7 @@ CLASSES
      |  name = &#39;SQw_coh&#39;
      |
      |  ----------------------------------------------------------------------
-     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
+     |  Methods inherited from AbstractSQw:
      |
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
@@ -3359,15 +5688,6 @@ CLASSES
      |      -------
      |      numpy.ndarray
      |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
-     |  calculate_FQt(self)
-     |      Calculates the intermediate scattering function for all ``Q_vectors``
-     |      for all time intervals
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An array of dimensions ``(len(self.Q_vectors), len(self.t))``
      |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
@@ -3444,6 +5764,94 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
+     |  validate_energy(self, dt)
+     |      Asserts that the user set frame separation ``dt`` leads to energy
+     |      separation that matches that of the experiment. If not, it
+     |      includes the time separation required in the error.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float
+     |          Frame separation in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      None
+     |
+     |      Raises
+     |      ------
+     |      AssertionError
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractSQw:
+     |
+     |  E
+     |
+     |  SQw
+     |
+     |  SQw_err
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      SQw, the dynamic structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      It also means that:
+     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
+     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
+     |
+     |  w
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractSQw:
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the dynamic
+     |      structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and energy E (in``meV``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from SQwMixins:
+     |
      |  maximum_frames(self)
      |      The maximum number of ``Trajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
@@ -3491,107 +5899,16 @@ CLASSES
      |      int
      |          The minimum number of frames
      |
-     |  validate_energy(self, dt)
-     |      Asserts that the user set frame separation ``dt`` leads to energy
-     |      separation that matches that of the experiment. If not, it
-     |      includes the time separation required in the error.
-     |
-     |      Parameters
-     |      ----------
-     |      dt : float
-     |          Frame separation in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      None
-     |
-     |      Raises
-     |      ------
-     |      AssertionError
-     |
      |  ----------------------------------------------------------------------
-     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  E
+     |  Data descriptors inherited from SQwMixins:
      |
      |  Q
      |
-     |  SQw
+     |  __dict__
+     |      dictionary for instance variables (if defined)
      |
-     |  SQw_err
-     |
-     |  data
-     |      Get the independent, dependent and error data
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
-     |  dependent_variables
-     |      Get or set the dependent variables, SQw (in ``arb``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The dependent variables
-     |
-     |  dependent_variables_structure
-     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
-     |      It also means that:
-     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
-     |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, list]
-     |          The shape of the SQw dependent variable
-     |
-     |  errors
-     |      Get or set the errors on the dependent variables
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The errors on the dependent variables
-     |
-     |  uniformity_requirements
-     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
-     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
-     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
-     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
-     |      zero.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, Dict[str, bool]]
-     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
-     |
-     |  w
-     |
-     |  ----------------------------------------------------------------------
-     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  independent_variables
-     |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
-     |      ``meV``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent variables
-     |
-     |  t
-     |      Get or set the times of the intermediate scattering function in units of
-     |      ``fs``
-     |
-     |      Returns
-     |      -------
-     |      array
-     |          1D array of times in ``fs``
+     |  __weakref__
+     |      list of weak references to the object (if defined)
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -3609,13 +5926,18 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
-     |
-     |  __dict__
-     |      dictionary for instance variables (if defined)
-     |
-     |  __weakref__
-     |      list of weak references to the object (if defined)
      |
      |  origin
      |      Get or set the origin of the observable
@@ -3634,13 +5956,13 @@ CLASSES
      |      bool
      |          Whether to use FFT
 
-    SQw_incoh = class SQwIncoherent(MDMC.trajectory_analysis.observables.sqw.AbstractSQw)
-     |  A class for containing, calculating and reading the incoherent dynamic
-     |  structure factor
+    SQw_incoh = class SQwIncoherent(AbstractSQw)
+     |  A class for the incoherent dynamic structure factor
      |
      |  Method resolution order:
      |      SQwIncoherent
-     |      MDMC.trajectory_analysis.observables.sqw.AbstractSQw
+     |      AbstractSQw
+     |      SQwMixins
      |      MDMC.trajectory_analysis.observables.obs.Observable
      |      abc.ABC
      |      builtins.object
@@ -3652,7 +5974,7 @@ CLASSES
      |  name = &#39;SQw_incoh&#39;
      |
      |  ----------------------------------------------------------------------
-     |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
+     |  Methods inherited from AbstractSQw:
      |
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
@@ -3680,15 +6002,6 @@ CLASSES
      |      -------
      |      numpy.ndarray
      |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
-     |  calculate_FQt(self)
-     |      Calculates the intermediate scattering function for all ``Q_vectors``
-     |      for all time intervals
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An array of dimensions ``(len(self.Q_vectors), len(self.t))``
      |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
@@ -3765,6 +6078,94 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
+     |  validate_energy(self, dt)
+     |      Asserts that the user set frame separation ``dt`` leads to energy
+     |      separation that matches that of the experiment. If not, it
+     |      includes the time separation required in the error.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float
+     |          Frame separation in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      None
+     |
+     |      Raises
+     |      ------
+     |      AssertionError
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from AbstractSQw:
+     |
+     |  E
+     |
+     |  SQw
+     |
+     |  SQw_err
+     |
+     |  dependent_variables
+     |      Get or set the dependent variables: this is
+     |      SQw, the dynamic structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables
+     |
+     |  dependent_variables_structure
+     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      It also means that:
+     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
+     |
+     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
+     |      objects.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, list]
+     |          The shape of the SQw dependent variable
+     |
+     |  uniformity_requirements
+     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
+     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
+     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
+     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
+     |      zero.
+     |
+     |      Return
+     |      ------
+     |      Dict[str, Dict[str, bool]]
+     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
+     |
+     |  w
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from AbstractSQw:
+     |
+     |  errors
+     |      Get or set the errors on the dependent variables, the dynamic
+     |      structure factor (in ``arb``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``
+     |
+     |  independent_variables
+     |      Get or set the independent variables: these are
+     |      the frequency Q (in ``Ang^-1``) and energy E (in``meV``)
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from SQwMixins:
+     |
      |  maximum_frames(self)
      |      The maximum number of ``Trajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
@@ -3812,107 +6213,16 @@ CLASSES
      |      int
      |          The minimum number of frames
      |
-     |  validate_energy(self, dt)
-     |      Asserts that the user set frame separation ``dt`` leads to energy
-     |      separation that matches that of the experiment. If not, it
-     |      includes the time separation required in the error.
-     |
-     |      Parameters
-     |      ----------
-     |      dt : float
-     |          Frame separation in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      None
-     |
-     |      Raises
-     |      ------
-     |      AssertionError
-     |
      |  ----------------------------------------------------------------------
-     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  E
+     |  Data descriptors inherited from SQwMixins:
      |
      |  Q
      |
-     |  SQw
+     |  __dict__
+     |      dictionary for instance variables (if defined)
      |
-     |  SQw_err
-     |
-     |  data
-     |      Get the independent, dependent and error data
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent, dependent and error data
-     |
-     |  dependent_variables
-     |      Get or set the dependent variables, SQw (in ``arb``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The dependent variables
-     |
-     |  dependent_variables_structure
-     |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
-     |      It also means that:
-     |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
-     |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, list]
-     |          The shape of the SQw dependent variable
-     |
-     |  errors
-     |      Get or set the errors on the dependent variables
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The errors on the dependent variables
-     |
-     |  uniformity_requirements
-     |      Captures the current limitations on the energy &#39;E&#39; and reciprocal
-     |      lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.
-     |      If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it
-     |      has no restrictions. &#39;Q&#39; must be uniform but does not need to start at
-     |      zero.
-     |
-     |      Return
-     |      ------
-     |      Dict[str, Dict[str, bool]]
-     |          Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.
-     |
-     |  w
-     |
-     |  ----------------------------------------------------------------------
-     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.sqw.AbstractSQw:
-     |
-     |  independent_variables
-     |      Get or set the independent variables, Q (in ``Ang^-1``) and E (in
-     |      ``meV``)
-     |
-     |      Returns
-     |      -------
-     |      dict
-     |          The independent variables
-     |
-     |  t
-     |      Get or set the times of the intermediate scattering function in units of
-     |      ``fs``
-     |
-     |      Returns
-     |      -------
-     |      array
-     |          1D array of times in ``fs``
+     |  __weakref__
+     |      list of weak references to the object (if defined)
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
@@ -3930,13 +6240,18 @@ CLASSES
      |          The name of the file
      |
      |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data
+     |
+     |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
-     |
-     |  __dict__
-     |      dictionary for instance variables (if defined)
-     |
-     |  __weakref__
-     |      list of weak references to the object (if defined)
      |
      |  origin
      |      Get or set the origin of the observable
@@ -3956,7 +6271,7 @@ CLASSES
      |          Whether to use FFT
 
 DATA
-    __all__ = [&#39;CoherentDynamicStructureFactor&#39;, &#39;DynamicStructureFactor&#39;,...
+    __all__ = [&#39;CoherentDynamicStructureFactor&#39;, &#39;CoherentIntermediateScat...
 
 FILE
     /usr/local/lib/python3.9/site-packages/MDMC/trajectory_analysis/observables/__init__.py
@@ -5001,7 +7316,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='72853393-0456-45fe-af6d-307dad4d0b40'></div></div>
+<div id='44ff8603-73e2-4f1d-8ca7-91d8f7039897'></div></div>
 </div>
 <p>Therefore it is strongly recommended that you specify the <span class="math notranslate nohighlight">\(E\)</span> values for calculating the dynamic structure factor.</p>
 <p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calulate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will be probably
@@ -6092,7 +8407,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='7f65f99c-d5e7-4d8f-9587-28f7cca178df'></div></div>
+<div id='286d9c6f-88ce-4a51-b9f7-0dc859bafe38'></div></div>
 </div>
 <p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the van Well et al. Phys. Rev. A <strong>31</strong> 3391 (1985) data, which the authors corrected for instrument resolution) by reading the data into an SQwCoh object:</p>
 <div class="nbinput nblast docutils container">
@@ -7109,7 +9424,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='8a518e36-b51f-4f39-930c-c838a6d1feeb'></div></div>
+<div id='2a0a918f-e31c-41c5-8341-ec10fcfe15bc'></div></div>
 </div>
 </div>
 <div class="section" id="Other-observables">

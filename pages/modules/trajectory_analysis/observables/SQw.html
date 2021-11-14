@@ -15,7 +15,7 @@
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -147,8 +147,9 @@
 </style>
 <div class="section" id="module-MDMC.trajectory_analysis.observables.SQw">
 <span id="sqw"></span><h1>SQw<a class="headerlink" href="#module-MDMC.trajectory_analysis.observables.SQw" title="Permalink to this headline"></a></h1>
-<p>A class for containing, calculating and reading the total dynamic structure
-factor</p>
+<p>A class for the total dynamic structure factor</p>
+<p>Calculation is done in the respective FQt object, and this is
+just a reference to get the correct FQt object.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw.calculate_dt">
 <span class="sig-prename descclassname"><span class="pre">SQw.</span></span><span class="sig-name descname"><span class="pre">calculate_dt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw.calculate_dt" title="Permalink to this definition"></a></dt>
@@ -173,7 +174,7 @@ time and energy comes from the numpy implementation of the FFT for
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw.calculate_E">
-<span class="sig-prename descclassname"><span class="pre">SQw.</span></span><span class="sig-name descname"><span class="pre">calculate_E</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nE</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw.calculate_E" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">SQw.</span></span><span class="sig-name descname"><span class="pre">calculate_E</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nE</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw.calculate_E" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates an array of <code class="docutils literal notranslate"><span class="pre">nE</span></code> uniformly spaced energy values from the
 time separation of the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> frames, <code class="docutils literal notranslate"><span class="pre">dt</span></code>. The frequencies
 are determined by the Fast Fourier Transform, as implemented by numpy,
@@ -198,97 +199,6 @@ angular frequency here, the relation to between energy is given by:</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw.calculate_FQt">
-<span class="sig-prename descclassname"><span class="pre">SQw.</span></span><span class="sig-name descname"><span class="pre">calculate_FQt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw.calculate_FQt" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates the intermediate scattering function for all <code class="docutils literal notranslate"><span class="pre">Q_vectors</span></code>
-for all time intervals</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>An array of dimensions <code class="docutils literal notranslate"><span class="pre">(len(self.Q_vectors),</span> <span class="pre">len(self.t))</span></code></p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw._calculate_FQt_single_Q">
-<span class="sig-prename descclassname"><span class="pre">SQw.</span></span><span class="sig-name descname"><span class="pre">_calculate_FQt_single_Q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">single_Q_vectors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/trajectory_analysis/observables/sqw.html#SQw._calculate_FQt_single_Q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw._calculate_FQt_single_Q" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates the F(Q, t) from an array of vectors corresponding to a
-single value of Q.</p>
-<p>The length of the correlations is bounded by the length of the
-<code class="docutils literal notranslate"><span class="pre">self.E</span> <span class="pre">+</span> <span class="pre">1</span></code> rather than <code class="docutils literal notranslate"><span class="pre">self.t</span></code>, as this allows energies to be
-calculated from trajectories with longer timescales than is required by
-the energy resolution.</p>
-<p>We start by calculating the Fourier transformed number densities for
-the atoms <span class="math notranslate nohighlight">\(j\)</span> of element <span class="math notranslate nohighlight">\(\alpha\)</span>:</p>
-<div class="math notranslate nohighlight">
-\[\rho_{\alpha, m_Q}(n_t, p) = \sum_{j \in \alpha} e^{-i \vec{q_{p}} \cdot \vec{r_j}}\]</div>
-<p>Where <span class="math notranslate nohighlight">\(n_t\)</span> indexes time and <span class="math notranslate nohighlight">\(p\)</span> indexes momentum vector.
-F(Q,t) is calculated from the correlation <span class="math notranslate nohighlight">\(C\)</span> between these
-number densities, where we make use of the correlation theorem of
-discrete periodic functions to speed up calculation using the FFT
-[see E.O. Brigham, The Fast Fourier Transform, 1974]:</p>
-<div class="math notranslate nohighlight">
-\[C_{\alpha,\beta,m_Q}(n_t, p) = \Re \Big[\frac{1}{N_E - |n_t|} \mathcal{F}_t^{-1} \big[ \tilde{\rho'}^*_{\alpha, m_Q}(n_E, p) \tilde{\rho'}_{\beta, m_Q}(n_E, p) \big] \Big]\]</div>
-<p>Where we denote the Fourier transform of <span class="math notranslate nohighlight">\(\rho\)</span> as:</p>
-<div class="math notranslate nohighlight">
-\[\tilde{\rho'}_{\alpha, m_Q}(n_E, p) = \mathcal{F}_t \big[ \rho'_{\alpha, m_Q}(n_t, p) \big]\]</div>
-<p>Where <span class="math notranslate nohighlight">\(\rho'\)</span> denotes that <span class="math notranslate nohighlight">\(\rho\)</span> has been padded with
-zeros in the time domain to give it twice its orginal length.</p>
-<p>For the coherent contribution, we calculate:</p>
-<div class="math notranslate nohighlight">
-\[F_{m_Q}^{coh}(n_t) = \sum_{\alpha} \sum_{\beta} B^{coh}_\alpha B^{coh}_\beta \sum_p C_{\alpha,\beta, m_Q}(n_t, p)\]</div>
-<p>For the incoherent contribution, we calculate:</p>
-<div class="math notranslate nohighlight">
-\[F_{m_Q}^{inc}(n_t) = \sum_{\alpha} \big( B^{inc}_\alpha \big) ^2 \sum_p C_{\alpha,\alpha, m_Q}(n_t, p)\]</div>
-<p>The ideal (not accounting for instrument resolution) scattering
-function is normalised by both the number of atoms that contributed and
-the number of Q vectors used for the single value of Q. Including both
-coherent and incoherent contributions gives:</p>
-<div class="math notranslate nohighlight">
-\[F_{m_Q}^{ideal}(n_t) = \frac{ F_{m_Q}^{coh}(n_t) +  F_{m_Q}^{inc}(n_t)}{N_{atoms} N_p\]</div>
-<p>If we were only considering the coherent/incoherent scattering
-function, then the other term is simply omitted from the numerator in
-the previous equation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>single_Q_vectors</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><em>numpy.ndarray</em></a>) – An array of Q vectors with approximately the same magnitude</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An <code class="docutils literal notranslate"><span class="pre">array</span></code> with length <code class="docutils literal notranslate"><span class="pre">len(self.E)</span> <span class="pre">+</span> <span class="pre">1</span></code></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw._calculate_SQw">
-<span class="sig-prename descclassname"><span class="pre">SQw.</span></span><span class="sig-name descname"><span class="pre">_calculate_SQw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw._calculate_SQw" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.</p>
-<p>In order to obtain <code class="docutils literal notranslate"><span class="pre">len(self.E)</span></code> values in energy, we reflect the
-intermediate scattering function in time to give it dimensions of
-<code class="docutils literal notranslate"><span class="pre">(len(self.Q),</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">(len(self.t))</span> <span class="pre">-</span> <span class="pre">2)</span></code>. This uses the fact it is even
-in time, and the number of time points is chosen to be 1 greater than
-the number of energy points [Rapaport, The Art of Molecular Dynamics
-Simulation (2nd Edition), 2004, page 142].</p>
-<p>The numpy implementation of the FFT gives frequencies arranged so that
-the first <code class="docutils literal notranslate"><span class="pre">len(self.E)</span></code> points in the energy dimension correspond to
-positive frequencies, and the remaining points have negative frequency.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The S(Q, w) calculated from F(Q, t)</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw.data">
 <span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.observables.SQw.</span></span><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw.data" title="Permalink to this definition"></a></dt>
@@ -306,13 +216,17 @@ positive frequencies, and the remaining points have negative frequency.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw.dependent_variables">
 <span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.observables.SQw.</span></span><span class="sig-name descname"><span class="pre">dependent_variables</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw.dependent_variables" title="Permalink to this definition"></a></dt>
-<dd><p>Get or set the dependent variables, SQw (in <code class="docutils literal notranslate"><span class="pre">arb</span></code>)</p>
+<dd><p>this is
+SQw, the dynamic structure factor (in <code class="docutils literal notranslate"><span class="pre">arb</span></code>)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The dependent variables</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Get or set the dependent variables</p>
 </dd>
 </dl>
 </dd></dl>
@@ -339,10 +253,11 @@ objects.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw.errors">
 <span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.observables.SQw.</span></span><span class="sig-name descname"><span class="pre">errors</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw.errors" title="Permalink to this definition"></a></dt>
-<dd><p>Get or set the errors on the dependent variables</p>
+<dd><p>Get or set the errors on the dependent variables, the dynamic
+structure factor (in <code class="docutils literal notranslate"><span class="pre">arb</span></code>)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The errors on the dependent variables</p>
+<dd class="field-odd"><p>The errors on the <code class="docutils literal notranslate"><span class="pre">dependent_variables</span></code></p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
@@ -353,14 +268,17 @@ objects.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw.independent_variables">
 <span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.observables.SQw.</span></span><span class="sig-name descname"><span class="pre">independent_variables</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw.independent_variables" title="Permalink to this definition"></a></dt>
-<dd><p>Get or set the independent variables, Q (in <code class="docutils literal notranslate"><span class="pre">Ang^-1</span></code>) and E (in
-<code class="docutils literal notranslate"><span class="pre">meV</span></code>)</p>
+<dd><p>these are
+the frequency Q (in <code class="docutils literal notranslate"><span class="pre">Ang^-1</span></code>) and energy E (in``meV``)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The independent variables</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Get or set the independent variables</p>
 </dd>
 </dl>
 </dd></dl>
@@ -376,21 +294,6 @@ objects.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.SQw.t">
-<span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.observables.SQw.</span></span><span class="sig-name descname"><span class="pre">t</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.SQw.t" title="Permalink to this definition"></a></dt>
-<dd><p>Get or set the times of the intermediate scattering function in units of
-<code class="docutils literal notranslate"><span class="pre">fs</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>1D array of times in <code class="docutils literal notranslate"><span class="pre">fs</span></code></p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>array</p>
 </dd>
 </dl>
 </dd></dl>
