@@ -133,7 +133,7 @@
 <span class="sd">true of calls to PyLammps.eval, and may also occur in other cases (anything that</span>
 <span class="sd">ends up using the OutputCapture class).</span>
 <span class="sd">&quot;&quot;&quot;</span>
-
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">tee</span>
@@ -2216,29 +2216,47 @@
                 <span class="n">press_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;iso&#39;</span><span class="p">,</span> <span class="n">press</span><span class="p">,</span> <span class="n">press</span><span class="p">,</span> <span class="n">p_damp</span><span class="p">]</span>
 
             <span class="c1"># Apply thermostat</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">==</span> <span class="s1">&#39;nose&#39;</span><span class="p">:</span>
+            <span class="c1"># we create local funcs for each thermostat, and use a dict to get the correct one.</span>
+            <span class="c1"># think of this like a proto-factory pattern, or like a switch-case block in C++.</span>
+
+            <span class="k">def</span> <span class="nf">nose</span><span class="p">():</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">barostat</span> <span class="o">==</span> <span class="s1">&#39;nose&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;npt&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;npt&#39;</span><span class="p">,</span> <span class="s1">&#39;temp&#39;</span><span class="p">,</span>
                                  <span class="o">*</span><span class="n">thermo_parameters</span> <span class="o">+</span> <span class="n">press_parameters</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;nvt&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;nvt&#39;</span><span class="p">,</span> <span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">thermo_parameters</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">==</span> <span class="s1">&#39;berendsen&#39;</span><span class="p">:</span>
+
+            <span class="k">def</span> <span class="nf">berendsen</span><span class="p">():</span>
                 <span class="c1"># berendsen does not do time integration so also requires nve</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;nve&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;nve&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;t_berendsen&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;temp/berendsen&#39;</span><span class="p">,</span>
                              <span class="o">*</span><span class="n">thermo_parameters</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">==</span> <span class="s1">&#39;langevin&#39;</span><span class="p">:</span>
+
+            <span class="k">def</span> <span class="nf">langevin</span><span class="p">():</span>
                 <span class="c1"># langevin does not do time integration so also requires nve</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;nve&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;nve&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;langevin&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;langevin&#39;</span><span class="p">,</span>
                              <span class="o">*</span><span class="n">thermo_parameters</span> <span class="o">+</span> <span class="p">[</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9999</span><span class="p">)])</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">==</span> <span class="s1">&#39;rescale&#39;</span><span class="p">:</span>
+
+            <span class="k">def</span> <span class="nf">rescale</span><span class="p">():</span>
                 <span class="c1"># temp/rescale does not do time integration so also requires nve</span>
                 <span class="n">t_window</span> <span class="o">=</span> <span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_window</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;nve&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;nve&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;rescale&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;temp/rescale&#39;</span><span class="p">,</span>
                              <span class="bp">self</span><span class="o">.</span><span class="n">rescale_step</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">t_window</span><span class="p">,</span>
                              <span class="bp">self</span><span class="o">.</span><span class="n">t_fraction</span><span class="p">)</span>
+
+            <span class="n">thermostat</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nose&#39;</span><span class="p">:</span> <span class="n">nose</span><span class="p">,</span>
+                          <span class="s1">&#39;berendsen&#39;</span><span class="p">:</span> <span class="n">berendsen</span><span class="p">,</span>
+                          <span class="s1">&#39;langevin&#39;</span><span class="p">:</span> <span class="n">langevin</span><span class="p">,</span>
+                          <span class="s1">&#39;rescale&#39;</span><span class="p">:</span> <span class="n">rescale</span><span class="p">}</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">thermostat</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span><span class="p">]()</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Thermostat type not recognised. No thermostat will be applied.&quot;</span>
+                              <span class="s2">&quot; Your thermostat type may be misspelt or not currently implemented.&quot;</span><span class="p">)</span>
+
             <span class="c1"># Apply barostat</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">barostat</span> <span class="o">==</span> <span class="s1">&#39;berendsen&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;p_berendsen&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;press/berendsen&#39;</span><span class="p">,</span>
