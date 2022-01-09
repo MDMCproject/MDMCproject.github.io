@@ -147,7 +147,34 @@
 </ul>
 <p>If on Linux, add your user to the <code class="docutils literal notranslate"><span class="pre">docker</span></code> permissions group with <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">usermod</span> <span class="pre">-a</span> <span class="pre">-G</span> <span class="pre">docker</span> <span class="pre">$USER</span></code>.</p>
 <p>Next, install <a class="reference external" href="https://code.visualstudio.com/">Visual Studio Code</a> and then install the <a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack">Remote Development extension pack</a>.</p>
-<p>Finally, with the MDMC project open in VSCode, open the Command Palette (by pressing F1) and run the command <strong>Remote-Containers: Open Folder in Container…</strong> to open the MDMC project inside the MDMC container.</p>
+<p>Finally, simply start VSCode within the MDMC repo using <cite>code .</cite> or open the
+MDMC repo in VSCode, after a moment, a box in the bottom right-hand corner
+pops up saying “Folder contains a Dev Container configuration file…”. Then, click
+“Reopen in Container”. If this box does not pop up then open the Command Palette
+(by pressing F1) and run the command <strong>Remote-Containers: Open Folder in
+Container…</strong> toopen the MDMC project inside the MDMC container.</p>
+<p>In addition, to run or debug the tutorials:</p>
+<ul class="simple">
+<li><p>open terminal in VSCode</p></li>
+<li><p>run <cite>python -m pip install .</cite> to install MDMC</p></li>
+<li><p>Then simply open relevant jupyter notebook tutorial in VSCode to run or debug</p></li>
+</ul>
+<p>Note the way this works is that VSCode makes the MDMC repo visible inside the
+container. This means that when you <cite>python -m pip install .</cite> it will install
+MDMC with reference to that folder, including picking up (as per normal)
+any old build/lib files from previously installs. So if you experience that
+this setup appears to magically pick up an old version of MDMC then you need to
+delete the build/lib folder in your repo (as you would need to also if you
+didn’t use containers).</p>
+<p>Finally to build the documentation:</p>
+<ul class="simple">
+<li><p>run <cite>apt-get update &amp;&amp;  apt-get install pandoc -y &amp;&amp; pip3 install sphinx nbsphinx sphinx_rtd_theme docutils==0.16</cite></p></li>
+<li><p>if not already done install MDMC with <cite>python -m pip install .</cite></p></li>
+<li><p>cd into <cite>doc</cite> folder and run <cite>make html</cite>. First time you run it will take a bit of time because it runs the code in all the tutorials</p></li>
+</ul>
+<p>Note the extra <cite>apt-get install</cite> packages needed to build the docs may change from time to time.
+Please the see the continious integration build instructions which builds the
+docs for up-to-date instructions on which <cite>apt-get</cite> packages are needed.</p>
 </div>
 </div>
 
