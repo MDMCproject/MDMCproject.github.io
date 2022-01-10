@@ -126,7 +126,6 @@
 <span class="kn">from</span> <span class="nn">scipy.spatial.transform</span> <span class="kn">import</span> <span class="n">Rotation</span>
 
 <span class="kn">import</span> <span class="nn">MDMC.common.atom_properties</span> <span class="k">as</span> <span class="nn">atom_properties</span>
-<span class="kn">from</span> <span class="nn">MDMC.utilities.structural_units</span> <span class="kn">import</span> <span class="n">parse_structural_unit_IDs</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Coulombic</span><span class="p">,</span> <span class="n">BondedInteraction</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span><span class="p">,</span>\
     <span class="n">unit_decorator_getter</span>
@@ -170,12 +169,10 @@
     <span class="c1"># ID exists to facilitate a 1 to 1 association with structural units within</span>
     <span class="c1"># MD engines.  It may not be required or may only be required for atoms.</span>
     <span class="n">_ID_generator</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">_ID_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_ID</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ID_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">velocity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -872,7 +869,6 @@
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;ID&#39;</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_ID</span><span class="p">())</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_ID_dict</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom</span>
             <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;_bonded_interaction_pairs&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">copy_interactions</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="n">memo</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;_nonbonded_interactions&#39;</span><span class="p">:</span>
@@ -1302,8 +1298,7 @@
 <span class="sd">        The name of the structure. The default is `None`.</span>
 <span class="sd">    **settings</span>
 <span class="sd">        ``atoms`` (`list`)</span>
-<span class="sd">            A `list` of ``Atom`` (or ``int`` corresponding to an ``Atom.ID``) which will be</span>
-<span class="sd">            included in the ``Molecule``</span>
+<span class="sd">            A `list` of ``Atom``  which will be included in the ``Molecule``</span>
 <span class="sd">        ``interactions`` (`list`)</span>
 <span class="sd">            A `list` of ``Interaction`` acting on atoms within the ``Molecule``.</span>
 <span class="sd">            The ``interactions`` provides a convenience for declaring</span>
@@ -1315,8 +1310,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
 
-        <span class="n">parsed_atoms</span> <span class="o">=</span> <span class="n">parse_structural_unit_IDs</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_structure_list</span> <span class="o">=</span> <span class="n">parsed_atoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_structure_list</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure_list</span><span class="p">:</span>
             <span class="n">structure</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_calc_subunit_position_in_CoM_frame</span><span class="p">()</span>
@@ -1427,19 +1421,18 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    atoms : list</span>
-<span class="sd">        ``Atom`` objects (or ``int`` corresponding to an ``Atom.ID``) for which the minimum and</span>
-<span class="sd">        maximum extents are determined</span>
+<span class="sd">        ``Atom`` objects for which the minimum and maximum extents are</span>
+<span class="sd">        determined</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">atoms</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Empty atoms passed; it must contain at least one atom to create a BoundingBox object.&quot;</span><span class="p">)</span>
 
-        <span class="n">parsed_atoms</span> <span class="o">=</span> <span class="n">parse_structural_unit_IDs</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
         <span class="c1"># Start with arbitrary min and max from the positions of the atoms in</span>
         <span class="c1"># the atom list</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">parsed_atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">position</span>
-        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">parsed_atoms</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">position</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
 
@@ -1507,7 +1500,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    atoms : list</span>
-<span class="sd">        A `list` of ``Atom`` (or ``int`` corresponding to an ``Atom.ID``)</span>
+<span class="sd">        A `list` of ``Atom``</span>
 <span class="sd">    predicate : function</span>
 <span class="sd">        A function that returns a `bool`</span>
 
@@ -1517,8 +1510,7 @@
 <span class="sd">        ``Atom`` objects in ``atoms`` which meet the condition of ``predicate``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">parsed_atoms</span> <span class="o">=</span> <span class="n">parse_structural_unit_IDs</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">,</span> <span class="n">parsed_atoms</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">,</span> <span class="n">atoms</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="filter_atoms_element"><a class="viewcode-back" href="../../../pages/modules/md/structural_units.html#MDMC.MD.structural_units.filter_atoms_element">[docs]</a><span class="k">def</span> <span class="nf">filter_atoms_element</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
@@ -1529,7 +1521,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    atoms : list</span>
-<span class="sd">        A ``list`` of ``Atom`` (or ``int`` corresponding to an ``Atom.ID``)</span>
+<span class="sd">        A ``list`` of ``Atom``</span>
 <span class="sd">    element : str</span>
 <span class="sd">        The atomic element label</span>
 
@@ -1539,8 +1531,7 @@
 <span class="sd">        ``Atom`` objects of a specific element</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">parsed_atoms</span> <span class="o">=</span> <span class="n">parse_structural_unit_IDs</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">element</span> <span class="o">==</span> <span class="n">element</span><span class="p">,</span> <span class="n">parsed_atoms</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">element</span> <span class="o">==</span> <span class="n">element</span><span class="p">,</span> <span class="n">atoms</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="get_reduced_chemical_formula"><a class="viewcode-back" href="../../../pages/modules/md/structural_units.html#MDMC.MD.structural_units.get_reduced_chemical_formula">[docs]</a><span class="k">def</span> <span class="nf">get_reduced_chemical_formula</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="s1">&#39;Hill&#39;</span><span class="p">):</span>

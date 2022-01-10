@@ -15,7 +15,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -318,7 +318,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -381,12 +381,11 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Argon-A-to-Z">
 <h1>Argon A-to-Z<a class="headerlink" href="#Argon-A-to-Z" title="Permalink to this headline"></a></h1>
 <p>This tutorial demonstrates a-to-z how to optimise Lennard Jones parameters for liquid argon, and without going into details. For details see other tutorials and wider MDMC documentation.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Imports used for this tutorial</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Imports used for this tutorial</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp2d</span>
@@ -395,12 +394,31 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+--------------------------------------------------------------------------
+[[934,1],0]: A high-performance Open MPI point-to-point messaging module
+was unable to find any relevant network interfaces:
+
+Module: OpenFabrics (openib)
+  Host: e8db25beb7e8
+
+Another transport will be used instead, although this may result in
+lower performance.
+
+NOTE: You can disable this warning by setting the MCA parameter
+btl_base_warn_component_unused to 0.
+--------------------------------------------------------------------------
+</pre></div></div>
+</div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Change the number of threads depending on the number of physical cores on your computer</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Change the number of threads depending on the number of physical cores on your computer</span>
 <span class="c1"># as it was tested for LAMMPS</span>
 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;4&quot;</span>
 </pre></div>
@@ -410,8 +428,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Build universe with density 0.0176 atoms per AA^-3</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build universe with density 0.0176 atoms per AA^-3</span>
 <span class="n">density</span> <span class="o">=</span> <span class="mf">0.0176</span>
 <span class="c1"># This means cubic universe of side:</span>
 <span class="c1"># 23.0668 A will contain 216 Ar atoms</span>
@@ -445,8 +462,7 @@ Number of argon atoms = 216
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">Ar_dispersion</span> <span class="o">=</span> <span class="n">Dispersion</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Ar_dispersion</span> <span class="o">=</span> <span class="n">Dispersion</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span>
                            <span class="p">(</span><span class="n">Ar</span><span class="o">.</span><span class="n">atom_type</span><span class="p">,</span> <span class="n">Ar</span><span class="o">.</span><span class="n">atom_type</span><span class="p">),</span>
                            <span class="n">cutoff</span><span class="o">=</span><span class="mf">8.</span><span class="p">,</span>
                            <span class="n">function</span><span class="o">=</span><span class="n">LennardJones</span><span class="p">(</span><span class="n">epsilon</span><span class="o">=</span><span class="mf">1.0243</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">3.36</span><span class="p">))</span>
@@ -461,8 +477,7 @@ between 8 and 12 ang is found to give near identifical results.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># MD Engine setup</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># MD Engine setup</span>
 <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span>
                         <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;lammps&quot;</span><span class="p">,</span>
                         <span class="n">time_step</span><span class="o">=</span><span class="mf">10.18893</span><span class="p">,</span>
@@ -476,8 +491,13 @@ between 8 and 12 ang is found to give near identifical results.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+LAMMPS (29 Sep 2021 - Update 2)
+  using 4 OpenMP thread(s) per MPI task
 LAMMPS output is captured by PyLammps wrapper
+LAMMPS (29 Sep 2021 - Update 2)
+  using 4 OpenMP thread(s) per MPI task
 LAMMPS output is captured by PyLammps wrapper
+Total wall time: 0:00:00
 Simulation created with lammps engine and settings:
   temperature  120.0
 
@@ -487,8 +507,7 @@ Simulation created with lammps engine and settings:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Energy Minimization and equilibration</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Energy Minimization and equilibration</span>
 <span class="n">simulation</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
 <span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -500,8 +519,7 @@ Simulation created with lammps engine and settings:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># exp_datasets is a list of dictionaries with one dictionary per experimental</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># exp_datasets is a list of dictionaries with one dictionary per experimental</span>
 <span class="c1"># dataset</span>
 <span class="c1"># Dataset from: van Well et al. (1985). Physical Review A, 31(5), 3391-3414</span>
 <span class="c1"># resolution is None as the original author already accounted for instrument resolution</span>
@@ -521,8 +539,7 @@ steps.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fit_parameters</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">parameters</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fit_parameters</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">parameters</span>
 
 <span class="n">control</span> <span class="o">=</span> <span class="n">Control</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">simulation</span><span class="p">,</span>
                   <span class="n">exp_datasets</span><span class="o">=</span><span class="n">exp_datasets</span><span class="p">,</span>
@@ -553,8 +570,7 @@ Control created with:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Run the refinement, i.e. refine the FF parameters against the data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run the refinement, i.e. refine the FF parameters against the data</span>
 <span class="n">control</span><span class="o">.</span><span class="n">refine</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -565,25 +581,24 @@ Control created with:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Step         FoM Change state      epsilon        sigma
-   0       392.8     Accepted        1.024         3.36
-   1       457.7     Rejected        1.018        3.331
-   2       398.5     Rejected        1.017        3.392
-   3       398.2     Accepted        1.015        3.374
+   0       420.2     Accepted        1.024         3.36
+   1       399.8     Accepted        1.023        3.379
+   2       426.3     Rejected        1.028         3.35
+   3       402.3     Accepted        1.022        3.402
 
 Final Parameters
  epsilon    sigma
-1.014513 3.373882
+ 1.02155 3.401922
 
 Automatic Scale Factors
-  data/Well_s_q_omega_Ar_data.xml  0.217164
+  data/Well_s_q_omega_Ar_data.xml  0.221286
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>

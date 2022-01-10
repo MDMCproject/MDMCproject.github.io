@@ -15,7 +15,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -321,7 +321,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -388,12 +388,11 @@ div.rendered_html tbody tr:hover {
 <p>This can be done by either passing the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> <code class="docutils literal notranslate"><span class="pre">atom_type</span></code> or the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> atom <code class="docutils literal notranslate"><span class="pre">name</span></code> as the <code class="docutils literal notranslate"><span class="pre">Atom.name</span></code>.</p>
 <p>It is also important to note that if you require the charge to be set from the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code>, you should pass this when creating each <code class="docutils literal notranslate"><span class="pre">Atom</span></code>. Any float can be passed as this will be changed when the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> is applied.</p>
 <p>Below is an example using methanol and the OPLSAA <code class="docutils literal notranslate"><span class="pre">ForceField</span></code>.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span><span class="p">,</span> <span class="n">DihedralAngle</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Universe</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span><span class="p">,</span> <span class="n">DihedralAngle</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Universe</span>
 
 <span class="c1"># Alternatively, could simply import all (as shown below).</span>
 <span class="c1">#from MDMC.MD import *</span>
@@ -408,13 +407,32 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+--------------------------------------------------------------------------
+[[822,1],0]: A high-performance Open MPI point-to-point messaging module
+was unable to find any relevant network interfaces:
+
+Module: OpenFabrics (openib)
+  Host: e8db25beb7e8
+
+Another transport will be used instead, although this may result in
+lower performance.
+
+NOTE: You can disable this warning by setting the MCA parameter
+btl_base_warn_component_unused to 0.
+--------------------------------------------------------------------------
+</pre></div></div>
+</div>
 <p>All bonded and nonbonded interactions need to be specified as normal, except the <code class="docutils literal notranslate"><span class="pre">function</span></code> should not be passed as a parameter. This is because the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> provides the <code class="docutils literal notranslate"><span class="pre">InteractionFunction</span></code> as well as the <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> values.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Create the bonds with harmonic potentials</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the bonds with harmonic potentials</span>
 <span class="n">CH_bond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">HC1</span><span class="p">)</span>
 <span class="n">CO_bond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">O</span><span class="p">)</span>
 <span class="n">OH_bond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">O</span><span class="p">,</span> <span class="n">HO</span><span class="p">)</span>
@@ -467,8 +485,7 @@ Universe created with:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">universe</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="s1">&#39;OPLSAA&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">universe</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="s1">&#39;OPLSAA&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -477,8 +494,7 @@ Universe created with:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> </span><span class="si">{1}</span><span class="s1"> charge = </span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">methanol</span><span class="o">.</span><span class="n">atoms</span><span class="p">]))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> </span><span class="si">{1}</span><span class="s1"> charge = </span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">methanol</span><span class="o">.</span><span class="n">atoms</span><span class="p">]))</span>
 </pre></div>
 </div>
 </div>
@@ -500,8 +516,7 @@ H Alcohol -OH charge = 0.418 e
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">HCO_angle</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">HCO_angle</span>
 </pre></div>
 </div>
 </div>
@@ -539,8 +554,7 @@ H Alcohol -OH charge = 0.418 e
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">H_atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.7006</span><span class="p">,</span>  <span class="mf">0.3636</span><span class="p">,</span>  <span class="mf">0.8900</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;98&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">H_atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.7006</span><span class="p">,</span>  <span class="mf">0.3636</span><span class="p">,</span>  <span class="mf">0.8900</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;98&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Before OPLSAA applied, H_atom name is: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">H_atom</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
 <span class="n">uni</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
@@ -570,8 +584,7 @@ After OPLSAA applied, H_atom name is: Methanol CH3-
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">H_atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.7006</span><span class="p">,</span>  <span class="mf">0.3636</span><span class="p">,</span>  <span class="mf">0.8900</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Methanol CH3-&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">H_atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.7006</span><span class="p">,</span>  <span class="mf">0.3636</span><span class="p">,</span>  <span class="mf">0.8900</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Methanol CH3-&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Before OPLSAA applied, H_atom name is: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">H_atom</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
 <span class="n">uni</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
@@ -608,8 +621,7 @@ After OPLSAA applied, H_atom name is: Methanol CH3-
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">OPLSAA</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">OPLSAA</span>
 <span class="n">oplsaa</span> <span class="o">=</span> <span class="n">OPLSAA</span><span class="p">()</span>
 
 <span class="c1"># If we wanted to determine the correct type of a Chlorine atom</span>
@@ -642,8 +654,7 @@ After OPLSAA applied, H_atom name is: Methanol CH3-
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Specifying the ForceField atom_type:</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Specifying the ForceField atom_type:</span>
 <span class="n">Cl</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;168&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
 
 <span class="c1"># Is equivalent to specifying the ForceField atom name</span>
