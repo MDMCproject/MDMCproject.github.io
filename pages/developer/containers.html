@@ -157,12 +157,12 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">mdmc/mdmc:latest</span></code>; the version is used by e.g. docker-compose to install MDMC. This is the ‘production’ image.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">mdmc/mdmc:experimental</span></code>; if you are making manual changes to the image, it’s useful to push it to this tag so you can swap it in and out vs other images, as well as let other developers and Travis use it.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">mdmc/mdmc:travis</span></code>; when Travis CI automatically builds a new image (see below), it is pushed to this tag.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mdmc/mdmc:ci-[branch]</span></code>; when Github Actions automatically builds a new image (see below), it is pushed to this tag, where [branch] is the name of the branch the image was built on.</p></li>
 </ul>
 </div>
 <div class="section" id="building-the-docker-image">
 <h2>Building the Docker image<a class="headerlink" href="#building-the-docker-image" title="Permalink to this headline"></a></h2>
-<p>As just mentioned, Travis CI, our testing and continuous integration service, automatically builds and tests new images. It does so ONLY IF files in the <code class="docutils literal notranslate"><span class="pre">/build/Docker</span></code> directory are changed, or if <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> is changed. In this case, the pull request testing will automatically detect these changes, rebuild the image from the Dockerfile, test it, and then push it to <code class="docutils literal notranslate"><span class="pre">mdmc/mdmc:travis</span></code>. The mdmc/mdmc:travis image can then be pushed to the mdmc/mdmc:latest when required.</p>
+<p>As just mentioned, Github Actions automatically builds and tests new images. It does so ONLY IF files in the <code class="docutils literal notranslate"><span class="pre">/build/Docker</span></code> directory are changed, or if <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> is changed. In this case, the pull request testing will automatically detect these changes, rebuild the image from the Dockerfile, test it, and then push it to <code class="docutils literal notranslate"><span class="pre">mdmc/mdmc:ci-[branch]</span></code> where [branch] is the name of the branch the image was built on. The mdmc/mdmc:travis image can then be pushed to the mdmc/mdmc:latest when required.</p>
 <p>If you need to rebuild the Docker image manually, go to the main directory for the source code then execute the command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -t mdmc/mdmc:experimental -f ./build/Docker/Dockerfile .
 </pre></div>
@@ -175,7 +175,7 @@ docker tag mdmc/mdmc:experimental mdmc/mdmc:latest
 docker push mdmc/mdmc:latest
 </pre></div>
 </div>
-<p>and the same with mdmc/mdmc:travis to push the Travis image.</p>
+<p>and the same with mdmc/mdmc:ci-[branch] tags to push a CI image.</p>
 </div>
 </div>
 
