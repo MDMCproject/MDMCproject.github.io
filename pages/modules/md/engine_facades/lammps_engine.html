@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lammps_engine &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="force_fields" href="../force_fields.html" />
+    <link rel="prev" title="facade" href="facade.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">2. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../simulations.html">3. Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parameter-refinement.html">4. Parameter Refinement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">5. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/building-a-universe.html">Building an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/units.html">Units in MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/coding_standards.html">Coding Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/documentation.html">Documentation Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/units.html">Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/management.html">MDMC Software Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/vscode.html">Debugging inside Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../common.html">common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../control.html">control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gui.html">gui</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../md.html">MD</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../ase.html">ase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../container.html">container</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../engine_facades.html">engine_facades</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="facade_factory.html">facade_factory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="facade.html">facade</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">lammps_engine</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../force_fields.html">force_fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interaction_functions.html">interaction_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../parameters.html">parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simulation.html">simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../solvents.html">solvents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../structural_units.html">structural_units</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../readers.html">readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../refinement.html">refinement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../trajectory_analysis.html">trajectory_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../md.html">MD</a> &raquo;</li>
+          <li><a href="../engine_facades.html">engine_facades</a> &raquo;</li>
+      <li>lammps_engine</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/pages/modules/md/engine_facades/lammps_engine.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-MDMC.MD.engine_facades.lammps_engine">
+<span id="lammps-engine"></span><h1>lammps_engine<a class="headerlink" href="#module-MDMC.MD.engine_facades.lammps_engine" title="Permalink to this headline"></a></h1>
+<p>Facade for LAMMPS MD engine</p>
+<p>This is a facade to <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> (added in 30th-Jul-2016 version), a convenience
+wrapper for the LAMMPS Python interface i.e. where Python is extended with
+LAMMPS.</p>
+<p>Defining all interaction types requires that LAMMPS was built with the MOLECULE
+package.</p>
+<p class="rubric">Notes</p>
+<p>When variables are either passed to or from <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code>, the ctypes conversion
+can mean that they are unnecessarily cast, particularly from <cite>float</cite> to <cite>int</cite>.
+This can cause issues as LAMMPS requires certain variables, e.g. number of
+steps, to be <cite>int</cite>.  Therefore it is always a good idea to be cast these
+variables when they are read from <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> e.g.
+<code class="docutils literal notranslate"><span class="pre">int(lmp.variables['steps'].value)</span></code>.</p>
+<p>A minor bug in LAMMPS (Dec 2018 version) means that <code class="docutils literal notranslate"><span class="pre">nangletypes</span></code> returned
+by <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> is incorrectly set to <code class="docutils literal notranslate"><span class="pre">ndihedraltypes</span></code>.  This was corrected in
+Mar 2020 release.</p>
+<p>The PyLammps class (which is what MDMC interfaces to) only outputs on the rank 0
+process when using MPI. This means that accessing PyLammps properties should
+only be done on rank 0, and broadcast to other ranks if necessary. This is also
+true of calls to PyLammps.eval, and may also occur in other cases (anything that
+ends up using the OutputCapture class).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">Ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thermostat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">barostat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#Ensemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble" title="Permalink to this definition"></a></dt>
+<dd><p>A thermodynamic ensemble determined by applying a thermostat and/or barostat</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lmp</strong> (<em>PyLammps</em>) – Set the <code class="docutils literal notranslate"><span class="pre">lmp</span></code> attribute to a <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object.</p></li>
+<li><p><strong>temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Thermostat temperature. Default is <cite>None</cite>, which is only valid if a
+<code class="docutils literal notranslate"><span class="pre">thermostat</span></code> is also <cite>None</cite>.</p></li>
+<li><p><strong>pressure</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Barostat pressure. Default is <cite>None</cite>, which is only valid if a
+<code class="docutils literal notranslate"><span class="pre">barostat</span></code> is also <cite>None</cite>.</p></li>
+<li><p><strong>thermostat</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Name of a thermostat to be applied.</p></li>
+<li><p><strong>barostat</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Name of a barostat to be applied.</p></li>
+<li><p><strong>**settings</strong> – <code class="docutils literal notranslate"><span class="pre">time_step</span></code> (<cite>float</cite>)
+<code class="docutils literal notranslate"><span class="pre">t_damp</span></code> (<cite>int</cite>)
+<code class="docutils literal notranslate"><span class="pre">p_damp</span></code> (<cite>int</cite>)
+<code class="docutils literal notranslate"><span class="pre">t_window</span></code> (<cite>float</cite>)
+<code class="docutils literal notranslate"><span class="pre">t_fraction</span></code> (<cite>float</cite>)
+<code class="docutils literal notranslate"><span class="pre">rescale_step</span></code> (<cite>int</cite>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.rescale_step">
+<span class="sig-name descname"><span class="pre">rescale_step</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.rescale_step" title="Permalink to this definition"></a></dt>
+<dd><p>Number of steps between applying temperature rescaling. This only
+applies to rescale thermostats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.apply_ensemble_fixes">
+<span class="sig-name descname"><span class="pre">apply_ensemble_fixes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#Ensemble.apply_ensemble_fixes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.apply_ensemble_fixes" title="Permalink to this definition"></a></dt>
+<dd><p>Passes the required LAMMPS <code class="docutils literal notranslate"><span class="pre">fixes</span></code> to apply a specific thermodynamic
+ensemble to the simulation</p>
+<p>Removes all pre-existing thermostat and barostat fixes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.barostat">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">barostat</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.barostat" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the <cite>str</cite> which specifies the barostat</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.10)"><strong>AttributeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">self.pressure</span></code> has not been set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.pressure">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pressure</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.pressure" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the pressure of the simulation in <code class="docutils literal notranslate"><span class="pre">atm</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.remove_ensemble_fixes">
+<span class="sig-name descname"><span class="pre">remove_ensemble_fixes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#Ensemble.remove_ensemble_fixes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.remove_ensemble_fixes" title="Permalink to this definition"></a></dt>
+<dd><p>Removes all LAMMPS <code class="docutils literal notranslate"><span class="pre">fixes</span></code> relating to the ensemble i.e. removes all
+thermostats and barostats</p>
+<p>This must be done before thermostat and barostat fixes are added, so
+that there is no conflict with existing thermostat and barostats
+<code class="docutils literal notranslate"><span class="pre">fixes</span></code>. It is also required for Shake and Rattle <code class="docutils literal notranslate"><span class="pre">fixes</span></code> which
+cannot be added after barostat fixes have been applied.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.t_fraction">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t_fraction</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.t_fraction" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the fraction by which the <code class="docutils literal notranslate"><span class="pre">temperature</span></code> is rescaled to the
+target temperature</p>
+<p>This is required for the rescale <code class="docutils literal notranslate"><span class="pre">thermostat</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Fraction (i.e. between 0.0 and 1.0 inclusive) by which the
+<code class="docutils literal notranslate"><span class="pre">temperature</span></code> is rescaled</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>float</cite></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If set to a value outside of 0.0 and 1.0 inclusive.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.t_window">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t_window</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.t_window" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the <code class="docutils literal notranslate"><span class="pre">temperature</span></code> range in <code class="docutils literal notranslate"><span class="pre">K</span></code> in which the
+<code class="docutils literal notranslate"><span class="pre">temperature</span></code> is not rescaled</p>
+<p>This only applies to rescale <code class="docutils literal notranslate"><span class="pre">thermostats</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>temperature range in <code class="docutils literal notranslate"><span class="pre">K</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.temperature">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">temperature</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.temperature" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the temperature of the simulation in <code class="docutils literal notranslate"><span class="pre">K</span></code></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.thermostat">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thermostat</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.thermostat" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the <cite>str</cite> which specifies the thermostat</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.10)"><strong>AttributeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">self.temperature</span></code> has not been set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.Ensemble.time_step">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_step</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble.time_step" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the simulation time step in <code class="docutils literal notranslate"><span class="pre">fs</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">LAMMPSEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'full'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSEngine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine" title="Permalink to this definition"></a></dt>
+<dd><p>Facade for LAMMPS</p>
+<p>One notable issue with creating the LAMMPS facade is that some
+<code class="docutils literal notranslate"><span class="pre">pair_styles</span></code> are combinations of both dispersion and coulombic
+interactions. For example, although LAMMPS has <code class="docutils literal notranslate"><span class="pre">lj/cut</span></code>, <code class="docutils literal notranslate"><span class="pre">coul/cut</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">coul/long</span></code>, there is no <code class="docutils literal notranslate"><span class="pre">lj/long</span></code> pair_style; it only exists in
+combination with <code class="docutils literal notranslate"><span class="pre">coul/long</span></code> (i.e. <code class="docutils literal notranslate"><span class="pre">lj/long/coul/long</span></code>). This means that
+the facade has to not just parse each nonbonded interaction, but also has to
+determine if that <code class="docutils literal notranslate"><span class="pre">pair_style</span></code> should be combined with another
+<code class="docutils literal notranslate"><span class="pre">pair_style</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">lj/long</span></code> and <code class="docutils literal notranslate"><span class="pre">coul/long</span></code> have to be combined
+before passing to <code class="docutils literal notranslate"><span class="pre">pair_style</span></code> and <code class="docutils literal notranslate"><span class="pre">pair_coeff</span></code>). An additional
+complication of this is that when setting the coefficients (<code class="docutils literal notranslate"><span class="pre">Parameters</span></code>)
+of these interactions, they again have to be set together. So in theory a
+coulombic interaction needs to know the dispersion interaction it has been
+paired with an also pass those coefficients when calling <code class="docutils literal notranslate"><span class="pre">pair_coeff</span></code>. In
+practice a simplification can be made, at least in the case of currently
+implemented pair styles: As coulombic <code class="docutils literal notranslate"><span class="pre">pair_styles</span></code> do no take any
+coefficients, any coulombic <code class="docutils literal notranslate"><span class="pre">pair_styles</span></code> that comprise a combined
+<code class="docutils literal notranslate"><span class="pre">pair_style</span></code> can be ignored for the purposes of setting the coulombic
+<code class="docutils literal notranslate"><span class="pre">pair_style</span></code>; this can be taken care of when <code class="docutils literal notranslate"><span class="pre">pair_coeff</span></code> is called from
+the correspoding dispersion interaction, as this possesses the dispersion
+coefficients that also need to be passed when the coefficients of this pair
+style are set.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.barostat">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">barostat</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.barostat" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the <cite>str</cite> which specifies the barostat</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The <code class="docutils literal notranslate"><span class="pre">barostat</span></code> name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>str</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.convert_trajectory">
+<span class="sig-name descname"><span class="pre">convert_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSEngine.convert_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.convert_trajectory" title="Permalink to this definition"></a></dt>
+<dd><p>Converts between a LAMMPS trajectory dump and an MDMC <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></p>
+<p>The LAMMPS dump must include at least <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">atom_type</span></code>, and <code class="docutils literal notranslate"><span class="pre">xyz</span></code>
+<code class="docutils literal notranslate"><span class="pre">positions</span></code>. The <code class="docutils literal notranslate"><span class="pre">xyz</span></code> <code class="docutils literal notranslate"><span class="pre">positions</span></code> must be consecutive and in that
+order. The same is true of the <code class="docutils literal notranslate"><span class="pre">xyz</span></code> components of the <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, if
+they are provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The index of the first trajectory, inclusive.</p></li>
+<li><p><strong>stop</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The index of the last trajectory, exclusive.</p></li>
+<li><p><strong>step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The step size between trajectories.</p></li>
+<li><p><strong>**settings</strong> – <dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">scaled_positions</span></code> (<cite>bool</cite>)</dt><dd><p>If the <code class="docutils literal notranslate"><span class="pre">trajectory_file</span></code> has scaled <code class="docutils literal notranslate"><span class="pre">positions</span></code></p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">atom_IDs</span></code> (<cite>list</cite>)</dt><dd><p>LAMMPS <code class="docutils literal notranslate"><span class="pre">ID</span></code> of the atoms which should be included. If not passed
+then all atoms are included in the converted trajectory.</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The MDMC <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> corresponding to the LAMMPS <code class="docutils literal notranslate"><span class="pre">trajectory_file</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.10)"><strong>AssertionError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">universe</span></code> is passed, and the number of atoms in the
+    <code class="docutils literal notranslate"><span class="pre">trajectory_file</span></code> is not the same as in the <code class="docutils literal notranslate"><span class="pre">universe</span></code>.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">trajectory_file</span></code> describes a triclinic universe.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.ensemble">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ensemble</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.ensemble" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the ensemble object which applies a <code class="docutils literal notranslate"><span class="pre">thermostat</span></code> and/or
+<code class="docutils literal notranslate"><span class="pre">barostat</span></code> to LAMMPS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The simulation thermodynamic ensemble</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble" title="MDMC.MD.engine_facades.lammps_engine.Ensemble">Ensemble</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize">
+<span class="sig-name descname"><span class="pre">minimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSEngine.minimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize" title="Permalink to this definition"></a></dt>
+<dd><p>Minimizes the simulation energy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Maximum number of steps for the energy minimization.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.pressure">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pressure</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.pressure" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the pressure of the simulation in <code class="docutils literal notranslate"><span class="pre">atm</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pressure in <code class="docutils literal notranslate"><span class="pre">atm</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.reset_config">
+<span class="sig-name descname"><span class="pre">reset_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSEngine.reset_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.reset_config" title="Permalink to this definition"></a></dt>
+<dd><p>Resets the configuration of the simulation to that in <code class="docutils literal notranslate"><span class="pre">saved_config</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equilibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSEngine.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.run" title="Permalink to this definition"></a></dt>
+<dd><p>Runs a simulation.  Must follow a call to <code class="docutils literal notranslate"><span class="pre">setup_universe()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">setup_simulation()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Number of steps for the time integrator.</p></li>
+<li><p><strong>equilibration</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – If <cite>True</cite>, run is equilibration which does not store the
+<code class="docutils literal notranslate"><span class="pre">trajectory</span></code>. Otherwise run is prodution.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.save_config">
+<span class="sig-name descname"><span class="pre">save_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSEngine.save_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.save_config" title="Permalink to this definition"></a></dt>
+<dd><p>Sets <code class="docutils literal notranslate"><span class="pre">self.saved_config</span></code> to the current configuration</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.saved_config">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">saved_config</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.saved_config" title="Permalink to this definition"></a></dt>
+<dd><p>Get the saved configuration of the atomic positions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The configuration from the start of the run. Each row of the
+<code class="docutils literal notranslate"><span class="pre">array</span></code> corresponds to the LAMMPS atom <code class="docutils literal notranslate"><span class="pre">ID</span> <span class="pre">-</span> <span class="pre">1</span></code> (offset is due
+to array zero indexing) and the columns of the <code class="docutils literal notranslate"><span class="pre">array</span></code> are the
+<code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code> components of the <code class="docutils literal notranslate"><span class="pre">position</span></code>, the <code class="docutils literal notranslate"><span class="pre">mass</span></code> and
+the <code class="docutils literal notranslate"><span class="pre">charge</span></code> of each <code class="docutils literal notranslate"><span class="pre">Atom</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_simulation">
+<span class="sig-name descname"><span class="pre">setup_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSEngine.setup_simulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_simulation" title="Permalink to this definition"></a></dt>
+<dd><p>Sets simulation parameters in LAMMPS, such as the thermodynamic
+variables, thermostat/barostat parameters and trajectory settings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traj_step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – How many steps the simulation should take between dumping each
+<code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> frame</p></li>
+<li><p><strong>time_step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Simulation timestep in <code class="docutils literal notranslate"><span class="pre">fs</span></code></p></li>
+<li><p><strong>**settings</strong> – Passed to <code class="docutils literal notranslate"><span class="pre">LAMMPSSimulation</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_universe">
+<span class="sig-name descname"><span class="pre">setup_universe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSEngine.setup_universe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_universe" title="Permalink to this definition"></a></dt>
+<dd><p>Creates the simulation box, the atomic configuration, and the topology
+in LAMMPS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>universe</strong> (<a class="reference internal" href="../simulation.html#MDMC.MD.simulation.Universe" title="MDMC.MD.simulation.Universe"><em>Universe</em></a>) – The MDMC <code class="docutils literal notranslate"><span class="pre">Universe</span></code> which will be setup in LAMMPS.</p></li>
+<li><p><strong>**settings</strong> – <dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">atom_style</span></code> (<cite>str</cite>)</dt><dd><p>A LAMMPS <code class="docutils literal notranslate"><span class="pre">atom_style</span></code> <cite>str</cite>. The default setting of <code class="docutils literal notranslate"><span class="pre">real</span></code>
+will generally be appropriate.</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.temperature">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">temperature</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.temperature" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the temperature of the simulation in <code class="docutils literal notranslate"><span class="pre">K</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Temperature in <code class="docutils literal notranslate"><span class="pre">K</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.thermostat">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thermostat</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.thermostat" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the <cite>str</cite> which specifies the thermostat</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The <code class="docutils literal notranslate"><span class="pre">thermostat</span></code> name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>str</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.time_step">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_step</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.time_step" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the simulation time step in <code class="docutils literal notranslate"><span class="pre">fs</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Simulation time step in <code class="docutils literal notranslate"><span class="pre">fs</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.traj_step">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">traj_step</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.traj_step" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the number of simulation steps between saving the
+<code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of simulation steps that elapse between the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code>
+being stored</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>int</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.update_parameters">
+<span class="sig-name descname"><span class="pre">update_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSEngine.update_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.update_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the <code class="docutils literal notranslate"><span class="pre">MDEngine</span></code> force field <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> objects from the
+<code class="docutils literal notranslate"><span class="pre">Universe</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">LAMMPSSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSSimulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation" title="Permalink to this definition"></a></dt>
+<dd><p>The attributes and methods related running a simulation in LAMMPS using a
+<code class="docutils literal notranslate"><span class="pre">LAMMPSUniverse</span></code> object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>universe</strong> (<a class="reference internal" href="../simulation.html#MDMC.MD.simulation.Universe" title="MDMC.MD.simulation.Universe"><em>Universe</em></a>) – The MDMC <code class="docutils literal notranslate"><span class="pre">Universe</span></code> used to create the <code class="docutils literal notranslate"><span class="pre">LAMMPSUniverse</span></code>.</p></li>
+<li><p><strong>traj_step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – How many steps the simulation should take between dumping each
+<code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> frame</p></li>
+<li><p><strong>time_step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Simulation timestep in <code class="docutils literal notranslate"><span class="pre">fs</span></code>, default is <code class="docutils literal notranslate"><span class="pre">1.</span></code></p></li>
+<li><p><strong>lmp</strong> (<em>PyLammps</em><em>, </em><em>optional</em>) – Set the <code class="docutils literal notranslate"><span class="pre">lmp</span></code> attribute to a <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object. Default is <cite>None</cite>,
+which results in a new <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object being initialised.</p></li>
+<li><p><strong>**settings</strong> – <code class="docutils literal notranslate"><span class="pre">temperature</span></code> (<cite>float</cite>)
+<code class="docutils literal notranslate"><span class="pre">skin</span></code> (<cite>float</cite>)
+<code class="docutils literal notranslate"><span class="pre">neighbor_steps</span></code> (<cite>int</cite>)
+<code class="docutils literal notranslate"><span class="pre">remove_linear_momentum</span></code> (<cite>int</cite>)
+<code class="docutils literal notranslate"><span class="pre">remove_angular_momentum</span></code> (<cite>int</cite>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.universe">
+<span class="sig-name descname"><span class="pre">universe</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.universe" title="Permalink to this definition"></a></dt>
+<dd><p>An MDMC <code class="docutils literal notranslate"><span class="pre">Universe</span></code> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../simulation.html#MDMC.MD.simulation.Universe" title="MDMC.MD.simulation.Universe">Universe</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.traj_step">
+<span class="sig-name descname"><span class="pre">traj_step</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.traj_step" title="Permalink to this definition"></a></dt>
+<dd><p>Number of simulation steps that elapse between the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> being
+stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.ensemble">
+<span class="sig-name descname"><span class="pre">ensemble</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.ensemble" title="Permalink to this definition"></a></dt>
+<dd><p>Simulation ensemble, which applies a <code class="docutils literal notranslate"><span class="pre">thermostat</span></code> and <code class="docutils literal notranslate"><span class="pre">barostat</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#MDMC.MD.engine_facades.lammps_engine.Ensemble" title="MDMC.MD.engine_facades.lammps_engine.Ensemble">Ensemble</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.ang_momentum_steps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ang_momentum_steps</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.ang_momentum_steps" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the number of steps between resetting the angular momentum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of steps between the angular momentum being removed</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>int</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.barostat">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">barostat</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.barostat" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the string which specifies the barostat</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The barostat name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>str</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.lin_momentum_steps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lin_momentum_steps</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.lin_momentum_steps" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the number of steps between resetting the linear momentum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of steps between the linear momentum being removed</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>int</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.neighbor_steps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">neighbor_steps</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.neighbor_steps" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the number of steps between neighbor list updates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of steps between neighbor list updates</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>int</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.pressure">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pressure</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.pressure" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the pressure of the simulation in <code class="docutils literal notranslate"><span class="pre">atm</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pressure in <code class="docutils literal notranslate"><span class="pre">atm</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.skin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">skin</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.skin" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the skin distance in <code class="docutils literal notranslate"><span class="pre">Ang</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The skin distance in <code class="docutils literal notranslate"><span class="pre">Ang</span></code>. This distance plus the force
+<code class="docutils literal notranslate"><span class="pre">cutoff</span></code> distance determines which atom pairs are stored in the
+neighbor list.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.temperature">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">temperature</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.temperature" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the temperature of the simulation in <code class="docutils literal notranslate"><span class="pre">K</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Temperature in <code class="docutils literal notranslate"><span class="pre">K</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.thermostat">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thermostat</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.thermostat" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the string which specifies the thermostat</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The thermostat name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>str</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.time_step">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_step</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSSimulation.time_step" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the simulation time step in <code class="docutils literal notranslate"><span class="pre">fs</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Simulation time step in <code class="docutils literal notranslate"><span class="pre">fs</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">LAMMPSUniverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSUniverse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse" title="Permalink to this definition"></a></dt>
+<dd><p>A class with what would be the equivalent in LAMMPS to the universe (i.e.
+the configuration and topology)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>universe</strong> (<a class="reference internal" href="../simulation.html#MDMC.MD.simulation.Universe" title="MDMC.MD.simulation.Universe"><em>Universe</em></a>) – The MDMC <code class="docutils literal notranslate"><span class="pre">Universe</span></code> used to create the <code class="docutils literal notranslate"><span class="pre">LAMMPSUniverse</span></code></p></li>
+<li><p><strong>lmp</strong> (<em>PyLammps</em><em>, </em><em>optional</em>) – Set the <code class="docutils literal notranslate"><span class="pre">lmp</span></code> attribute to a <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object. Default is <cite>None</cite>,
+which results in a new <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object being initialised.</p></li>
+<li><p><strong>**settings</strong> – <dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">atom_style</span></code> (<cite>str</cite>)</dt><dd><p>A LAMMPS <code class="docutils literal notranslate"><span class="pre">atom_style</span></code> string. The default setting of <code class="docutils literal notranslate"><span class="pre">real</span></code> will
+generally be appropriate.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">nonbonded_mix</span></code> (<cite>str</cite>)</dt><dd><p>The name of the formula which determines non-bonded mixing</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.universe">
+<span class="sig-name descname"><span class="pre">universe</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.universe" title="Permalink to this definition"></a></dt>
+<dd><p>The MDMC <code class="docutils literal notranslate"><span class="pre">Universe</span></code> which has been converted to this
+<code class="docutils literal notranslate"><span class="pre">LAMMPSUniverse</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../simulation.html#MDMC.MD.simulation.Universe" title="MDMC.MD.simulation.Universe">Universe</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.atom_dict">
+<span class="sig-name descname"><span class="pre">atom_dict</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.atom_dict" title="Permalink to this definition"></a></dt>
+<dd><p>A <cite>dict</cite> with {<code class="docutils literal notranslate"><span class="pre">MDMC_atom</span></code>: <code class="docutils literal notranslate"><span class="pre">LAMMPS_atom_id</span></code>}, where <code class="docutils literal notranslate"><span class="pre">MDMC_atom</span></code>
+is an MDMC <code class="docutils literal notranslate"><span class="pre">Atom</span></code> and <code class="docutils literal notranslate"><span class="pre">LAMMPS_atom</span></code> is the corresponding LAMMPS
+<code class="docutils literal notranslate"><span class="pre">Atom</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.atom_types">
+<span class="sig-name descname"><span class="pre">atom_types</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.atom_types" title="Permalink to this definition"></a></dt>
+<dd><p>A <cite>dict</cite> with {<code class="docutils literal notranslate"><span class="pre">type_ID</span></code>: <code class="docutils literal notranslate"><span class="pre">MDMC_atom_group</span></code>}, where the <code class="docutils literal notranslate"><span class="pre">type_ID</span></code>
+is a unique <cite>int</cite> and <code class="docutils literal notranslate"><span class="pre">MDMC_atom_group</span></code> is a <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code> which
+are identical in terms of element and interactions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.atom_type_properties">
+<span class="sig-name descname"><span class="pre">atom_type_properties</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.atom_type_properties" title="Permalink to this definition"></a></dt>
+<dd><p>Each <cite>tuple</cite> is (<code class="docutils literal notranslate"><span class="pre">symbol</span></code>, <code class="docutils literal notranslate"><span class="pre">mass</span></code>) for all <code class="docutils literal notranslate"><span class="pre">atom_types</span></code> (ordered)
+by <code class="docutils literal notranslate"><span class="pre">atom_type</span></code>, where <code class="docutils literal notranslate"><span class="pre">symbol</span></code> is a <cite>str</cite> specifying the element of
+the <code class="docutils literal notranslate"><span class="pre">atom_type</span></code> and <code class="docutils literal notranslate"><span class="pre">mass</span></code> is a <cite>float</cite> specifying the <code class="docutils literal notranslate"><span class="pre">mass</span></code> of
+the <code class="docutils literal notranslate"><span class="pre">atom_type</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.bonds">
+<span class="sig-name descname"><span class="pre">bonds</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.bonds" title="Permalink to this definition"></a></dt>
+<dd><p>All <code class="docutils literal notranslate"><span class="pre">Bond</span></code> interactions in the MDMC <code class="docutils literal notranslate"><span class="pre">Universe</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of Bonds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.angles">
+<span class="sig-name descname"><span class="pre">angles</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.angles" title="Permalink to this definition"></a></dt>
+<dd><p>All <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code> interactions in the MDMC <code class="docutils literal notranslate"><span class="pre">Universe</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of BondAngles</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.couls">
+<span class="sig-name descname"><span class="pre">couls</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.couls" title="Permalink to this definition"></a></dt>
+<dd><p>All <code class="docutils literal notranslate"><span class="pre">Coulombic</span></code> interactions in the MDMC <code class="docutils literal notranslate"><span class="pre">Universe</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of Coulombics</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.disps">
+<span class="sig-name descname"><span class="pre">disps</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.disps" title="Permalink to this definition"></a></dt>
+<dd><p>All <code class="docutils literal notranslate"><span class="pre">Dispersion</span></code> interactions in the MDMC <code class="docutils literal notranslate"><span class="pre">Universe</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of Dispersions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.bond_ID">
+<span class="sig-name descname"><span class="pre">bond_ID</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.bond_ID" title="Permalink to this definition"></a></dt>
+<dd><p>A <cite>dict</cite> of {<code class="docutils literal notranslate"><span class="pre">bond</span></code>: <code class="docutils literal notranslate"><span class="pre">ID</span> <span class="pre">pairs</span></code>} relating each <code class="docutils literal notranslate"><span class="pre">Bond</span></code> to a LAMMPS
+<code class="docutils literal notranslate"><span class="pre">ID</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.angle_ID">
+<span class="sig-name descname"><span class="pre">angle_ID</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.angle_ID" title="Permalink to this definition"></a></dt>
+<dd><p>A <cite>dict</cite> of {<code class="docutils literal notranslate"><span class="pre">angle</span></code>: <code class="docutils literal notranslate"><span class="pre">ID</span> <span class="pre">pairs</span></code>} relating each <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code> to a
+LAMMPS <code class="docutils literal notranslate"><span class="pre">ID</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.proper_ID">
+<span class="sig-name descname"><span class="pre">proper_ID</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.proper_ID" title="Permalink to this definition"></a></dt>
+<dd><p>A <cite>dict</cite> of {<code class="docutils literal notranslate"><span class="pre">proper</span></code>: <code class="docutils literal notranslate"><span class="pre">ID</span> <span class="pre">pairs</span></code>} relating each <code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code>
+(with <code class="docutils literal notranslate"><span class="pre">improper</span> <span class="pre">==</span> <span class="pre">False</span></code>) to a LAMMPS <code class="docutils literal notranslate"><span class="pre">ID</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.improper_ID">
+<span class="sig-name descname"><span class="pre">improper_ID</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.improper_ID" title="Permalink to this definition"></a></dt>
+<dd><p>A <cite>dict</cite> of {<code class="docutils literal notranslate"><span class="pre">improper</span></code>: <code class="docutils literal notranslate"><span class="pre">ID</span> <span class="pre">pairs</span></code>} relating each <code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code>
+(with <code class="docutils literal notranslate"><span class="pre">improper</span> <span class="pre">==</span> <span class="pre">True</span></code>) to a LAMMPS <code class="docutils literal notranslate"><span class="pre">ID</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.apply_constraints">
+<span class="sig-name descname"><span class="pre">apply_constraints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSUniverse.apply_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.apply_constraints" title="Permalink to this definition"></a></dt>
+<dd><p>Adds a constraint <code class="docutils literal notranslate"><span class="pre">fix</span></code> to LAMMPS for all bonds and bond angles which
+are constrained</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.nonbonded_mix">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nonbonded_mix</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.nonbonded_mix" title="Permalink to this definition"></a></dt>
+<dd><p>Get or set the formula used to calculate nonbonded interactions between
+different <code class="docutils literal notranslate"><span class="pre">atom_types</span></code></p>
+<p>Options are <code class="docutils literal notranslate"><span class="pre">geometric</span></code>, <code class="docutils literal notranslate"><span class="pre">arithmetic</span></code> and <code class="docutils literal notranslate"><span class="pre">sixthpower</span></code>, which are
+defined in the LAMMPS documentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The name of the formula which determines non-bonded mixing</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>str</cite></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – <cite>str</cite> specifies an unsupported mix name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.set_config">
+<span class="sig-name descname"><span class="pre">set_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSUniverse.set_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.set_config" title="Permalink to this definition"></a></dt>
+<dd><p>Changes the positions of all of the atoms in the LAMMPS wrapper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><em>numpy.ndarray</em></a>) – The <code class="docutils literal notranslate"><span class="pre">positions</span></code>, <code class="docutils literal notranslate"><span class="pre">mass</span></code> and <code class="docutils literal notranslate"><span class="pre">charge</span></code> of the <code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects,
+used to set the LAMMPS configuration. Each row of the array must
+correspond to the LAMMPS <code class="docutils literal notranslate"><span class="pre">atom</span> <span class="pre">ID</span> <span class="pre">-</span> <span class="pre">1</span></code> (offset is due to <code class="docutils literal notranslate"><span class="pre">array</span></code>
+zero indexing) and the columns of the <code class="docutils literal notranslate"><span class="pre">array</span></code> must be the <code class="docutils literal notranslate"><span class="pre">x</span></code>,
+<code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code> components of the <code class="docutils literal notranslate"><span class="pre">position</span></code>, the <code class="docutils literal notranslate"><span class="pre">mass</span></code> and the
+<code class="docutils literal notranslate"><span class="pre">charge</span></code> of each <code class="docutils literal notranslate"><span class="pre">Atom</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#IndexError" title="(in Python v3.10)"><strong>IndexError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">config</span></code> does not contain the same number of atoms as LAMMPS
+    possesses.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.update_parameters">
+<span class="sig-name descname"><span class="pre">update_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#LAMMPSUniverse.update_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.update_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the LAMMPS force field parameters from the MDMC universe</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">PyLammpsAttribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'full'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#PyLammpsAttribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute" title="Permalink to this definition"></a></dt>
+<dd><p>A class which has a <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object as an attribute</p>
+<p>It possesses attributes and methods relating to the <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lmp</strong> (<em>PyLammps</em><em>, </em><em>optional</em>) – Set the <code class="docutils literal notranslate"><span class="pre">lmp</span></code> attribute to a <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object. Default is <cite>None</cite>,
+which results in a new <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object being initialised.</p></li>
+<li><p><strong>atom_style</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – The LAMMPS <code class="docutils literal notranslate"><span class="pre">atom_style</span></code>, which determines the properties that can be
+associated which the atoms (e.g. <code class="docutils literal notranslate"><span class="pre">charge</span></code>, <code class="docutils literal notranslate"><span class="pre">bonds</span></code>). Default is
+<code class="docutils literal notranslate"><span class="pre">full</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.lmp">
+<span class="sig-name descname"><span class="pre">lmp</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.lmp" title="Permalink to this definition"></a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> object owned by this class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>PyLammps</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.dumps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dumps</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.dumps" title="Permalink to this definition"></a></dt>
+<dd><p>Get the PyLammps wrapper list of dumps</p>
+<p>Dumps are LAMMPS commands which write atom quantities to file for
+specified timesteps</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.fix_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fix_names</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.fix_names" title="Permalink to this definition"></a></dt>
+<dd><p>Get the names of the <code class="docutils literal notranslate"><span class="pre">fixes</span></code> applied in LAMMPS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The names of the <code class="docutils literal notranslate"><span class="pre">fixes</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>list</cite> of <cite>str</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.fix_styles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fix_styles</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.fix_styles" title="Permalink to this definition"></a></dt>
+<dd><p>Get the styles of the <code class="docutils literal notranslate"><span class="pre">fixes</span></code> applied in LAMMPS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The styles of the <code class="docutils literal notranslate"><span class="pre">fixes</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>list</cite> of <cite>str</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.fixes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fixes</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.fixes" title="Permalink to this definition"></a></dt>
+<dd><p>Get the <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> wrapper <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">fixes</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Each <cite>dict</cite> states the <code class="docutils literal notranslate"><span class="pre">group</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code> and <code class="docutils literal notranslate"><span class="pre">style</span></code> of a LAMMPS
+<a href="#id1"><span class="problematic" id="id2">``</span></a>fix` which is applied</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>list</cite> of <cite>dict</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.system_state">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">system_state</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute.system_state" title="Permalink to this definition"></a></dt>
+<dd><p>Get the <code class="docutils literal notranslate"><span class="pre">PyLammps</span></code> wrapper system <code class="docutils literal notranslate"><span class="pre">state</span></code> <cite>dict</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Contains the properties of the simulation box.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">System</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.convert_unit">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">convert_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_lammps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#convert_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.convert_unit" title="Permalink to this definition"></a></dt>
+<dd><p>Converts between MDMC units and LAMMPS real units</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>array_like</em><em> or </em><em>float_like</em>) – The value of the physical property to be converted, in MDMC units.
+Must derive from either <code class="docutils literal notranslate"><span class="pre">ndarray</span></code> or <cite>float</cite>.</p></li>
+<li><p><strong>unit</strong> (<a class="reference internal" href="../../common/units.html#MDMC.common.units.Unit" title="MDMC.common.units.Unit"><em>Unit</em></a><em>, </em><em>optional</em>) – The unit of the <code class="docutils literal notranslate"><span class="pre">value</span></code>. If <cite>None</cite>, the <code class="docutils literal notranslate"><span class="pre">value</span></code> must possess a
+<code class="docutils literal notranslate"><span class="pre">unit</span></code> attribute i.e. derive from <code class="docutils literal notranslate"><span class="pre">UnitFloat</span></code> or <code class="docutils literal notranslate"><span class="pre">UnitArray</span></code>.
+Default is <cite>None</cite>.</p></li>
+<li><p><strong>to_lammps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – If <cite>True</cite> the conversion is from MDMC units to LAMMPS units. Default is
+<cite>True</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value in LAMMPS units if <code class="docutils literal notranslate"><span class="pre">to_lammps</span></code> is <cite>True</cite>, otherwise value in
+MDMC units. Return type is same as <code class="docutils literal notranslate"><span class="pre">value</span></code> type.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>float</cite> or <cite>numpy.ndarray</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.parse_all_nonbonded_styles">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">parse_all_nonbonded_styles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interactions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#parse_all_nonbonded_styles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.parse_all_nonbonded_styles" title="Permalink to this definition"></a></dt>
+<dd><p>Converts all <code class="docutils literal notranslate"><span class="pre">NonBondedInteractions</span></code> to LAMMPS pair styles</p>
+<p>This is required because LAMMPS frequently treats <code class="docutils literal notranslate"><span class="pre">Coulombic</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Disperion</span></code> interactions together; these cases need to be dealt with to
+generate the correct input to LAMMPS <code class="docutils literal notranslate"><span class="pre">pair_styles</span></code>.  For example, while
+the <code class="docutils literal notranslate"><span class="pre">pair_styles</span></code> <code class="docutils literal notranslate"><span class="pre">buck</span></code>, <code class="docutils literal notranslate"><span class="pre">lj/cut</span></code>, <code class="docutils literal notranslate"><span class="pre">coul/cut</span></code> and <code class="docutils literal notranslate"><span class="pre">coul/long</span></code> can
+all be passed separately, the dispersive and coulombic styles are combined
+(dispersive always preceding coulombic) as this is dealt with more
+efficiently in the LAMMPS engine. <code class="docutils literal notranslate"><span class="pre">buck/long</span></code> and <code class="docutils literal notranslate"><span class="pre">lj/long</span></code> only exist
+as part of other pair styles, such as <code class="docutils literal notranslate"><span class="pre">buck/long/coul/long</span></code> and
+<code class="docutils literal notranslate"><span class="pre">lj/long/coul/long</span></code>, so must be combined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>interactions</strong> (<em>list of NonBondedInteractions</em>) – <code class="docutils literal notranslate"><span class="pre">NonBondedInteractions</span></code> to be parsed into LAMMPS <code class="docutils literal notranslate"><span class="pre">pair_styles</span></code>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <cite>dict</cite> with {<code class="docutils literal notranslate"><span class="pre">pair_styles</span></code>: <code class="docutils literal notranslate"><span class="pre">pair_modifiers</span></code>} where
+<code class="docutils literal notranslate"><span class="pre">pair_styles</span></code> is a <cite>tuple</cite> of all of the combined LAMMPS pair styles
+corresponding to <code class="docutils literal notranslate"><span class="pre">interactions</span></code>. Each <cite>tuple</cite> contains the combined
+<code class="docutils literal notranslate"><span class="pre">pair_style</span></code> as one element, and the <code class="docutils literal notranslate"><span class="pre">cutoffs</span></code> as the second element
+e.g. <code class="docutils literal notranslate"><span class="pre">('lj/cut/coul/cut',</span> <span class="pre">5.0</span> <span class="pre">10.0)</span></code>. If additional arguments are
+required when combining styles, they will be added and returned in the
+<cite>tuple</cite> as the third and middle element
+e.g. <code class="docutils literal notranslate"><span class="pre">('buck/long/coul/long',</span> <span class="pre">'long</span> <span class="pre">long',</span> <span class="pre">'10.0'</span></code>).
+<code class="docutils literal notranslate"><span class="pre">pair_modifiers</span></code> is a <cite>list</cite> of <cite>str</cite> for setting <code class="docutils literal notranslate"><span class="pre">pair_modify</span></code> for
+the corresponding <code class="docutils literal notranslate"><span class="pre">pair_style</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>dict</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">Dispersion</span></code> and <code class="docutils literal notranslate"><span class="pre">Coulombic</span></code> interactions have different long
+    range <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>, which is not implemented in LAMMPS.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If long range <code class="docutils literal notranslate"><span class="pre">Dispersion</span></code> not defined in conjunction with a long
+    range <code class="docutils literal notranslate"><span class="pre">Coulombic</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.parse_bonded_coefficients">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">parse_bonded_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interaction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#parse_bonded_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.parse_bonded_coefficients" title="Permalink to this definition"></a></dt>
+<dd><p>Orders MDMC <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> objects for input to LAMMPS <code class="docutils literal notranslate"><span class="pre">bond_coeff</span></code> and
+<code class="docutils literal notranslate"><span class="pre">angle_coeff</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>interaction</strong> (<em>BondedInteraction</em>) – <code class="docutils literal notranslate"><span class="pre">BondedInteraction</span></code> where its style and parameters will be parsed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Style and parameters converted to the input format for LAMMPS
+<code class="docutils literal notranslate"><span class="pre">bond_coeff</span></code> and <code class="docutils literal notranslate"><span class="pre">angle_coeff</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>list</cite> of <cite>str</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">interaction</span></code> has a <code class="docutils literal notranslate"><span class="pre">function</span></code> that has not been implemented in
+    the LAMMPS facade.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.parse_bonded_styles">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">parse_bonded_styles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interaction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#parse_bonded_styles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.parse_bonded_styles" title="Permalink to this definition"></a></dt>
+<dd><p>Converts MDMC <code class="docutils literal notranslate"><span class="pre">InteractionFunction</span></code> names for <code class="docutils literal notranslate"><span class="pre">BondedInteractions</span></code> to
+LAMMP bond styles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>interaction</strong> (<em>BondedInteraction</em>) – <code class="docutils literal notranslate"><span class="pre">BondedInteraction</span></code> to be parsed into LAMMPS bond style.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>LAMMPS bond style corresponding to <code class="docutils literal notranslate"><span class="pre">interaction</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>str</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">interaction</span></code> has a <code class="docutils literal notranslate"><span class="pre">function</span></code> that has not been implemented in
+    the LAMMPS facade.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.parse_constraint">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">parse_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraint_algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bond_ID_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_ID_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#parse_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.parse_constraint" title="Permalink to this definition"></a></dt>
+<dd><p>Converts an MDMC <code class="docutils literal notranslate"><span class="pre">ConstraintAlgorithm</span></code> for input to LAMMPS fix</p>
+<p>At least one of bonds and angles must be passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>constraint_algorithm</strong> (<a class="reference internal" href="../simulation.html#MDMC.MD.simulation.ConstraintAlgorithm" title="MDMC.MD.simulation.ConstraintAlgorithm"><em>ConstraintAlgorithm</em></a>) – An object that derives from <code class="docutils literal notranslate"><span class="pre">ConstraintAlgorithm</span></code> to be parsed.</p></li>
+<li><p><strong>bonds</strong> (<em>list of Bonds</em><em>, </em><em>optional</em>) – Constrained <code class="docutils literal notranslate"><span class="pre">Bond</span></code> interactions.</p></li>
+<li><p><strong>bond_ID_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><em>optional</em>) – <cite>dict</cite> with {<code class="docutils literal notranslate"><span class="pre">bond</span></code>: <code class="docutils literal notranslate"><span class="pre">ID</span> <span class="pre">pairs</span></code>} relating each <code class="docutils literal notranslate"><span class="pre">Bond</span></code> object to a
+LAMMPS <code class="docutils literal notranslate"><span class="pre">ID</span></code>.</p></li>
+<li><p><strong>angles</strong> (<em>list of BondAngles</em><em>, </em><em>optional</em>) – Constrained <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code> interactions.</p></li>
+<li><p><strong>angle_ID_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><em>optional</em>) – <cite>dict</cite> with {<code class="docutils literal notranslate"><span class="pre">angle</span></code>: <code class="docutils literal notranslate"><span class="pre">ID</span> <span class="pre">pairs</span></code>} relating each <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code> object
+to a LAMMPS <code class="docutils literal notranslate"><span class="pre">ID</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Input parameters for LAMMPS <code class="docutils literal notranslate"><span class="pre">fix</span></code>, not including the first two terms
+(<code class="docutils literal notranslate"><span class="pre">fix</span> <span class="pre">ID</span></code>, <code class="docutils literal notranslate"><span class="pre">group-ID</span></code>).  The output list has a maximum length of 7,
+where the last four entries are optional but a minimum of two is
+required:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">algorithm</span> <span class="n">name</span><span class="p">,</span> <span class="n">accuracy</span><span class="p">,</span> <span class="nb">max</span> <span class="n">iterations</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">bond</span> <span class="n">IDs</span><span class="p">,</span>
+ <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">angle</span> <span class="n">IDs</span><span class="p">]</span>
+</pre></div>
+</div>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>list</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – If there is not at least one <code class="docutils literal notranslate"><span class="pre">constrained</span></code> <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> passed.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">constraint_algorithm</span></code> not been implemented in the LAMMPS facade.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.parse_dispersion_coefficients">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">parse_dispersion_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interactions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonbonded_styles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#parse_dispersion_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.parse_dispersion_coefficients" title="Permalink to this definition"></a></dt>
+<dd><p>Orders MDMC <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> objects for input to LAMMPS <code class="docutils literal notranslate"><span class="pre">pair_coeff</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interactions</strong> (<em>list of NonBondedInteraction</em>) – <code class="docutils literal notranslate"><span class="pre">NonBondedInteractions</span></code> where their style and parameters will be
+parsed.</p></li>
+<li><p><strong>nonbonded_styles</strong> (<em>list of tuple</em>) – The parsed <code class="docutils literal notranslate"><span class="pre">NonBondedInteractions</span></code>, where the combined <code class="docutils literal notranslate"><span class="pre">pair_styles</span></code>
+have been created by the <code class="docutils literal notranslate"><span class="pre">parse_all_nonbonded_styles</span></code> function.
+If <cite>None</cite> (default), the <code class="docutils literal notranslate"><span class="pre">interactions</span></code> are parsed manually.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Each element is a partial <code class="docutils literal notranslate"><span class="pre">pair_coeff</span></code> command, containing a
+<code class="docutils literal notranslate"><span class="pre">pair_style</span></code>, the ordered <code class="docutils literal notranslate"><span class="pre">Dispersion</span></code> <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> objects
+converted to the correct input format for LAMMPS <code class="docutils literal notranslate"><span class="pre">pair_coeff</span></code>, and the
+<code class="docutils literal notranslate"><span class="pre">cutoff</span></code>.
+For example, if interactions contains a <code class="docutils literal notranslate"><span class="pre">Buckingham</span></code> with
+<code class="docutils literal notranslate"><span class="pre">Parameter</span></code> <code class="docutils literal notranslate"><span class="pre">A,</span> <span class="pre">B,</span> <span class="pre">C</span> <span class="pre">=</span> <span class="pre">4.184,</span> <span class="pre">1.0,</span> <span class="pre">4.184</span></code>, and <code class="docutils literal notranslate"><span class="pre">cutoff</span> <span class="pre">=</span> <span class="pre">20.0</span></code>,
+and a <code class="docutils literal notranslate"><span class="pre">Coulombic</span></code> with a <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> of <code class="docutils literal notranslate"><span class="pre">10.0</span></code>, the <cite>str</cite> element of
+the <cite>list</cite> will be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;buck/coul/cut 1.0 1.0 1.0 20.0 10.0&#39;</span>
+</pre></div>
+</div>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>list</cite> of <cite>str</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">interaction</span></code> has a <code class="docutils literal notranslate"><span class="pre">function</span></code> that has not been implemented in
+    the LAMMPS facade.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If the LAMMPS Buckingham parameter rho is less than or equal to zero.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.parse_kspace_solver">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">parse_kspace_solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solver</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#parse_kspace_solver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.parse_kspace_solver" title="Permalink to this definition"></a></dt>
+<dd><p>Converts an MDMC <code class="docutils literal notranslate"><span class="pre">KSpaceSolver</span></code> for input to LAMMPS <code class="docutils literal notranslate"><span class="pre">kspace_style</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>solver</strong> (<a class="reference internal" href="../simulation.html#MDMC.MD.simulation.KSpaceSolver" title="MDMC.MD.simulation.KSpaceSolver"><em>KSpaceSolver</em></a>) – A <code class="docutils literal notranslate"><span class="pre">KSpaceSolver</span></code> to be parsed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Style and parameters for input to LAMMPS <code class="docutils literal notranslate"><span class="pre">kspace_style</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>list</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">solver</span></code> type has has not been implemented in the LAMMPS facade.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_modifications">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">parse_nonbonded_modifications</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interaction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#parse_nonbonded_modifications"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_modifications" title="Permalink to this definition"></a></dt>
+<dd><p>Parses MDMC <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> attributes into <cite>list</cite> that can be used with
+LAMMPS <code class="docutils literal notranslate"><span class="pre">pair_modify</span></code> command</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.interaction">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">interaction</span></span><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.interaction" title="Permalink to this definition"></a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> for which the attributes are parsed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Interaction</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A <cite>list</cite> of <cite>str</cite> which are a valid <code class="docutils literal notranslate"><span class="pre">pair_modify</span></code> command, or an empty
+<cite>list</cite> if no <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> attributes require setting <code class="docutils literal notranslate"><span class="pre">pair_modify</span></code></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>list</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_styles">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">parse_nonbonded_styles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interaction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#parse_nonbonded_styles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_styles" title="Permalink to this definition"></a></dt>
+<dd><p>Converts MDMC <code class="docutils literal notranslate"><span class="pre">InteractionFunction</span></code> names for <code class="docutils literal notranslate"><span class="pre">NonBondedInteractions</span></code> to
+LAMMPS pair styles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>interaction</strong> (<em>NonBondedInteraction</em>) – <code class="docutils literal notranslate"><span class="pre">NonBondedInteraction</span></code> to be parsed into LAMMPS pair style.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<code class="docutils literal notranslate"><span class="pre">styles</span></code>, <code class="docutils literal notranslate"><span class="pre">mods</span></code>) where <code class="docutils literal notranslate"><span class="pre">styles</span></code> is a <cite>list</cite> of <cite>str</cite> of LAMMPS
+pair style corresponding to the <code class="docutils literal notranslate"><span class="pre">interaction</span></code>, and <code class="docutils literal notranslate"><span class="pre">mods</span></code> is a
+<cite>list</cite> of <cite>str</cite> of LAMMPS pair modifications corresponding to the
+interaction</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>tuple</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">interaction</span></code> has a <code class="docutils literal notranslate"><span class="pre">function</span></code> that has not been implemented in
+    the LAMMPS facade.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.partition">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">partition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#partition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.partition" title="Permalink to this definition"></a></dt>
+<dd><p>Partitions an <code class="docutils literal notranslate"><span class="pre">iterable</span></code> using a predicate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>iterable</em>) – An <code class="docutils literal notranslate"><span class="pre">interable</span></code> to be partitioned.</p></li>
+<li><p><strong>predicate</strong> (<em>function</em>) – A predicate that can be applied to items to returned <cite>True</cite> or <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <cite>tuple</cite> of (<code class="docutils literal notranslate"><span class="pre">gen_true</span></code>, <code class="docutils literal notranslate"><span class="pre">gen_false</span></code>), where <code class="docutils literal notranslate"><span class="pre">gen_true</span></code> is a
+generator of all items for which the <code class="docutils literal notranslate"><span class="pre">predicate</span></code> returned <cite>True</cite>, and
+<code class="docutils literal notranslate"><span class="pre">gen_false</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">generator</span> <span class="pre">of</span> <span class="pre">all</span> <span class="pre">items</span> <span class="pre">for</span> <span class="pre">which</span> <span class="pre">the</span> <span class="pre">``predicate</span></code>
+returned <cite>False</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>tuple</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.MD.engine_facades.lammps_engine.partition_interactions">
+<span class="sig-prename descclassname"><span class="pre">MDMC.MD.engine_facades.lammps_engine.</span></span><span class="sig-name descname"><span class="pre">partition_interactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interactions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unpartitioned</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/MD/engine_facades/lammps_engine.html#partition_interactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.engine_facades.lammps_engine.partition_interactions" title="Permalink to this definition"></a></dt>
+<dd><p>Partitions an <code class="docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> objects using a <cite>list</cite> of
+<code class="docutils literal notranslate"><span class="pre">Interaction</span></code> <code class="docutils literal notranslate"><span class="pre">names</span></code></p>
+<p>This occurs by using <code class="docutils literal notranslate"><span class="pre">partition</span></code> to filter out one <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> type
+for each loop, so previously identified <code class="docutils literal notranslate"><span class="pre">Interactions</span></code> are no longer
+considered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interactions</strong> (<em>iterable of Interactions</em>) – An <code class="docutils literal notranslate"><span class="pre">interable</span></code> of <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> objects to be partitioned.</p></li>
+<li><p><strong>names</strong> (<em>list of str</em>) – Names of <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> classes.</p></li>
+<li><p><strong>unpartitioned</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – If <cite>True</cite>, then a generator containing any <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> objects that
+did not have a name in <code class="docutils literal notranslate"><span class="pre">names</span></code> is returned as an additional item in
+the <cite>tuple</cite>. Default is <cite>False</cite>.</p></li>
+<li><p><strong>lst</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – If <cite>True</cite>, then the returned <cite>tuple</cite> contains <cite>list</cite> rather than
+generators. <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> objects which have the name specified by
+<code class="docutils literal notranslate"><span class="pre">names[n]</span></code>. Default is <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <cite>tuple</cite> of length <code class="docutils literal notranslate"><span class="pre">len(names)</span></code> where <code class="docutils literal notranslate"><span class="pre">index</span></code> <code class="docutils literal notranslate"><span class="pre">n</span></code> is a generator
+of all of the <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> objects which have the name specified by
+<code class="docutils literal notranslate"><span class="pre">names[n]</span></code>. If <code class="docutils literal notranslate"><span class="pre">unpartitioned</span></code> is <cite>True</cite>, <cite>tuple</cite> is length <code class="docutils literal notranslate"><span class="pre">n+1</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">lst</span></code> is <cite>True</cite>, the generators are replaced by <cite>list</cite>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>tuple</cite></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Partion <code class="docutils literal notranslate"><span class="pre">interactions</span></code> into <code class="docutils literal notranslate"><span class="pre">Bonds</span></code> and <code class="docutils literal notranslate"><span class="pre">BondAngles</span></code>:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bonds</span><span class="p">,</span> <span class="n">angles</span> <span class="o">=</span> <span class="n">partition_interactions</span><span class="p">(</span><span class="n">interactions</span><span class="p">,</span>
+                                       <span class="p">[</span><span class="s1">&#39;Bond, BondAngle&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div></blockquote>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="facade.html" class="btn btn-neutral float-left" title="facade" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../force_fields.html" class="btn btn-neutral float-right" title="force_fields" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

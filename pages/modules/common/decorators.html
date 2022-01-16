@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>decorators &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="df_operations" href="df_operations.html" />
+    <link rel="prev" title="constants" href="constants.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">2. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulations.html">3. Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../parameter-refinement.html">4. Parameter Refinement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">5. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/building-a-universe.html">Building an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/units.html">Units in MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/coding_standards.html">Coding Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/documentation.html">Documentation Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/units.html">Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/management.html">MDMC Software Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/vscode.html">Debugging inside Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../common.html">common</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="constants.html">constants</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">decorators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="df_operations.html">df_operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mathematics.html">mathematics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resolution_functions.html">resolution_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html">units</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../control.html">control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gui.html">gui</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../md.html">MD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readers.html">readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../refinement.html">refinement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trajectory_analysis.html">trajectory_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../common.html">common</a> &raquo;</li>
+      <li>decorators</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/pages/modules/common/decorators.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-MDMC.common.decorators">
+<span id="decorators"></span><h1>decorators<a class="headerlink" href="#module-MDMC.common.decorators" title="Permalink to this headline"></a></h1>
+<p>Module which defines decorators</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.common.decorators.mod_docstring">
+<span class="sig-prename descclassname"><span class="pre">MDMC.common.decorators.</span></span><span class="sig-name descname"><span class="pre">mod_docstring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replacements</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/common/decorators.html#mod_docstring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.common.decorators.mod_docstring" title="Permalink to this definition"></a></dt>
+<dd><p>Decorator for modifying the docstring of a function, method, class or
+property</p>
+<p>This is done by replacing specified substrings. After replacement the
+docstring is text wrapped to ensure that line length and indentations are
+preserved.</p>
+<p>While this can be used for replacements in equations, care must be taken
+to ensure that wrapping does not cause line breaks in invalid places in the
+Latex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>replacements</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – {old:new} pairs where old is a <cite>str</cite> in the docstring which will be
+replaced, and new is the <cite>str</cite> it should be replaced with.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A decorator which modifies the docstring of a function, method, class or
+property</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>function</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">mod_docstring</span></code> is applied to an object which is not a function,
+    method, class, or property</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>To dynamically modify the docstring of a function so “this” is replaced
+with “that”:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@mod_docstring</span><span class="p">({</span><span class="s1">&#39;this&#39;</span><span class="p">:</span><span class="s1">&#39;that&#39;</span><span class="p">})</span>
+<span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The word this will be replaced</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>To dynamically modify the docstring of a class so “this” is replaced
+with “that”:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@mod_docstring</span><span class="p">({</span><span class="s1">&#39;this&#39;</span><span class="p">:</span><span class="s1">&#39;that&#39;</span><span class="p">})</span>
+<span class="k">class</span> <span class="nc">DocClass</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the class level docstring. The word this will be</span>
+<span class="sd">    replaced.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>To dynamically modify the docstring of a property so “this” is replaced
+with “that”:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="nd">@mod_docstring</span><span class="p">({</span><span class="s1">&#39;this&#39;</span><span class="p">:</span><span class="s1">&#39;that&#39;</span><span class="p">})</span>
+<span class="k">def</span> <span class="nf">prop</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The word this will be replaced.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.common.decorators.repr_decorator">
+<span class="sig-prename descclassname"><span class="pre">MDMC.common.decorators.</span></span><span class="sig-name descname"><span class="pre">repr_decorator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/common/decorators.html#repr_decorator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.common.decorators.repr_decorator" title="Permalink to this definition"></a></dt>
+<dd><p>Implements <code class="docutils literal notranslate"><span class="pre">__repr__</span></code> for a class using passed attributes (including
+properties)</p>
+<p>The first element of all <code class="docutils literal notranslate"><span class="pre">__repr__</span></code> returns is always the name of the
+class</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Testing for <code class="docutils literal notranslate"><span class="pre">repr_decorator</span></code> is restricted to testing the decorator
+outputs the correct format, not whether each occurence it is used is
+valid. It is strongly recommended that classes decorated with
+<code class="docutils literal notranslate"><span class="pre">repr_decorator</span></code> are tested to ensure that <code class="docutils literal notranslate"><span class="pre">repr(class)</span></code> is valid,
+for instance whether the class actually has all of the attributes passed
+as <cite>str</cite> to <code class="docutils literal notranslate"><span class="pre">repr_decorator</span></code>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of an attribute of the class being decorated. This attribute
+(or property) will be included in the <code class="docutils literal notranslate"><span class="pre">__repr__</span></code> of the class.</p></li>
+<li><p><strong>*attributes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Zero or more <cite>str</cite> with the name of an attribute (or property) of the
+class being decorated. These attributes will be included in the
+<code class="docutils literal notranslate"><span class="pre">__repr__</span></code> of the class.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A class with <code class="docutils literal notranslate"><span class="pre">__repr__</span></code> implemented such that <code class="docutils literal notranslate"><span class="pre">attribute</span></code> and
+<code class="docutils literal notranslate"><span class="pre">attributes</span></code> are printed</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>class</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Add a <code class="docutils literal notranslate"><span class="pre">repr_decorator</span></code> to the <code class="docutils literal notranslate"><span class="pre">Atom</span></code> class to include the <code class="docutils literal notranslate"><span class="pre">name</span></code>
+attribute and the <code class="docutils literal notranslate"><span class="pre">position</span></code> property:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">)</span>
+<span class="gp">... </span><span class="n">Class</span> <span class="n">Atom</span><span class="p">(</span><span class="n">StructuralUnit</span><span class="p">):</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">element</span> <span class="o">=</span> <span class="n">element</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@property</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="n">atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;Hydrogen&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+<span class="gp">... </span><span class="n">atom</span>
+<span class="go">&lt; Atom</span>
+<span class="go"> {name: &#39;Hydrogen&#39;,</span>
+<span class="go">  position: [1., 1., 1.]}&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.common.decorators.set_docstring">
+<span class="sig-prename descclassname"><span class="pre">MDMC.common.decorators.</span></span><span class="sig-name descname"><span class="pre">set_docstring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docstring</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/common/decorators.html#set_docstring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.common.decorators.set_docstring" title="Permalink to this definition"></a></dt>
+<dd><p>Decorator for setting the docstring of a function, method, class or property</p>
+<p>The new docstring is text wrapped to ensure that the line length is valid.
+It is assumed that the specified docstring has the correct indentations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>docstring</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The new docstring for the function, method, class or property</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A decorator which sets the docstring of a function, method, class or
+property</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>function</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">set_docstring</span></code> is applied to an object which is not a function,
+    method, class, or property</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>To dynamically set the docstring of a function:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@set_docstring</span><span class="p">(</span><span class="s2">&quot;This is the new docstring&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This docstring will be replaced</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>To dynamically set the docstring of a class:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@set_docstring</span><span class="p">(</span><span class="s2">&quot;This is the new docstring&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">DocClass</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a class level docstring. This docstring will be</span>
+<span class="sd">    replaced.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>To dynamically set the docstring of a property:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="nd">@set_docstring</span><span class="p">(</span><span class="s2">&quot;This is the new docstring&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">prop</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This docstring will be replaced</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.common.decorators.unit_decorator">
+<span class="sig-prename descclassname"><span class="pre">MDMC.common.decorators.</span></span><span class="sig-name descname"><span class="pre">unit_decorator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/common/decorators.html#unit_decorator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.common.decorators.unit_decorator" title="Permalink to this definition"></a></dt>
+<dd><p>Decorates <code class="docutils literal notranslate"><span class="pre">property.setter</span></code> methods to add units</p>
+<p>Adds units to the values passed to <code class="docutils literal notranslate"><span class="pre">property.setter</span></code> methods. These units
+are displayed when either <code class="docutils literal notranslate"><span class="pre">repr</span></code> or <code class="docutils literal notranslate"><span class="pre">str</span></code> is called for the
+corresponding <code class="docutils literal notranslate"><span class="pre">property.getter</span></code> method.</p>
+<p>Suitable for use with setter methods that either take <cite>float</cite> (or objects
+that can be cast to <cite>float</cite>), or NumPy <cite>array</cite> (or objects that can be cast
+to NumPy <cite>array</cite>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unit</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><em>None</em>) – The <code class="docutils literal notranslate"><span class="pre">unit</span></code> applied to the property. If <cite>None</cite> then <code class="docutils literal notranslate"><span class="pre">self.unit</span></code> is
+used, which enables classes to have properties with units defined at
+runtime.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">property.setter</span></code> <cite>function</cite> with a <code class="docutils literal notranslate"><span class="pre">value</span></code> parameter which has a
+<code class="docutils literal notranslate"><span class="pre">unit</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>function</cite></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Add a <code class="docutils literal notranslate"><span class="pre">unit_decorator</span></code> to the <code class="docutils literal notranslate"><span class="pre">position</span></code> <code class="docutils literal notranslate"><span class="pre">property</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Class</span> <span class="n">Atom</span><span class="p">(</span><span class="n">StructuralUnit</span><span class="p">):</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@property</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@position</span><span class="o">.</span><span class="n">setter</span>
+<span class="gp">... </span>    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Ang&#39;</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">_position</span> <span class="o">=</span> <span class="n">value</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.common.decorators.unit_decorator_getter">
+<span class="sig-prename descclassname"><span class="pre">MDMC.common.decorators.</span></span><span class="sig-name descname"><span class="pre">unit_decorator_getter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/common/decorators.html#unit_decorator_getter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.common.decorators.unit_decorator_getter" title="Permalink to this definition"></a></dt>
+<dd><p>Decorates <code class="docutils literal notranslate"><span class="pre">property.getter</span></code> methods to add units</p>
+<p>Adds units to the return values of <code class="docutils literal notranslate"><span class="pre">property.getter</span></code> methods. These units
+are displayed when either <code class="docutils literal notranslate"><span class="pre">repr</span></code> or <code class="docutils literal notranslate"><span class="pre">str</span></code> is called.</p>
+<p>Suitable for use with setter methods that either take <cite>float</cite> (or objects
+that can be cast to <cite>float</cite>), or NumPy <cite>array</cite> (or objects that can be cast
+to NumPy <cite>array</cite>). This method exists for properties which have no setter
+method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unit</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><em>None</em>) – The <code class="docutils literal notranslate"><span class="pre">unit</span></code> applied to the property. If <cite>None</cite> then <code class="docutils literal notranslate"><span class="pre">self.unit</span></code> is
+used, which enables classes to have properties with units defined at
+runtime.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">property.getter</span></code> <cite>function</cite> with a return type which has a unit
+(e.g. <code class="docutils literal notranslate"><span class="pre">UnitFloat</span></code> or <code class="docutils literal notranslate"><span class="pre">UnitArray</span></code>)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>function</cite></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Add a <code class="docutils literal notranslate"><span class="pre">unit_decorator_getter</span></code> to the <code class="docutils literal notranslate"><span class="pre">volume</span></code> property:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Class</span> <span class="n">Universe</span><span class="p">:</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@property</span>
+<span class="gp">... </span>    <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Ang&#39;</span><span class="p">)</span> <span class="o">^</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">**</span> <span class="mi">3</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MDMC.common.decorators.wrap_docstring">
+<span class="sig-prename descclassname"><span class="pre">MDMC.common.decorators.</span></span><span class="sig-name descname"><span class="pre">wrap_docstring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/common/decorators.html#wrap_docstring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.common.decorators.wrap_docstring" title="Permalink to this definition"></a></dt>
+<dd><p>Wraps a docstring to a specific line length.</p>
+<p>This maintains any indentation which exists at the start of a line. While
+equations should not be affected by this wrapping, it is recommended that
+docstrings with .. math:: are visually checked after wrapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>docstring</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The docstring to be wrapped</p></li>
+<li><p><strong>line_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The maximum line length of the docstring before it is wrapped</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The wrapped docstring</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If any indent has more characters than the <code class="docutils literal notranslate"><span class="pre">line_length</span></code>, as the
+    wrapping cannot then preserve the correct indent</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="constants.html" class="btn btn-neutral float-left" title="constants" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="df_operations.html" class="btn btn-neutral float-right" title="df_operations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
