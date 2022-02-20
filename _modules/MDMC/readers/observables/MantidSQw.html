@@ -109,12 +109,10 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
-<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span>
-<span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">ObservableReader</span>
+<span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">SQwReader</span>
 
 
-<div class="viewcode-block" id="MantidSQw"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw">[docs]</a><span class="k">class</span> <span class="nc">MantidSQw</span><span class="p">(</span><span class="n">ObservableReader</span><span class="p">):</span>
+<div class="viewcode-block" id="MantidSQw"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw">[docs]</a><span class="k">class</span> <span class="nc">MantidSQw</span><span class="p">(</span><span class="n">SQwReader</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class for reading SQw files from Mantid</span>
@@ -133,20 +131,20 @@
 <span class="sd">        File containing the errors on the dependent variables</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MantidSQw.open"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Open the files for variables and detector momenta</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        file_name : str</span>
-<span class="sd">            The variables file name, which contains the SQw, error, and energy values for each</span>
-<span class="sd">            detector ID</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;_detectors&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;_detectors&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Closes variable and detector files after parsing&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="MantidSQw.parse"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
 
@@ -173,88 +171,6 @@
         <span class="c1"># Mantid sets errors to 0 if the corresponding datum is 0.  Change these to</span>
         <span class="c1"># inf so that error calculations can still be performed on them.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the independent variables, Q (in ``Ang^-1``) and E (``meV``)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The independent variables Q and E</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;Q&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">}</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the dependent variables, SQw (in ``arb``)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The dependent variables, SQw (in ``arb``)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;SQw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="p">]}</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the errors on the dependent variables</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The error on SQw (in ``arb``)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;SQw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">]}</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the energy transfer, E, in meV</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        numpy.ndarray</span>
-<span class="sd">            Energy transfer, E, in ``meV``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_E</span>
-
-    <span class="nd">@E</span><span class="o">.</span><span class="n">setter</span>
-    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_TRANSFER</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_E</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the momentum transfer, Q, in ``Ang^-1``</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        numpy.ndarray</span>
-<span class="sd">            Momentum transfer, Q, in ``Ang^-1``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
-
-    <span class="nd">@Q</span><span class="o">.</span><span class="n">setter</span>
-    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="MantidSQw.parse_variables"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.parse_variables">[docs]</a>    <span class="k">def</span> <span class="nf">parse_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
 

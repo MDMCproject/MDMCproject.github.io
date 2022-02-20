@@ -112,11 +112,10 @@
 
 <span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.constants</span> <span class="kn">import</span> <span class="n">h_bar</span>
-<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span>
-<span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">ObservableReader</span>
+<span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">SQwReader</span>
 
 
-<div class="viewcode-block" id="XML_SQw"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/xml_SQw.html#MDMC.readers.observables.xml_SQw.XML_SQw">[docs]</a><span class="k">class</span> <span class="nc">XML_SQw</span><span class="p">(</span><span class="n">ObservableReader</span><span class="p">):</span>
+<div class="viewcode-block" id="XML_SQw"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/xml_SQw.html#MDMC.readers.observables.xml_SQw.XML_SQw">[docs]</a><span class="k">class</span> <span class="nc">XML_SQw</span><span class="p">(</span><span class="n">SQwReader</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An XML reader for SQw data</span>
@@ -177,115 +176,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">*</span> <span class="mf">1e15</span> <span class="o">*</span> <span class="n">h_bar</span>
 
-        <span class="c1"># the way the Wells Ar data is structured and read in, we need to reshape the self.SQw list with w points</span>
-        <span class="c1"># in the outer index and Q points in the inner index. we then need to transpose the result to make it consistent</span>
+        <span class="c1"># the way the Wells Ar data is structured and read in,</span>
+        <span class="c1"># we need to reshape the self.SQw list with w points</span>
+        <span class="c1"># in the outer index and Q points in the inner index.</span>
+        <span class="c1"># we then need to transpose the result to make it consistent</span>
         <span class="c1"># with our approach of calculating SQw from MD. The resulting arrays must satisfy:</span>
         <span class="c1"># np.shape(SQw) == (np.size(Q), np.size(E))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SQw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="p">),</span> <span class="p">[</span><span class="n">n_w</span><span class="p">,</span> <span class="n">n_Q</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">),</span> <span class="p">[</span><span class="n">n_w</span><span class="p">,</span> <span class="n">n_Q</span><span class="p">]))</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the independent variables, Q (in ``Ang^-1``) and E (``meV``)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The independent variables Q and E</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;Q&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">}</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the dependent variables, SQw (in ``arb``)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The dependent variables, SQw (in ``arb``)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;SQw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="p">]}</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the errors on the dependent variables</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The error on SQw (in ``arb``)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;SQw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">]}</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">w</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the energy transfer expressed in angular frequency, w, in</span>
-<span class="sd">        ``1 / ps``</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        array</span>
-<span class="sd">            Energy transfer as angular frequency, w, in ``1 / ps``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span>
-
-    <span class="nd">@w</span><span class="o">.</span><span class="n">setter</span>
-    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;ps&#39;</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the energy transfer, E, in ``meV``</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        array</span>
-<span class="sd">            Energy transfer, E, in ``meV``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_E</span>
-
-    <span class="nd">@E</span><span class="o">.</span><span class="n">setter</span>
-    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_TRANSFER</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_E</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the momentum transfer, Q, in ``Ang^-1``</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        array</span>
-<span class="sd">            Momentum transfer, Q, in ``Ang^-1``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
-
-    <span class="nd">@Q</span><span class="o">.</span><span class="n">setter</span>
-    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="XML_SQw.dict_from_element"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/xml_SQw.html#MDMC.readers.observables.xml_SQw.XML_SQw.dict_from_element">[docs]</a>    <span class="k">def</span> <span class="nf">dict_from_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
 
