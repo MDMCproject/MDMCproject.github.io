@@ -115,17 +115,16 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span><span class="p">,</span> <span class="n">reduce</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span><span class="p">,</span> <span class="n">permutations</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">gcd</span>
-<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">MethodType</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">weakref</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial.transform</span> <span class="kn">import</span> <span class="n">Rotation</span>
 
-<span class="kn">import</span> <span class="nn">MDMC.common.atom_properties</span> <span class="k">as</span> <span class="nn">atom_properties</span>
+<span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">atom_properties</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Coulombic</span><span class="p">,</span> <span class="n">BondedInteraction</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span><span class="p">,</span>\
     <span class="n">unit_decorator_getter</span>
@@ -140,6 +139,8 @@
 <div class="viewcode-block" id="StructuralUnit"><a class="viewcode-back" href="../../../pages/modules/md/structural_units.html#MDMC.MD.structural_units.StructuralUnit">[docs]</a><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="s1">&#39;velocity&#39;</span><span class="p">,</span> <span class="s1">&#39;parent&#39;</span><span class="p">,</span> <span class="s1">&#39;bounding_box&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;atoms&#39;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">StructuralUnit</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="c1"># pylint: disable=no-member</span>
+    <span class="c1"># to avoid errors with MD and _structure_list</span>
 
     <span class="sd">&quot;&quot;&quot;Abstract base class for all structural units</span>
 
@@ -177,6 +178,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">velocity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_position_in_parent</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> created: {ID:</span><span class="si">%s</span><span class="s1">, name:</span><span class="si">%s</span><span class="s1">, position:</span><span class="si">%s</span><span class="s1">}&#39;</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
@@ -370,8 +372,7 @@
         <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">),</span> <span class="n">StructuralUnit</span><span class="p">)</span> \
         <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">top_level_structure</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
 <div class="viewcode-block" id="StructuralUnit.copy"><a class="viewcode-back" href="../../../pages/modules/md/structural_units.html#MDMC.MD.structural_units.StructuralUnit.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
 
@@ -427,8 +428,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_level_structure</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;This structure has no parent&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">_get_center_of_mass</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_center_of_mass</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_added_to_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -464,6 +464,8 @@
 <span class="sd">        ValueError</span>
 <span class="sd">            If ``position`` if undefined</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#pylint: disable=nan-comparison</span>
+        <span class="c1"># because math.isnan doesn&#39;t work here for some reason</span>
 
         <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span>
@@ -472,10 +474,9 @@
             <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">position</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">position</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)):</span>
                 <span class="k">return</span> <span class="kc">False</span>
-            <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">position</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">position</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;position of </span><span class="si">{0}</span><span class="s1"> is undefined&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="c1"># Not a member of a universe</span>
             <span class="k">return</span> <span class="kc">True</span></div>
@@ -531,8 +532,7 @@
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;ID&#39;</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_ID</span><span class="p">())</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;_bonded_interaction_pairs&#39;</span>
-                  <span class="ow">or</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;_nonbonded_interactions&#39;</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;_bonded_interaction_pairs&#39;</span><span class="p">,</span> <span class="s1">&#39;_nonbonded_interactions&#39;</span><span class="p">):</span>
                 <span class="k">pass</span>
             <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;_structure_list&#39;</span><span class="p">:</span>
                 <span class="c1"># Separate structures into atoms and composites</span>
@@ -753,6 +753,8 @@
 <span class="sd">        Calculate the position of all subunits in the</span>
 <span class="sd">        ``CompositeStructuralUnit`` CoM frame in units of ``Ang``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
+        <span class="c1"># _CoM_frame_positions breaks when defined in init</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_CoM_frame_positions</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">CoM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_CoM</span><span class="p">()</span>
@@ -1097,7 +1099,7 @@
         <span class="c1"># Update atom_types in Coulombic interactions</span>
         <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonbonded_interactions</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="n">Coulombic</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">atom_types</span><span class="p">:</span>
-                <span class="n">inter</span><span class="o">.</span><span class="n">_atom_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">inter</span><span class="o">.</span><span class="n">atom_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nonbonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1224,7 +1226,7 @@
             <span class="k">if</span> <span class="n">interaction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonbonded_interactions</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_nonbonded_interactions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interaction</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Atom.copy_interactions"><a class="viewcode-back" href="../../../pages/modules/md/structural_units.html#MDMC.MD.structural_units.Atom.copy_interactions">[docs]</a>    <span class="k">def</span> <span class="nf">copy_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">memo</span><span class="o">=</span><span class="p">{}):</span>
+<div class="viewcode-block" id="Atom.copy_interactions"><a class="viewcode-back" href="../../../pages/modules/md/structural_units.html#MDMC.MD.structural_units.Atom.copy_interactions">[docs]</a>    <span class="k">def</span> <span class="nf">copy_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">memo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This replicates the interactions from ``self`` for ``Atom``, but with</span>
@@ -1241,6 +1243,14 @@
 <span class="sd">        memo : dict, optional</span>
 <span class="sd">            The memoization `dict`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=protected-access</span>
+        <span class="c1"># because bonded_interaction_pairs is not designed to be set directly</span>
+
+        <span class="c1"># default arguments are set at definition time (and not at call time)</span>
+        <span class="c1"># so setting memo={} as the default value is dangerous, because the</span>
+        <span class="c1"># dict will not be reset between calls of copy_interactions()</span>
+        <span class="k">if</span> <span class="n">memo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">memo</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># if/else required for deepcopy (where _bonded_interaction_pairs attribute</span>
         <span class="c1"># doesn&#39;t exist). try/except not valid due to order of operations in</span>
@@ -1270,6 +1280,8 @@
 <span class="sd">    NotImplementedError</span>
 <span class="sd">        THIS CLASS HAS NOT BEEN IMPLEMENTED</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># pylint: disable=super-init-not-called</span>
+    <span class="c1"># as this is not implemented yet</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -1377,6 +1389,8 @@
 <span class="sd">            &gt;&gt;&gt; print(O.bonded_interaction_pairs)</span>
 <span class="sd">            [(Bond, (H1, O)), (Bond, (H2, O))]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=simplifiable-condition</span>
+        <span class="c1"># as simplifying the condition breaks it for some reason</span>
 
         <span class="c1"># Cache only most recent value, as atoms only expected to increase</span>
         <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1427,7 +1441,8 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">atoms</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Empty atoms passed; it must contain at least one atom to create a BoundingBox object.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Empty atoms passed; &quot;</span>
+                             <span class="s2">&quot;it must contain at least one atom to create a BoundingBox object.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Start with arbitrary min and max from the positions of the atoms in</span>
         <span class="c1"># the atom list</span>
@@ -1616,7 +1631,6 @@
                                    <span class="ow">in</span> <span class="n">reduced_symbols_count</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
 
     <span class="k">return</span> <span class="n">reduced_formula</span></div>
-
 </pre></div>
 
            </div>

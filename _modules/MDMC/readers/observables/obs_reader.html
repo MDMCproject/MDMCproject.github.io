@@ -109,6 +109,8 @@
 
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABC</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.readers.reader</span> <span class="kn">import</span> <span class="n">Reader</span>
@@ -125,7 +127,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A dictionary of dictionaries containing the independent variables,</span>
 <span class="sd">        dependent variables and the associated errors.</span>
@@ -137,14 +138,13 @@
 <span class="sd">            the dependent variables</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;independent&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">,</span>
-                <span class="s2">&quot;dependent&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">,</span>
-                <span class="s2">&quot;errors&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;independent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">,</span>
+                <span class="s2">&quot;dependent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">,</span>
+                <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">}</span>
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The independent variables</span>
 
@@ -159,7 +159,6 @@
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The dependent variables</span>
 
@@ -174,7 +173,6 @@
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The errors on the dependent variables</span>
 
@@ -184,7 +182,28 @@
 <span class="sd">            A dictionary of the errors on the dependent variables</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_float</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Casts the input to a `float`, or passes if the input cannot be cast</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        i : numeric</span>
+<span class="sd">            Input to be cast to `float`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            A non-negative `float`, if the input can be converted to a `float`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="SQwReader"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/obs_reader.html#MDMC.readers.observables.obs_reader.SQwReader">[docs]</a><span class="k">class</span> <span class="nc">SQwReader</span><span class="p">(</span><span class="n">ObservableReader</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>

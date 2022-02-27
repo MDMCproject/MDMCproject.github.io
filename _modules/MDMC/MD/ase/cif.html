@@ -120,13 +120,13 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.MD.ase.conversions</span> <span class="kn">import</span> <span class="n">ASEAtoms</span><span class="p">,</span> <span class="n">convert_from_ase_atom</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.structural_units</span> <span class="kn">import</span> <span class="p">(</span><span class="n">BoundingBox</span><span class="p">,</span> <span class="n">get_reduced_chemical_formula</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structural_units</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BoundingBox</span><span class="p">,</span> <span class="n">get_reduced_chemical_formula</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Coulombic</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span><span class="p">,</span> <span class="n">DihedralAngle</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interaction_functions</span> <span class="kn">import</span> <span class="n">Coulomb</span>
 
 
 <div class="viewcode-block" id="ase_read_cif"><a class="viewcode-back" href="../../../../pages/modules/md/ase/cif.html#MDMC.MD.ase.cif.ase_read_cif">[docs]</a><span class="k">def</span> <span class="nf">ase_read_cif</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads a configuration file and returns a list of ``Atom`` objects.</span>
 
@@ -204,11 +204,14 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">ase_atoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">images</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MDMC uses the ASE (Atomic Simulation Environment) module for reading your CIF file (</span><span class="si">{0}</span><span class="s1">), &#39;</span>
-               <span class="s1">&#39;which failed. Please see the ASE CIF documentation for help with the CIF format ASE requires.&#39;</span>
-               <span class="s1">&#39; Please note that the ASE CIF reader cannot parse CIF files with user defined text sections so these &#39;</span>
-               <span class="s1">&#39;must be stripped out before reading. The full Python stack error message should be shown &#39;</span>
-               <span class="s1">&#39;above.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MDMC uses the ASE (Atomic Simulation Environment) module &#39;</span>
+               <span class="sa">f</span><span class="s1">&#39;for reading your CIF file (</span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">), &#39;</span>
+               <span class="s1">&#39;which failed. Please see the ASE CIF documentation for help &#39;</span>
+               <span class="s1">&#39;with the CIF format ASE requires.&#39;</span>
+               <span class="s1">&#39; Please note that the ASE CIF reader cannot parse CIF files &#39;</span>
+               <span class="s1">&#39;with user defined text sections so these &#39;</span>
+               <span class="s1">&#39;must be stripped out before reading. &#39;</span>
+               <span class="s1">&#39;The full Python stack error message should be shown above.&#39;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
 
     <span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">_reduce_ase_unit_cell</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">)</span>
@@ -218,10 +221,10 @@
     <span class="n">atom_types</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atom_types&#39;</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">))</span>
 
     <span class="c1"># dict of CIF atom label to MDMC atom</span>
-    <span class="n">atoms_labels</span> <span class="o">=</span> <span class="p">{</span><span class="n">label</span><span class="p">:</span><span class="n">convert_from_ase_atom</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span>
-                                                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                                <span class="n">atom_type</span><span class="o">=</span><span class="n">atom_type</span><span class="p">,</span>
-                                                <span class="n">set_charge</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">atoms_labels</span> <span class="o">=</span> <span class="p">{</span><span class="n">label</span><span class="p">:</span> <span class="n">convert_from_ase_atom</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span>
+                                                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                                 <span class="n">atom_type</span><span class="o">=</span><span class="n">atom_type</span><span class="p">,</span>
+                                                 <span class="n">set_charge</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">atom_type</span>
                     <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ase_atoms</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;_atom_site_label&#39;</span><span class="p">],</span>
                            <span class="n">ase_atoms</span><span class="p">,</span>
@@ -234,11 +237,11 @@
     <span class="c1"># used, a single Coulombic interaction will be created for all atoms with</span>
     <span class="c1"># atom_type 1.</span>
     <span class="k">if</span> <span class="n">atom_types</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="n">coulombic_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">atom</span><span class="p">:</span> <span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span>
-        <span class="n">bonded_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">atom_arr</span><span class="p">:</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atom_arr</span><span class="p">]</span>
+        <span class="k">def</span> <span class="nf">coulombic_key</span><span class="p">(</span><span class="n">atom</span><span class="p">):</span> <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span>
+        <span class="k">def</span> <span class="nf">bonded_key</span><span class="p">(</span><span class="n">atom_arr</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atom_arr</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="n">coulombic_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">atom</span><span class="p">:</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">bonded_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">atom_arr</span><span class="p">:</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atom_arr</span><span class="p">]</span>
+        <span class="k">def</span> <span class="nf">coulombic_key</span><span class="p">(</span><span class="n">atom</span><span class="p">):</span> <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">def</span> <span class="nf">bonded_key</span><span class="p">(</span><span class="n">atom_arr</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atom_arr</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">coulombic_key</span> <span class="o">=</span> <span class="n">bonded_key</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -271,7 +274,6 @@
 
 
 <div class="viewcode-block" id="get_bonded_interactions_atoms"><a class="viewcode-back" href="../../../../pages/modules/md/ase/cif.html#MDMC.MD.ase.cif.get_bonded_interactions_atoms">[docs]</a><span class="k">def</span> <span class="nf">get_bonded_interactions_atoms</span><span class="p">(</span><span class="n">ase_atoms_info</span><span class="p">,</span> <span class="n">cif_geom_def</span><span class="p">,</span> <span class="n">atoms_labels</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gets the atoms for each bonded interaction</span>
 
@@ -315,7 +317,6 @@
 
 
 <span class="k">def</span> <span class="nf">_create_coulombic_interactions</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates ``Coulombic`` interactions</span>
 
@@ -338,7 +339,6 @@
 
 
 <span class="k">def</span> <span class="nf">_create_bonded_interactions</span><span class="p">(</span><span class="n">interactions_atoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates ``BondedInteraction`` objects</span>
 
@@ -379,8 +379,8 @@
     <span class="k">elif</span> <span class="n">n_inter_atoms</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
         <span class="n">bond_type</span> <span class="o">=</span> <span class="n">DihedralAngle</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> is not a valid number of atoms for a bonded&#39;</span>
-                        <span class="s1">&#39; interaction&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_inter_atoms</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">n_inter_atoms</span><span class="si">}</span><span class="s1"> is not a valid number of atoms for a bonded&#39;</span>
+                        <span class="s1">&#39; interaction&#39;</span><span class="p">)</span>
 
     <span class="c1"># If no key is passed, group by id - this will result in each tuple of atoms</span>
     <span class="c1"># being in its own group (i.e. no tuples of atoms are grouped together).</span>
@@ -397,7 +397,6 @@
 
 
 <span class="k">def</span> <span class="nf">_group_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Groups atoms based on a key</span>
 
@@ -420,7 +419,6 @@
 
 
 <span class="k">def</span> <span class="nf">_reduce_ase_unit_cell</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reduces an ``ase.atoms.Atoms`` object from a unit cell of molecules to a</span>
 <span class="sd">    single molecule</span>
@@ -460,7 +458,6 @@
 
 
 <span class="k">def</span> <span class="nf">_make_atom_positions_valid</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets the positions of all atoms are positive (including 0.)</span>
 

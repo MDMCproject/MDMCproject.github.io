@@ -580,30 +580,6 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_E(self, nE: int, dt: float)
-     |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
-     |
-     |      .. math::
-     |
-     |          E = h \nu
-     |
-     |      Parameters
-     |      ----------
-     |      nE : int
-     |          The number of energy values to be calculated
-     |      dt : float
-     |          The step size between frames in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -651,7 +627,7 @@ CLASSES
      |              is the resolution function and `value` is the desired `FWHM`.
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
-     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
+     |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -698,6 +674,33 @@ CLASSES
      |      AssertionError
      |
      |  ----------------------------------------------------------------------
+     |  Static methods inherited from AbstractSQw:
+     |
+     |  calculate_E(nE: int, dt: float)
+     |      Calculates an array of ``nE`` uniformly spaced energy values from the
+     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
+     |      are determined by the Fast Fourier Transform, as implemented by numpy,
+     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
+     |      positive frequencies. As we are dealing with frequency rather than
+     |      angular frequency here, the relation to between energy is given by:
+     |
+     |      .. math::
+     |
+     |          E = h \nu
+     |
+     |      Parameters
+     |      ----------
+     |      nE : int
+     |          The number of energy values to be calculated
+     |      dt : float
+     |          The step size between frames in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          An ``array`` of `float` specifying the energy in units of ``meV``
+     |
+     |  ----------------------------------------------------------------------
      |  Readonly properties inherited from AbstractSQw:
      |
      |  E
@@ -717,12 +720,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for
+     |      given indices of self.Q and self.E
      |      It also means that:
      |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
+     |      The purpose of this method is to ensure consistency
+     |      between different readers/methods which create ``SQw`` objects.
      |
      |      Return
      |      ------
@@ -933,7 +937,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose=0, **settings)
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -970,12 +974,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
-     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point
+     |      for given indices of self.Q and self.t
      |      It also means that:
      |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
-     |      objects.
+     |      The purpose of this method is to ensure consistency between
+     |      different readers/methods which create ``FQt`` objects.
      |
      |      Return
      |      ------
@@ -1159,30 +1164,6 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_E(self, nE: int, dt: float)
-     |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
-     |
-     |      .. math::
-     |
-     |          E = h \nu
-     |
-     |      Parameters
-     |      ----------
-     |      nE : int
-     |          The number of energy values to be calculated
-     |      dt : float
-     |          The step size between frames in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -1230,7 +1211,7 @@ CLASSES
      |              is the resolution function and `value` is the desired `FWHM`.
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
-     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
+     |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -1277,6 +1258,33 @@ CLASSES
      |      AssertionError
      |
      |  ----------------------------------------------------------------------
+     |  Static methods inherited from AbstractSQw:
+     |
+     |  calculate_E(nE: int, dt: float)
+     |      Calculates an array of ``nE`` uniformly spaced energy values from the
+     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
+     |      are determined by the Fast Fourier Transform, as implemented by numpy,
+     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
+     |      positive frequencies. As we are dealing with frequency rather than
+     |      angular frequency here, the relation to between energy is given by:
+     |
+     |      .. math::
+     |
+     |          E = h \nu
+     |
+     |      Parameters
+     |      ----------
+     |      nE : int
+     |          The number of energy values to be calculated
+     |      dt : float
+     |          The step size between frames in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          An ``array`` of `float` specifying the energy in units of ``meV``
+     |
+     |  ----------------------------------------------------------------------
      |  Readonly properties inherited from AbstractSQw:
      |
      |  E
@@ -1296,12 +1304,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for
+     |      given indices of self.Q and self.E
      |      It also means that:
      |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
+     |      The purpose of this method is to ensure consistency
+     |      between different readers/methods which create ``SQw`` objects.
      |
      |      Return
      |      ------
@@ -1512,7 +1521,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose=0, **settings)
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -1549,12 +1558,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
-     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point
+     |      for given indices of self.Q and self.t
      |      It also means that:
      |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
-     |      objects.
+     |      The purpose of this method is to ensure consistency between
+     |      different readers/methods which create ``FQt`` objects.
      |
      |      Return
      |      ------
@@ -1774,7 +1784,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose=0, **settings)
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -1811,12 +1821,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
-     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point
+     |      for given indices of self.Q and self.t
      |      It also means that:
      |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
-     |      objects.
+     |      The purpose of this method is to ensure consistency between
+     |      different readers/methods which create ``FQt`` objects.
      |
      |      Return
      |      ------
@@ -2036,7 +2047,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose=0, **settings)
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2073,12 +2084,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
-     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point
+     |      for given indices of self.Q and self.t
      |      It also means that:
      |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
-     |      objects.
+     |      The purpose of this method is to ensure consistency between
+     |      different readers/methods which create ``FQt`` objects.
      |
      |      Return
      |      ------
@@ -2298,7 +2310,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose=0, **settings)
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2335,12 +2347,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
-     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point
+     |      for given indices of self.Q and self.t
      |      It also means that:
      |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
-     |      objects.
+     |      The purpose of this method is to ensure consistency between
+     |      different readers/methods which create ``FQt`` objects.
      |
      |      Return
      |      ------
@@ -2560,7 +2573,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose=0, **settings)
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2597,12 +2610,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
-     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point
+     |      for given indices of self.Q and self.t
      |      It also means that:
      |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
-     |      objects.
+     |      The purpose of this method is to ensure consistency between
+     |      different readers/methods which create ``FQt`` objects.
      |
      |      Return
      |      ------
@@ -2822,7 +2836,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose=0, **settings)
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2859,12 +2873,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
-     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point
+     |      for given indices of self.Q and self.t
      |      It also means that:
      |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
-     |      objects.
+     |      The purpose of this method is to ensure consistency between
+     |      different readers/methods which create ``FQt`` objects.
      |
      |      Return
      |      ------
@@ -3045,30 +3060,6 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_E(self, nE: int, dt: float)
-     |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
-     |
-     |      .. math::
-     |
-     |          E = h \nu
-     |
-     |      Parameters
-     |      ----------
-     |      nE : int
-     |          The number of energy values to be calculated
-     |      dt : float
-     |          The step size between frames in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -3116,7 +3107,7 @@ CLASSES
      |              is the resolution function and `value` is the desired `FWHM`.
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
-     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
+     |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -3163,6 +3154,33 @@ CLASSES
      |      AssertionError
      |
      |  ----------------------------------------------------------------------
+     |  Static methods inherited from AbstractSQw:
+     |
+     |  calculate_E(nE: int, dt: float)
+     |      Calculates an array of ``nE`` uniformly spaced energy values from the
+     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
+     |      are determined by the Fast Fourier Transform, as implemented by numpy,
+     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
+     |      positive frequencies. As we are dealing with frequency rather than
+     |      angular frequency here, the relation to between energy is given by:
+     |
+     |      .. math::
+     |
+     |          E = h \nu
+     |
+     |      Parameters
+     |      ----------
+     |      nE : int
+     |          The number of energy values to be calculated
+     |      dt : float
+     |          The step size between frames in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          An ``array`` of `float` specifying the energy in units of ``meV``
+     |
+     |  ----------------------------------------------------------------------
      |  Readonly properties inherited from AbstractSQw:
      |
      |  E
@@ -3182,12 +3200,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for
+     |      given indices of self.Q and self.E
      |      It also means that:
      |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
+     |      The purpose of this method is to ensure consistency
+     |      between different readers/methods which create ``SQw`` objects.
      |
      |      Return
      |      ------
@@ -3398,7 +3417,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose=0, **settings)
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -3435,12 +3454,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
-     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point
+     |      for given indices of self.Q and self.t
      |      It also means that:
      |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
-     |      objects.
+     |      The purpose of this method is to ensure consistency between
+     |      different readers/methods which create ``FQt`` objects.
      |
      |      Return
      |      ------
@@ -3660,7 +3680,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose=0, **settings)
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -3697,12 +3717,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;FQt&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;t&#39;.
-     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point for given indices of self.Q and self.t
+     |      Explicitly: we have that self.FQt[Q_index, t_index] is the data point
+     |      for given indices of self.Q and self.t
      |      It also means that:
      |      np.shape(self.FQt)=(np.size(self.Q), np.size(self.t))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``FQt``
-     |      objects.
+     |      The purpose of this method is to ensure consistency between
+     |      different readers/methods which create ``FQt`` objects.
      |
      |      Return
      |      ------
@@ -3875,7 +3896,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], **settings)
+     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose=0, **settings)
      |      Calculate the pair distribution function, :math:`G(r)`` from a
      |      ``Trajectory``
      |
@@ -3911,6 +3932,8 @@ CLASSES
      |      ----------
      |      MD_input : Trajectory or list of Trajectory
      |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      verbose: int
+     |          Verbose print settings. Not currently implemented for PDF.
      |      **settings
      |          n_frames : int
      |              The number of frames from which the pdf and its error are
@@ -4032,8 +4055,9 @@ CLASSES
      |          The shape of the PDF dependent variable
      |
      |  uniformity_requirements
-     |      # Defines the current limitations on the atomc separation distance &#39;r&#39; of the ``PairDistributionFunction``
-     |      # ``Observable. The requirement is that &#39;r&#39; must be uniform, but it does not have to start at zero.
+     |      # Defines the current limitations on the atomic separation distance &#39;r&#39;
+     |      of the ``PairDistributionFunction`` ``Observable.
+     |      The requirement is that &#39;r&#39; must be uniform, but it does not have to start at zero.
      |
      |      Return
      |      ------
@@ -4138,7 +4162,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], **settings)
+     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose=0, **settings)
      |      Calculate the pair distribution function, :math:`G(r)`` from a
      |      ``Trajectory``
      |
@@ -4174,6 +4198,8 @@ CLASSES
      |      ----------
      |      MD_input : Trajectory or list of Trajectory
      |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      verbose: int
+     |          Verbose print settings. Not currently implemented for PDF.
      |      **settings
      |          n_frames : int
      |              The number of frames from which the pdf and its error are
@@ -4295,8 +4321,9 @@ CLASSES
      |          The shape of the PDF dependent variable
      |
      |  uniformity_requirements
-     |      # Defines the current limitations on the atomc separation distance &#39;r&#39; of the ``PairDistributionFunction``
-     |      # ``Observable. The requirement is that &#39;r&#39; must be uniform, but it does not have to start at zero.
+     |      # Defines the current limitations on the atomic separation distance &#39;r&#39;
+     |      of the ``PairDistributionFunction`` ``Observable.
+     |      The requirement is that &#39;r&#39; must be uniform, but it does not have to start at zero.
      |
      |      Return
      |      ------
@@ -4412,30 +4439,6 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_E(self, nE: int, dt: float)
-     |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
-     |
-     |      .. math::
-     |
-     |          E = h \nu
-     |
-     |      Parameters
-     |      ----------
-     |      nE : int
-     |          The number of energy values to be calculated
-     |      dt : float
-     |          The step size between frames in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -4483,7 +4486,7 @@ CLASSES
      |              is the resolution function and `value` is the desired `FWHM`.
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
-     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
+     |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -4530,6 +4533,33 @@ CLASSES
      |      AssertionError
      |
      |  ----------------------------------------------------------------------
+     |  Static methods inherited from AbstractSQw:
+     |
+     |  calculate_E(nE: int, dt: float)
+     |      Calculates an array of ``nE`` uniformly spaced energy values from the
+     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
+     |      are determined by the Fast Fourier Transform, as implemented by numpy,
+     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
+     |      positive frequencies. As we are dealing with frequency rather than
+     |      angular frequency here, the relation to between energy is given by:
+     |
+     |      .. math::
+     |
+     |          E = h \nu
+     |
+     |      Parameters
+     |      ----------
+     |      nE : int
+     |          The number of energy values to be calculated
+     |      dt : float
+     |          The step size between frames in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          An ``array`` of `float` specifying the energy in units of ``meV``
+     |
+     |  ----------------------------------------------------------------------
      |  Readonly properties inherited from AbstractSQw:
      |
      |  E
@@ -4549,12 +4579,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for
+     |      given indices of self.Q and self.E
      |      It also means that:
      |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
+     |      The purpose of this method is to ensure consistency
+     |      between different readers/methods which create ``SQw`` objects.
      |
      |      Return
      |      ------
@@ -4726,30 +4757,6 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_E(self, nE: int, dt: float)
-     |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
-     |
-     |      .. math::
-     |
-     |          E = h \nu
-     |
-     |      Parameters
-     |      ----------
-     |      nE : int
-     |          The number of energy values to be calculated
-     |      dt : float
-     |          The step size between frames in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -4797,7 +4804,7 @@ CLASSES
      |              is the resolution function and `value` is the desired `FWHM`.
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
-     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
+     |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -4844,6 +4851,33 @@ CLASSES
      |      AssertionError
      |
      |  ----------------------------------------------------------------------
+     |  Static methods inherited from AbstractSQw:
+     |
+     |  calculate_E(nE: int, dt: float)
+     |      Calculates an array of ``nE`` uniformly spaced energy values from the
+     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
+     |      are determined by the Fast Fourier Transform, as implemented by numpy,
+     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
+     |      positive frequencies. As we are dealing with frequency rather than
+     |      angular frequency here, the relation to between energy is given by:
+     |
+     |      .. math::
+     |
+     |          E = h \nu
+     |
+     |      Parameters
+     |      ----------
+     |      nE : int
+     |          The number of energy values to be calculated
+     |      dt : float
+     |          The step size between frames in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          An ``array`` of `float` specifying the energy in units of ``meV``
+     |
+     |  ----------------------------------------------------------------------
      |  Readonly properties inherited from AbstractSQw:
      |
      |  E
@@ -4863,12 +4897,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for
+     |      given indices of self.Q and self.E
      |      It also means that:
      |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
+     |      The purpose of this method is to ensure consistency
+     |      between different readers/methods which create ``SQw`` objects.
      |
      |      Return
      |      ------
@@ -5040,30 +5075,6 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_E(self, nE: int, dt: float)
-     |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
-     |
-     |      .. math::
-     |
-     |          E = h \nu
-     |
-     |      Parameters
-     |      ----------
-     |      nE : int
-     |          The number of energy values to be calculated
-     |      dt : float
-     |          The step size between frames in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -5111,7 +5122,7 @@ CLASSES
      |              is the resolution function and `value` is the desired `FWHM`.
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
-     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
+     |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -5158,6 +5169,33 @@ CLASSES
      |      AssertionError
      |
      |  ----------------------------------------------------------------------
+     |  Static methods inherited from AbstractSQw:
+     |
+     |  calculate_E(nE: int, dt: float)
+     |      Calculates an array of ``nE`` uniformly spaced energy values from the
+     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
+     |      are determined by the Fast Fourier Transform, as implemented by numpy,
+     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
+     |      positive frequencies. As we are dealing with frequency rather than
+     |      angular frequency here, the relation to between energy is given by:
+     |
+     |      .. math::
+     |
+     |          E = h \nu
+     |
+     |      Parameters
+     |      ----------
+     |      nE : int
+     |          The number of energy values to be calculated
+     |      dt : float
+     |          The step size between frames in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          An ``array`` of `float` specifying the energy in units of ``meV``
+     |
+     |  ----------------------------------------------------------------------
      |  Readonly properties inherited from AbstractSQw:
      |
      |  E
@@ -5177,12 +5215,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for
+     |      given indices of self.Q and self.E
      |      It also means that:
      |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
+     |      The purpose of this method is to ensure consistency
+     |      between different readers/methods which create ``SQw`` objects.
      |
      |      Return
      |      ------
@@ -5354,30 +5393,6 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_E(self, nE: int, dt: float)
-     |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
-     |
-     |      .. math::
-     |
-     |          E = h \nu
-     |
-     |      Parameters
-     |      ----------
-     |      nE : int
-     |          The number of energy values to be calculated
-     |      dt : float
-     |          The step size between frames in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -5425,7 +5440,7 @@ CLASSES
      |              is the resolution function and `value` is the desired `FWHM`.
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
-     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
+     |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -5472,6 +5487,33 @@ CLASSES
      |      AssertionError
      |
      |  ----------------------------------------------------------------------
+     |  Static methods inherited from AbstractSQw:
+     |
+     |  calculate_E(nE: int, dt: float)
+     |      Calculates an array of ``nE`` uniformly spaced energy values from the
+     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
+     |      are determined by the Fast Fourier Transform, as implemented by numpy,
+     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
+     |      positive frequencies. As we are dealing with frequency rather than
+     |      angular frequency here, the relation to between energy is given by:
+     |
+     |      .. math::
+     |
+     |          E = h \nu
+     |
+     |      Parameters
+     |      ----------
+     |      nE : int
+     |          The number of energy values to be calculated
+     |      dt : float
+     |          The step size between frames in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          An ``array`` of `float` specifying the energy in units of ``meV``
+     |
+     |  ----------------------------------------------------------------------
      |  Readonly properties inherited from AbstractSQw:
      |
      |  E
@@ -5491,12 +5533,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for
+     |      given indices of self.Q and self.E
      |      It also means that:
      |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
+     |      The purpose of this method is to ensure consistency
+     |      between different readers/methods which create ``SQw`` objects.
      |
      |      Return
      |      ------
@@ -5668,30 +5711,6 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_E(self, nE: int, dt: float)
-     |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
-     |
-     |      .. math::
-     |
-     |          E = h \nu
-     |
-     |      Parameters
-     |      ----------
-     |      nE : int
-     |          The number of energy values to be calculated
-     |      dt : float
-     |          The step size between frames in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -5739,7 +5758,7 @@ CLASSES
      |              is the resolution function and `value` is the desired `FWHM`.
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
-     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
+     |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -5786,6 +5805,33 @@ CLASSES
      |      AssertionError
      |
      |  ----------------------------------------------------------------------
+     |  Static methods inherited from AbstractSQw:
+     |
+     |  calculate_E(nE: int, dt: float)
+     |      Calculates an array of ``nE`` uniformly spaced energy values from the
+     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
+     |      are determined by the Fast Fourier Transform, as implemented by numpy,
+     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
+     |      positive frequencies. As we are dealing with frequency rather than
+     |      angular frequency here, the relation to between energy is given by:
+     |
+     |      .. math::
+     |
+     |          E = h \nu
+     |
+     |      Parameters
+     |      ----------
+     |      nE : int
+     |          The number of energy values to be calculated
+     |      dt : float
+     |          The step size between frames in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          An ``array`` of `float` specifying the energy in units of ``meV``
+     |
+     |  ----------------------------------------------------------------------
      |  Readonly properties inherited from AbstractSQw:
      |
      |  E
@@ -5805,12 +5851,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for
+     |      given indices of self.Q and self.E
      |      It also means that:
      |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
+     |      The purpose of this method is to ensure consistency
+     |      between different readers/methods which create ``SQw`` objects.
      |
      |      Return
      |      ------
@@ -5982,30 +6029,6 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_E(self, nE: int, dt: float)
-     |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
-     |
-     |      .. math::
-     |
-     |          E = h \nu
-     |
-     |      Parameters
-     |      ----------
-     |      nE : int
-     |          The number of energy values to be calculated
-     |      dt : float
-     |          The step size between frames in ``fs``
-     |
-     |      Returns
-     |      -------
-     |      numpy.ndarray
-     |          An ``array`` of `float` specifying the energy in units of ``meV``
-     |
      |  calculate_dt(self)
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
@@ -6053,7 +6076,7 @@ CLASSES
      |              is the resolution function and `value` is the desired `FWHM`.
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
-     |              Can also be &#39;lazily&#39; given as a `float`, in which case it is assumed to be Gaussian.
+     |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -6100,6 +6123,33 @@ CLASSES
      |      AssertionError
      |
      |  ----------------------------------------------------------------------
+     |  Static methods inherited from AbstractSQw:
+     |
+     |  calculate_E(nE: int, dt: float)
+     |      Calculates an array of ``nE`` uniformly spaced energy values from the
+     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
+     |      are determined by the Fast Fourier Transform, as implemented by numpy,
+     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
+     |      positive frequencies. As we are dealing with frequency rather than
+     |      angular frequency here, the relation to between energy is given by:
+     |
+     |      .. math::
+     |
+     |          E = h \nu
+     |
+     |      Parameters
+     |      ----------
+     |      nE : int
+     |          The number of energy values to be calculated
+     |      dt : float
+     |          The step size between frames in ``fs``
+     |
+     |      Returns
+     |      -------
+     |      numpy.ndarray
+     |          An ``array`` of `float` specifying the energy in units of ``meV``
+     |
+     |  ----------------------------------------------------------------------
      |  Readonly properties inherited from AbstractSQw:
      |
      |  E
@@ -6119,12 +6169,13 @@ CLASSES
      |
      |  dependent_variables_structure
      |      The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.
-     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for given indices of self.Q and self.E
+     |      Explicitly: we have that self.SQw[Q_index, E_index] is the data point for
+     |      given indices of self.Q and self.E
      |      It also means that:
      |      np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))
      |
-     |      The purpose of this method is to ensure consistency between different readers/methods which create ``SQw``
-     |      objects.
+     |      The purpose of this method is to ensure consistency
+     |      between different readers/methods which create ``SQw`` objects.
      |
      |      Return
      |      ------
@@ -7298,7 +7349,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='95c03ea6-1c55-41fc-a21a-812bedfacda4'></div></div>
+<div id='cce501d8-762f-4958-9e43-55672dabb232'></div></div>
 </div>
 <p>Therefore it is strongly recommended that you specify the <span class="math notranslate nohighlight">\(E\)</span> values for calculating the dynamic structure factor.</p>
 <p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calulate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will be probably
@@ -8366,7 +8417,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='bbd35266-9a5e-45f9-80cc-d02a28659d67'></div></div>
+<div id='84762d52-dfdc-455c-88f0-6ad66d345203'></div></div>
 </div>
 <p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the van Well et al. Phys. Rev. A <strong>31</strong> 3391 (1985) data, which the authors corrected for instrument resolution) by reading the data into an SQwCoh object:</p>
 <div class="nbinput nblast docutils container">
@@ -9363,7 +9414,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='038cddb9-708f-42ee-af27-0770f86f3d68'></div></div>
+<div id='a6eb6070-e015-4b57-9d27-d84ed9e13c05'></div></div>
 </div>
 </div>
 <div class="section" id="Other-observables">
@@ -9384,7 +9435,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="highlight"><pre>
 Help on function calculate_from_MD in module MDMC.trajectory_analysis.observables.pdf:
 
-calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], **settings)
+calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose=0, **settings)
     Calculate the pair distribution function, :math:`G(r)`` from a
     ``Trajectory``
 
@@ -9420,6 +9471,8 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Traj
     ----------
     MD_input : Trajectory or list of Trajectory
         Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+    verbose: int
+        Verbose print settings. Not currently implemented for PDF.
     **settings
         n_frames : int
             The number of frames from which the pdf and its error are

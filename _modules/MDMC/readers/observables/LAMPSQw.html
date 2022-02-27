@@ -132,12 +132,21 @@
 <span class="sd">        File containing the errors on the dependent variables</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Y_dim</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_dim</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_dep_err</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_dep</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_indep</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Open the files for independent variables, dependent variables and errors</span>
 <span class="sd">        on the dependent variables</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=consider-using-with</span>
+        <span class="c1"># as this is an abstracted open method</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">file_indep</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_dep</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
@@ -151,7 +160,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">file_dep_err</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="LAMPSQw.parse"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parse into SQw format</span>
 
@@ -169,7 +177,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LAMPSQw.parse_indep_var"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw.parse_indep_var">[docs]</a>    <span class="k">def</span> <span class="nf">parse_indep_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parses the independent variables</span>
 
@@ -187,6 +194,8 @@
 <span class="sd">            (X, Y) where X and Y are arrays of the two independent variables</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># pylint: disable=inconsistent-return-statements</span>
+        <span class="c1"># as it breaks the function when changed to return None</span>
         <span class="k">def</span> <span class="nf">get_n_elements</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -207,7 +216,7 @@
                 <span class="k">break</span>
 
         <span class="n">file_split</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">([</span><span class="nb">str</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span> <span class="k">for</span> <span class="nb">str</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;Y_COORDINATES&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">])</span>
+                           <span class="k">if</span> <span class="s2">&quot;Y_COORDINATES&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">])</span>
 
         <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">file_split</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_dim</span><span class="p">)</span>
         <span class="n">Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">file_split</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Y_dim</span><span class="p">)</span>
@@ -215,7 +224,6 @@
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
 
 <div class="viewcode-block" id="LAMPSQw.parse_dep_var"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw.parse_dep_var">[docs]</a>    <span class="k">def</span> <span class="nf">parse_dep_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parses the dependent variables or their errors.</span>
 
@@ -234,29 +242,7 @@
         <span class="n">dep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">file_split</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_dim</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dep</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_float</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Casts the input to a `float`, or passes if the input cannot be cast</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        i : numeric</span>
-<span class="sd">            Input to be cast to `float`</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        float</span>
-<span class="sd">            A non-negative `float`, if the input can be converted to a `float`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="k">pass</span>
-
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">str_iter</span><span class="p">,</span> <span class="o">*</span><span class="n">dimensions</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Iterates over an iterator from a file and extracts the numerical values</span>
 <span class="sd">        as data.</span>
@@ -293,7 +279,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
                 <span class="n">var</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_row_data</span><span class="p">(</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="c1"># For the 263K05Awat_LAMP data file the outpout is SQw structured such that:</span>
+        <span class="c1"># For the 263K05Awat_LAMP data file the output is SQw structured such that:</span>
         <span class="c1"># np.shape(SQw) == (np.shape(Q), np.shape(E))</span>
         <span class="c1"># this is consistent with SQw as we currently calculate it from MD</span>
         <span class="k">return</span> <span class="n">var</span></div>

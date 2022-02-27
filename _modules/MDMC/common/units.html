@@ -122,6 +122,9 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
+<span class="c1"># pylint: disable=no-member</span>
+<span class="c1"># as it raises a false positive for components</span>
+
 <span class="n">CODATA_VERSION</span> <span class="o">=</span> <span class="s1">&#39;2014&#39;</span>
 
 
@@ -248,7 +251,6 @@
         <span class="k">return</span> <span class="n">unit</span>
 
     <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies the ``Unit`` by another ``Unit``</span>
 
@@ -265,12 +267,12 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_components</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;mul&#39;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;A Unit can only be multipled by another Unit&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;A Unit can only be multipled by another Unit&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculate_string</span><span class="p">(</span><span class="n">components</span><span class="p">),</span> <span class="n">components</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Divides the ``Unit`` by another ``Unit``</span>
 
@@ -287,12 +289,12 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_components</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;div&#39;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;A Unit can only be divided by another Unit&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;A Unit can only be divided by another Unit&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculate_string</span><span class="p">(</span><span class="n">components</span><span class="p">),</span> <span class="n">components</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs the power operation on the ``Unit``</span>
 
@@ -310,16 +312,15 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Number</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">other</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Only numeric types can be used as a power for&#39;</span>
-                                <span class="s1">&#39; Units&#39;</span><span class="p">)</span>
+                                <span class="s1">&#39; Units&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
 
         <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_components</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;pow&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculate_string</span><span class="p">(</span><span class="n">components</span><span class="p">),</span> <span class="n">components</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get whether the ``Unit`` is a ``base`` or compound ``Unit``</span>
 
@@ -337,7 +338,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">conversion_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the factor by which a value with this ``Unit`` should be</span>
 <span class="sd">        multiplied in order to express it in system units. This takes into</span>
@@ -371,14 +371,13 @@
                     <span class="n">factor</span> <span class="o">/=</span> <span class="n">factors_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">)]</span>
 
         <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Unknown unit </span><span class="si">{}</span><span class="s1"> provided, cannot convert to system&#39;</span>
-                           <span class="s1">&#39; units&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">)))</span> <span class="kn">from</span> <span class="nn">error</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown unit </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span><span class="si">}</span><span class="s1"> provided, cannot convert to system&#39;</span>
+                           <span class="s1">&#39; units&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
 
         <span class="k">return</span> <span class="n">factor</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">physical_property</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The physical property (e.g. &#39;LENGTH&#39;, &#39;TIME&#39;, ...) that the unit measures.</span>
 
@@ -395,12 +394,10 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">properties_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)]</span>
         <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Unknown unit </span><span class="si">{}</span><span class="s1"> provided, cannot determine the &#39;</span>
-                           <span class="s1">&#39;physical property it measures &#39;</span>
-                           <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span> <span class="kn">from</span> <span class="nn">error</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown unit </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> provided, cannot determine the &#39;</span>
+                           <span class="s1">&#39;physical property it measures &#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
 
     <span class="k">def</span> <span class="nf">_calculate_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the ``components`` for a new ``Unit`` generated from an</span>
 <span class="sd">        operation</span>
@@ -445,13 +442,14 @@
                 <span class="n">components</span><span class="p">[</span><span class="s1">&#39;denominator&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="n">other</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">numerator</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="s1">&#39;numerator&#39;</span><span class="p">]</span>
-                <span class="n">components</span><span class="p">[</span><span class="s1">&#39;numerator&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="s1">&#39;denominator&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+                <span class="n">components</span><span class="p">[</span><span class="s1">&#39;numerator&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">components</span><span class="p">[</span><span class="s1">&#39;denominator&#39;</span><span class="p">]</span> <span class="o">*</span> \
+                    <span class="nb">abs</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
                 <span class="n">components</span><span class="p">[</span><span class="s1">&#39;denominator&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">components</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="p">):</span>
-
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_calculate_string</span><span class="p">(</span><span class="n">components</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the `str` for a new ``Unit`` generated from an operation</span>
 
@@ -467,7 +465,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">_calculate_expr_string</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
-
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Calculates the `str` from a `list` of ``components``</span>
 
@@ -480,7 +477,7 @@
             <span class="c1"># List used rather than string so that sorting can be implemented</span>
             <span class="n">component_list</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">comp</span><span class="p">,</span> <span class="n">power</span> <span class="ow">in</span> <span class="n">component_powers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">power</span> <span class="ow">is</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">power</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">component_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">component_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comp</span> <span class="o">+</span> <span class="s1">&#39; ^ &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">power</span><span class="p">))</span>
@@ -493,14 +490,12 @@
         <span class="c1"># denominator, and both</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">components</span><span class="p">[</span><span class="s1">&#39;numerator&#39;</span><span class="p">]:</span>
             <span class="k">return</span> <span class="s1">&#39;1 / &#39;</span> <span class="o">+</span> <span class="n">denominator</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">components</span><span class="p">[</span><span class="s1">&#39;denominator&#39;</span><span class="p">]:</span>
-                <span class="k">return</span> <span class="n">numerator</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">numerator</span> <span class="o">+</span> <span class="s1">&#39; / &#39;</span> <span class="o">+</span> <span class="n">denominator</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">components</span><span class="p">[</span><span class="s1">&#39;denominator&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">numerator</span>
+        <span class="k">return</span> <span class="n">numerator</span> <span class="o">+</span> <span class="s1">&#39; / &#39;</span> <span class="o">+</span> <span class="n">denominator</span>
 
-    <span class="k">def</span> <span class="nf">_parse_unit_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit_string</span><span class="p">):</span>
-
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_unit_string</span><span class="p">(</span><span class="n">unit_string</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts a ``Unit`` `str` into ``Unit`` objects</span>
 
@@ -524,7 +519,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">parse_powers</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -588,27 +582,27 @@
         <span class="n">num</span><span class="p">,</span> <span class="n">inverse_num</span> <span class="o">=</span> <span class="n">parse_powers</span><span class="p">(</span><span class="n">num_string</span><span class="p">)</span>
 
         <span class="c1"># Combine the numerator with elements from the denominator that had</span>
-        <span class="c1"># negative powers, and vice versa </span>
+        <span class="c1"># negative powers, and vice versa</span>
         <span class="k">return</span> <span class="n">num</span> <span class="o">+</span> <span class="n">inverse_denom</span><span class="p">,</span> <span class="n">denom</span> <span class="o">+</span> <span class="n">inverse_num</span></div>
+
 
 <span class="c1"># Define the unit system used in MDMC</span>
 <span class="n">SYSTEM</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;LENGTH&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Ang&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;TIME&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;MASS&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;amu&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;CHARGE&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;ANGLE&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;TEMPERATURE&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;ENERGY&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;kJ&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;mol&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;FORCE&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;kJ&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Ang&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;mol&#39;</span><span class="p">)),</span>
-    <span class="s1">&#39;PRESSURE&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Pa&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;ENERGY_TRANSFER&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;meV&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;ARBITRARY&#39;</span><span class="p">:</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;arb&#39;</span><span class="p">)</span>
+    <span class="s1">&#39;LENGTH&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Ang&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;TIME&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;MASS&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;amu&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;CHARGE&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;ANGLE&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;TEMPERATURE&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;ENERGY&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;kJ&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;mol&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;FORCE&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;kJ&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Ang&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;mol&#39;</span><span class="p">)),</span>
+    <span class="s1">&#39;PRESSURE&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Pa&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;ENERGY_TRANSFER&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;meV&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;ARBITRARY&#39;</span><span class="p">:</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;arb&#39;</span><span class="p">)</span>
 <span class="p">}</span>
 
 
 <div class="viewcode-block" id="create_units"><a class="viewcode-back" href="../../../pages/modules/common/units.html#MDMC.common.units.create_units">[docs]</a><span class="k">def</span> <span class="nf">create_units</span><span class="p">(</span><span class="n">codata_version</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a `dict` of ``Unit`` based on the CODATA version.</span>
 
@@ -625,8 +619,8 @@
 
     <span class="c1"># SYSTEM units are defined to 1.0, and have the physical properties they</span>
     <span class="c1"># measure defined (e.g. {&#39;Ang&#39;: &#39;LENGTH&#39;, ...})</span>
-    <span class="n">units</span> <span class="o">=</span> <span class="p">{</span><span class="n">unit</span><span class="p">:</span><span class="mf">1.0</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">SYSTEM</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
-    <span class="n">unit_properties</span> <span class="o">=</span> <span class="p">{</span><span class="n">unit</span><span class="p">:</span><span class="nb">property</span> <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">SYSTEM</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">units</span> <span class="o">=</span> <span class="p">{</span><span class="n">unit</span><span class="p">:</span> <span class="mf">1.0</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">SYSTEM</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
+    <span class="n">unit_properties</span> <span class="o">=</span> <span class="p">{</span><span class="n">unit</span><span class="p">:</span> <span class="nb">property</span> <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">SYSTEM</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="c1"># CODATA version</span>
     <span class="n">codata</span> <span class="o">=</span> <span class="n">CODATA</span><span class="p">[</span><span class="n">codata_version</span><span class="p">]</span>
@@ -747,7 +741,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the ``unit``</span>
 
@@ -769,7 +762,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">Unit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Copies the ``UnitFloat`` and all attributes</span>
 
@@ -796,7 +788,7 @@
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="UnitNDArray"><a class="viewcode-back" href="../../../pages/modules/common/units.html#MDMC.common.units.UnitNDArray">[docs]</a><span class="k">class</span> <span class="nc">UnitNDArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -835,7 +827,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the ``unit``</span>
 
@@ -870,7 +861,6 @@
 
 
 <div class="viewcode-block" id="unit_array"><a class="viewcode-back" href="../../../pages/modules/common/units.html#MDMC.common.units.unit_array">[docs]</a><span class="k">def</span> <span class="nf">unit_array</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function for creating a ``UnitNDArray`` from an ``array`` or any</span>
 <span class="sd">    nested sequence</span>
@@ -902,7 +892,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;unit must be a string, but was </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">unit</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unit must be a string, but was </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># Significantly faster to create np.array and view it than to loop</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
