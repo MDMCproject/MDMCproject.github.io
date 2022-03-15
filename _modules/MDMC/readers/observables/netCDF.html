@@ -106,17 +106,16 @@
              
   <h1>Source code for MDMC.readers.observables.netCDF</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A reader for netcdf SQw data&quot;&quot;&quot;</span>
-
+<span class="c1"># disabling as there is a &#39;no Dataset in netCDF4&#39; false linting warning for this file</span>
+<span class="c1"># pylint: disable=no-name-in-module</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">netCDF4</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
-<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.constants</span> <span class="kn">import</span> <span class="n">h_bar</span>
-<span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">ObservableReader</span>
+<span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">SQwReader</span>
 
 
-<div class="viewcode-block" id="netCDF"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/netCDF.html#MDMC.readers.observables.netCDF.netCDF">[docs]</a><span class="k">class</span> <span class="nc">netCDF</span><span class="p">(</span><span class="n">ObservableReader</span><span class="p">):</span>
+<div class="viewcode-block" id="netCDF"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/netCDF.html#MDMC.readers.observables.netCDF.netCDF">[docs]</a><span class="k">class</span> <span class="nc">netCDF</span><span class="p">(</span><span class="n">SQwReader</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Currently only setup for parsing MMTK/nMOLDYN SQw netcdf files</span>
@@ -127,21 +126,19 @@
 <span class="sd">        The netCDF input file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="netCDF.open"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/netCDF.html#MDMC.readers.observables.netCDF.netCDF.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
-
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Opens the file for parsing</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        file_name : str</span>
-<span class="sd">            The name of the netCDF file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Closes the file after parsing&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="netCDF.parse"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/netCDF.html#MDMC.readers.observables.netCDF.netCDF.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parse into SQw format</span>
 
@@ -153,93 +150,11 @@
                   <span class="o">*</span> <span class="n">h_bar</span><span class="p">)</span>
         <span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="s1">&#39;nm&#39;</span> <span class="ow">in</span> <span class="n">Q</span><span class="o">.</span><span class="n">units</span><span class="p">:</span>
-            <span class="n">Q</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.1</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">SQw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;Sqw-total&#39;</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">)</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the independent variables, Q (in ``Ang^-1``) and E (``meV``)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The independent variables Q and E</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;Q&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">}</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the dependent variables, SQw (in ``arb``)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The dependent variables, SQw (in ``arb``)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;SQw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="p">]}</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the errors on the dependent variables</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The error on SQw (in ``arb``)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;SQw&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">]}</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the energy transfer, E, in ``meV``</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        array</span>
-<span class="sd">            Energy transfer, E, in ``meV``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_E</span>
-
-    <span class="nd">@E</span><span class="o">.</span><span class="n">setter</span>
-    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_TRANSFER</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_E</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the momentum transfer, Q, in ``Ang^-1``</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        array</span>
-<span class="sd">            Momentum transfer, Q, in ``Ang^-1``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
-
-    <span class="nd">@Q</span><span class="o">.</span><span class="n">setter</span>
-    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="o">=</span> <span class="n">value</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

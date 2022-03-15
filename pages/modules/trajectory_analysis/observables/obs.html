@@ -169,12 +169,13 @@ The <cite>bool</cite> property <code class="docutils literal notranslate"><span 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.obs.Observable.calculate_from_MD">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_from_MD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MD_input</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/trajectory_analysis/observables/obs.html#Observable.calculate_from_MD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.observables.obs.Observable.calculate_from_MD" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_from_MD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MD_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/trajectory_analysis/observables/obs.html#Observable.calculate_from_MD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.observables.obs.Observable.calculate_from_MD" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the obseravable using input from an MD simulation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>MD_input</strong> (<em>Object</em>) – Some input from an MD simulation, commonly a <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Enables verbose printing of the calculation</p></li>
 <li><p><strong>**parameters</strong> – Additional parameters required for calculation specific
 <code class="docutils literal notranslate"><span class="pre">Observable</span></code> objects</p></li>
 </ul>
@@ -213,18 +214,19 @@ The <cite>bool</cite> property <code class="docutils literal notranslate"><span 
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.obs.Observable.dependent_variables_structure">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dependent_variables_structure</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.observables.obs.Observable.dependent_variables_structure" title="Permalink to this definition"></a></dt>
-<dd><p>The structure of the dependent variables with respect to the independent variables. Specifically,
-the order in which the dependent variables are indexed with regards to the independent variables.
+<dd><p>The structure of the dependent variables with respect to the independent variables.
+Specifically, the order in which the dependent variables are indexed
+with regards to the independent variables.
 Example: if
-dep_var1[indep_var1_index, indep_var2_index, …] = data point for values of the independent_variables with
-the stated indices then the relevant entry in the returned dict should be:
+dep_var1[indep_var1_index, indep_var2_index, …] = data point
+for values of the independent_variables with the stated indices
+then the relevant entry in the returned dict should be:
 {‘dependent_variable1’: [independent_variable1, independent_variable2, …]}
 Note that this would also correspond to numpy.shape of the dependent variable being:
 np.shape(dependent_variable1)=(np.size(independent_variable1), np.size(independent_variable2), …)</p>
-<dl class="simple">
-<dt>The purpose of this method is to ensure that all <a href="#id1"><span class="problematic" id="id2">``</span></a>Observable``s of a particular type are created with</dt><dd><p>‘dependent_variables’ that are consistent regardless of how they were created (e.g. by different <a href="#id3"><span class="problematic" id="id4">``</span></a>Reader``s).</p>
-</dd>
-</dl>
+<p>The purpose of this method is to ensure that all <a href="#id1"><span class="problematic" id="id2">``</span></a>Observable``s of a particular type
+are created with ‘dependent_variables’ that are consistent
+regardless of how they were created (e.g. by different <a href="#id3"><span class="problematic" id="id4">``</span></a>Reader``s).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The np.shape of the dependent variables</p>
@@ -342,15 +344,17 @@ calculate the <code class="docutils literal notranslate"><span class="pre">depen
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.observables.obs.Observable.uniformity_requirements">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniformity_requirements</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#MDMC.trajectory_analysis.observables.obs.Observable.uniformity_requirements" title="Permalink to this definition"></a></dt>
-<dd><p># Represents the current limitations on the <code class="docutils literal notranslate"><span class="pre">independent_variables</span></code> of the <code class="docutils literal notranslate"><span class="pre">Observable</span></code>. It captures if the
-# <code class="docutils literal notranslate"><span class="pre">independent_variables</span></code> are required to be uniform or to start at zero. The keys of the returned dictionary
-# should be the variables that have such a restriction, with the associated values being a dictionary
-# with booleans if the variables are ‘uniform’ or ‘zeroed’.
-# Variables without any requirements do not need to be included, but can be included.
-# If there are no uniformity requirements it is okay to return ‘None’.</p>
+<dd><p>Represents the current limitations on <code class="docutils literal notranslate"><span class="pre">independent_variables</span></code> of the <code class="docutils literal notranslate"><span class="pre">Observable</span></code>.
+It captures if the <code class="docutils literal notranslate"><span class="pre">independent_variables</span></code> are required to be uniform or to start at zero
+The keys of the returned dictionary should be the variables that have such a restriction,
+with the associated values being a dictionary with booleans
+if the variables are ‘uniform’ or ‘zeroed’.
+Variables without any requirements do not need to be included, but can be included.
+If there are no uniformity requirements it is okay to return ‘None’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Dictionary of independent variables with their uniformity restrictions represented as booleans</p>
+<dd class="field-odd"><p>Dictionary of independent variables
+with their uniformity restrictions represented as booleans</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Dict[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, Dict[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>]]</p>

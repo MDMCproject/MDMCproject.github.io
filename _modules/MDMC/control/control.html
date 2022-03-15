@@ -109,13 +109,11 @@
 
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span><span class="p">,</span> <span class="n">interp2d</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
@@ -125,7 +123,6 @@
 <span class="kn">from</span> <span class="nn">MDMC.refinement.FoM.FoM_abs</span> <span class="kn">import</span> <span class="n">ObservablePair</span>
 <span class="kn">from</span> <span class="nn">MDMC.resolution.resolution_factory</span> <span class="kn">import</span> <span class="n">ResolutionFactory</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.refinement</span> <span class="kn">import</span> <span class="n">FoM</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span> \
     <span class="kn">import</span> <span class="nn">ObservableFactory</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> <span class="n">Observable</span>
@@ -164,8 +161,9 @@
 <span class="sd">            If just a string is given, it is assumed to be a filename.</span>
 <span class="sd">            If just a float is given, it is assumed to be Gaussian.</span>
 <span class="sd">            The float should be the instrument energy resolution as the FWHM in ``ueV`` (micro eV).</span>
-<span class="sd">            If you have already accounted for instrument resolution in your dataset, this field can</span>
-<span class="sd">            be set to None, and resolution application will be skipped. This must be done explicitly.</span>
+<span class="sd">            If you have already accounted for instrument resolution in your dataset,</span>
+<span class="sd">            this field can be set to None, and resolution application will be skipped.</span>
+<span class="sd">            This must be done explicitly.</span>
 <span class="sd">          - ``rescale_factor`` (`float`, optional, defaults to `1.`) applied to</span>
 <span class="sd">            the experimental data when calculating the FoM to ensure it is on</span>
 <span class="sd">            the same scale as the calculated observable</span>
@@ -219,12 +217,13 @@
 <span class="sd">        general will vary depending on the details of the ``Universe`` and ``Parameters``. Default</span>
 <span class="sd">        is 0.</span>
 <span class="sd">    convergence_tol : float, optional</span>
-<span class="sd">        The relative tolerance used to determine if a refinement has converged. If the Figure of Merit and all</span>
-<span class="sd">        ``Parameters`` change less than this tolerance between two accepted refinement steps the refinement stops.</span>
+<span class="sd">        The relative tolerance used to determine if a refinement has converged.</span>
+<span class="sd">        If the Figure of Merit and all ``Parameters`` change less than this</span>
+<span class="sd">        tolerance between two accepted refinement steps, the refinement stops.</span>
 <span class="sd">        Default value is 1e-5.</span>
 <span class="sd">    min_refinement_steps : int, optional</span>
-<span class="sd">        The minimum number of refinement steps before the refinement process can stop if all parameters and the</span>
-<span class="sd">        Figure of Merit have converged. Default value is 2.</span>
+<span class="sd">        The minimum number of refinement steps before the refinement process can stop</span>
+<span class="sd">         if all parameters and the Figure of Merit have converged. Default value is 2.</span>
 <span class="sd">    verbose: int, optional</span>
 <span class="sd">        If 2, timings are printed for every step of the refinement. If 1,</span>
 <span class="sd">        timings are printed at the end of the refinement. If 0, no timings</span>
@@ -268,34 +267,37 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">exp_datasets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
-                 <span class="n">fit_parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">MC_norm</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
-                 <span class="n">minimizer_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;MMC&#39;</span><span class="p">,</span> <span class="n">FoM_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">reset_config</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">fit_parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">MC_norm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
+                 <span class="n">minimizer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;MMC&#39;</span><span class="p">,</span> <span class="n">FoM_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">reset_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">equilibration_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="n">convergence_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span>
                  <span class="n">min_refinement_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-                 <span class="n">max_parameter_change</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-                 <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">max_parameter_change</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="o">=</span> <span class="n">simulation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exp_datasets</span> <span class="o">=</span> <span class="n">exp_datasets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">timings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;equilibrate&#39;</span><span class="p">:[],</span>
-                        <span class="s1">&#39;_run_MD&#39;</span><span class="p">:[],</span>
-                        <span class="s1">&#39;convert_trajectory&#39;</span><span class="p">:[],</span>
-                        <span class="s1">&#39;FoM_calculator&#39;</span><span class="p">:[],</span>
-                        <span class="s1">&#39;minimizer&#39;</span><span class="p">:[],</span>
-                        <span class="s1">&#39;TOTAL STEP&#39;</span><span class="p">:[]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;equilibrate&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                        <span class="s1">&#39;_run_MD&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                        <span class="s1">&#39;convert_trajectory&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                        <span class="s1">&#39;FoM_calculator&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                        <span class="s1">&#39;minimizer&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                        <span class="s1">&#39;TOTAL STEP&#39;</span><span class="p">:</span> <span class="p">[]}</span>
 
         <span class="c1"># Remove any fixed, tied or parameters equal to 0 as these cannot be refined</span>
-        <span class="n">fit_parameters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">fit_parameters</span> <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">fixed</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">tied</span><span class="p">)</span>
-                                                            <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)])</span>
+        <span class="n">fit_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">fit_parameters</span> <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">fixed</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">tied</span><span class="p">)</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">fit_parameters</span><span class="p">)</span>
         <span class="c1"># Minimizer FoM_old is always initialised to infinity, so that first MC</span>
         <span class="c1"># step (i.e. the setup) is always accepted.</span>
+        <span class="c1"># pylint: disable=line-too-long</span>
+        <span class="c1"># disable this pylint warning as this can&#39;t be fixed in a way that looks good</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span> <span class="o">=</span> <span class="n">MinimizerFactory</span><span class="o">.</span><span class="n">create_minimizer</span><span class="p">(</span><span class="n">minimizer_type</span><span class="p">,</span> <span class="n">MC_norm</span><span class="p">,</span>
-                                                             <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">,</span> <span class="n">max_parameter_change</span><span class="o">=</span><span class="n">max_parameter_change</span><span class="p">)</span>
+                                                           <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">,</span>
+                                                           <span class="n">max_parameter_change</span><span class="o">=</span><span class="n">max_parameter_change</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_config</span> <span class="o">=</span> <span class="n">reset_config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">=</span> <span class="n">equilibration_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">convergence_tol</span> <span class="o">=</span> <span class="n">convergence_tol</span>
@@ -309,8 +311,8 @@
         <span class="k">for</span> <span class="n">dset</span> <span class="ow">in</span> <span class="n">exp_datasets</span><span class="p">:</span>
             <span class="n">use_FFT</span> <span class="o">=</span> <span class="n">dset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;use_FFT&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
             <span class="n">exp_observable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_observable_from_file</span><span class="p">(</span><span class="n">dset</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
-                                                             <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;reader&#39;</span><span class="p">],</span>
-                                                             <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;file_name&#39;</span><span class="p">])</span>
+                                                        <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;reader&#39;</span><span class="p">],</span>
+                                                        <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;file_name&#39;</span><span class="p">])</span>
             <span class="n">exp_observable</span><span class="o">.</span><span class="n">use_FFT</span> <span class="o">=</span> <span class="n">use_FFT</span>
 
             <span class="k">if</span> <span class="n">exp_observable</span><span class="o">.</span><span class="n">uniformity_requirements</span><span class="p">:</span>
@@ -339,7 +341,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">observable_pair</span><span class="p">)</span>
 
             <span class="c1"># Take the largest minimum number of MD_steps needed by any dataset</span>
-            <span class="n">min_MD_steps_dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_minimum_MD_steps</span><span class="p">(</span><span class="n">observable_pair</span><span class="p">)</span>
+            <span class="n">min_MD_steps_dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_minimum_MD_steps</span><span class="p">(</span>
+                <span class="n">observable_pair</span><span class="p">)</span>
             <span class="n">minimum_MD_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">minimum_MD_steps</span><span class="p">,</span> <span class="n">min_MD_steps_dset</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">FoM_options</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">FoM_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -353,8 +356,8 @@
             <span class="n">FoM_norm</span> <span class="o">=</span> <span class="n">FoM_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;norm&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span> <span class="o">=</span> <span class="n">FoMFactory</span><span class="o">.</span><span class="n">create_FoM</span><span class="p">(</span><span class="n">FoM_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">,</span>
-                                        <span class="n">norm</span><span class="o">=</span><span class="n">FoM_norm</span><span class="p">,</span>
-                                        <span class="n">n_parameters</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">))</span>
+                                                    <span class="n">norm</span><span class="o">=</span><span class="n">FoM_norm</span><span class="p">,</span>
+                                                    <span class="n">n_parameters</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">))</span>
 
         <span class="c1"># Use specified MD_steps if supplied, else calculate</span>
         <span class="k">if</span> <span class="n">MD_steps</span><span class="p">:</span>
@@ -364,18 +367,19 @@
                 <span class="c1"># our observable pairs</span>
                 <span class="n">maximum_MD_steps</span> <span class="o">=</span> <span class="n">minimum_MD_steps</span>
                 <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">:</span>
-                    <span class="n">max_MD_steps_pair</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_maximum_MD_steps</span><span class="p">(</span><span class="n">MD_steps</span><span class="p">,</span> <span class="n">pair</span><span class="p">)</span>
+                    <span class="n">max_MD_steps_pair</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_maximum_MD_steps</span><span class="p">(</span>
+                        <span class="n">MD_steps</span><span class="p">,</span> <span class="n">pair</span><span class="p">)</span>
                     <span class="n">maximum_MD_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maximum_MD_steps</span><span class="p">,</span> <span class="n">max_MD_steps_pair</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span> <span class="o">=</span> <span class="n">maximum_MD_steps</span>
             <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Experimental datasets provided require a &#39;</span>
-                                 <span class="s1">&#39;minimum MD_steps value of </span><span class="si">{}</span><span class="s1"> in order to &#39;</span>
-                                 <span class="s1">&#39;calculate observables&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">minimum_MD_steps</span><span class="p">)</span>
-                                 <span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+                                 <span class="sa">f</span><span class="s1">&#39;minimum MD_steps value of </span><span class="si">{</span><span class="n">minimum_MD_steps</span><span class="si">}</span><span class="s1"> in order to &#39;</span>
+                                 <span class="s1">&#39;calculate observables&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span> <span class="o">=</span> <span class="n">minimum_MD_steps</span>
 
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">exp_datasets</span><span class="p">):</span>  <span class="c1"># read in resolutions for the experimental datasets</span>
+        <span class="c1"># read in resolutions for experimental datasets</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">exp_datasets</span><span class="p">):</span>
             <span class="n">resolution_factory</span> <span class="o">=</span> <span class="n">ResolutionFactory</span><span class="p">()</span>
             <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">traj_step</span>
 
@@ -385,10 +389,12 @@
                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">resolution_factory</span><span class="o">.</span><span class="n">resolutions</span><span class="p">:</span>
                     <span class="n">userkeys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;resolution&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;A resolution function must be added. Recognised functions are &quot;</span> <span class="o">+</span>
-                               <span class="nb">str</span><span class="p">(</span><span class="n">userkeys</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. If you meant to apply no resolution,&quot;</span>
+                               <span class="nb">str</span><span class="p">(</span><span class="n">userkeys</span><span class="p">)</span> <span class="o">+</span>
+                               <span class="s2">&quot;. If you meant to apply no resolution,&quot;</span>
                                <span class="s2">&quot; then specify resolution as None for the exp_dataset parameters.&quot;</span><span class="p">)</span>
 
-            <span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution_factory</span><span class="o">.</span><span class="n">create_instance</span><span class="p">(</span><span class="n">dset</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">],</span> <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span> <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;reader&#39;</span><span class="p">],</span> <span class="n">dt</span><span class="p">)</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution_factory</span><span class="o">.</span><span class="n">create_instance</span><span class="p">(</span><span class="n">dset</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">],</span> <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+                                                            <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;reader&#39;</span><span class="p">],</span> <span class="n">dt</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
@@ -405,20 +411,18 @@
                                           <span class="s1">&#39;  Number of observables&#39;</span><span class="p">,</span>
                                           <span class="s1">&#39;  Number of parameters&#39;</span><span class="p">])</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Control created with:</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span>
-              <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">setup_frame</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Control created with:</span><span class="se">\n</span><span class="si">{</span><span class="n">setup_frame</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="n">exp_dataset_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_datasets</span><span class="p">]</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> refining </span><span class="si">{1}</span><span class="s2"> </span><span class="si">{2}</span><span class="s2"> using </span><span class="si">{3}</span><span class="s2"> data types&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">),</span>
-            <span class="s1">&#39;parameter&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;parameters&#39;</span><span class="p">,</span>
-            <span class="n">exp_dataset_types</span><span class="p">)</span>
+
+        <span class="c1"># plural adds &quot;s&quot; to end of &quot;parameter&quot; if there is more than one parameter</span>
+        <span class="n">plural</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> refining </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="si">}</span><span class="s2"> parameter</span><span class="si">{</span><span class="n">plural</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;using </span><span class="si">{</span><span class="n">exp_dataset_types</span><span class="si">}</span><span class="s2"> data types&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Control.refine"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.refine">[docs]</a>    <span class="k">def</span> <span class="nf">refine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Refines the specified potential parameters</span>
 
@@ -449,14 +453,16 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;equilibrate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         equilibrate: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         equilibrate: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># advance the refinement by one step</span>
             <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;TOTAL STEP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;          TOTAL STEP: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;          TOTAL STEP: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_print_data</span><span class="p">()</span>
 
         <span class="c1"># Try/except accounts for n_steps &lt;= -1</span>
@@ -469,7 +475,7 @@
             <span class="k">pass</span>
 
         <span class="c1"># print values of final parameters</span>
-        <span class="n">parameter_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span><span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">parameters</span><span class="p">},</span>
+        <span class="n">parameter_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">parameters</span><span class="p">},</span>
                                     <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Final Parameters</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span>
               <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parameter_df</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span>
@@ -485,8 +491,8 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scaling_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">scaling_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">scaling_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">scaling_values</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">scaling_keys</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Automatic Scale Factors</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span>
-                  <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">scaling_df</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Automatic Scale Factors</span><span class="se">\n</span><span class="si">{</span><span class="n">scaling_df</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="c1"># Average timings</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -500,13 +506,13 @@
             <span class="c1"># chronological order of the timed operations, move keys/values 3:6 to the end of the</span>
             <span class="c1"># lists.</span>
             <span class="n">timing_keys</span> <span class="o">=</span> <span class="n">timing_keys</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">timing_keys</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span> <span class="o">+</span> <span class="n">timing_keys</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
-            <span class="n">timing_values</span> <span class="o">=</span> <span class="n">timing_values</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">timing_values</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span> <span class="o">+</span> <span class="n">timing_values</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">timing_values</span> <span class="o">=</span> <span class="n">timing_values</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> \
+                <span class="n">timing_values</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span> <span class="o">+</span> <span class="n">timing_values</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
             <span class="n">timing_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">timing_values</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">timing_keys</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Average Timings (s)</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span>
                   <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing_df</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="Control.equilibrate"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.equilibrate">[docs]</a>    <span class="k">def</span> <span class="nf">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run molecular dynamics to equilibrate the ``Universe``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -515,7 +521,6 @@
                             <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Control.step"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Do a full step: generate and run MD to calculate FoM for existing</span>
 <span class="sd">        parameters, iterate parameters a step forward and reset MD (phasespace)</span>
@@ -544,7 +549,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;minimizer&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;           minimizer: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;           minimizer: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">write_history</span><span class="p">(</span><span class="s1">&#39;results.csv&#39;</span><span class="p">)</span></div>
 
@@ -571,7 +577,6 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_generate_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the MD for an iteration/step, calculate observable, compare with</span>
 <span class="sd">        observed observed and return the FoM</span>
@@ -588,7 +593,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;_run_MD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;             _run_MD: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;             _run_MD: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">)</span>
 
@@ -598,12 +604,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;FoM_calculator&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_1</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      FoM_calculator: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">3</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      FoM_calculator: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">3</span><span class="p">)))</span>
 
         <span class="k">return</span> <span class="n">FoM_value</span>
 
     <span class="k">def</span> <span class="nf">_run_MD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run a molecular dynamics simulation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -611,22 +617,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_update_engine_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the force field parameters of the MD engine</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">update_parameters</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_read_observable_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reader</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_read_observable_from_file</span><span class="p">(</span><span class="n">obstype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reader</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                                    <span class="n">resolution_file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an Observable of the specified type and reads in data from file</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        type : str</span>
+<span class="sd">        obstype : str</span>
 <span class="sd">            The ``type`` of the ``Observable``.</span>
 <span class="sd">        reader : str</span>
 <span class="sd">            The ``type`` of the ``Reader``.</span>
@@ -639,12 +644,12 @@
 <span class="sd">            An ``Observable`` of specified ``type``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">observable</span> <span class="o">=</span> <span class="n">ObservableFactory</span><span class="o">.</span><span class="n">create_observable</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
+        <span class="n">observable</span> <span class="o">=</span> <span class="n">ObservableFactory</span><span class="o">.</span><span class="n">create_observable</span><span class="p">(</span><span class="n">obstype</span><span class="p">)</span>
         <span class="n">observable</span><span class="o">.</span><span class="n">read_from_file</span><span class="p">(</span><span class="n">reader</span><span class="o">=</span><span class="n">reader</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">observable</span>
 
-    <span class="k">def</span> <span class="nf">_create_empty_observable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp_observable</span><span class="p">):</span>
-
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_empty_observable</span><span class="p">(</span><span class="n">exp_observable</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a ``Observable`` without data but with independent variables</span>
 <span class="sd">        specified from another ``Observable``.  This is a placeholder in which</span>
@@ -669,7 +674,6 @@
         <span class="k">return</span> <span class="n">observable</span>
 
     <span class="k">def</span> <span class="nf">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">,</span> <span class="n">observable_pairs</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates all of the ``Observable`` objects from the MD</span>
 <span class="sd">        trajectory/configurations</span>
@@ -689,7 +693,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;convert_trajectory&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  convert_trajectory: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  convert_trajectory: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
 
         <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">observable_pairs</span><span class="p">:</span>
             <span class="n">maximum_frames</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">maximum_frames</span><span class="p">()</span>
@@ -700,7 +705,8 @@
                 <span class="n">sub_trj</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">n_averages</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trj</span><span class="p">)</span> <span class="o">//</span> <span class="n">maximum_frames</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_averages</span><span class="p">):</span>
-                    <span class="n">sub_trj</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trj</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">maximum_frames</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">maximum_frames</span><span class="p">])</span>
+                    <span class="n">sub_trj</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">trj</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">maximum_frames</span><span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">maximum_frames</span><span class="p">])</span>
                 <span class="n">obs_timings</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">calculate_from_MD</span><span class="p">(</span><span class="n">sub_trj</span><span class="p">,</span>
                                                             <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
                                                             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
@@ -717,7 +723,6 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
 
     <span class="k">def</span> <span class="nf">_calculate_minimum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the minimum number of steps required for the MD engine in</span>
 <span class="sd">        order to calculate MD ``Observables`` objects with the same independent</span>
@@ -746,7 +751,6 @@
 
     <span class="k">def</span> <span class="nf">_calculate_maximum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                                     <span class="n">observable_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the maximum number of steps that ``observable_pair`` will be</span>
 <span class="sd">        able to use when calculating dependent variables whilst still being</span>
@@ -784,7 +788,8 @@
 
         <span class="k">return</span> <span class="n">maximum_steps</span> <span class="o">*</span> <span class="p">(</span><span class="n">MD_steps</span> <span class="o">//</span> <span class="p">(</span><span class="n">maximum_steps</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">_is_data_uniform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_is_data_uniform</span><span class="p">(</span><span class="n">observable</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the values for each independent variable of an ``Observable`` are uniformly</span>
 <span class="sd">        spaced and if they start at zero. This information is returned in a single dictionary.</span>
@@ -805,34 +810,40 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; control._is_data_uniform(self, observable)</span>
+<span class="sd">        &gt;&gt;&gt; _is_data_uniform(observable)</span>
 <span class="sd">        {&#39;E&#39;: {&#39;uniform&#39;: True, &#39;zeroed&#39;: True}, &#39;Q&#39;: {&#39;uniform&#39;: True, &#39;zeroed&#39;: False}}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">uniformity_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">var_key</span><span class="p">,</span> <span class="n">var_data</span> <span class="ow">in</span> <span class="n">observable</span><span class="o">.</span><span class="n">independent_variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">uniform_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">var_data</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">var_data</span><span class="p">),</span> <span class="n">num</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">var_data</span><span class="p">))</span>
+            <span class="n">uniform_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                <span class="nb">min</span><span class="p">(</span><span class="n">var_data</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">var_data</span><span class="p">),</span> <span class="n">num</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">var_data</span><span class="p">))</span>
             <span class="n">is_uniform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">var_data</span><span class="p">,</span> <span class="n">uniform_data</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
-            <span class="n">uniformity_dict</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;uniform&#39;</span><span class="p">:</span> <span class="n">is_uniform</span><span class="p">,</span> <span class="s1">&#39;zeroed&#39;</span><span class="p">:</span> <span class="n">var_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">}</span>
+            <span class="n">uniformity_dict</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;uniform&#39;</span><span class="p">:</span> <span class="n">is_uniform</span><span class="p">,</span> <span class="s1">&#39;zeroed&#39;</span><span class="p">:</span> <span class="n">var_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">uniformity_dict</span>
 
     <span class="k">def</span> <span class="nf">_make_data_uniform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Observable</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Takes an ``Observable``, checks the requirements for its ``independent_variables`` to be uniform or start at</span>
-<span class="sd">        zero, creates uniform grids for the variables that do not satisfy their requirement, interpolates the</span>
-<span class="sd">        ``dependent_variables`` as needed, and returns an ``Observable`` with the uniform/interpolated variables.</span>
-<span class="sd">        Currently limited to ``Observables`` with two-dimensional ``dependent_variables`` (e.g. SQw).</span>
+<span class="sd">        Takes an ``Observable``, checks the requirements for its ``independent_variables``</span>
+<span class="sd">        to be uniform or start at zero, creates uniform grids for the variables that do not</span>
+<span class="sd">        satisfy their requirement, interpolates the ``dependent_variables`` as needed,</span>
+<span class="sd">        and returns an ``Observable`` with the uniform/interpolated variables.</span>
+<span class="sd">        Limited to ``Observables`` with two-dimensional ``dependent_variables`` (e.g. SQw).</span>
+<span class="sd">        This may change in future.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        observable : Observable</span>
-<span class="sd">            An ``Observable`` for which the independent variables need to be made uniform / to start at zero. Currently</span>
+<span class="sd">            An ``Observable`` for which the independent variables</span>
+<span class="sd">            need to be made uniform / to start at zero. Currently</span>
 <span class="sd">            limited to ``Observables`` for which the ``dependent_variables`` are two-dimensional.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        ``Observable``</span>
-<span class="sd">            Returns a copy of the passed ``Observable`` with the independent variables put onto uniform grid (for the</span>
-<span class="sd">            variables where that is necessary) and the dependent variables interpolated onto the same grid</span>
+<span class="sd">            Returns a copy of the passed ``Observable`` with the independent variables put onto</span>
+<span class="sd">            uniform grid (for the variables where that is necessary)</span>
+<span class="sd">            and the dependent variables interpolated onto the same grid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># get the uniformity requirements from the Observable</span>
         <span class="n">uniformity_required</span> <span class="o">=</span> <span class="n">observable</span><span class="o">.</span><span class="n">uniformity_requirements</span>
@@ -846,13 +857,15 @@
         <span class="c1"># loop through requirements</span>
         <span class="k">for</span> <span class="n">var_key</span><span class="p">,</span> <span class="n">var_required</span> <span class="ow">in</span> <span class="n">uniformity_required</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">var_state</span> <span class="o">=</span> <span class="n">uniformity_state</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span>
-            <span class="c1"># if the variable has a requirement AND it is not satisfied (for either uniformity OR zero-start)</span>
+            <span class="c1"># if the variable has a requirement AND it is not satisfied</span>
+            <span class="c1"># (for either uniformity OR zero-start)</span>
             <span class="c1"># then add it to the list of variables that need to be changed</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">var_required</span><span class="p">[</span><span class="s1">&#39;uniform&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">var_state</span><span class="p">[</span><span class="s1">&#39;uniform&#39;</span><span class="p">])</span> <span class="ow">or</span> \
                     <span class="p">(</span><span class="n">var_required</span><span class="p">[</span><span class="s1">&#39;zeroed&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">var_state</span><span class="p">[</span><span class="s1">&#39;zeroed&#39;</span><span class="p">]):</span>
                 <span class="n">indep_vars_to_be_changed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var_key</span><span class="p">)</span>
 
-        <span class="c1"># if all uniformity requirements are already satisfied simply return the original observable</span>
+        <span class="c1"># if all uniformity requirements are already satisfied</span>
+        <span class="c1"># simply return the original observable</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">indep_vars_to_be_changed</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">observable</span>
 
@@ -869,7 +882,8 @@
                     <span class="n">minimum</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">uniform_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minimum</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">num</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
                 <span class="n">indep_var_uniform</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniform_data</span>
-            <span class="c1"># if uniformity requirements are satisfied already, add the data points to the helper dictionary</span>
+            <span class="c1"># if uniformity requirements are satisfied already,</span>
+            <span class="c1"># add the data points to the helper dictionary</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">indep_var_uniform</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">observable</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span>
 
@@ -883,10 +897,9 @@
                 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">data_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Expected experimental dataset to only have one dependent &#39;</span>
-                       <span class="s1">&#39;variable entry for </span><span class="si">{0}</span><span class="s1">, but found </span><span class="si">{1}</span><span class="s1"> instead&#39;</span>
-                       <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var_key</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)))</span>
-                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Expected experimental dataset to only have one dependent &#39;</span>
+                                     <span class="sa">f</span><span class="s1">&#39;variable entry for </span><span class="si">{</span><span class="n">var_key</span><span class="si">}</span><span class="s1">, &#39;</span>
+                                     <span class="sa">f</span><span class="s1">&#39;but found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span><span class="si">}</span><span class="s1"> instead&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
 
             <span class="c1"># determine the dimension of the dependent variable</span>
             <span class="n">var_dimension</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span>
@@ -908,13 +921,14 @@
                 <span class="c1"># interp2d(x, y, z)</span>
                 <span class="c1"># where if np.size(x)=m and np.size(y)=n then np.shape(z)=(n,m)</span>
                 <span class="c1"># E.g. if x = [0,1,2]; y = [0,3]; z = [[1,2,3], [4,5,6]]</span>
-                <span class="c1"># Because Observable.dependent_variables_structure gives the order in which the independent variables</span>
-                <span class="c1"># are represented in the np.shape of the data, we have to reverse the order of the x and y arrays</span>
-                <span class="c1"># for interp2d:</span>
+                <span class="c1"># Because Observable.dependent_variables_structure gives the order in which</span>
+                <span class="c1"># the independent variables are represented in the np.shape of the data,</span>
+                <span class="c1"># we have to reverse the order of the x and y arrays for interp2d:</span>
                 <span class="n">x_data</span> <span class="o">=</span> <span class="n">observable</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="n">var_indexing</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="n">y_data</span> <span class="o">=</span> <span class="n">observable</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="n">var_indexing</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
                 <span class="n">data_interpol</span> <span class="o">=</span> <span class="n">interp2d</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-                <span class="c1"># get the independent_variables that satisfy the uniformity requirements as created earlier</span>
+                <span class="c1"># get the independent_variables that satisfy the uniformity requirements</span>
+                <span class="c1"># as created earlier</span>
                 <span class="n">x_uniform</span> <span class="o">=</span> <span class="n">indep_var_uniform</span><span class="p">[</span><span class="n">var_indexing</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="n">y_uniform</span> <span class="o">=</span> <span class="n">indep_var_uniform</span><span class="p">[</span><span class="n">var_indexing</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
                 <span class="n">uniform_data</span> <span class="o">=</span> <span class="n">data_interpol</span><span class="p">(</span><span class="n">x_uniform</span><span class="p">,</span> <span class="n">y_uniform</span><span class="p">)</span>
@@ -925,16 +939,16 @@
                 <span class="n">err_uniform</span> <span class="o">=</span> <span class="n">err_interpol</span><span class="p">(</span><span class="n">x_uniform</span><span class="p">,</span> <span class="n">y_uniform</span><span class="p">)</span>
                 <span class="n">err_uniform</span><span class="p">[</span><span class="n">err_uniform</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Only 1D and 2D data can currently be made uniform&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s1">&#39;Only 1D and 2D data can currently be made uniform&#39;</span><span class="p">)</span>
             <span class="c1"># save the uniform data and errors back into the Observable</span>
-            <span class="n">observable</span><span class="o">.</span><span class="n">_dependent_variables</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">uniform_data</span><span class="p">]</span>
-            <span class="n">observable</span><span class="o">.</span><span class="n">_errors</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">err_uniform</span><span class="p">]</span>
+            <span class="n">observable</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">uniform_data</span><span class="p">]</span>
+            <span class="n">observable</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">err_uniform</span><span class="p">]</span>
         <span class="c1"># finally, set the independent variables of the ``Observable`` to the uniform ones</span>
         <span class="n">observable</span><span class="o">.</span><span class="n">independent_variables</span> <span class="o">=</span> <span class="n">indep_var_uniform</span>
         <span class="k">return</span> <span class="n">observable</span>
 
     <span class="k">def</span> <span class="nf">_validate_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observable</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Try and validate the energy of the ``Observable`` provided, and pass if</span>
 <span class="sd">        it does not have a ``validate_energy`` function itself</span>

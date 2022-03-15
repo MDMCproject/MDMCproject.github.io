@@ -165,10 +165,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">functions_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_interactions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tie</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tie_parameter</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the value of the ``Parameter``</span>
 
@@ -209,7 +209,6 @@
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the constraint of the ``Parameter``</span>
 
@@ -229,9 +228,9 @@
     <span class="nd">@constraints</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
 
-        <span class="c1">### Checks if constraints are a 2 element tuple of floats, that the</span>
-        <span class="c1">### zeroeth element is less than or equal to the first, and that</span>
-        <span class="c1">### self.value is within them, if it exists</span>
+        <span class="c1"># Checks if constraints are a 2 element tuple of floats, that the</span>
+        <span class="c1"># zeroeth element is less than or equal to the first, and that</span>
+        <span class="c1"># self.value is within them, if it exists</span>
         <span class="k">if</span> <span class="n">constraints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">constraints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">constraints</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Constaints must be (lower, upper)&quot;</span><span class="p">)</span>
@@ -241,7 +240,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or append to the parent ``Interaction`` objects for this</span>
 <span class="sd">        ``Parameter``</span>
@@ -283,7 +281,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tie</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the ``value`` of a the ``Parameter`` that this ``Parameter`` is tied</span>
 <span class="sd">        to</span>
@@ -293,15 +290,16 @@
 <span class="sd">        float</span>
 <span class="sd">            The ``value`` of the ``tied`` ``Parameter``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=eval-used</span>
+        <span class="c1"># eval use is generally bad</span>
+        <span class="c1"># but the safe alternative (ast.literal_eval) creates malformed nodes</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tie</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tie</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tie</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tied</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get whether this ``Parameter`` is tied</span>
 
@@ -312,13 +310,9 @@
 <span class="sd">            `False`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tie&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tie&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Parameter.set_tie"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameter.set_tie">[docs]</a>    <span class="k">def</span> <span class="nf">set_tie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This ``ties`` the ``Parameter.value`` to the ``value`` of another</span>
 <span class="sd">        ``Parameter``</span>
@@ -338,7 +332,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_tie_parameter</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tie</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;self._tie_parameter().value&#39;</span> <span class="o">+</span> <span class="n">expr</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;eval&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tie</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+            <span class="s1">&#39;self._tie_parameter().value&#39;</span> <span class="o">+</span> <span class="n">expr</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;eval&#39;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -356,8 +351,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Parameter.validate_value"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameter.validate_value">[docs]</a>    <span class="k">def</span> <span class="nf">validate_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
-
+<div class="viewcode-block" id="Parameter.validate_value"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameter.validate_value">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">validate_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the ``Parameter.value`` by testing if it is within the</span>
 <span class="sd">        ``constraints``</span>
@@ -396,7 +391,6 @@
         <span class="k">return</span> <span class="n">item</span>
 
 <div class="viewcode-block" id="Parameters.filter"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters using a predicate</span>
 
@@ -414,9 +408,7 @@
 
         <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
 
-
 <div class="viewcode-block" id="Parameters.filter_name"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_name">[docs]</a>    <span class="k">def</span> <span class="nf">filter_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters by ``name``</span>
 
@@ -433,9 +425,7 @@
 
         <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
 
-
 <div class="viewcode-block" id="Parameters.filter_value"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_value">[docs]</a>    <span class="k">def</span> <span class="nf">filter_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comparison</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters by ``value``</span>
 
@@ -455,18 +445,16 @@
 <span class="sd">            are compared with ``value`` using the ``comparison`` operator</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">ops</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&gt;&#39;</span><span class="p">:</span><span class="n">operator</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span>
-               <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span><span class="n">operator</span><span class="o">.</span><span class="n">lt</span><span class="p">,</span>
-               <span class="s1">&#39;&gt;=&#39;</span><span class="p">:</span><span class="n">operator</span><span class="o">.</span><span class="n">ge</span><span class="p">,</span>
-               <span class="s1">&#39;&lt;=&#39;</span><span class="p">:</span><span class="n">operator</span><span class="o">.</span><span class="n">le</span><span class="p">,</span>
-               <span class="s1">&#39;==&#39;</span><span class="p">:</span><span class="n">operator</span><span class="o">.</span><span class="n">eq</span><span class="p">,</span>
-               <span class="s1">&#39;!=&#39;</span><span class="p">:</span><span class="n">operator</span><span class="o">.</span><span class="n">ne</span><span class="p">}</span>
+        <span class="n">ops</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&gt;&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span>
+               <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">lt</span><span class="p">,</span>
+               <span class="s1">&#39;&gt;=&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">ge</span><span class="p">,</span>
+               <span class="s1">&#39;&lt;=&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">le</span><span class="p">,</span>
+               <span class="s1">&#39;==&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">eq</span><span class="p">,</span>
+               <span class="s1">&#39;!=&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">ne</span><span class="p">}</span>
 
         <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">ops</span><span class="p">[</span><span class="n">comparison</span><span class="p">](</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="bp">self</span><span class="p">))</span></div>
 
-
 <div class="viewcode-block" id="Parameters.filter_interaction"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_interaction">[docs]</a>    <span class="k">def</span> <span class="nf">filter_interaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interaction_name</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters based on the name of the ``Interaction`` of each ``Parameter``</span>
 
@@ -486,9 +474,7 @@
         <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">interactions_name</span> <span class="o">==</span> <span class="n">interaction_name</span><span class="p">,</span>
                                  <span class="bp">self</span><span class="p">))</span></div>
 
-
 <div class="viewcode-block" id="Parameters.filter_function"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_function">[docs]</a>    <span class="k">def</span> <span class="nf">filter_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters based on the name of the ``InteractionFunction`` of each</span>
 <span class="sd">        ``Parameter``</span>
@@ -508,9 +494,7 @@
 
         <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">functions_name</span> <span class="o">==</span> <span class="n">function_name</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
 
-
 <div class="viewcode-block" id="Parameters.filter_atom_attribute"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_atom_attribute">[docs]</a>    <span class="k">def</span> <span class="nf">filter_atom_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters based on the attribute of ``Atom`` objects which have each</span>
 <span class="sd">        ``Parameter`` applied to them</span>
@@ -545,9 +529,7 @@
                                            <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">atoms</span><span class="p">)],</span>
                                  <span class="bp">self</span><span class="p">))</span></div>
 
-
 <div class="viewcode-block" id="Parameters.filter_structure"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_structure">[docs]</a>    <span class="k">def</span> <span class="nf">filter_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure_name</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters based on the name of the ``StructuralUnit`` to which each</span>
 <span class="sd">        ``Parameter`` applies</span>
@@ -565,7 +547,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">check_structure_name</span><span class="p">(</span><span class="n">parameter</span><span class="p">):</span>
-
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Checks the name of all structures</span>
 
@@ -578,6 +559,7 @@
             <span class="c1"># Recursively add structure.name to structure_names set until the</span>
             <span class="c1"># structure is the top level structure</span>
             <span class="n">structure_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
             <span class="k">def</span> <span class="nf">add_name</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
                 <span class="n">structure_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">structure</span><span class="o">.</span><span class="n">top_level_structure</span> <span class="o">==</span> <span class="n">structure</span><span class="p">:</span>
