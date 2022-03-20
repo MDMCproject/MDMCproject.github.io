@@ -70,6 +70,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul class="current">
@@ -216,7 +217,7 @@ refinement. Defaults to <cite>0.01</cite></p></li>
 When not provided, the minimum number of steps needed for successful
 calculation of the observables is used. If provided, the actual number
 of steps may be reduced to prevent running MD that won’t be used when
-calculting dependent variables. Default is <cite>None</cite>.</p></li>
+calculating dependent variables. Default is <cite>None</cite>.</p></li>
 <li><p><strong>equilibration_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of molecular dynamics steps used to equilibrate the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> in between each
 refinement step. When changes to the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> are small, this equilibration can be
 much shorter than the equilibration needed before starting the refinement process, but in
@@ -226,11 +227,25 @@ is 0.</p></li>
 If the Figure of Merit and all <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> change less than this
 tolerance between two accepted refinement steps, the refinement stops.
 Default value is 1e-5.</p></li>
-<li><p><strong>min_refinement_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – <dl class="simple">
+<li><p><strong>min_refinement_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – <blockquote>
+<div><dl class="simple">
 <dt>The minimum number of refinement steps before the refinement process can stop</dt><dd><p>if all parameters and the Figure of Merit have converged. Default value is 2.</p>
 </dd>
 </dl>
+</div></blockquote>
+<dl class="simple">
+<dt>cont_slicing<span class="classifier">bool, optional</span></dt><dd><p>Flag to decide between two possible behaviours when the number of <code class="docutils literal notranslate"><span class="pre">MD_steps</span></code> is
+larger than the minimum required to calculate the observables. If <code class="docutils literal notranslate"><span class="pre">False</span></code> (default) then
+the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> is sliced into non-overlapping sub-<code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> blocks for each of
+which the observable is calculated. If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> is sliced into
+as many non-identical sub-<code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> blocks as possible (with overlap allowed).</p>
+</dd>
+</dl>
 </p></li>
+<li><p><strong>use_average</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Optional parameter relevant in case <code class="docutils literal notranslate"><span class="pre">MD_steps</span></code> is larger than the minimum required
+and the MD <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> is sliced into sub-<code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> blocks. If <code class="docutils literal notranslate"><span class="pre">True</span></code> (
+default) the observables are averaged over the sub-<code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> blocks. If <code class="docutils literal notranslate"><span class="pre">False</span></code>
+they are not averaged.</p></li>
 <li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – If 2, timings are printed for every step of the refinement. If 1,
 timings are printed at the end of the refinement. If 0, no timings
 are printed. In all cases information about the FoM and parameter

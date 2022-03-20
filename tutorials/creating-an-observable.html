@@ -80,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -461,9 +462,9 @@ Universe created with:
 
 Universe contains 1000 Ar atoms
 LAMMPS (29 Sep 2021 - Update 2)
+LAMMPS output is captured by PyLammps wrapper
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
-LAMMPS output is captured by PyLammps wrapper
 LAMMPS (29 Sep 2021 - Update 2)
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
@@ -597,18 +598,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
      |
-     |      Currently sets all errors to 0 when S(Q, w) is calculated from MD
+     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
+     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
+     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
+     |      the settings ``use_average`` and ``cont_slicing``.
      |
-     |      ``independent_variables`` can either be set previously or defined within
+     |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : Trajectory
+     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
      |          timings are collected so they can be printed at the end of the refinement.
@@ -628,6 +632,20 @@ CLASSES
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
      |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
+     |          ``Q_values`` (`array`)
+     |              1D array of Q `float` (in ``Ang^-1``). (optional)
+     |          ``use_average`` (`bool`)
+     |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
+     |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
+     |              are set to the standard deviation calculated over the list of ``Trajectory``
+     |              objects.
+     |           ``cont_slicing`` (`bool`)
+     |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+     |              larger than the minimum required to calculate the observables. If ``False``
+     |              (default) then the ``Trajectory`` is sliced into non-overlapping
+     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
+     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
+     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -1181,18 +1199,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
      |
-     |      Currently sets all errors to 0 when S(Q, w) is calculated from MD
+     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
+     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
+     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
+     |      the settings ``use_average`` and ``cont_slicing``.
      |
-     |      ``independent_variables`` can either be set previously or defined within
+     |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : Trajectory
+     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
      |          timings are collected so they can be printed at the end of the refinement.
@@ -1212,6 +1233,20 @@ CLASSES
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
      |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
+     |          ``Q_values`` (`array`)
+     |              1D array of Q `float` (in ``Ang^-1``). (optional)
+     |          ``use_average`` (`bool`)
+     |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
+     |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
+     |              are set to the standard deviation calculated over the list of ``Trajectory``
+     |              objects.
+     |           ``cont_slicing`` (`bool`)
+     |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+     |              larger than the minimum required to calculate the observables. If ``False``
+     |              (default) then the ``Trajectory`` is sliced into non-overlapping
+     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
+     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
+     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -3077,18 +3112,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
      |
-     |      Currently sets all errors to 0 when S(Q, w) is calculated from MD
+     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
+     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
+     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
+     |      the settings ``use_average`` and ``cont_slicing``.
      |
-     |      ``independent_variables`` can either be set previously or defined within
+     |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : Trajectory
+     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
      |          timings are collected so they can be printed at the end of the refinement.
@@ -3108,6 +3146,20 @@ CLASSES
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
      |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
+     |          ``Q_values`` (`array`)
+     |              1D array of Q `float` (in ``Ang^-1``). (optional)
+     |          ``use_average`` (`bool`)
+     |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
+     |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
+     |              are set to the standard deviation calculated over the list of ``Trajectory``
+     |              objects.
+     |           ``cont_slicing`` (`bool`)
+     |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+     |              larger than the minimum required to calculate the observables. If ``False``
+     |              (default) then the ``Trajectory`` is sliced into non-overlapping
+     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
+     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
+     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -4456,18 +4508,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
      |
-     |      Currently sets all errors to 0 when S(Q, w) is calculated from MD
+     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
+     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
+     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
+     |      the settings ``use_average`` and ``cont_slicing``.
      |
-     |      ``independent_variables`` can either be set previously or defined within
+     |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : Trajectory
+     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
      |          timings are collected so they can be printed at the end of the refinement.
@@ -4487,6 +4542,20 @@ CLASSES
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
      |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
+     |          ``Q_values`` (`array`)
+     |              1D array of Q `float` (in ``Ang^-1``). (optional)
+     |          ``use_average`` (`bool`)
+     |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
+     |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
+     |              are set to the standard deviation calculated over the list of ``Trajectory``
+     |              objects.
+     |           ``cont_slicing`` (`bool`)
+     |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+     |              larger than the minimum required to calculate the observables. If ``False``
+     |              (default) then the ``Trajectory`` is sliced into non-overlapping
+     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
+     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
+     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -4774,18 +4843,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
      |
-     |      Currently sets all errors to 0 when S(Q, w) is calculated from MD
+     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
+     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
+     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
+     |      the settings ``use_average`` and ``cont_slicing``.
      |
-     |      ``independent_variables`` can either be set previously or defined within
+     |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : Trajectory
+     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
      |          timings are collected so they can be printed at the end of the refinement.
@@ -4805,6 +4877,20 @@ CLASSES
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
      |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
+     |          ``Q_values`` (`array`)
+     |              1D array of Q `float` (in ``Ang^-1``). (optional)
+     |          ``use_average`` (`bool`)
+     |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
+     |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
+     |              are set to the standard deviation calculated over the list of ``Trajectory``
+     |              objects.
+     |           ``cont_slicing`` (`bool`)
+     |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+     |              larger than the minimum required to calculate the observables. If ``False``
+     |              (default) then the ``Trajectory`` is sliced into non-overlapping
+     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
+     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
+     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -5092,18 +5178,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
      |
-     |      Currently sets all errors to 0 when S(Q, w) is calculated from MD
+     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
+     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
+     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
+     |      the settings ``use_average`` and ``cont_slicing``.
      |
-     |      ``independent_variables`` can either be set previously or defined within
+     |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : Trajectory
+     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
      |          timings are collected so they can be printed at the end of the refinement.
@@ -5123,6 +5212,20 @@ CLASSES
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
      |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
+     |          ``Q_values`` (`array`)
+     |              1D array of Q `float` (in ``Ang^-1``). (optional)
+     |          ``use_average`` (`bool`)
+     |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
+     |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
+     |              are set to the standard deviation calculated over the list of ``Trajectory``
+     |              objects.
+     |           ``cont_slicing`` (`bool`)
+     |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+     |              larger than the minimum required to calculate the observables. If ``False``
+     |              (default) then the ``Trajectory`` is sliced into non-overlapping
+     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
+     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
+     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -5410,18 +5513,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
      |
-     |      Currently sets all errors to 0 when S(Q, w) is calculated from MD
+     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
+     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
+     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
+     |      the settings ``use_average`` and ``cont_slicing``.
      |
-     |      ``independent_variables`` can either be set previously or defined within
+     |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : Trajectory
+     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
      |          timings are collected so they can be printed at the end of the refinement.
@@ -5441,6 +5547,20 @@ CLASSES
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
      |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
+     |          ``Q_values`` (`array`)
+     |              1D array of Q `float` (in ``Ang^-1``). (optional)
+     |          ``use_average`` (`bool`)
+     |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
+     |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
+     |              are set to the standard deviation calculated over the list of ``Trajectory``
+     |              objects.
+     |           ``cont_slicing`` (`bool`)
+     |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+     |              larger than the minimum required to calculate the observables. If ``False``
+     |              (default) then the ``Trajectory`` is sliced into non-overlapping
+     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
+     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
+     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -5728,18 +5848,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
      |
-     |      Currently sets all errors to 0 when S(Q, w) is calculated from MD
+     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
+     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
+     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
+     |      the settings ``use_average`` and ``cont_slicing``.
      |
-     |      ``independent_variables`` can either be set previously or defined within
+     |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : Trajectory
+     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
      |          timings are collected so they can be printed at the end of the refinement.
@@ -5759,6 +5882,20 @@ CLASSES
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
      |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
+     |          ``Q_values`` (`array`)
+     |              1D array of Q `float` (in ``Ang^-1``). (optional)
+     |          ``use_average`` (`bool`)
+     |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
+     |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
+     |              are set to the standard deviation calculated over the list of ``Trajectory``
+     |              objects.
+     |           ``cont_slicing`` (`bool`)
+     |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+     |              larger than the minimum required to calculate the observables. If ``False``
+     |              (default) then the ``Trajectory`` is sliced into non-overlapping
+     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
+     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
+     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -6046,18 +6183,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
      |
-     |      Currently sets all errors to 0 when S(Q, w) is calculated from MD
+     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
+     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
+     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
+     |      the settings ``use_average`` and ``cont_slicing``.
      |
-     |      ``independent_variables`` can either be set previously or defined within
+     |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : Trajectory
+     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          If 2, timings are printed for each calculation of FQt and SQw. If 1,
      |          timings are collected so they can be printed at the end of the refinement.
@@ -6077,6 +6217,20 @@ CLASSES
      |              e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.
      |              Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;
      |              Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.
+     |          ``Q_values`` (`array`)
+     |              1D array of Q `float` (in ``Ang^-1``). (optional)
+     |          ``use_average`` (`bool`)
+     |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
+     |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
+     |              are set to the standard deviation calculated over the list of ``Trajectory``
+     |              objects.
+     |           ``cont_slicing`` (`bool`)
+     |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+     |              larger than the minimum required to calculate the observables. If ``False``
+     |              (default) then the ``Trajectory`` is sliced into non-overlapping
+     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
+     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
+     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt)
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -7349,7 +7503,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='cce501d8-762f-4958-9e43-55672dabb232'></div></div>
+<div id='d3f2ce61-bc11-4311-9330-89e8ca2f5c6b'></div></div>
 </div>
 <p>Therefore it is strongly recommended that you specify the <span class="math notranslate nohighlight">\(E\)</span> values for calculating the dynamic structure factor.</p>
 <p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calulate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will be probably
@@ -8417,7 +8571,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='84762d52-dfdc-455c-88f0-6ad66d345203'></div></div>
+<div id='aefc8a77-dd2f-4a8b-9e66-ed208ff93398'></div></div>
 </div>
 <p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the van Well et al. Phys. Rev. A <strong>31</strong> 3391 (1985) data, which the authors corrected for instrument resolution) by reading the data into an SQwCoh object:</p>
 <div class="nbinput nblast docutils container">
@@ -9414,7 +9568,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='a6eb6070-e015-4b57-9d27-d84ed9e13c05'></div></div>
+<div id='1ce7bd5d-2404-4764-9a13-6cfbf40d42c2'></div></div>
 </div>
 </div>
 <div class="section" id="Other-observables">

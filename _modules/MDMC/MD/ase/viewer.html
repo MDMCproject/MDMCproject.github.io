@@ -68,6 +68,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -115,6 +116,8 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">TclError</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">ase.gui.gui</span> <span class="kn">import</span> <span class="n">GUI</span>
 <span class="kn">from</span> <span class="nn">ase.gui.i18n</span> <span class="kn">import</span> <span class="n">_</span>
@@ -122,7 +125,6 @@
 <span class="kn">from</span> <span class="nn">ase.gui.ui</span> <span class="kn">import</span> <span class="n">MenuItem</span>
 <span class="kn">from</span> <span class="nn">ase.gui.view</span> <span class="kn">import</span> <span class="n">get_cell_coordinates</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.MD.ase.conversions</span> <span class="kn">import</span> <span class="n">get_ase_atoms</span>
 
@@ -168,7 +170,6 @@
 <span class="sd">        ``max_atoms`` (`int`)</span>
 <span class="sd">            Sets the maximum number of atoms that will be viewed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">TclError</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">limit_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_atoms&#39;</span><span class="p">,</span> <span class="mi">8000</span><span class="p">))</span>
 
     <span class="n">atom_images</span> <span class="o">=</span> <span class="n">Images</span><span class="p">()</span>
@@ -263,6 +264,11 @@
         <span class="c1"># Override in order to set show bonds</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">,</span> <span class="n">rotations</span><span class="o">=</span><span class="n">rotations</span><span class="p">,</span> <span class="n">show_bonds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                          <span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_pos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_cell</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_bonds</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Viewer.set_atoms"><a class="viewcode-back" href="../../../../pages/modules/md/ase/viewer.html#MDMC.MD.ase.viewer.Viewer.set_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">set_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

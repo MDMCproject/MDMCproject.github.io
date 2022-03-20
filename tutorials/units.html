@@ -77,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -964,7 +965,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          of not converging.
  |      solvent : str, optional
  |          A `str` specifying an inbuilt ``Solvent`` from the following:
- |          SPCE, TIP3PFB, SPC, TIP3P.
+ |          SPCE, TIP3PFB, TIP3P, SPC.
  |          The default is &#39;SPCE&#39;.
  |      **settings
  |          ``constraint_algorithm`` (`ConstraintAlgorithm`)
@@ -1479,7 +1480,7 @@ class Control(builtins.object)
  |      When not provided, the minimum number of steps needed for successful
  |      calculation of the observables is used. If provided, the actual number
  |      of steps may be reduced to prevent running MD that won&#39;t be used when
- |      calculting dependent variables. Default is `None`.
+ |      calculating dependent variables. Default is `None`.
  |  equilibration_steps : int, optional
  |      Number of molecular dynamics steps used to equilibrate the ``Universe`` in between each
  |      refinement step. When changes to the ``Parameters`` are small, this equilibration can be
@@ -1494,6 +1495,17 @@ class Control(builtins.object)
  |  min_refinement_steps : int, optional
  |      The minimum number of refinement steps before the refinement process can stop
  |       if all parameters and the Figure of Merit have converged. Default value is 2.
+ |   cont_slicing : bool, optional
+ |      Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+ |      larger than the minimum required to calculate the observables. If ``False`` (default) then
+ |      the ``Trajectory`` is sliced into non-overlapping sub-``Trajectory`` blocks for each of
+ |      which the observable is calculated. If ``True``, then the ``Trajectory`` is sliced into
+ |      as many non-identical sub-``Trajectory`` blocks as possible (with overlap allowed).
+ |  use_average : bool, optional
+ |      Optional parameter relevant in case ``MD_steps`` is larger than the minimum required
+ |      and the MD ``Trajectory`` is sliced into sub-``Trajectory`` blocks. If ``True`` (
+ |      default) the observables are averaged over the sub-``Trajectory`` blocks. If ``False``
+ |      they are not averaged.
  |  verbose: int, optional
  |      If 2, timings are printed for every step of the refinement. If 1,
  |      timings are printed at the end of the refinement. If 0, no timings
