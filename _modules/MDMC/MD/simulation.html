@@ -113,10 +113,10 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span><span class="p">,</span> <span class="n">filterfalse</span><span class="p">,</span> <span class="n">product</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">verbosemanager</span> <span class="kn">import</span> <span class="n">VerboseManager</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator_getter</span><span class="p">,</span> \
     <span class="n">mod_docstring</span><span class="p">,</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span>
@@ -1495,8 +1495,8 @@
 <span class="sd">        n_steps : int</span>
 <span class="sd">            Maximum number of steps to run the minimization</span>
 <span class="sd">        verbose: bool, optional</span>
-<span class="sd">            Whether to print statements when the minimization has been started and completed</span>
-<span class="sd">            (including the number minimizatin steps and time taken). Default is `False`.</span>
+<span class="sd">            If true, prints time taken for the minimization when complete.</span>
+<span class="sd">            If false (default), does nothing.</span>
 <span class="sd">        **settings</span>
 <span class="sd">            ``etol`` (`float`)</span>
 <span class="sd">                If the energy change between iterations is less than ``etol``,</span>
@@ -1509,15 +1509,16 @@
 <span class="sd">                on engine used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting minimization for </span><span class="si">{}</span><span class="s1"> steps&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_steps</span><span class="p">))</span>
-            <span class="n">time_0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="c1"># to match legacy use of verbose on this function (where verbose was bool) we use bool</span>
+        <span class="c1"># and convert to int, corresponding to verbose levels 0 or 1; there is only one verbose</span>
+        <span class="c1"># step in this function so verbose levels 2 or 3 would not provide extra information</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">verbose</span><span class="p">))</span>
 
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running minimization for </span><span class="si">{</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Minimization complete in </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span></div>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="s2">&quot;Minimization&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Simulation.run"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Simulation.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">equilibration</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1535,8 +1536,8 @@
 <span class="sd">            If the run is for equilibration (`True`) or production (`False`).</span>
 <span class="sd">            Default is `False`.</span>
 <span class="sd">        verbose: bool, optional</span>
-<span class="sd">            Whether to print statements upon starting and completing the run.</span>
-<span class="sd">            Default is `False`.</span>
+<span class="sd">            If true, prints time taken for the run when complete.</span>
+<span class="sd">            If false (default), does nothing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">equilibration</span><span class="p">:</span>
@@ -1544,15 +1545,16 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">process</span> <span class="o">=</span> <span class="s1">&#39;simulation&#39;</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting </span><span class="si">{0}</span><span class="s1"> for </span><span class="si">{1}</span><span class="s1"> steps&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">))</span>
-            <span class="n">time_0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="c1"># to match legacy use of verbose on this function (where verbose was bool) we use bool</span>
+        <span class="c1"># and convert to int, corresponding to verbose levels 0 or 1; there is only one verbose</span>
+        <span class="c1"># step in this function so verbose levels 2 or 3 would not provide extra information</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">verbose</span><span class="p">))</span>
 
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">equilibration</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> complete in </span><span class="si">{1}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">process</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span></div>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">process</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

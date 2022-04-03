@@ -107,15 +107,15 @@
              
   <h1>Source code for MDMC.control.control</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module for performing the refinement&quot;&quot;&quot;</span>
-
+<span class="kn">import</span> <span class="nn">statistics</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span><span class="p">,</span> <span class="n">interp2d</span>
+<span class="kn">from</span> <span class="nn">verbosemanager</span> <span class="kn">import</span> <span class="n">VerboseManager</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
@@ -235,10 +235,11 @@
 <span class="sd">        default) the observables are averaged over the sub-``Trajectory`` blocks. If ``False``</span>
 <span class="sd">        they are not averaged.</span>
 <span class="sd">    verbose: int, optional</span>
-<span class="sd">        If 2, timings are printed for every step of the refinement. If 1,</span>
-<span class="sd">        timings are printed at the end of the refinement. If 0, no timings</span>
-<span class="sd">        are printed. In all cases information about the FoM and parameter</span>
-<span class="sd">        values will still be printed. Default is 0.</span>
+<span class="sd">        The level of verbosity:</span>
+<span class="sd">        Verbose level 0 gives no information.</span>
+<span class="sd">        Verbose level 1 gives final time for the whole method.</span>
+<span class="sd">        Verbose level 2 gives final time and also a progress bar.</span>
+<span class="sd">        Verbose level 3 gives final time, a progress bar, and time per step.</span>
 <span class="sd">    **settings: dict, optional</span>
 <span class="sd">        Settings to be passed into other functions, e.g. MC_norm=1 for MC optimiser if MMC</span>
 <span class="sd">        minimiser is used.</span>
@@ -290,6 +291,7 @@
                  <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_timings</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="o">=</span> <span class="n">simulation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exp_datasets</span> <span class="o">=</span> <span class="n">exp_datasets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
@@ -375,17 +377,21 @@
                                                     <span class="n">n_parameters</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">))</span>
 
         <span class="c1"># Use specified MD_steps if supplied, else calculate</span>
+        <span class="c1"># cont_slicing produces small sub-trajectories, so calculation is unnecessary</span>
         <span class="k">if</span> <span class="n">MD_steps</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="n">MD_steps</span> <span class="o">&gt;=</span> <span class="n">minimum_MD_steps</span>
-                <span class="c1"># Set self.MD_steps to be the largest number required by any of</span>
-                <span class="c1"># our observable pairs</span>
-                <span class="n">maximum_MD_steps</span> <span class="o">=</span> <span class="n">minimum_MD_steps</span>
-                <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">:</span>
-                    <span class="n">max_MD_steps_pair</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_maximum_MD_steps</span><span class="p">(</span>
-                        <span class="n">MD_steps</span><span class="p">,</span> <span class="n">pair</span><span class="p">)</span>
-                    <span class="n">maximum_MD_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maximum_MD_steps</span><span class="p">,</span> <span class="n">max_MD_steps_pair</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span> <span class="o">=</span> <span class="n">maximum_MD_steps</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cont_slicing&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span> <span class="o">=</span> <span class="n">MD_steps</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Set self.MD_steps to be the largest number required by any of</span>
+                    <span class="c1"># our observable pairs</span>
+                    <span class="n">maximum_MD_steps</span> <span class="o">=</span> <span class="n">minimum_MD_steps</span>
+                    <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">:</span>
+                        <span class="n">max_MD_steps_pair</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_maximum_MD_steps</span><span class="p">(</span>
+                            <span class="n">MD_steps</span><span class="p">,</span> <span class="n">pair</span><span class="p">)</span>
+                        <span class="n">maximum_MD_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maximum_MD_steps</span><span class="p">,</span> <span class="n">max_MD_steps_pair</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span> <span class="o">=</span> <span class="n">maximum_MD_steps</span>
             <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Experimental datasets provided require a &#39;</span>
                                  <span class="sa">f</span><span class="s1">&#39;minimum MD_steps value of </span><span class="si">{</span><span class="n">minimum_MD_steps</span><span class="si">}</span><span class="s1"> in order to &#39;</span>
@@ -453,28 +459,27 @@
 <span class="sd">            control.refine(100)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># calculate verbose steps</span>
+        <span class="c1"># 4 steps per refinement step, and n + 1 steps total</span>
+        <span class="n">verbose_steps</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="c1"># initialise step timings list for average step timings at end</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_timings</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="n">count</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_print_header</span><span class="p">()</span>  <span class="c1"># creates stdout header</span>
+        <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">verbose_steps</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
         <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">n_steps</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">has_converged</span><span class="p">(</span><span class="n">conv_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">convergence_tol</span><span class="p">,</span>
                                                                    <span class="n">min_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_refine_steps</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">time_0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">()</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;equilibrate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         equilibrate: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
 
+            <span class="n">verbose_manager</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Step </span><span class="si">{</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># advance the refinement by one step</span>
             <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;TOTAL STEP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;          TOTAL STEP: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># if progress bar is there, ensure data is on new line</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_print_data</span><span class="p">()</span>
 
         <span class="c1"># Try/except accounts for n_steps &lt;= -1</span>
@@ -506,23 +511,11 @@
             <span class="nb">print</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Automatic Scale Factors</span><span class="se">\n</span><span class="si">{</span><span class="n">scaling_df</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="c1"># Average timings</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">timing_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">]</span>
-            <span class="n">timing_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
-                             <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-            <span class="c1"># Our first 6 timed operations are well defined in __init__, with the first 3 taking</span>
-            <span class="c1"># place before calculate_from_MD and the second 3 taking place after. We add</span>
-            <span class="c1"># additional entries to self.timings during calculate_from_MD, but as this depends on</span>
-            <span class="c1"># the observable we do not know how many, or what keys, beforehand. To preserve the</span>
-            <span class="c1"># chronological order of the timed operations, move keys/values 3:6 to the end of the</span>
-            <span class="c1"># lists.</span>
-            <span class="n">timing_keys</span> <span class="o">=</span> <span class="n">timing_keys</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">timing_keys</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span> <span class="o">+</span> <span class="n">timing_keys</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
-            <span class="n">timing_values</span> <span class="o">=</span> <span class="n">timing_values</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> \
-                <span class="n">timing_values</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span> <span class="o">+</span> <span class="n">timing_values</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
-            <span class="n">timing_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">timing_values</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">timing_keys</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Average Timings (s)</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span>
-                  <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing_df</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">average_timing</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_timings</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Average time per step was </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round_</span><span class="p">(</span><span class="n">average_timing</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="s2">&quot;Refinement&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Control.equilibrate"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.equilibrate">[docs]</a>    <span class="k">def</span> <span class="nf">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -538,12 +531,13 @@
 <span class="sd">        parameters, iterate parameters a step forward and reset MD (phasespace)</span>
 <span class="sd">        if previous step was rejected and reset_config = true</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
 
         <span class="c1"># Generate FoM by running MD for this step and then calculate FoM</span>
         <span class="n">fom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_FoM</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">time_0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="s2">&quot;Selecting new parameters and updating engine&quot;</span><span class="p">)</span>
         <span class="c1"># Select new parameters to consider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">fom</span><span class="p">)</span>
         <span class="c1"># Update the MD engine with new parameters</span>
@@ -558,13 +552,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Set MD engine to reset to old config</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">reset_config</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;minimizer&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;           minimizer: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">write_history</span><span class="p">(</span><span class="s1">&#39;results.csv&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">write_history</span><span class="p">(</span><span class="s1">&#39;results.csv&#39;</span><span class="p">)</span>
+
+        <span class="n">step_timings</span> <span class="o">=</span> <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="s2">&quot;Refinement step&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_timings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">step_timings</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_print_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -591,33 +583,17 @@
     <span class="k">def</span> <span class="nf">_generate_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the MD for an iteration/step, calculate observable, compare with</span>
-<span class="sd">        observed observed and return the FoM</span>
+<span class="sd">        observed and return the FoM</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        `float`</span>
 <span class="sd">            Non-negative `float` FoM</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">time_0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_run_MD</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;_run_MD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;             _run_MD: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">time_1</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
         <span class="n">FoM_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;FoM_calculator&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_1</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      FoM_calculator: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="nb">round</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">3</span><span class="p">)))</span>
 
         <span class="k">return</span> <span class="n">FoM_value</span>
 
@@ -704,16 +680,14 @@
 <span class="sd">            ``ObservablesPairs`` for which the MD ``Observable`` will be</span>
 <span class="sd">            calculated</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="c1"># this is a subprocess, so we don&#39;t bother giving maximum steps since it won&#39;t be used</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">time_0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="s2">&quot;Converting trajectory&quot;</span><span class="p">)</span>
         <span class="n">trj</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">convert_trajectory</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="s1">&#39;convert_trajectory&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  convert_trajectory: </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
 
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="s2">&quot;Calculating observables from the MD trajectory&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">observable_pairs</span><span class="p">:</span>
             <span class="n">obs_timings</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">calculate_from_MD</span><span class="p">(</span><span class="n">trj</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">obs_timings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -721,6 +695,7 @@
                     <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="s2">&quot;Calculating observables&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_calculate_minimum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
