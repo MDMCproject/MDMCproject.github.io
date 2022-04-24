@@ -109,8 +109,10 @@
 <span></span><span class="sd">&quot;&quot;&quot;Module which defines decorators&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">textwrap</span>
 <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">FunctionType</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.common.units</span> <span class="kn">import</span> <span class="n">UnitFloat</span><span class="p">,</span> <span class="n">unit_array</span>
 
@@ -560,6 +562,29 @@
 
         <span class="k">return</span> <span class="bp">cls</span>
     <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+<div class="viewcode-block" id="weakref_cache"><a class="viewcode-back" href="../../../pages/modules/common/decorators.html#MDMC.common.decorators.weakref_cache">[docs]</a><span class="k">def</span> <span class="nf">weakref_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">128</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Weakref LRU cache to avoid memory leaks</span>
+
+<span class="sd">    Caches on instance methods store `self`, which can</span>
+<span class="sd">    lead to excess memory use. This avoids it</span>
+<span class="sd">    by only holding a weakref to the instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="p">)</span>  <span class="c1"># create a &#39;semi-static&#39; cached version of the method</span>
+        <span class="k">def</span> <span class="nf">_func</span><span class="p">(</span><span class="n">_self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">_self</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>  <span class="c1"># call the &#39;semi-static&#39; method with weakref</span>
+        <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_func</span><span class="p">(</span><span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">inner</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
 </pre></div>
 
            </div>

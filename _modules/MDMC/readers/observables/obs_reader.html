@@ -116,7 +116,6 @@
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.readers.reader</span> <span class="kn">import</span> <span class="n">Reader</span>
 
-
 <div class="viewcode-block" id="ObservableReader"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/obs_reader.html#MDMC.readers.observables.obs_reader.ObservableReader">[docs]</a><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">ObservableReader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
 
@@ -125,6 +124,21 @@
 
 <span class="sd">    ObservableReaders are created using ObservableReaderFactory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ObservableReader.assign"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/obs_reader.html#MDMC.readers.observables.obs_reader.ObservableReader.assign">[docs]</a>    <span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable</span><span class="p">:</span> <span class="s1">&#39;Observable&#39;</span><span class="p">):</span>
+        <span class="c1"># disable pylint warning about writing to the `Observable`</span>
+        <span class="c1">#pylint: disable=protected-access</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abstract method to assign the parsed information into the `Observable`</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        observable : `Observable`</span>
+<span class="sd">            An MDMC `Observable` that will be assigned the data parsed by the reader.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">observable</span><span class="o">.</span><span class="n">_independent_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">independent_variables</span>
+        <span class="n">observable</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variables</span>
+        <span class="n">observable</span><span class="o">.</span><span class="n">_errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -313,6 +327,106 @@
     <span class="k">def</span> <span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="PDFReader"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/obs_reader.html#MDMC.readers.observables.obs_reader.PDFReader">[docs]</a><span class="k">class</span> <span class="nc">PDFReader</span><span class="p">(</span><span class="n">ObservableReader</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base subclass that adds attributes &amp; methods common to all PDF readers&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PDF</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PDF_err</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the independent variable r (in ``Ang^-1``)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            The independent variable r (in ``Ang^-1``)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the dependent variable PDF, the pair distribution function (in ``barn``)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            The dependent variable, PDF (in ``barn``)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;PDF&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PDF</span><span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the errors on the dependent variable</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            The error on PDF (in ``barn``)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;PDF&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PDF_err</span><span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the value of the atomic separation distance (in ``Ang``)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r</span>
+
+    <span class="nd">@r</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Ang&#39;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_r</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">PDF</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the total pair distribution function between pairs (in ``barn``)</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            total pair distribution function (in ``barn``)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PDF</span>
+
+    <span class="nd">@PDF</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;barn&#39;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">PDF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_PDF</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">PDF_err</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the error on the total pair distribution function between pairs (in ``barn``)</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            error on the total pair distribution function (in ``barn``)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PDF_err</span>
+
+    <span class="nd">@PDF_err</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;barn&#39;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">PDF_err</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_PDF_err</span> <span class="o">=</span> <span class="n">value</span></div>
 </pre></div>
 
            </div>
