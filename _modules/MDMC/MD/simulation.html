@@ -51,7 +51,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -126,7 +125,7 @@
 <span class="kn">from</span> <span class="nn">MDMC.MD.force_fields.force_field_factory</span> <span class="kn">import</span> <span class="n">ForceFieldFactory</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.solvents.solvents</span> <span class="kn">import</span> <span class="n">get_solvent_names</span><span class="p">,</span> <span class="n">get_solvent_config</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.structural_units</span> <span class="kn">import</span> <span class="n">StructuralUnit</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Structure</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">Coulombic</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">Configuration</span>
 
@@ -156,7 +155,7 @@
 <span class="sd">        A force field to apply to the Universe. The force fields available are:</span>
 <span class="sd">        DYNAMIC_FORCE_FIELD_LIST. Default is None.</span>
 <span class="sd">    structures : list, optional</span>
-<span class="sd">        ``StructuralUnit`` objects contained in the ``Universe``. Default is None.</span>
+<span class="sd">        ``Structure`` objects contained in the ``Universe``. Default is None.</span>
 <span class="sd">    **settings</span>
 <span class="sd">        ``kspace_solver`` (`KSpaceSolver`)</span>
 <span class="sd">            The k-space solver to be used for both electrostatic and dispersive</span>
@@ -538,15 +537,15 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">structure_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get a `list` of all ``StructuralUnit`` objects that exist in the</span>
-<span class="sd">        ``Universe``.  This includes all ``StructuralUnit`` that are a subunit</span>
+<span class="sd">        Get a `list` of all ``Structure`` objects that exist in the</span>
+<span class="sd">        ``Universe``.  This includes all ``Structure`` that are a subunit</span>
 <span class="sd">        of another structure belonging to the ``Universe``.</span>
 
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list</span>
-<span class="sd">            The ``StructuralUnit`` objects in the ``Universe``</span>
+<span class="sd">            The ``Structure`` objects in the ``Universe``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">add_all_parents</span><span class="p">(</span><span class="n">unit</span><span class="p">):</span>
@@ -557,12 +556,12 @@
                 <span class="n">parents</span> <span class="o">+=</span> <span class="n">add_all_parents</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">parents</span>
 
-        <span class="n">structural_units</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
-            <span class="n">structural_units</span> <span class="o">+=</span> <span class="n">add_all_parents</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
+            <span class="n">structures</span> <span class="o">+=</span> <span class="n">add_all_parents</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
 
-        <span class="n">structural_units</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">structural_units</span><span class="p">))</span>
+        <span class="n">structures</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">structures</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
@@ -716,45 +715,45 @@
                          <span class="n">msg</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Universe.add_structural_unit"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.add_structural_unit">[docs]</a>    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">add_structural_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structural_unit</span><span class="p">,</span> <span class="n">force_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="Universe.add_structure"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.add_structure">[docs]</a>    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">add_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">force_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">center</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Adds a single ``StructuralUnit`` to the ``Universe``, with optional</span>
-<span class="sd">        ``ForceField`` applying only to that ``StructuralUnit``</span>
+<span class="sd">        Adds a single ``Structure`` to the ``Universe``, with optional</span>
+<span class="sd">        ``ForceField`` applying only to that ``Structure``</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structural_unit : StructuralUnit or int</span>
-<span class="sd">            The ``StructuralUnit`` (or its ``ID`` as an `int`) to be added to the ``Universe``</span>
+<span class="sd">        structure : Structure or int</span>
+<span class="sd">            The ``Structure`` (or its ``ID`` as an `int`) to be added to the ``Universe``</span>
 <span class="sd">        force_field : str, optional</span>
-<span class="sd">            The force field to be applied to the structural_unit. The available</span>
+<span class="sd">            The force field to be applied to the structure. The available</span>
 <span class="sd">            ``ForceField`` are:</span>
 <span class="sd">            DYNAMIC_FORCE_FIELD_LIST</span>
 <span class="sd">        center : bool, optional</span>
-<span class="sd">            Whether to center `structural_unit` within the Universe as it is</span>
+<span class="sd">            Whether to center `structure` within the Universe as it is</span>
 <span class="sd">            added</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
-            <span class="n">structural_unit</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">/</span> <span class="mf">2.</span>
-        <span class="n">structural_unit</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="bp">self</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">add_structural_unit</span><span class="p">(</span><span class="n">structural_unit</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">structural_unit</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">structure</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_bonded_interaction_pairs</span><span class="p">(</span><span class="o">*</span><span class="n">atom</span><span class="o">.</span><span class="n">bonded_interaction_pairs</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_nonbonded_interaction</span><span class="p">(</span><span class="o">*</span><span class="n">atom</span><span class="o">.</span><span class="n">nonbonded_interactions</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_atom_types</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">force_field</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="n">force_field</span><span class="p">,</span> <span class="o">*</span><span class="n">structural_unit</span><span class="o">.</span><span class="n">interactions</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="n">force_field</span><span class="p">,</span> <span class="o">*</span><span class="n">structure</span><span class="o">.</span><span class="n">interactions</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Universe.fill"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.fill">[docs]</a>    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structural_unit</span><span class="p">:</span> <span class="n">StructuralUnit</span><span class="p">,</span> <span class="n">force_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">force_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">num_density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">num_struc_units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A liquid-like filling of the ``Universe`` independent of existing atoms</span>
 
-<span class="sd">        Adds copies of ``structural_unit`` to existing configuration until</span>
+<span class="sd">        Adds copies of ``structures`` to existing configuration until</span>
 <span class="sd">        ``Universe`` is full.  As exclusion region is defined by the size of a</span>
 <span class="sd">        bounding sphere, this method is most suitable for atoms or molecules</span>
 <span class="sd">        with approximately equal dimensions.</span>
@@ -769,18 +768,18 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        structural_unit : StructuralUnit or int</span>
-<span class="sd">            The ``StructuralUnit`` with which to fill the ``Universe``</span>
+<span class="sd">        structures : Structure or int</span>
+<span class="sd">            The ``Structure`` with which to fill the ``Universe``</span>
 <span class="sd">        force_field : str</span>
 <span class="sd">            Applies a ``ForceField`` to the ``Universe``. The available</span>
 <span class="sd">            ``ForceField`` are:</span>
 <span class="sd">            DYNAMIC_FORCE_FIELD_LIST</span>
 <span class="sd">        num_density: float</span>
 <span class="sd">            Non-negative `float` specifying the number density of the</span>
-<span class="sd">            ``StructuralUnit``, in units of ``StructuralUnit / Ang ^ -3``</span>
+<span class="sd">            ``Structure``, in units of ``Structure / Ang ^ -3``</span>
 <span class="sd">        num_struc_units: int</span>
 <span class="sd">            Non-negative `int` specifying the number of passed</span>
-<span class="sd">            ``StructuralUnit`` objects that the universe should be filled</span>
+<span class="sd">            ``Structure`` objects that the universe should be filled</span>
 <span class="sd">            with, regardless of ``Universe.dimensions``.</span>
 
 <span class="sd">        Raises</span>
@@ -817,9 +816,9 @@
         <span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Determine the upper and lower bounds for structural unit with its</span>
         <span class="c1"># position (CoM) and its bounding box</span>
-        <span class="n">bounds</span> <span class="o">=</span> <span class="n">structural_unit</span><span class="o">.</span><span class="n">bounding_box</span>
-        <span class="n">mn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">min</span> <span class="o">-</span> <span class="n">structural_unit</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
-        <span class="n">mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">-</span> <span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">min</span> <span class="o">-</span> <span class="n">structural_unit</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">structures</span><span class="o">.</span><span class="n">bounding_box</span>
+        <span class="n">mn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">min</span> <span class="o">-</span> <span class="n">structures</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+        <span class="n">mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">-</span> <span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">min</span> <span class="o">-</span> <span class="n">structures</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)):</span>
             <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">mn</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">mx</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">n_units_xyz</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                          <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
@@ -830,11 +829,11 @@
         <span class="c1"># copying the structural unit to fill the universe</span>
         <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">add_structural_unit</span><span class="p">(</span><span class="n">structural_unit</span><span class="p">,</span> <span class="n">force_field</span><span class="p">)</span>
-                <span class="n">structural_unit</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">force_field</span><span class="p">)</span>
+                <span class="n">structures</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">new_unit</span> <span class="o">=</span> <span class="n">structural_unit</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">add_structural_unit</span><span class="p">(</span><span class="n">new_unit</span><span class="p">)</span></div>
+                <span class="n">new_unit</span> <span class="o">=</span> <span class="n">structures</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">new_unit</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Universe.add_force_field"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.add_force_field">[docs]</a>    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">add_force_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_field</span><span class="p">,</span> <span class="o">*</span><span class="n">interactions</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
@@ -1128,7 +1127,7 @@
         <span class="c1"># Also determine the total density of the solvent</span>
         <span class="n">bonded_interactions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">mols</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_structural_unit</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
             <span class="n">bonded_interactions</span> <span class="o">+=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">interactions</span>
 
         <span class="c1"># Get nonbonded interactions from atom types</span>
@@ -1172,7 +1171,7 @@
 
 <span class="k">def</span> <span class="nf">_liquid_structure</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates a random arrangement of ``StructuralUnit`` objects</span>
+<span class="sd">    Generates a random arrangement of ``Structure`` objects</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
