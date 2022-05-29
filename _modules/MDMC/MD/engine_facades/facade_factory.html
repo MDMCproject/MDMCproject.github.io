@@ -153,8 +153,15 @@
 <span class="sd">        Converts an ``alias`` into a module name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">alias</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;LAMMPS&#39;</span> <span class="ow">or</span> <span class="n">alias</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;lammps_engine&#39;</span><span class="p">:</span>
-            <span class="n">module_name</span> <span class="o">=</span> <span class="s1">&#39;lammps_engine&#39;</span>
+        <span class="n">alias</span> <span class="o">=</span> <span class="n">alias</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">engines</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lammps_engine&#39;</span><span class="p">,</span> <span class="s1">&#39;dlpoly_engine&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">alias</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_engine&#39;</span><span class="p">):</span>
+            <span class="n">alias</span> <span class="o">+=</span> <span class="s1">&#39;_engine&#39;</span>
+        <span class="k">if</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">engines</span><span class="p">:</span>
+            <span class="n">module_name</span> <span class="o">=</span> <span class="n">alias</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The MD engine </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2"> is not in the list of recognised engines, &quot;</span>
+                              <span class="sa">f</span><span class="s2">&quot;which currently comprises: </span><span class="si">{</span><span class="n">engines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">__package__</span><span class="p">)</span></div></div>
 </pre></div>

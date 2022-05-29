@@ -423,6 +423,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Supported DL_POLY version 4.10
 Help on class Atom in module MDMC.MD.structures:
 
 class Atom(Structure)
@@ -446,7 +447,7 @@ class Atom(Structure)
  |      the MD engine will be randomly chosen in order to provide an accurate
  |      temperature. The default is ``(0., 0., 0.)``.
  |  charge : float
- |      The charge of the ``Atom`` in units of elementary charge (``e)``. The
+ |      The charge of the ``Atom`` in units of elementary charge (``e``). The
  |      default is `None`, meaning that a ``Coulomb`` interaction is not applied
  |      to the ``Atom``.
  |  **settings
@@ -461,6 +462,9 @@ class Atom(Structure)
  |          A name to uniquely identify the atom. Used by ForceFields (e.g. OPLSAA). Atoms
  |          should only have the same names if they are equivalent. Defaults to the element
  |          of the atom.
+ |      ``cutoff`` (`float`)
+ |          Sets the cutoff radius in ``Ang``, beyond which this atom does not interact
+ |          with other atoms. Must be set if a charge is being added to the atom.
  |  Attributes
  |  ----------
  |  element : str
@@ -574,6 +578,22 @@ class Atom(Structure)
  |          The ``Atom`` for which ``self.interactions`` are being replicated
  |      memo : dict, optional
  |          The memoization `dict`
+ |
+ |  is_equivalent(self, structure: MDMC.MD.structures.Structure) -&gt; bool
+ |      Checks the passed ``Structure`` against `self` for equivalence in
+ |      terms of the force field application, namely that the following are the
+ |      same:
+ |        - Element or chemical formula
+ |        - Mass
+ |        - Charge
+ |        - Bonded interactions
+ |        - Non bonded interactions
+ |
+ |
+ |      Returns
+ |      -------
+ |      bool
+ |          Whether the two are equivalent
  |
  |  ----------------------------------------------------------------------
  |  Readonly properties defined here:
@@ -789,7 +809,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      used for a cubic universe.
  |  force_field : ForceField, optional
  |      A force field to apply to the Universe. The force fields available are:
- |      TIP3PFB, TIP3P, OPLSAA, SPCE, SPC. Default is None.
+ |      TIP3PFB, SPC, OPLSAA, TIP3P, SPCE. Default is None.
  |  structures : list, optional
  |      ``Structure`` objects contained in the ``Universe``. Default is None.
  |  **settings
@@ -863,7 +883,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          The ``ForceField`` to parameterize ``interactions`` (if provided),
  |          or all the ``interactions`` in the ``Universe``. The available
  |          ``ForceField`` are:
- |          TIP3PFB, TIP3P, OPLSAA, SPCE, SPC
+ |          TIP3PFB, SPC, OPLSAA, TIP3P, SPCE
  |      *interactions
  |          ``Interaction`` objects to parameterize with the ``ForceField``
  |      **settings
@@ -904,7 +924,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      force_field : str, optional
  |          The force field to be applied to the structure. The available
  |          ``ForceField`` are:
- |          TIP3PFB, TIP3P, OPLSAA, SPCE, SPC
+ |          TIP3PFB, SPC, OPLSAA, TIP3P, SPCE
  |      center : bool, optional
  |          Whether to center `structure` within the Universe as it is
  |          added
@@ -932,7 +952,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      force_field : str
  |          Applies a ``ForceField`` to the ``Universe``. The available
  |          ``ForceField`` are:
- |          TIP3PFB, TIP3P, OPLSAA, SPCE, SPC
+ |          TIP3PFB, SPC, OPLSAA, TIP3P, SPCE
  |      num_density: float
  |          Non-negative `float` specifying the number density of the
  |          ``Structure``, in units of ``Structure / Ang ^ -3``
@@ -963,7 +983,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          of not converging.
  |      solvent : str, optional
  |          A `str` specifying an inbuilt ``Solvent`` from the following:
- |          SPC, TIP3PFB, TIP3P, SPCE.
+ |          SPCE, TIP3P, TIP3PFB, SPC.
  |          The default is &#39;SPCE&#39;.
  |      **settings
  |          ``constraint_algorithm`` (`ConstraintAlgorithm`)
@@ -1055,11 +1075,37 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      list
  |          The elements in the ``Universe``
  |
+ |  element_lookup
+ |      Get the elements by ID in the ``Universe``
+ |
+ |      This is required for MD engines which assign the same potential
+ |      parameters for all identical element names.
+ |
+ |      Returns
+ |      -------
+ |      dict
+ |          ``element:atom pairs``, where ``atom`` is a single ``Atom`` of the
+ |          specified ``element``.
+ |
+ |  equivalent_top_level_structures_dict
+ |      Get a `dict` of equivalent top level ``Structure`` objects that
+ |      exist in the ``Universe`` as keys, and the number of ``Structure``
+ |      that are equivalent to the key as a value. This does not include any
+ |      ``Structure`` that are a subunit of another structure belonging
+ |      to the ``Universe``.
+ |
+ |
+ |      Returns
+ |      -------
+ |      dict
+ |          The top level ``Structure`` objects in the ``Universe`` as
+ |          keys, and the number of each as a value
+ |
  |  force_fields
  |      Get or set the ``ForceField`` acting on the Universe
  |
  |      The available force fields are:
- |      TIP3PFB, TIP3P, OPLSAA, SPCE, SPC
+ |      TIP3PFB, SPC, OPLSAA, TIP3P, SPCE
  |
  |      Returns
  |      -------
@@ -1154,7 +1200,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |
  |      Returns
  |      -------
- |      set
+ |      Parameters
  |          The ``Parameters`` objects defined within ``Universe``
  |
  |  solvent_density
@@ -1169,6 +1215,17 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      -------
  |      list
  |          The ``Structure`` objects in the ``Universe``
+ |
+ |  top_level_structure_list
+ |      Get a `list` of the top level ``Structure`` objects that exist in the
+ |      ``Universe``. This does not include any ``Structure`` that are a subunit
+ |      of another structure belonging to the ``Universe``.
+ |
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The top level ``Structure`` objects in the ``Universe``
  |
  |  volume
  |
@@ -1326,6 +1383,9 @@ class HarmonicPotential(InteractionFunction)
  |  ----------------------------------------------------------------------
  |  Methods inherited from InteractionFunction:
  |
+ |  __eq__(self, other)
+ |      Return self==value.
+ |
  |  __repr__(self)
  |
  |  __str__(self)
@@ -1369,15 +1429,17 @@ class HarmonicPotential(InteractionFunction)
  |      list of weak references to the object (if defined)
  |
  |  parameters
- |      Get or set the ``array`` of ``Parameter`` objects
- |
- |      On setting the ``Parameter`` objects, they are ordered alphabetically by
- |      ``Parameter.name``
+ |      Get or set the interaction function&#39;s parameters
  |
  |      Returns
  |      -------
- |      numpy.ndarray
- |          A NumPy ``array`` of ``Parameter``
+ |      Parameters
+ |          A Parameters object containing each ``Parameter``
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes inherited from InteractionFunction:
+ |
+ |  __hash__ = None
 
 None
 </pre></div></div>

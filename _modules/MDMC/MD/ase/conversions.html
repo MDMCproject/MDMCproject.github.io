@@ -235,7 +235,7 @@
                          <span class="n">charge</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="convert_from_ase_atom"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_from_ase_atom">[docs]</a><span class="k">def</span> <span class="nf">convert_from_ase_atom</span><span class="p">(</span><span class="n">ase_atom</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_charge</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="convert_from_ase_atom"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_from_ase_atom">[docs]</a><span class="k">def</span> <span class="nf">convert_from_ase_atom</span><span class="p">(</span><span class="n">ase_atom</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_charge</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an ``ase.atom.Atom`` to an MDMC ``Atom``.</span>
 
@@ -256,6 +256,8 @@
 <span class="sd">        set to 0. if it is uninitialized. As MDMC ``Atom`` objects can have</span>
 <span class="sd">        ``charge=None`, in some cases it might be preferential to leave the</span>
 <span class="sd">        ``charge`` unset. The default is to set the ``charge``.</span>
+<span class="sd">    cutoff : float, optional</span>
+<span class="sd">        The cutoff value for the atom&#39;s charge interaction. Must be set if set_charge is True.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -268,6 +270,9 @@
               <span class="s1">&#39;mass&#39;</span><span class="p">:</span> <span class="n">ase_atom</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">set_charge</span><span class="p">:</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;charge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ase_atom</span><span class="o">.</span><span class="n">charge</span>
+        <span class="k">if</span> <span class="n">cutoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If set_charge is True, a cutoff must also be set.&quot;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;cutoff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cutoff</span>
     <span class="k">if</span> <span class="n">atom_type</span><span class="p">:</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;atom_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom_type</span>
     <span class="k">return</span> <span class="n">Atom</span><span class="p">(</span><span class="n">ase_atom</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>

@@ -136,7 +136,7 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">tee</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">product</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
@@ -159,6 +159,7 @@
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">BondedInteraction</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">TemporalConfiguration</span><span class="p">,</span> \
     <span class="n">Trajectory</span>
+<span class="kn">from</span> <span class="nn">MDMC.utilities.partitioning</span> <span class="kn">import</span> <span class="n">partition</span><span class="p">,</span> <span class="n">partition_interactions</span>
 
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -481,7 +482,7 @@
                                                <span class="n">lmp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span>
                                                <span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.minimize"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.minimize"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
 
         <span class="c1"># Check fix styles for shake or rattle styles and remove them</span>
         <span class="k">if</span> <span class="s1">&#39;constrain&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_names</span><span class="p">:</span>
@@ -512,7 +513,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span><span class="o">.</span><span class="n">apply_constraints</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">apply_ensemble_fixes</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.run"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.run"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">equilibration</span><span class="p">:</span>
             <span class="c1"># Remove previous dumps if they exist</span>
             <span class="k">if</span> <span class="s1">&#39;traj1&#39;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dump</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dump</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dumps</span><span class="p">]:</span>
@@ -636,7 +638,7 @@
         <span class="n">pos_string</span> <span class="o">=</span> <span class="s1">&#39;xs&#39;</span> <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scaled_positions&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;x&#39;</span>
 
         <span class="c1"># ID is an acronym</span>
-        <span class="c1">#pylint: disable=invalid-name</span>
+        <span class="c1"># pylint: disable=invalid-name</span>
         <span class="n">atom_IDs</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atom_IDs&#39;</span><span class="p">)</span>
 
         <span class="n">configs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -728,7 +730,7 @@
                                                              <span class="o">*</span><span class="n">atoms</span><span class="p">))</span>
 
                         <span class="c1"># next_frame_n next attribute is assigned dynamically</span>
-                        <span class="c1">#pylint: disable=no-member</span>
+                        <span class="c1"># pylint: disable=no-member</span>
                         <span class="n">next_frame_n</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">frame_indexes</span><span class="p">)</span>
                     <span class="n">frame_n</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">if</span> <span class="n">stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">frame_n</span> <span class="o">&gt;=</span> <span class="n">stop</span><span class="p">:</span>
@@ -778,7 +780,7 @@
 <span class="k">class</span> <span class="nc">LAMMPSUniverse</span><span class="p">(</span><span class="n">PyLammpsAttribute</span><span class="p">):</span>
     <span class="c1"># Class has to maintain a lot of state (attributes) as PyLammps class does</span>
     <span class="c1"># not</span>
-    <span class="c1">#pylint: disable=too-many-instance-attributes</span>
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class with what would be the equivalent in LAMMPS to the universe (i.e.</span>
@@ -854,7 +856,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">propers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">impropers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># ID is an acronym</span>
-        <span class="c1">#pylint: disable=invalid-name</span>
+        <span class="c1"># pylint: disable=invalid-name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bond_ID</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angle_ID</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proper_ID</span> <span class="o">=</span> <span class="p">{}</span>
@@ -923,7 +925,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># ID is an acronym</span>
-        <span class="c1">#pylint: disable=invalid-name</span>
+        <span class="c1"># pylint: disable=invalid-name</span>
         <span class="n">region_ID</span> <span class="o">=</span> <span class="s1">&#39;universe&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_lammps_region</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="n">region_ID</span><span class="p">)</span>
         <span class="n">n_atom_types</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">atom_types</span><span class="p">)</span>
@@ -975,7 +977,7 @@
                             <span class="p">)</span>
 
     <span class="c1"># ID is an acronym</span>
-    <span class="c1">#pylint: disable=invalid-name</span>
+    <span class="c1"># pylint: disable=invalid-name</span>
     <span class="k">def</span> <span class="nf">_create_lammps_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">region_ID</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a geometry of the simulation box in LAMMPS</span>
@@ -1420,9 +1422,9 @@
         <span class="n">b_inters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">bonded_interactions</span><span class="p">)</span>
         <span class="c1"># *_ is for pylint as it does not know about the output of partition_interactions</span>
         <span class="n">bonds</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">partition_interactions</span><span class="p">([</span><span class="n">inter</span> <span class="k">for</span> <span class="n">inter</span>
-                                                <span class="ow">in</span> <span class="n">b_inters</span>
-                                                <span class="k">if</span> <span class="n">inter</span><span class="o">.</span><span class="n">constrained</span><span class="p">],</span>
-                                               <span class="p">[</span><span class="s1">&#39;Bond&#39;</span><span class="p">,</span> <span class="s1">&#39;BondAngle&#39;</span><span class="p">],</span> <span class="n">lst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                                    <span class="ow">in</span> <span class="n">b_inters</span>
+                                                    <span class="k">if</span> <span class="n">inter</span><span class="o">.</span><span class="n">constrained</span><span class="p">],</span>
+                                                   <span class="p">[</span><span class="s1">&#39;Bond&#39;</span><span class="p">,</span> <span class="s1">&#39;BondAngle&#39;</span><span class="p">],</span> <span class="n">lst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">algorithm</span> <span class="o">=</span> <span class="n">parse_constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">constraint_algorithm</span><span class="p">,</span>
                                      <span class="n">bonds</span><span class="o">=</span><span class="n">bonds</span><span class="p">,</span> <span class="n">bond_ID_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bond_ID</span><span class="p">,</span>
                                      <span class="n">angles</span><span class="o">=</span><span class="n">angles</span><span class="p">,</span> <span class="n">angle_ID_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">angle_ID</span><span class="p">)</span>
@@ -1443,7 +1445,7 @@
 <span class="k">class</span> <span class="nc">LAMMPSSimulation</span><span class="p">(</span><span class="n">PyLammpsAttribute</span><span class="p">):</span>
     <span class="c1"># Class has to maintain a lot of state (attributes) as PyLammps class does</span>
     <span class="c1"># not</span>
-    <span class="c1">#pylint: disable=too-many-instance-attributes</span>
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The attributes and methods related running a simulation in LAMMPS using a</span>
@@ -1794,7 +1796,7 @@
 <span class="k">class</span> <span class="nc">LAMMPSEnsemble</span><span class="p">(</span><span class="n">PyLammpsAttribute</span><span class="p">):</span>
     <span class="c1"># Class has to maintain a lot of state (attributes) as PyLammps class does</span>
     <span class="c1"># not</span>
-    <span class="c1">#pylint: disable=too-many-instance-attributes</span>
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A thermodynamic ensemble determined by applying a thermostat and/or barostat</span>
@@ -2699,8 +2701,9 @@
 <span class="sd">        the LAMMPS facade.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">interaction</span><span class="o">.</span><span class="n">parameters</span><span class="p">}</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">type</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">interaction</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">as_array</span><span class="p">}</span>
+
     <span class="n">style</span> <span class="o">=</span> <span class="n">parse_bonded_styles</span><span class="p">(</span><span class="n">interaction</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;harmonic&#39;</span><span class="p">:</span>
@@ -2714,8 +2717,8 @@
         <span class="n">ord_let</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">)</span>
         <span class="c1"># Sort by fourier_order first and then by letter sequence</span>
         <span class="n">ordered_p_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span>
-                                 <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p_name</span><span class="p">:</span> <span class="p">(</span><span class="n">p_name</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                     <span class="n">ord_let</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">p_name</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+                                 <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p_type</span><span class="p">:</span> <span class="p">(</span><span class="n">p_type</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                     <span class="n">ord_let</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">p_type</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
         <span class="c1"># Get parameters values and prepend the order of the equation</span>
         <span class="n">ordered_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">fourier_order</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">]</span> <span class="k">for</span> <span class="n">p_name</span>
                                                 <span class="ow">in</span> <span class="n">ordered_p_names</span><span class="p">]</span>
@@ -2790,8 +2793,9 @@
         <span class="k">if</span> <span class="s1">&#39;buck&#39;</span> <span class="ow">in</span> <span class="n">pair_style</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">interactions</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">inter</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Buckingham&#39;</span><span class="p">:</span>
-                    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">parameters</span><span class="p">}</span>
+                    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">type</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">as_array</span><span class="p">}</span>
+
             <span class="n">ordered_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span>
                                   <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                                   <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">]]</span>
@@ -2806,8 +2810,9 @@
         <span class="k">elif</span> <span class="s1">&#39;lj&#39;</span> <span class="ow">in</span> <span class="n">pair_style</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">interactions</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">inter</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;LennardJones&#39;</span><span class="p">:</span>
-                    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">parameters</span><span class="p">}</span>
+                    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">type</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">as_array</span><span class="p">}</span>
+
             <span class="n">ordered_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon&#39;</span><span class="p">],</span>
                                   <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]]</span>
             <span class="n">coeff_cmd</span> <span class="o">=</span> <span class="p">(</span><span class="n">pair_style</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
@@ -2843,27 +2848,18 @@
 <span class="sd">        If ``solver`` type has has not been implemented in the LAMMPS facade.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">lmp_str</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Add algorithm name</span>
-    <span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ewald&#39;</span><span class="p">:</span>
-        <span class="n">lmp_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ewald&#39;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">solver</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;pppm&#39;</span><span class="p">:</span>
-        <span class="n">lmp_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;pppm&#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;This k-space solver has not been implemented&#39;</span>
+    <span class="n">solver_name</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">solver_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;ewald&#39;</span><span class="p">,</span> <span class="s1">&#39;pppm&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;This k-space solver (</span><span class="si">{</span><span class="n">solver_name</span><span class="si">}</span><span class="s1">) has not been implemented&#39;</span>
                                   <span class="s1">&#39; in the LAMMPS facade&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Add accuracy</span>
-    <span class="n">lmp_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">accuracy</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">lmp_str</span></div>
+    <span class="k">return</span> <span class="p">[</span><span class="n">solver_name</span><span class="p">,</span> <span class="n">solver</span><span class="o">.</span><span class="n">accuracy</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="parse_constraint"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_constraint">[docs]</a><span class="k">def</span> <span class="nf">parse_constraint</span><span class="p">(</span><span class="n">constraint_algorithm</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bond_ID_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">angles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angle_ID_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="c1"># ID is an acronym</span>
-    <span class="c1">#pylint: disable=invalid-name</span>
+    <span class="c1"># pylint: disable=invalid-name</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an MDMC ``ConstraintAlgorithm`` for input to LAMMPS fix</span>
 
@@ -2940,88 +2936,6 @@
                     <span class="k">if</span> <span class="n">angle</span><span class="o">.</span><span class="n">constrained</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">lmp_str</span></div>
-
-
-<div class="viewcode-block" id="partition"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.partition">[docs]</a><span class="k">def</span> <span class="nf">partition</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">predicate</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Partitions an ``iterable`` using a predicate</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    items : iterable</span>
-<span class="sd">        An ``interable`` to be partitioned.</span>
-<span class="sd">    predicate : function</span>
-<span class="sd">        A predicate that can be applied to items to returned `True` or `False`.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    `tuple`</span>
-<span class="sd">        A `tuple` of (``gen_true``, ``gen_false``), where ``gen_true`` is a</span>
-<span class="sd">        generator of all items for which the ``predicate`` returned `True`, and</span>
-<span class="sd">        ``gen_false is a generator of all items for which the ``predicate``</span>
-<span class="sd">        returned `False`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">iter_a</span><span class="p">,</span> <span class="n">iter_b</span> <span class="o">=</span> <span class="n">tee</span><span class="p">((</span><span class="n">predicate</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">((</span><span class="n">item</span> <span class="k">for</span> <span class="n">pred</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">iter_a</span> <span class="k">if</span> <span class="n">pred</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">pred</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">iter_b</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">pred</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="partition_interactions"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.partition_interactions">[docs]</a><span class="k">def</span> <span class="nf">partition_interactions</span><span class="p">(</span><span class="n">interactions</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">unpartitioned</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">lst</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Partitions an ``iterable`` of ``Interaction`` objects using a `list` of</span>
-<span class="sd">    ``Interaction`` ``names``</span>
-
-<span class="sd">    This occurs by using ``partition`` to filter out one ``Interaction`` type</span>
-<span class="sd">    for each loop, so previously identified ``Interactions`` are no longer</span>
-<span class="sd">    considered.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    interactions : iterable of Interactions</span>
-<span class="sd">        An ``interable`` of ``Interaction`` objects to be partitioned.</span>
-<span class="sd">    names : list of str</span>
-<span class="sd">        Names of ``Interaction`` classes.</span>
-<span class="sd">    unpartitioned : bool, optional</span>
-<span class="sd">        If `True`, then a generator containing any ``Interaction`` objects that</span>
-<span class="sd">        did not have a name in ``names`` is returned as an additional item in</span>
-<span class="sd">        the `tuple`. Default is `False`.</span>
-<span class="sd">    lst : bool, optional</span>
-<span class="sd">        If `True`, then the returned `tuple` contains `list` rather than</span>
-<span class="sd">        generators. ``Interaction`` objects which have the name specified by</span>
-<span class="sd">        ``names[n]``. Default is `False`.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    `tuple`</span>
-<span class="sd">        A `tuple` of length ``len(names)`` where ``index`` ``n`` is a generator</span>
-<span class="sd">        of all of the ``Interaction`` objects which have the name specified by</span>
-<span class="sd">        ``names[n]``. If ``unpartitioned`` is `True`, `tuple` is length ``n+1``.</span>
-<span class="sd">        If ``lst`` is `True`, the generators are replaced by `list`.</span>
-
-<span class="sd">    Example</span>
-<span class="sd">    -------</span>
-<span class="sd">    Partion ``interactions`` into ``Bonds`` and ``BondAngles``:</span>
-
-<span class="sd">        .. highlight:: python</span>
-<span class="sd">        .. code-block:: python</span>
-
-<span class="sd">            bonds, angles = partition_interactions(interactions,</span>
-<span class="sd">                                                   [&#39;Bond, BondAngle&#39;])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">interaction_lst</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
-    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">predicate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">name</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">n</span>
-        <span class="n">interaction_lst</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">interactions</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">interactions</span><span class="p">,</span> <span class="n">predicate</span><span class="p">)</span>
-        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="n">unpartitioned</span><span class="p">:</span>
-        <span class="n">interaction_lst</span> <span class="o">+=</span> <span class="p">[</span><span class="n">interactions</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">lst</span><span class="p">:</span>
-        <span class="n">interaction_lst</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">interaction_lst</span><span class="p">]</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">interaction_lst</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
