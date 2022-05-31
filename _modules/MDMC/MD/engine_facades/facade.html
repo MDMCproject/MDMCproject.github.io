@@ -51,7 +51,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -68,6 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -140,13 +140,68 @@
 <span class="sd">            The atomic positions</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">pass</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parent_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the simulation that created this engine facade</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `Simulation`</span>
+<span class="sd">            The Simulation object that created this engine facade</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_simulation</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;This MD engine does not belong to a simulation. &quot;</span>
+                                 <span class="s2">&quot;MD engines should be created through initialising Simulations.&quot;</span>
+                                 <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+
+    <span class="nd">@parent_simulation</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">parent_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
+        <span class="c1"># as this is internal and abstract</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent_simulation</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the simulation time step in ``fs`` from the parent simulation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `float`</span>
+<span class="sd">            Simulation time step in ``fs``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_simulation</span><span class="o">.</span><span class="n">time_step</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the number of simulation steps between saving the</span>
+<span class="sd">        ``Trajectory`` from the parent simulation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `int`</span>
+<span class="sd">            Number of simulation steps that elapse between the ``Trajectory``</span>
+<span class="sd">            being stored</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_simulation</span><span class="o">.</span><span class="n">traj_step</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="MDEngine.setup_universe"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine.setup_universe">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">setup_universe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a ``Universe.configuration`` and populates with</span>
-<span class="sd">        ``StructuralUnit``</span>
+<span class="sd">        ``Structure``</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -158,10 +213,10 @@
 <span class="sd">            ``MDEngine`` that is being used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="MDEngine.setup_simulation"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine.setup_simulation">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">setup_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traj_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setup_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the options required to perform a simulation on a setup</span>
 <span class="sd">        ``Universe``. Must follow a call to ``setup_universe()``.</span>
@@ -171,17 +226,12 @@
 <span class="sd">        universe : Universe</span>
 <span class="sd">            A molecular dynamics ``Universe`` which will be simulated in the</span>
 <span class="sd">            ``MDEngine``.</span>
-<span class="sd">        traj_step : int</span>
-<span class="sd">            How many steps the simulation should take between dumping each</span>
-<span class="sd">            ``Trajectory`` frame</span>
-<span class="sd">        time_step : float</span>
-<span class="sd">            Simulation timestep in ``fs``</span>
 <span class="sd">        settings**</span>
 <span class="sd">            The majority of these are generic but some are specific to the</span>
 <span class="sd">            ``MDEngine`` that is being used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="MDEngine.minimize"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine.minimize">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
@@ -194,7 +244,7 @@
 <span class="sd">            Maximum number of steps for the energy minimization.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="MDEngine.run"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine.run">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="n">equilibration</span><span class="p">):</span>
@@ -211,7 +261,7 @@
 <span class="sd">            ``trajectory``. Otherwise run is prodution.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="MDEngine.convert_trajectory"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine.convert_trajectory">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">convert_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
@@ -242,7 +292,7 @@
         <span class="c1"># convert_trajectory has no range function as it is assumed that the</span>
         <span class="c1"># trajectory that is calculated by MD is exactly what is required</span>
 
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="MDEngine.update_parameters"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine.update_parameters">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -251,13 +301,15 @@
 <span class="sd">        ``Universe``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="MDEngine.save_config"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine.save_config">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">save_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets ``self.saved_config`` to the current configuration</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="MDEngine.reset_config"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/facade.html#MDMC.MD.engine_facades.facade.MDEngine.reset_config">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">reset_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -265,7 +317,7 @@
 <span class="sd">        Resets the configuration of the simulation to that in ``saved_config``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">pass</span></div></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
 </pre></div>
 
            </div>

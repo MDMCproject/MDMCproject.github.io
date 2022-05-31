@@ -51,7 +51,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -68,6 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -120,7 +120,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.MD.ase.conversions</span> <span class="kn">import</span> <span class="n">ASEAtoms</span><span class="p">,</span> <span class="n">convert_from_ase_atom</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.structural_units</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BoundingBox</span><span class="p">,</span> <span class="n">get_reduced_chemical_formula</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Coulombic</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span><span class="p">,</span> <span class="n">DihedralAngle</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interaction_functions</span> <span class="kn">import</span> <span class="n">Coulomb</span>
@@ -237,11 +237,15 @@
     <span class="c1"># used, a single Coulombic interaction will be created for all atoms with</span>
     <span class="c1"># atom_type 1.</span>
     <span class="k">if</span> <span class="n">atom_types</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="k">def</span> <span class="nf">coulombic_key</span><span class="p">(</span><span class="n">atom</span><span class="p">):</span> <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span>
-        <span class="k">def</span> <span class="nf">bonded_key</span><span class="p">(</span><span class="n">atom_arr</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atom_arr</span><span class="p">]</span>
+        <span class="k">def</span> <span class="nf">coulombic_key</span><span class="p">(</span><span class="n">atom</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span>
+        <span class="k">def</span> <span class="nf">bonded_key</span><span class="p">(</span><span class="n">atom_arr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atom_arr</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="k">def</span> <span class="nf">coulombic_key</span><span class="p">(</span><span class="n">atom</span><span class="p">):</span> <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">def</span> <span class="nf">bonded_key</span><span class="p">(</span><span class="n">atom_arr</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atom_arr</span><span class="p">]</span>
+        <span class="k">def</span> <span class="nf">coulombic_key</span><span class="p">(</span><span class="n">atom</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">def</span> <span class="nf">bonded_key</span><span class="p">(</span><span class="n">atom_arr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atom_arr</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">coulombic_key</span> <span class="o">=</span> <span class="n">bonded_key</span> <span class="o">=</span> <span class="kc">None</span>
 

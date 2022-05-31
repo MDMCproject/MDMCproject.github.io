@@ -51,7 +51,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -68,6 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -136,7 +136,7 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">tee</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">product</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
@@ -155,13 +155,17 @@
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">unit_decorator_getter</span><span class="p">,</span> \
     <span class="n">repr_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngine</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.structural_units</span> <span class="kn">import</span> <span class="n">Atom</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">BondedInteraction</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">TemporalConfiguration</span><span class="p">,</span> \
     <span class="n">Trajectory</span>
+<span class="kn">from</span> <span class="nn">MDMC.utilities.partitioning</span> <span class="kn">import</span> <span class="n">partition</span><span class="p">,</span> <span class="n">partition_interactions</span>
 
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># pylint: disable=c-extension-no-member, too-many-lines</span>
+<span class="c1"># to avoid MPI warnings</span>
 
 
 <div class="viewcode-block" id="PyLammpsAttribute"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute">[docs]</a><span class="k">class</span> <span class="nc">PyLammpsAttribute</span><span class="p">:</span>
@@ -324,6 +328,14 @@
 <span class="sd">    style are set.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_saved_config</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">saved_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -340,51 +352,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saved_config</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the simulation time step in ``fs``</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        `float`</span>
-<span class="sd">            Simulation time step in ``fs``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span><span class="o">.</span><span class="n">time_step</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="nd">@time_step</span><span class="o">.</span><span class="n">setter</span>
-    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TIME</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the number of simulation steps between saving the</span>
-<span class="sd">        ``Trajectory``</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        `int`</span>
-<span class="sd">            Number of simulation steps that elapse between the ``Trajectory``</span>
-<span class="sd">            being stored</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span><span class="o">.</span><span class="n">traj_step</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="nd">@traj_step</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span><span class="o">.</span><span class="n">traj_step</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -432,7 +399,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Ensemble</span>
+<span class="sd">        LAMMPSEnsemble</span>
 <span class="sd">            The simulation thermodynamic ensemble</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -499,29 +466,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span> <span class="o">=</span> <span class="n">LAMMPSUniverse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_saved_config</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.setup_simulation"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">setup_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traj_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.setup_simulation"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">setup_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets simulation parameters in LAMMPS, such as the thermodynamic</span>
 <span class="sd">        variables, thermostat/barostat parameters and trajectory settings</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        traj_step : int</span>
-<span class="sd">            How many steps the simulation should take between dumping each</span>
-<span class="sd">            ``Trajectory`` frame</span>
-<span class="sd">        time_step : float</span>
-<span class="sd">            Simulation timestep in ``fs``</span>
 <span class="sd">        **settings</span>
 <span class="sd">            Passed to ``LAMMPSSimulation``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span> <span class="o">=</span> <span class="n">LAMMPSSimulation</span><span class="p">(</span><span class="n">universe</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">,</span>
-                                               <span class="n">time_step</span><span class="o">=</span><span class="n">time_step</span><span class="p">,</span>
-                                               <span class="n">traj_step</span><span class="o">=</span><span class="n">traj_step</span><span class="p">,</span>
+                                               <span class="n">time_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
+                                               <span class="n">traj_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">traj_step</span><span class="p">,</span>
                                                <span class="n">lmp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span>
                                                <span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.minimize"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.minimize"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
 
         <span class="c1"># Check fix styles for shake or rattle styles and remove them</span>
         <span class="k">if</span> <span class="s1">&#39;constrain&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_names</span><span class="p">:</span>
@@ -552,20 +513,25 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span><span class="o">.</span><span class="n">apply_constraints</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">apply_ensemble_fixes</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.run"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.run"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">equilibration</span><span class="p">:</span>
             <span class="c1"># Remove previous dumps if they exist</span>
             <span class="k">if</span> <span class="s1">&#39;traj1&#39;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dump</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dump</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dumps</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">undump</span><span class="p">(</span><span class="s1">&#39;traj1&#39;</span><span class="p">)</span>
             <span class="c1"># Store the trajectory in a NamedTemporaryFile</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># pylint: disable=consider-using-with</span>
+                <span class="c1"># the file has to persist outside out of this method</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span> <span class="o">=</span> <span class="n">NamedTemporaryFile</span><span class="p">()</span>
                 <span class="n">f_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span><span class="o">.</span><span class="n">name</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">f_name</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">f_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">f_name</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                <span class="c1"># pylint: disable=consider-using-with</span>
+                <span class="c1"># the file has to persist outside out of this method</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f_name</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
             <span class="c1"># Custom trajectory output just saves the atom ID, type and</span>
             <span class="c1"># positions</span>
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> set trajectory dump output to </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
@@ -672,7 +638,7 @@
         <span class="n">pos_string</span> <span class="o">=</span> <span class="s1">&#39;xs&#39;</span> <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scaled_positions&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;x&#39;</span>
 
         <span class="c1"># ID is an acronym</span>
-        <span class="c1">#pylint: disable=invalid-name</span>
+        <span class="c1"># pylint: disable=invalid-name</span>
         <span class="n">atom_IDs</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atom_IDs&#39;</span><span class="p">)</span>
 
         <span class="n">configs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -681,7 +647,7 @@
         <span class="n">frame_indexes</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
         <span class="c1"># next_frame_n next attribute is assigned dynamically</span>
         <span class="n">next_frame_n</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">frame_indexes</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_handler</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_handler</span><span class="p">:</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
             <span class="k">while</span> <span class="n">line</span><span class="p">:</span>
 
@@ -764,7 +730,7 @@
                                                              <span class="o">*</span><span class="n">atoms</span><span class="p">))</span>
 
                         <span class="c1"># next_frame_n next attribute is assigned dynamically</span>
-                        <span class="c1">#pylint: disable=no-member</span>
+                        <span class="c1"># pylint: disable=no-member</span>
                         <span class="n">next_frame_n</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">frame_indexes</span><span class="p">)</span>
                     <span class="n">frame_n</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">if</span> <span class="n">stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">frame_n</span> <span class="o">&gt;=</span> <span class="n">stop</span><span class="p">:</span>
@@ -794,9 +760,7 @@
             <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_atoms</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">):</span>
                 <span class="n">atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">atoms</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">([</span><span class="n">component</span> <span class="k">for</span> <span class="n">component</span>
-                                        <span class="ow">in</span> <span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
-                                       <span class="o">+</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">])</span>
+                <span class="n">atoms</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">])</span>
             <span class="n">saved_config</span> <span class="o">=</span> <span class="n">atoms</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">saved_config</span> <span class="o">=</span> <span class="kc">None</span>
@@ -816,7 +780,7 @@
 <span class="k">class</span> <span class="nc">LAMMPSUniverse</span><span class="p">(</span><span class="n">PyLammpsAttribute</span><span class="p">):</span>
     <span class="c1"># Class has to maintain a lot of state (attributes) as PyLammps class does</span>
     <span class="c1"># not</span>
-    <span class="c1">#pylint: disable=too-many-instance-attributes</span>
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class with what would be the equivalent in LAMMPS to the universe (i.e.</span>
@@ -886,10 +850,13 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dihedrals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">couls</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">propers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">impropers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># ID is an acronym</span>
-        <span class="c1">#pylint: disable=invalid-name</span>
+        <span class="c1"># pylint: disable=invalid-name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bond_ID</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angle_ID</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proper_ID</span> <span class="o">=</span> <span class="p">{}</span>
@@ -958,7 +925,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># ID is an acronym</span>
-        <span class="c1">#pylint: disable=invalid-name</span>
+        <span class="c1"># pylint: disable=invalid-name</span>
         <span class="n">region_ID</span> <span class="o">=</span> <span class="s1">&#39;universe&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_lammps_region</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="n">region_ID</span><span class="p">)</span>
         <span class="n">n_atom_types</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">atom_types</span><span class="p">)</span>
@@ -970,7 +937,7 @@
         <span class="c1"># level</span>
         <span class="n">dihedrals</span> <span class="o">=</span> <span class="n">partition_interactions</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">interactions</span><span class="p">),</span>
                                            <span class="p">[</span><span class="s1">&#39;DihedralAngle&#39;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">dihedral_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">dihedral</span><span class="o">.</span><span class="n">improper</span> <span class="k">for</span> <span class="n">dihedral</span> <span class="ow">in</span> <span class="n">dihedrals</span><span class="p">]</span>
+        <span class="n">dihedral_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">dihedral</span><span class="o">.</span><span class="n">improper</span> <span class="k">for</span> <span class="n">dihedral</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">dihedrals</span><span class="p">)]</span>
         <span class="n">n_bond_types</span> <span class="o">=</span> <span class="n">bonded_interaction_types</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;Bond&#39;</span><span class="p">)</span>
         <span class="n">n_angle_types</span> <span class="o">=</span> <span class="n">bonded_interaction_types</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;BondAngle&#39;</span><span class="p">)</span>
         <span class="n">n_dihedral_types</span> <span class="o">=</span> <span class="n">dihedral_types</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -1010,7 +977,7 @@
                             <span class="p">)</span>
 
     <span class="c1"># ID is an acronym</span>
-    <span class="c1">#pylint: disable=invalid-name</span>
+    <span class="c1"># pylint: disable=invalid-name</span>
     <span class="k">def</span> <span class="nf">_create_lammps_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">region_ID</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a geometry of the simulation box in LAMMPS</span>
@@ -1127,9 +1094,8 @@
         <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
             <span class="c1"># Filter interactions by name</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;proper&#39;</span><span class="p">,</span> <span class="s1">&#39;improper&#39;</span><span class="p">]:</span>
-                <span class="n">improper</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;improper&#39;</span><span class="p">)</span>
                 <span class="n">inters</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;DihedralAngle&#39;</span> <span class="ow">and</span>
-                                <span class="n">i</span><span class="o">.</span><span class="n">improper</span> <span class="o">==</span> <span class="n">improper</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">interactions</span><span class="p">)</span>
+                                <span class="n">i</span><span class="o">.</span><span class="n">improper</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;improper&#39;</span><span class="p">),</span> <span class="n">atom</span><span class="o">.</span><span class="n">interactions</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">inters</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">interactions</span><span class="p">)</span>
             <span class="n">n_inters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">inters</span><span class="p">))</span>
@@ -1157,7 +1123,8 @@
 
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Add topology to LAMMPS&#39;</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
-        <span class="n">bonds</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="n">dihedrals</span><span class="p">,</span> <span class="n">disps</span><span class="p">,</span> <span class="n">couls</span><span class="p">,</span> <span class="n">others</span> <span class="o">=</span> <span class="n">partition_interactions</span><span class="p">(</span>
+        <span class="c1"># *_ is for pylint as it does not know about the output of partition_interactions</span>
+        <span class="n">bonds</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="n">dihedrals</span><span class="p">,</span> <span class="n">disps</span><span class="p">,</span> <span class="n">couls</span><span class="p">,</span> <span class="n">others</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">partition_interactions</span><span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">interactions</span><span class="p">),</span>
             <span class="p">[</span><span class="s1">&#39;Bond&#39;</span><span class="p">,</span> <span class="s1">&#39;BondAngle&#39;</span><span class="p">,</span> <span class="s1">&#39;DihedralAngle&#39;</span><span class="p">,</span> <span class="s1">&#39;Dispersion&#39;</span><span class="p">,</span> <span class="s1">&#39;Coulombic&#39;</span><span class="p">],</span>
             <span class="n">unpartitioned</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1169,6 +1136,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">bonds</span> <span class="o">=</span> <span class="n">bonds</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angles</span> <span class="o">=</span> <span class="n">angles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dihedrals</span> <span class="o">=</span> <span class="n">dihedrals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disps</span> <span class="o">=</span> <span class="n">disps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">couls</span> <span class="o">=</span> <span class="n">couls</span>
 
         <span class="n">pair_styles</span><span class="p">,</span> <span class="n">pair_mods</span><span class="p">,</span> <span class="n">pair_coeff_cmds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_commands</span><span class="p">(</span><span class="n">universe</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">pair_styles</span><span class="p">:</span>
@@ -1193,7 +1163,7 @@
             <span class="c1"># to be (and in fact cannot) be passed to LAMMPS hybrid bond_style</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">bond_style</span><span class="p">(</span><span class="s1">&#39;hybrid&#39;</span><span class="p">,</span>
                                 <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">parse_bonded_styles</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-                                           <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">)))</span>
+                                           <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">bonds</span><span class="p">))))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_create_bonded_interactions</span><span class="p">(</span><span class="s1">&#39;bond&#39;</span><span class="p">,</span> <span class="n">bonds</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">angles</span><span class="p">:</span>
@@ -1450,10 +1420,11 @@
         <span class="c1"># Sort bonded interactions in the Universe which are constrained into</span>
         <span class="c1"># bonds and angles</span>
         <span class="n">b_inters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">bonded_interactions</span><span class="p">)</span>
-        <span class="n">bonds</span><span class="p">,</span> <span class="n">angles</span> <span class="o">=</span> <span class="n">partition_interactions</span><span class="p">([</span><span class="n">inter</span> <span class="k">for</span> <span class="n">inter</span>
-                                                <span class="ow">in</span> <span class="n">b_inters</span>
-                                                <span class="k">if</span> <span class="n">inter</span><span class="o">.</span><span class="n">constrained</span><span class="p">],</span>
-                                               <span class="p">[</span><span class="s1">&#39;Bond&#39;</span><span class="p">,</span> <span class="s1">&#39;BondAngle&#39;</span><span class="p">],</span> <span class="n">lst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># *_ is for pylint as it does not know about the output of partition_interactions</span>
+        <span class="n">bonds</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">partition_interactions</span><span class="p">([</span><span class="n">inter</span> <span class="k">for</span> <span class="n">inter</span>
+                                                    <span class="ow">in</span> <span class="n">b_inters</span>
+                                                    <span class="k">if</span> <span class="n">inter</span><span class="o">.</span><span class="n">constrained</span><span class="p">],</span>
+                                                   <span class="p">[</span><span class="s1">&#39;Bond&#39;</span><span class="p">,</span> <span class="s1">&#39;BondAngle&#39;</span><span class="p">],</span> <span class="n">lst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">algorithm</span> <span class="o">=</span> <span class="n">parse_constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">constraint_algorithm</span><span class="p">,</span>
                                      <span class="n">bonds</span><span class="o">=</span><span class="n">bonds</span><span class="p">,</span> <span class="n">bond_ID_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bond_ID</span><span class="p">,</span>
                                      <span class="n">angles</span><span class="o">=</span><span class="n">angles</span><span class="p">,</span> <span class="n">angle_ID_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">angle_ID</span><span class="p">)</span>
@@ -1474,7 +1445,7 @@
 <span class="k">class</span> <span class="nc">LAMMPSSimulation</span><span class="p">(</span><span class="n">PyLammpsAttribute</span><span class="p">):</span>
     <span class="c1"># Class has to maintain a lot of state (attributes) as PyLammps class does</span>
     <span class="c1"># not</span>
-    <span class="c1">#pylint: disable=too-many-instance-attributes</span>
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The attributes and methods related running a simulation in LAMMPS using a</span>
@@ -1506,7 +1477,7 @@
 <span class="sd">    traj_step : int</span>
 <span class="sd">        Number of simulation steps that elapse between the ``Trajectory`` being</span>
 <span class="sd">        stored.</span>
-<span class="sd">    ensemble : Ensemble</span>
+<span class="sd">    ensemble : LAMMPSEnsemble</span>
 <span class="sd">        Simulation ensemble, which applies a ``thermostat`` and ``barostat``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1514,7 +1485,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atom_style&#39;</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">universe</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">Ensemble</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">LAMMPSEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;temperature&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">traj_step</span> <span class="o">=</span> <span class="n">traj_step</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="n">time_step</span>
@@ -1821,11 +1792,11 @@
                             <span class="s1">&#39; an electrostatic solver&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Ensemble"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.Ensemble">[docs]</a><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;temperature&#39;</span><span class="p">,</span> <span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;thermostat&#39;</span><span class="p">,</span> <span class="s1">&#39;barostat&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">Ensemble</span><span class="p">(</span><span class="n">PyLammpsAttribute</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEnsemble"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEnsemble">[docs]</a><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;temperature&#39;</span><span class="p">,</span> <span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;thermostat&#39;</span><span class="p">,</span> <span class="s1">&#39;barostat&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">LAMMPSEnsemble</span><span class="p">(</span><span class="n">PyLammpsAttribute</span><span class="p">):</span>
     <span class="c1"># Class has to maintain a lot of state (attributes) as PyLammps class does</span>
     <span class="c1"># not</span>
-    <span class="c1">#pylint: disable=too-many-instance-attributes</span>
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A thermodynamic ensemble determined by applying a thermostat and/or barostat</span>
@@ -2114,7 +2085,7 @@
         <span class="c1"># Set the thermostat and barostat in LAMMPS wrapper</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_ensemble_fixes</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Ensemble.remove_ensemble_fixes"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.Ensemble.remove_ensemble_fixes">[docs]</a>    <span class="k">def</span> <span class="nf">remove_ensemble_fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEnsemble.remove_ensemble_fixes"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEnsemble.remove_ensemble_fixes">[docs]</a>    <span class="k">def</span> <span class="nf">remove_ensemble_fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes all LAMMPS ``fixes`` relating to the ensemble i.e. removes all</span>
 <span class="sd">        thermostats and barostats</span>
@@ -2133,7 +2104,7 @@
                              <span class="n">name</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">unfix</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Ensemble.apply_ensemble_fixes"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.Ensemble.apply_ensemble_fixes">[docs]</a>    <span class="k">def</span> <span class="nf">apply_ensemble_fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEnsemble.apply_ensemble_fixes"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEnsemble.apply_ensemble_fixes">[docs]</a>    <span class="k">def</span> <span class="nf">apply_ensemble_fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Passes the required LAMMPS ``fixes`` to apply a specific thermodynamic</span>
 <span class="sd">        ensemble to the simulation</span>
@@ -2193,10 +2164,17 @@
                              <span class="bp">self</span><span class="o">.</span><span class="n">rescale_step</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">t_window</span><span class="p">,</span>
                              <span class="bp">self</span><span class="o">.</span><span class="n">t_fraction</span><span class="p">)</span>
 
+            <span class="k">def</span> <span class="nf">csvr</span><span class="p">():</span>
+                <span class="c1"># csvr does not do time integration so also requires nve</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;nve&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;nve&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;csvr&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;temp/csvr&#39;</span><span class="p">,</span>
+                             <span class="o">*</span><span class="n">thermo_parameters</span> <span class="o">+</span> <span class="p">[</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9999</span><span class="p">)])</span>
+
             <span class="n">thermostat</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nose&#39;</span><span class="p">:</span> <span class="n">nose</span><span class="p">,</span>
                           <span class="s1">&#39;berendsen&#39;</span><span class="p">:</span> <span class="n">berendsen</span><span class="p">,</span>
                           <span class="s1">&#39;langevin&#39;</span><span class="p">:</span> <span class="n">langevin</span><span class="p">,</span>
-                          <span class="s1">&#39;rescale&#39;</span><span class="p">:</span> <span class="n">rescale</span><span class="p">}</span>
+                          <span class="s1">&#39;rescale&#39;</span><span class="p">:</span> <span class="n">rescale</span><span class="p">,</span>
+                          <span class="s1">&#39;csvr&#39;</span><span class="p">:</span> <span class="n">csvr</span><span class="p">}</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">thermostat</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span><span class="p">]()</span>
@@ -2723,8 +2701,9 @@
 <span class="sd">        the LAMMPS facade.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">interaction</span><span class="o">.</span><span class="n">parameters</span><span class="p">}</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">type</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">interaction</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">as_array</span><span class="p">}</span>
+
     <span class="n">style</span> <span class="o">=</span> <span class="n">parse_bonded_styles</span><span class="p">(</span><span class="n">interaction</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;harmonic&#39;</span><span class="p">:</span>
@@ -2738,8 +2717,8 @@
         <span class="n">ord_let</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">)</span>
         <span class="c1"># Sort by fourier_order first and then by letter sequence</span>
         <span class="n">ordered_p_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span>
-                                 <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p_name</span><span class="p">:</span> <span class="p">(</span><span class="n">p_name</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                     <span class="n">ord_let</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">p_name</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+                                 <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p_type</span><span class="p">:</span> <span class="p">(</span><span class="n">p_type</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                     <span class="n">ord_let</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">p_type</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
         <span class="c1"># Get parameters values and prepend the order of the equation</span>
         <span class="n">ordered_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">fourier_order</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">]</span> <span class="k">for</span> <span class="n">p_name</span>
                                                 <span class="ow">in</span> <span class="n">ordered_p_names</span><span class="p">]</span>
@@ -2814,8 +2793,9 @@
         <span class="k">if</span> <span class="s1">&#39;buck&#39;</span> <span class="ow">in</span> <span class="n">pair_style</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">interactions</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">inter</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Buckingham&#39;</span><span class="p">:</span>
-                    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">parameters</span><span class="p">}</span>
+                    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">type</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">as_array</span><span class="p">}</span>
+
             <span class="n">ordered_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span>
                                   <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                                   <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">]]</span>
@@ -2830,8 +2810,9 @@
         <span class="k">elif</span> <span class="s1">&#39;lj&#39;</span> <span class="ow">in</span> <span class="n">pair_style</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">interactions</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">inter</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;LennardJones&#39;</span><span class="p">:</span>
-                    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">parameters</span><span class="p">}</span>
+                    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">type</span><span class="p">:</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">as_array</span><span class="p">}</span>
+
             <span class="n">ordered_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;epsilon&#39;</span><span class="p">],</span>
                                   <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]]</span>
             <span class="n">coeff_cmd</span> <span class="o">=</span> <span class="p">(</span><span class="n">pair_style</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
@@ -2867,27 +2848,18 @@
 <span class="sd">        If ``solver`` type has has not been implemented in the LAMMPS facade.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">lmp_str</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Add algorithm name</span>
-    <span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ewald&#39;</span><span class="p">:</span>
-        <span class="n">lmp_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ewald&#39;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">solver</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;pppm&#39;</span><span class="p">:</span>
-        <span class="n">lmp_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;pppm&#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;This k-space solver has not been implemented&#39;</span>
+    <span class="n">solver_name</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">solver_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;ewald&#39;</span><span class="p">,</span> <span class="s1">&#39;pppm&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;This k-space solver (</span><span class="si">{</span><span class="n">solver_name</span><span class="si">}</span><span class="s1">) has not been implemented&#39;</span>
                                   <span class="s1">&#39; in the LAMMPS facade&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Add accuracy</span>
-    <span class="n">lmp_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">accuracy</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">lmp_str</span></div>
+    <span class="k">return</span> <span class="p">[</span><span class="n">solver_name</span><span class="p">,</span> <span class="n">solver</span><span class="o">.</span><span class="n">accuracy</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="parse_constraint"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_constraint">[docs]</a><span class="k">def</span> <span class="nf">parse_constraint</span><span class="p">(</span><span class="n">constraint_algorithm</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bond_ID_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">angles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angle_ID_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="c1"># ID is an acronym</span>
-    <span class="c1">#pylint: disable=invalid-name</span>
+    <span class="c1"># pylint: disable=invalid-name</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an MDMC ``ConstraintAlgorithm`` for input to LAMMPS fix</span>
 
@@ -2964,87 +2936,6 @@
                     <span class="k">if</span> <span class="n">angle</span><span class="o">.</span><span class="n">constrained</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">lmp_str</span></div>
-
-
-<div class="viewcode-block" id="partition"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.partition">[docs]</a><span class="k">def</span> <span class="nf">partition</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">predicate</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Partitions an ``iterable`` using a predicate</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    items : iterable</span>
-<span class="sd">        An ``interable`` to be partitioned.</span>
-<span class="sd">    predicate : function</span>
-<span class="sd">        A predicate that can be applied to items to returned `True` or `False`.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    `tuple`</span>
-<span class="sd">        A `tuple` of (``gen_true``, ``gen_false``), where ``gen_true`` is a</span>
-<span class="sd">        generator of all items for which the ``predicate`` returned `True`, and</span>
-<span class="sd">        ``gen_false is a generator of all items for which the ``predicate``</span>
-<span class="sd">        returned `False`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">iter_a</span><span class="p">,</span> <span class="n">iter_b</span> <span class="o">=</span> <span class="n">tee</span><span class="p">((</span><span class="n">predicate</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">((</span><span class="n">item</span> <span class="k">for</span> <span class="n">pred</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">iter_a</span> <span class="k">if</span> <span class="n">pred</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">pred</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">iter_b</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">pred</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="partition_interactions"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.partition_interactions">[docs]</a><span class="k">def</span> <span class="nf">partition_interactions</span><span class="p">(</span><span class="n">interactions</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">unpartitioned</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">lst</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Partitions an ``iterable`` of ``Interaction`` objects using a `list` of</span>
-<span class="sd">    ``Interaction`` ``names``</span>
-
-<span class="sd">    This occurs by using ``partition`` to filter out one ``Interaction`` type</span>
-<span class="sd">    for each loop, so previously identified ``Interactions`` are no longer</span>
-<span class="sd">    considered.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    interactions : iterable of Interactions</span>
-<span class="sd">        An ``interable`` of ``Interaction`` objects to be partitioned.</span>
-<span class="sd">    names : list of str</span>
-<span class="sd">        Names of ``Interaction`` classes.</span>
-<span class="sd">    unpartitioned : bool, optional</span>
-<span class="sd">        If `True`, then a generator containing any ``Interaction`` objects that</span>
-<span class="sd">        did not have a name in ``names`` is returned as an additional item in</span>
-<span class="sd">        the `tuple`. Default is `False`.</span>
-<span class="sd">    lst : bool, optional</span>
-<span class="sd">        If `True`, then the returned `tuple` contains `list` rather than</span>
-<span class="sd">        generators. ``Interaction`` objects which have the name specified by</span>
-<span class="sd">        ``names[n]``. Default is `False`.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    `tuple`</span>
-<span class="sd">        A `tuple` of length ``len(names)`` where ``index`` ``n`` is a generator</span>
-<span class="sd">        of all of the ``Interaction`` objects which have the name specified by</span>
-<span class="sd">        ``names[n]``. If ``unpartitioned`` is `True`, `tuple` is length ``n+1``.</span>
-<span class="sd">        If ``lst`` is `True`, the generators are replaced by `list`.</span>
-
-<span class="sd">    Example</span>
-<span class="sd">    -------</span>
-<span class="sd">    Partion ``interactions`` into ``Bonds`` and ``BondAngles``:</span>
-
-<span class="sd">        .. highlight:: python</span>
-<span class="sd">        .. code-block:: python</span>
-
-<span class="sd">            bonds, angles = partition_interactions(interactions,</span>
-<span class="sd">                                                   [&#39;Bond, BondAngle&#39;])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">interaction_lst</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
-    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">predicate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">name</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">n</span>
-        <span class="n">interaction_lst</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">interactions</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">interactions</span><span class="p">,</span> <span class="n">predicate</span><span class="p">)</span>
-        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="n">unpartitioned</span><span class="p">:</span>
-        <span class="n">interaction_lst</span> <span class="o">+=</span> <span class="p">[</span><span class="n">interactions</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">lst</span><span class="p">:</span>
-        <span class="n">interaction_lst</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">interaction_lst</span><span class="p">]</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">interaction_lst</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

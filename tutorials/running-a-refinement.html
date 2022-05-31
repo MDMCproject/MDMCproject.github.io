@@ -55,7 +55,6 @@
 <li class="toctree-l1"><a class="reference internal" href="applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="molecular-visualization.html">Molecular Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Running a Refinement</a><ul>
@@ -86,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -549,8 +549,9 @@ total number of data points, the degrees of freedom (number of data points less 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.refinement.FoM</span> <span class="kn">import</span> <span class="n">ChiSquaredExpError</span>
-<span class="n">help</span><span class="p">(</span><span class="n">ChiSquaredExpError</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.refinement.FoM</span> <span class="kn">import</span> <span class="n">ChiSquared_experror</span>
+<span class="n">error</span> <span class="o">=</span> <span class="n">ChiSquared_experror</span><span class="o">.</span><span class="n">ChiSquaredExpError</span>
+<span class="n">help</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -568,7 +569,7 @@ total number of data points, the degrees of freedom (number of data points less 
 <span class="n">control</span> <span class="o">=</span> <span class="n">Control</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">simulation</span><span class="p">,</span>
                   <span class="n">exp_datasets</span><span class="o">=</span><span class="n">exp_datasets</span><span class="p">,</span>
                   <span class="n">fit_parameters</span><span class="o">=</span><span class="n">fit_parameters</span><span class="p">,</span>
-                  <span class="n">MC_norm</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                  <span class="n">MC_norm</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                   <span class="n">minimizer_type</span><span class="o">=</span><span class="s2">&quot;MMC&quot;</span><span class="p">,</span>
                   <span class="n">FoM_options</span> <span class="o">=</span> <span class="n">FoM_options</span><span class="p">,</span>
                   <span class="n">MD_steps</span><span class="o">=</span><span class="mi">424620</span><span class="p">,</span>
@@ -608,7 +609,8 @@ with <code class="docutils literal notranslate"><span class="pre">SQw</span></co
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">exp_obs</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">exp_obs</span>
-<span class="n">resolution_function</span> <span class="o">=</span> <span class="n">exp_obs</span><span class="o">.</span><span class="n">resolution_functions</span><span class="p">[</span><span class="s1">&#39;SQw&#39;</span><span class="p">]</span>
+<span class="c1">#help(exp_obs.resolution)</span>
+<span class="n">resolution_function</span> <span class="o">=</span> <span class="n">exp_obs</span><span class="o">.</span><span class="n">resolution</span><span class="p">[</span><span class="s1">&#39;SQw&#39;</span><span class="p">]</span>
 <span class="c1"># Note that for multidimensional resolution functions, the innermost independent variable should be passed first</span>
 <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1e5</span><span class="p">)</span>
 <span class="n">resolution_array</span> <span class="o">=</span> <span class="n">resolution_function</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span>
@@ -689,10 +691,10 @@ minimum achieved.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install matplotlib and ipywidgets if they are not already installed</span>
-<span class="o">!</span>pip install matplotlib
-<span class="o">!</span>pip install ipywidgets
+<span class="o">%</span><span class="k">pip</span> install matplotlib
+<span class="o">%</span><span class="k">pip</span> install ipywidgets
 
-<span class="kn">from</span> <span class="nn">MDMC.utilities</span> <span class="kn">import</span> <span class="n">plot_progress</span>
+<span class="kn">from</span> <span class="nn">MDMC.utilities.plotting</span> <span class="kn">import</span> <span class="n">plot_progress</span>
 <span class="n">contol</span> <span class="o">=</span> <span class="n">plot_progress</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;FoM&#39;</span><span class="p">,</span> <span class="s1">&#39;charge&#39;</span><span class="p">])</span>
 <span class="n">control</span><span class="o">.</span><span class="n">refine</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>

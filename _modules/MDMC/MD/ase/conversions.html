@@ -51,7 +51,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -68,6 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -105,7 +105,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.MD.ase.conversions</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;This module enables conversion between MDMC StructuralUnit objects and ASE</span>
+<span></span><span class="sd">&quot;&quot;&quot;This module enables conversion between MDMC Structure objects and ASE</span>
 <span class="sd">Atom and Atoms objects.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -116,7 +116,7 @@
 <span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">x3d</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.MD.structural_units</span> <span class="kn">import</span> <span class="n">Atom</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Bond</span>
 
 
@@ -235,7 +235,7 @@
                          <span class="n">charge</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="convert_from_ase_atom"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_from_ase_atom">[docs]</a><span class="k">def</span> <span class="nf">convert_from_ase_atom</span><span class="p">(</span><span class="n">ase_atom</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_charge</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="convert_from_ase_atom"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_from_ase_atom">[docs]</a><span class="k">def</span> <span class="nf">convert_from_ase_atom</span><span class="p">(</span><span class="n">ase_atom</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_charge</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an ``ase.atom.Atom`` to an MDMC ``Atom``.</span>
 
@@ -256,6 +256,8 @@
 <span class="sd">        set to 0. if it is uninitialized. As MDMC ``Atom`` objects can have</span>
 <span class="sd">        ``charge=None`, in some cases it might be preferential to leave the</span>
 <span class="sd">        ``charge`` unset. The default is to set the ``charge``.</span>
+<span class="sd">    cutoff : float, optional</span>
+<span class="sd">        The cutoff value for the atom&#39;s charge interaction. Must be set if set_charge is True.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -268,6 +270,9 @@
               <span class="s1">&#39;mass&#39;</span><span class="p">:</span> <span class="n">ase_atom</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">set_charge</span><span class="p">:</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;charge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ase_atom</span><span class="o">.</span><span class="n">charge</span>
+        <span class="k">if</span> <span class="n">cutoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If set_charge is True, a cutoff must also be set.&quot;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;cutoff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cutoff</span>
     <span class="k">if</span> <span class="n">atom_type</span><span class="p">:</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;atom_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom_type</span>
     <span class="k">return</span> <span class="n">Atom</span><span class="p">(</span><span class="n">ase_atom</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -386,13 +391,13 @@
         <span class="c1"># viewed on 2018 macbook pro (2.6GHz, 16GB DDR4, 4GB GDDR5)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reduce_memory</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3000</span>
 
-<div class="viewcode-block" id="X3D.write"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;X3DOM&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="X3D.write"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;X3DOM&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes output to an &#39;X3DOM&#39; (html) or &#39;X3D&#39; file</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        filename : str or file-like</span>
+<span class="sd">        fileobj : str or file-like</span>
 <span class="sd">            The file name to which the ``atoms`` are written</span>
 <span class="sd">        datatype : str, optional</span>
 <span class="sd">            The output format, which can be &#39;X3D&#39; or &#39;X3DOM&#39; (html). If `None`,</span>
@@ -400,15 +405,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">datatype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.x3d&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.x3d&#39;</span><span class="p">):</span>
                 <span class="n">datatype</span> <span class="o">=</span> <span class="s1">&#39;X3D&#39;</span>
-            <span class="k">elif</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.html&#39;</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.html&#39;</span><span class="p">):</span>
                 <span class="n">datatype</span> <span class="o">=</span> <span class="s1">&#39;X3DOM&#39;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;filename must end in &#39;.x3d&#39; or &#39;.html&#39;.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Write the header</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">x3d</span><span class="o">.</span><span class="n">WriteToFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">x3d</span><span class="o">.</span><span class="n">WriteToFile</span><span class="p">(</span><span class="n">fileobj</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;X3DOM&#39;</span><span class="p">:</span>
             <span class="n">w</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;html&gt;&#39;</span><span class="p">)</span>
             <span class="n">w</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;&lt;head&gt;&#39;</span><span class="p">)</span>
@@ -532,7 +537,8 @@
         <span class="c1"># All cylinders (bonds) are oriented along y axis by default</span>
         <span class="c1"># Calculate axis-angle representation in order to set bond rotation</span>
         <span class="n">cylinder</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">separation</span><span class="p">),</span> <span class="mf">0.</span><span class="p">])</span>
-        <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">x</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">uvec1</span><span class="p">,</span> <span class="n">uvec2</span> <span class="o">=</span> <span class="n">normalise</span><span class="p">(</span><span class="n">cylinder</span><span class="p">),</span> <span class="n">normalise</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
         <span class="n">axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">uvec1</span><span class="p">,</span> <span class="n">uvec2</span><span class="p">)</span>
         <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">uvec1</span><span class="p">,</span> <span class="n">uvec2</span><span class="p">)))</span>

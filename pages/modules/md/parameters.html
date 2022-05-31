@@ -53,7 +53,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -70,6 +69,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul class="current">
@@ -85,7 +85,6 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="simulation.html">simulation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="solvents.html">solvents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="structural_units.html">structural_units</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../readers.html">readers</a></li>
@@ -286,9 +285,55 @@ is set outside the bounds of <code class="docutils literal notranslate"><span cl
 
 <dl class="py class">
 <dt class="sig sig-object py" id="MDMC.MD.parameters.Parameters">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.MD.parameters.</span></span><span class="sig-name descname"><span class="pre">Parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/MD/parameters.html#Parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.parameters.Parameters" title="Permalink to this definition"></a></dt>
-<dd><p>A <cite>list-like</cite> object where every element is a <code class="docutils literal notranslate"><span class="pre">Parameter</span></code>, which contains
-a number of helper methods for filtering</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.MD.parameters.</span></span><span class="sig-name descname"><span class="pre">Parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#MDMC.MD.parameters.Parameter" title="MDMC.MD.parameters.Parameter"><span class="pre">MDMC.MD.parameters.Parameter</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#MDMC.MD.parameters.Parameter" title="MDMC.MD.parameters.Parameter"><span class="pre">MDMC.MD.parameters.Parameter</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/MD/parameters.html#Parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.parameters.Parameters" title="Permalink to this definition"></a></dt>
+<dd><p>A <cite>dict-like</cite> object where every element is a <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> indexed by name,
+which contains a number of helper methods for filtering.</p>
+<p>Although <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> is a <cite>dict</cite>, it should be treated like a <cite>list</cite> when writing to it;
+i.e. initialise it using a <cite>list</cite> and use <cite>append</cite> to add to it. These parameters can
+then be accessed by their name as a key.</p>
+<p>In short; Parameters writes like a list and reads like a dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>init_parameters</strong> (<code class="docutils literal notranslate"><span class="pre">Parameter</span></code> or <cite>list</cite> of <a href="#id1"><span class="problematic" id="id2">``</span></a>Parameter``s, optional, default None) – The initial <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> objects that the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object contains.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.MD.parameters.Parameters.array">
+<span class="sig-name descname"><span class="pre">array</span></span><a class="headerlink" href="#MDMC.MD.parameters.Parameters.array" title="Permalink to this definition"></a></dt>
+<dd><p>An alphabetically-sorted numpy array of the <a href="#id3"><span class="problematic" id="id4">``</span></a>Parameter``s stored in this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.parameters.Parameters.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#MDMC.MD.parameters.Parameter" title="MDMC.MD.parameters.Parameter"><span class="pre">MDMC.MD.parameters.Parameter</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#MDMC.MD.parameters.Parameter" title="MDMC.MD.parameters.Parameter"><span class="pre">MDMC.MD.parameters.Parameter</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/MD/parameters.html#Parameters.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.parameters.Parameters.append" title="Permalink to this definition"></a></dt>
+<dd><p>Appends a <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> or list of <a href="#id5"><span class="problematic" id="id6">``</span></a>Parameter``s to the dict,
+with the parameter name as its key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parameters</strong> (<code class="docutils literal notranslate"><span class="pre">Parameter</span></code> or <cite>list</cite> of <a href="#id7"><span class="problematic" id="id8">``</span></a>Parameter``s) – The parameter(s) to be added to the dict.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="MDMC.MD.parameters.Parameters.as_array">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">as_array</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a></em><a class="headerlink" href="#MDMC.MD.parameters.Parameters.as_array" title="Permalink to this definition"></a></dt>
+<dd><p>The parameters in the object as a sorted numpy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An alphabetically-sorted array of parameter values in the object.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.MD.parameters.Parameters.filter">
 <span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/MD/parameters.html#Parameters.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.parameters.Parameters.filter" title="Permalink to this definition"></a></dt>
@@ -389,15 +434,15 @@ specified <code class="docutils literal notranslate"><span class="pre">interacti
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.MD.parameters.Parameters.filter_structure">
 <span class="sig-name descname"><span class="pre">filter_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/MD/parameters.html#Parameters.filter_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.parameters.Parameters.filter_structure" title="Permalink to this definition"></a></dt>
-<dd><p>Filters based on the name of the <code class="docutils literal notranslate"><span class="pre">StructuralUnit</span></code> to which each
+<dd><p>Filters based on the name of the <code class="docutils literal notranslate"><span class="pre">Structure</span></code> to which each
 <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> applies</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>structure_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of a <code class="docutils literal notranslate"><span class="pre">StructuralUnit</span></code>.</p>
+<dd class="field-odd"><p><strong>structure_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of a <code class="docutils literal notranslate"><span class="pre">Structure</span></code>.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> objects which are applied to a <code class="docutils literal notranslate"><span class="pre">StructuralUnit</span></code>
-which has the specified <code class="docutils literal notranslate"><span class="pre">zstructure_name</span></code></p>
+<dd class="field-even"><p>The <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> objects which are applied to a <code class="docutils literal notranslate"><span class="pre">Structure</span></code>
+which has the specified <code class="docutils literal notranslate"><span class="pre">structure_name</span></code></p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#MDMC.MD.parameters.Parameters" title="MDMC.MD.parameters.Parameters">Parameters</a></p>
@@ -426,6 +471,12 @@ are compared with <code class="docutils literal notranslate"><span class="pre">v
 <dd class="field-odd"><p><a class="reference internal" href="#MDMC.MD.parameters.Parameters" title="MDMC.MD.parameters.Parameters">Parameters</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.MD.parameters.Parameters.log_parameters">
+<span class="sig-name descname"><span class="pre">log_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/MD/parameters.html#Parameters.log_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.MD.parameters.Parameters.log_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Logs all Parameters by ID</p>
 </dd></dl>
 
 </dd></dl>

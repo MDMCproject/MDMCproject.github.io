@@ -51,7 +51,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -68,6 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/containers.html">Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/vscode.html">Debugging inside Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/recipes.html">Recipes for ‘simple’ additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pages/developer/known_bugs.html">Known bugs and unimplemented features</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
@@ -139,7 +139,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">__package__</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="n">module</span> <span class="o">=</span> <span class="n">MDEngineFacadeFactory</span><span class="o">.</span><span class="n">_import_from_alias</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">MDEngineFacadeFactory</span><span class="o">.</span><span class="n">import_from_alias</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
 
         <span class="n">classes</span> <span class="o">=</span> <span class="n">getmembers</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="p">(</span><span class="n">isclass</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
                                                 <span class="ow">and</span> <span class="ow">not</span> <span class="n">isabstract</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
@@ -147,16 +147,23 @@
 
         <span class="k">return</span> <span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]()</span></div>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_import_from_alias</span><span class="p">(</span><span class="n">alias</span><span class="p">):</span>
+<div class="viewcode-block" id="MDEngineFacadeFactory.import_from_alias"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/facade_factory.html#MDMC.MD.engine_facades.facade_factory.MDEngineFacadeFactory.import_from_alias">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">import_from_alias</span><span class="p">(</span><span class="n">alias</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts an ``alias`` into a module name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">alias</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;LAMMPS&#39;</span> <span class="ow">or</span> <span class="n">alias</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;lammps_engine&#39;</span><span class="p">:</span>
-            <span class="n">module_name</span> <span class="o">=</span> <span class="s1">&#39;lammps_engine&#39;</span>
+        <span class="n">alias</span> <span class="o">=</span> <span class="n">alias</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">engines</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lammps_engine&#39;</span><span class="p">,</span> <span class="s1">&#39;dlpoly_engine&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">alias</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_engine&#39;</span><span class="p">):</span>
+            <span class="n">alias</span> <span class="o">+=</span> <span class="s1">&#39;_engine&#39;</span>
+        <span class="k">if</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">engines</span><span class="p">:</span>
+            <span class="n">module_name</span> <span class="o">=</span> <span class="n">alias</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The MD engine </span><span class="si">{</span><span class="n">alias</span><span class="si">}</span><span class="s2"> is not in the list of recognised engines, &quot;</span>
+                              <span class="sa">f</span><span class="s2">&quot;which currently comprises: </span><span class="si">{</span><span class="n">engines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">__package__</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">__package__</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
