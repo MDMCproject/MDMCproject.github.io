@@ -201,9 +201,6 @@
 <span class="sd">    reset_config : bool, optional</span>
 <span class="sd">        Determines if the configuration is reset to the end of the last accepted</span>
 <span class="sd">        state. Default is `True`.</span>
-<span class="sd">    max_parameter_change : float, optional</span>
-<span class="sd">        Maximum factor by which a Parameter can change each step of the</span>
-<span class="sd">        refinement. Defaults to `0.01`</span>
 <span class="sd">    MD_steps : int, optional</span>
 <span class="sd">        Number of molecular dynamics steps for each step of the refinement.</span>
 <span class="sd">        When not provided, the minimum number of steps needed for successful</span>
@@ -216,14 +213,6 @@
 <span class="sd">        much shorter than the equilibration needed before starting the refinement process, but in</span>
 <span class="sd">        general will vary depending on the details of the ``Universe`` and ``Parameters``. Default</span>
 <span class="sd">        is 0.</span>
-<span class="sd">    convergence_tol : float, optional</span>
-<span class="sd">        The relative tolerance used to determine if a refinement has converged.</span>
-<span class="sd">        If the Figure of Merit and all ``Parameters`` change less than this</span>
-<span class="sd">        tolerance between two accepted refinement steps, the refinement stops.</span>
-<span class="sd">        Default value is 1e-5.</span>
-<span class="sd">    min_refinement_steps : int, optional</span>
-<span class="sd">        The minimum number of refinement steps before the refinement process can stop</span>
-<span class="sd">         if all parameters and the Figure of Merit have converged. Default value is 2.</span>
 <span class="sd">     cont_slicing : bool, optional</span>
 <span class="sd">        Flag to decide between two possible behaviours when the number of ``MD_steps`` is</span>
 <span class="sd">        larger than the minimum required to calculate the observables. If ``False`` (default) then</span>
@@ -286,9 +275,6 @@
                  <span class="n">minimizer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;MMC&#39;</span><span class="p">,</span> <span class="n">FoM_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">reset_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">equilibration_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                 <span class="n">convergence_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span>
-                 <span class="n">min_refinement_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-                 <span class="n">max_parameter_change</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
@@ -310,6 +296,9 @@
         <span class="n">fit_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">fit_parameters</span>
                           <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">fixed</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">tied</span><span class="p">)</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">fit_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_config</span> <span class="o">=</span> <span class="n">reset_config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">=</span> <span class="n">equilibration_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;results_filename&#39;</span><span class="p">,</span>
                                 <span class="sa">f</span><span class="s1">&#39;results_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">--%H-%M-%S&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">)</span>
@@ -320,13 +309,8 @@
         <span class="c1"># pylint: disable=line-too-long</span>
         <span class="c1"># disable this pylint warning as this can&#39;t be fixed in a way that looks good</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span> <span class="o">=</span> <span class="n">MinimizerFactory</span><span class="o">.</span><span class="n">create_minimizer</span><span class="p">(</span><span class="n">minimizer_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">,</span>
-                                                           <span class="n">max_parameter_change</span><span class="o">=</span><span class="n">max_parameter_change</span><span class="p">,</span>
                                                            <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reset_config</span> <span class="o">=</span> <span class="n">reset_config</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">=</span> <span class="n">equilibration_steps</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">convergence_tol</span> <span class="o">=</span> <span class="n">convergence_tol</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min_refine_steps</span> <span class="o">=</span> <span class="n">min_refinement_steps</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
+
 
         <span class="c1"># Create experimental observables from datasets and placeholders for</span>
         <span class="c1"># experimental observables calculated from MD</span>
@@ -480,8 +464,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_print_header</span><span class="p">()</span>  <span class="c1"># creates stdout header</span>
         <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">verbose_steps</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
-        <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">n_steps</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">has_converged</span><span class="p">(</span><span class="n">conv_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">convergence_tol</span><span class="p">,</span>
-                                                                   <span class="n">min_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_refine_steps</span><span class="p">):</span>
+        <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">n_steps</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">()</span>
 
