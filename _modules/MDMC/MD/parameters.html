@@ -435,9 +435,16 @@
             <span class="n">matching_parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
             <span class="k">if</span> <span class="n">matching_parameters</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_parameters</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Calling a parameter name with no ID fetches the first &quot;</span>
-                                  <span class="s2">&quot;parameter with that name; this may cause buggy or &quot;</span>
-                                  <span class="s2">&quot;inconsistent behaviour!&quot;</span><span class="p">)</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Calling a parameter name with no ID returns a &quot;</span>
+                                  <span class="s2">&quot;list of all parameters with that name; &quot;</span>
+                                  <span class="s2">&quot;this may create inconsistent behaviour!&quot;</span><span class="p">)</span>
+                    <span class="c1">#pylint: disable=super-with-arguments</span>
+                    <span class="c1"># for some reason when we run it without arguments,</span>
+                    <span class="c1"># it complains in jupyter notebooks</span>
+                    <span class="c1"># see http://thomas-cokelaer.info/blog/2011/09/382/</span>
+                    <span class="k">return</span> <span class="nb">sorted</span><span class="p">([</span><span class="nb">super</span><span class="p">(</span><span class="n">Parameters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                                   <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">matching_parameters</span><span class="p">],</span>
+                                   <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
                 <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">matching_parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">raise</span> <span class="ne">KeyError</span> <span class="kn">from</span> <span class="nn">error</span>
 
