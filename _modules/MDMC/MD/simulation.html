@@ -113,7 +113,7 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span><span class="p">,</span> <span class="n">filterfalse</span><span class="p">,</span> <span class="n">product</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -130,6 +130,11 @@
 <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Structure</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">Coulombic</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">Configuration</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Atom</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Interaction</span>
+    <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">Trajectory</span>
 
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -241,12 +246,12 @@
         <span class="nb">print</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Universe created with:</span><span class="se">\n</span><span class="si">{</span><span class="n">setup_frame</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Universe with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="si">}</span><span class="s1"> atoms, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bonded</span><span class="si">}</span><span class="s1"> bonded interactions, &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_nonbonded</span><span class="si">}</span><span class="s1"> nonbonded interactions, and dimensions of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
@@ -265,7 +270,7 @@
 
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the dimensions of the ``Universe``</span>
 
@@ -284,7 +289,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimensions</span>
 
     <span class="nd">@dimensions</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">dimensions</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
@@ -322,7 +327,7 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the interactions in the ``Universe``</span>
 
@@ -335,7 +340,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonded_interactions</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonbonded_interactions</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">bonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the bonded interactions in the ``Universe``</span>
 
@@ -348,7 +353,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonded_interaction_pairs</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nonbonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">nonbonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the nonbonded interactions in the ``Universe``</span>
 
@@ -361,7 +366,7 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nonbonded_interactions</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bonded_interaction_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">bonded_interaction_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the bonded interactions and the atoms they apply to</span>
 
@@ -424,7 +429,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bonded</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_nonbonded</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the parameters of the interactions that exist within the</span>
 <span class="sd">        ``Universe``</span>
@@ -440,7 +445,7 @@
 
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the volume of the ``Universe``</span>
 
@@ -453,7 +458,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">element_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">element_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The elements of the atoms in the ``Universe``</span>
 
@@ -466,7 +471,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">element_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">element_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Atom]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the elements in the ``Universe`` and example ``Atom`` objects for</span>
 <span class="sd">        each element</span>
@@ -485,7 +490,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">element_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">element_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Atom]&#39;</span><span class="p">:</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the elements by ID in the ``Universe``</span>
@@ -504,7 +509,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span><span class="p">:</span> <span class="n">atom</span><span class="o">.</span><span class="n">element</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Atom]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a list of the atoms in the Universe</span>
 
@@ -530,7 +535,7 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">molecule_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">molecule_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Molecule]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a list of the ``Molecule`` objects in the ``Universe``</span>
 
@@ -556,7 +561,7 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule_list</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">structure_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">structure_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a `list` of all ``Structure`` objects that exist in the</span>
 <span class="sd">        ``Universe``.  This includes all ``Structure`` that are a subunit</span>
@@ -585,7 +590,7 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">structures</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">top_level_structure_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Structure</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">top_level_structure_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Structure]&#39;</span><span class="p">:</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a `list` of the top level ``Structure`` objects that exist in the</span>
@@ -608,7 +613,7 @@
         <span class="k">return</span> <span class="n">top_level_structures</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">equivalent_top_level_structures_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Structure</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">equivalent_top_level_structures_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[Structure, int]&#39;</span><span class="p">:</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a `dict` of equivalent top level ``Structure`` objects that</span>
@@ -640,7 +645,7 @@
 
     <span class="nd">@property</span>
     <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">force_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">force_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the ``ForceField`` acting on the Universe</span>
 
@@ -656,7 +661,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_force_fields</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">atom_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">atom_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Atom]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the atom types of atoms in the ``Universe``</span>
 
@@ -669,7 +674,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_types</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">atom_type_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">atom_type_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[int, list[Interaction]]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the atom types and the interactions for each atom type</span>
 
@@ -685,7 +690,7 @@
 
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">MASS</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the mass density of the ``Universe``</span>
 
@@ -699,7 +704,7 @@
 
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">MASS</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">solvent_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">solvent_density</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the mass density of a solvent added using ``solvate()``</span>
 
@@ -711,7 +716,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solvent_density</span>
 
-    <span class="k">def</span> <span class="nf">_update_atom_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_update_atom_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">:</span> <span class="s1">&#39;Atom&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds the atom to ``atom_types`` `dict`</span>
 
@@ -757,7 +762,7 @@
             <span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span> <span class="o">=</span> <span class="n">atom_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_atom_types</span><span class="p">[</span><span class="n">atom_type</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_update_atom_type_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">atom_type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_update_atom_type_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">atom_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a new ``key:atom_type`` to ``atom_type_interactions``, if the</span>
 <span class="sd">        ``key`` does not already exist</span>
@@ -791,8 +796,9 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Universe.add_structure"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.add_structure">[docs]</a>    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">add_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">force_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                      <span class="n">center</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Structure</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+                      <span class="n">force_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">center</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a single ``Structure`` to the ``Universe``, with optional</span>
 <span class="sd">        ``ForceField`` applying only to that ``Structure``</span>
@@ -824,7 +830,7 @@
 
 <div class="viewcode-block" id="Universe.fill"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.fill">[docs]</a>    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">force_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">num_density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">num_struc_units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+             <span class="n">num_density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">num_struc_units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A liquid-like filling of the ``Universe`` independent of existing atoms</span>
 
@@ -906,7 +912,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">new_unit</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Universe.add_force_field"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.add_force_field">[docs]</a>    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">add_force_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_field</span><span class="p">,</span> <span class="o">*</span><span class="n">interactions</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_force_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="o">*</span><span class="n">interactions</span><span class="p">:</span> <span class="s1">&#39;Interaction&#39;</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a force field to the specified ``interactions``.  If no</span>
 <span class="sd">        ``interactions`` are passed, the force field is applied to all</span>
@@ -965,7 +973,8 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Universe.add_bonded_interaction_pairs"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.add_bonded_interaction_pairs">[docs]</a>    <span class="k">def</span> <span class="nf">add_bonded_interaction_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">bonded_interaction_pairs</span><span class="p">):</span>
+<div class="viewcode-block" id="Universe.add_bonded_interaction_pairs"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.add_bonded_interaction_pairs">[docs]</a>    <span class="k">def</span> <span class="nf">add_bonded_interaction_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                     <span class="o">*</span><span class="n">bonded_interaction_pairs</span><span class="p">:</span> <span class="s1">&#39;tuple[Interaction, Atom]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds one or more interaction pairs to the ``Universe``</span>
 
@@ -978,7 +987,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_bonded_interaction_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bonded_interaction_pairs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Universe.add_nonbonded_interaction"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.add_nonbonded_interaction">[docs]</a>    <span class="k">def</span> <span class="nf">add_nonbonded_interaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">nonbonded_interactions</span><span class="p">):</span>
+<div class="viewcode-block" id="Universe.add_nonbonded_interaction"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.add_nonbonded_interaction">[docs]</a>    <span class="k">def</span> <span class="nf">add_nonbonded_interaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                  <span class="o">*</span><span class="n">nonbonded_interactions</span><span class="p">:</span> <span class="s1">&#39;tuple[Interaction, Atom]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># ignore line too long linting as it is necessary for URL formatting</span>
         <span class="c1"># pylint: disable=line-too-long</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1002,7 +1012,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_nonbonded_interactions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nonbonded_interactions</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nbis_by_atom_type_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">nbis_by_atom_type_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[tuple[int], list[Interaction]]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a `dict` of all nonbonded interactions possessed by all</span>
 <span class="sd">        combinations of ``atom_type`` pairs in the ``Universe``.</span>
@@ -1041,7 +1051,7 @@
 
         <span class="k">return</span> <span class="n">pairs_interactions</span>
 
-    <span class="k">def</span> <span class="nf">_check_out_of_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_out_of_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks whether a ``position`` lies outside the bounds of the</span>
 <span class="sd">        ``Universe``</span>
@@ -1061,7 +1071,9 @@
         <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">position</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">position</span> <span class="o">&lt;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 
 <div class="viewcode-block" id="Universe.solvate"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.solvate">[docs]</a>    <span class="nd">@mod_docstring</span><span class="p">({</span><span class="s1">&#39;DYNAMIC_SOLVENT_LIST&#39;</span><span class="p">:</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_solvent_names</span><span class="p">())})</span>
-    <span class="k">def</span> <span class="nf">solvate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">solvent</span><span class="o">=</span><span class="s1">&#39;SPCE&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">solvate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">solvent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;SPCE&#39;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fills the ``Universe`` with solvent molecules according to pre-defined</span>
 <span class="sd">        coordinates.</span>
@@ -1260,7 +1272,7 @@
 <span class="sd">        The relative RMS error in per-atom forces</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">)</span>
 
@@ -1303,7 +1315,7 @@
 <span class="sd">            The relative RMS error in per-atom forces</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Two KSpaceSolvers are equal if their __dict__ are equal</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1315,7 +1327,7 @@
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
@@ -1341,13 +1353,13 @@
 <span class="sd">        The accuracy (tolerance) of the applied constraints</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accuracy</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accuracy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_iterations</span> <span class="o">=</span> <span class="n">max_iterations</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the name of the class</span>
 
@@ -1360,7 +1372,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the maximum number of iterations that can be used when</span>
 <span class="sd">        calculating the additional force that is required to constrain the atoms</span>
@@ -1375,7 +1387,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_iterations</span>
 
     <span class="nd">@max_iterations</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_max_iterations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
@@ -1495,7 +1507,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">setup_msg</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the simulation time step in ``fs``</span>
 
@@ -1509,11 +1521,11 @@
 
     <span class="nd">@time_step</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TIME</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the number of simulation steps between saving the</span>
 <span class="sd">        ``Trajectory``</span>
@@ -1528,10 +1540,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traj_step</span>
 
     <span class="nd">@traj_step</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_traj_step</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="k">def</span> <span class="nf">_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a universe within the ``MDEngine`` with the equivalent</span>
 <span class="sd">        configuration and topology to ``self.universe`` and defines the</span>
@@ -1542,7 +1554,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">setup_simulation</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Simulation.minimize"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Simulation.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+                 <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Minimizes the total potential energy of the simulated system by</span>
 <span class="sd">        modifying the positions of the constituent atoms until one of the</span>
@@ -1587,7 +1599,7 @@
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="s2">&quot;Minimization&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Simulation.run"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Simulation.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">equilibration</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+            <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Runs the MD simulation for the specified number of steps. Trajectories</span>
 <span class="sd">        for the simulation are only saved when ``equilibration`` is `False`.</span>
@@ -1628,7 +1640,7 @@
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">process</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Trajectory&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The ``Trajectory`` produced by the most recent production run of the</span>
 <span class="sd">        ``Simulation``.</span>

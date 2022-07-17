@@ -428,7 +428,7 @@ Supported DL_POLY version 4.10
 Help on class Atom in module MDMC.MD.structures:
 
 class Atom(Structure)
- |  Atom(element, position=(0.0, 0.0, 0.0), velocity=(0.0, 0.0, 0.0), charge=None, **settings)
+ |  Atom(element: &#39;str&#39;, position: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = (0.0, 0.0, 0.0), velocity: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = (0.0, 0.0, 0.0), charge: &#39;float&#39; = None, **settings: &#39;dict&#39;)
  |
  |  A single atom
  |
@@ -479,7 +479,7 @@ class Atom(Structure)
  |
  |  Methods defined here:
  |
- |  __deepcopy__(self, memo)
+ |  __deepcopy__(self, memo: &#39;dict&#39;) -&gt; &#39;Atom&#39;
  |      Copies the Atom and all attributes, except ``ID`` which is generated
  |
  |      Interactions are copied but the copied ``Atom`` is substituted for the
@@ -492,18 +492,18 @@ class Atom(Structure)
  |      memo : dict
  |          The memoization `dict`
  |
- |  __init__(self, element, position=(0.0, 0.0, 0.0), velocity=(0.0, 0.0, 0.0), charge=None, **settings)
+ |  __init__(self, element: &#39;str&#39;, position: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = (0.0, 0.0, 0.0), velocity: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = (0.0, 0.0, 0.0), charge: &#39;float&#39; = None, **settings: &#39;dict&#39;)
  |      Initialize self.  See help(type(self)) for accurate signature.
  |
  |  __repr__(self)
  |
- |  __str__(self)
+ |  __str__(self) -&gt; &#39;str&#39;
  |      Returns
  |      -------
  |      str
  |          The ``element``, ``charge`` and ``position`` of the ``Atom``
  |
- |  add_interaction(self, interaction, from_interaction=False)
+ |  add_interaction(self, interaction: &#39;Interaction&#39;, from_interaction: &#39;bool&#39; = False) -&gt; &#39;None&#39;
  |      Adds an interaction to the ``Atom``
  |
  |      Parameters
@@ -518,7 +518,7 @@ class Atom(Structure)
  |          Specifies if this method has been called from an ``Interaction``.
  |          Default is `False`.
  |
- |  copy(self, position)
+ |  copy(self, position: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34;) -&gt; &#39;Atom&#39;
  |      Copies the ``Atom`` and all attributes, except ``ID`` which is generated
  |
  |      Copying an ``Atom`` creates an exact duplicate at the specified
@@ -565,7 +565,7 @@ class Atom(Structure)
  |      ``Bond`` interaction with ``H2`` (as ``H1`` had a ``Bond`` interaction
  |      with ``H2``).
  |
- |  copy_interactions(self, atom, memo=None)
+ |  copy_interactions(self, atom: &#39;Atom&#39;, memo: &#39;dict&#39; = None) -&gt; &#39;None&#39;
  |      This replicates the interactions from ``self`` for ``Atom``, but with
  |      ``self`` substituted by ``atom`` in the ``Interaction.atoms``. These
  |      interactions are added to any that already exist for the ``Atom``.
@@ -580,7 +580,7 @@ class Atom(Structure)
  |      memo : dict, optional
  |          The memoization `dict`
  |
- |  is_equivalent(self, structure: MDMC.MD.structures.Structure) -&gt; bool
+ |  is_equivalent(self, structure: &#39;Structure&#39;) -&gt; &#39;bool&#39;
  |      Checks the passed ``Structure`` against `self` for equivalence in
  |      terms of the force field application, namely that the following are the
  |      same:
@@ -697,7 +697,7 @@ class Atom(Structure)
  |  ----------------------------------------------------------------------
  |  Methods inherited from Structure:
  |
- |  translate(self, displacement)
+ |  translate(self, displacement: &#39;Union[tuple, np.ndarray]&#39;) -&gt; &#39;None&#39;
  |      Translate the structural unit by the specified displacement
  |
  |      Parameters
@@ -705,7 +705,7 @@ class Atom(Structure)
  |      Displacement : tuple, numpy.ndarray
  |          A three element tuple or ``array`` of `float`
  |
- |  valid_position(self, position=None)
+ |  valid_position(self, position: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = None) -&gt; &#39;bool&#39;
  |      Checks if the specified ``position`` is within the bounds of the
  |      ``Structure.universe``, if it has one
  |
@@ -810,7 +810,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      used for a cubic universe.
  |  force_field : ForceField, optional
  |      A force field to apply to the Universe. The force fields available are:
- |      OPLSAA, SPC, TIP3PFB, TIP3P, SPCE. Default is None.
+ |      TIP3PFB, SPC, SPCE, OPLSAA, TIP3P. Default is None.
  |  structures : list, optional
  |      ``Structure`` objects contained in the ``Universe``. Default is None.
  |  **settings
@@ -853,7 +853,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |
  |  Methods defined here:
  |
- |  __eq__(self, other)
+ |  __eq__(self, other) -&gt; bool
  |      Return self==value.
  |
  |  __init__(self, dimensions, force_field=None, structures=None, **settings)
@@ -861,10 +861,10 @@ class Universe(MDMC.MD.container.AtomContainer)
  |
  |  __repr__(self)
  |
- |  __str__(self)
+ |  __str__(self) -&gt; str
  |      Return str(self).
  |
- |  add_bonded_interaction_pairs(self, *bonded_interaction_pairs)
+ |  add_bonded_interaction_pairs(self, *bonded_interaction_pairs: &#39;tuple[Interaction, Atom]&#39;) -&gt; None
  |      Adds one or more interaction pairs to the ``Universe``
  |
  |      Parameters
@@ -873,7 +873,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          one or more (``interaction``, ``atoms``) pairs, where ``atoms`` is a
  |          `tuple` of all atoms for that specific bonded ``interaction``
  |
- |  add_force_field(self, force_field, *interactions, **settings)
+ |  add_force_field(self, force_field: str, *interactions: &#39;Interaction&#39;, **settings: dict) -&gt; None
  |      Adds a force field to the specified ``interactions``.  If no
  |      ``interactions`` are passed, the force field is applied to all
  |      interactions in the ``Universe``.
@@ -884,7 +884,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          The ``ForceField`` to parameterize ``interactions`` (if provided),
  |          or all the ``interactions`` in the ``Universe``. The available
  |          ``ForceField`` are:
- |          OPLSAA, SPC, TIP3PFB, TIP3P, SPCE
+ |          TIP3PFB, SPC, SPCE, OPLSAA, TIP3P
  |      *interactions
  |          ``Interaction`` objects to parameterize with the ``ForceField``
  |      **settings
@@ -897,7 +897,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |              ``Dispersion`` interactions added will only be like-like. By
  |              default, no ``Dispersion`` interactions are added.
  |
- |  add_nonbonded_interaction(self, *nonbonded_interactions)
+ |  add_nonbonded_interaction(self, *nonbonded_interactions: &#39;tuple[Interaction, Atom]&#39;) -&gt; None
  |      Adds one or more nonbonded interactions to the ``Universe``
  |
  |      Parameters
@@ -913,7 +913,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          See http://mdmcproject.org/tutorials/building-a-universe.html?highlight=interaction#Create-non-bonded-interactions
  |          for more details on non-bonded interactions.
  |
- |  add_structure(self, structure, force_field=None, center=False)
+ |  add_structure(self, structure: Union[MDMC.MD.structures.Structure, int], force_field: str = None, center: bool = False) -&gt; None
  |      Adds a single ``Structure`` to the ``Universe``, with optional
  |      ``ForceField`` applying only to that ``Structure``
  |
@@ -925,12 +925,12 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      force_field : str, optional
  |          The force field to be applied to the structure. The available
  |          ``ForceField`` are:
- |          OPLSAA, SPC, TIP3PFB, TIP3P, SPCE
+ |          TIP3PFB, SPC, SPCE, OPLSAA, TIP3P
  |      center : bool, optional
  |          Whether to center `structure` within the Universe as it is
  |          added
  |
- |  fill(self, structures: MDMC.MD.structures.Structure, force_field: str = None, num_density: float = None, num_struc_units: int = None)
+ |  fill(self, structures: MDMC.MD.structures.Structure, force_field: str = None, num_density: float = None, num_struc_units: int = None) -&gt; None
  |      A liquid-like filling of the ``Universe`` independent of existing atoms
  |
  |      Adds copies of ``structures`` to existing configuration until
@@ -953,7 +953,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      force_field : str
  |          Applies a ``ForceField`` to the ``Universe``. The available
  |          ``ForceField`` are:
- |          OPLSAA, SPC, TIP3PFB, TIP3P, SPCE
+ |          TIP3PFB, SPC, SPCE, OPLSAA, TIP3P
  |      num_density: float
  |          Non-negative `float` specifying the number density of the
  |          ``Structure``, in units of ``Structure / Ang ^ -3``
@@ -969,7 +969,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      ValueError
  |          If neither ``num_density`` or ``num_struc_units`` are passed
  |
- |  solvate(self, density, tolerance=1.0, solvent=&#39;SPCE&#39;, **settings)
+ |  solvate(self, density: float, tolerance: float = 1.0, solvent: str = &#39;SPCE&#39;, **settings: dict) -&gt; None
  |      Fills the ``Universe`` with solvent molecules according to pre-defined
  |      coordinates.
  |
@@ -984,7 +984,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          of not converging.
  |      solvent : str, optional
  |          A `str` specifying an inbuilt ``Solvent`` from the following:
- |          SPCE, SPC, TIP3PFB, TIP3P.
+ |          TIP3P, TIP3PFB, SPCE, SPC.
  |          The default is &#39;SPCE&#39;.
  |      **settings
  |          ``constraint_algorithm`` (`ConstraintAlgorithm`)
@@ -1106,7 +1106,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      Get or set the ``ForceField`` acting on the Universe
  |
  |      The available force fields are:
- |      OPLSAA, SPC, TIP3PFB, TIP3P, SPCE
+ |      TIP3PFB, SPC, SPCE, OPLSAA, TIP3P
  |
  |      Returns
  |      -------
@@ -1245,7 +1245,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |  ----------------------------------------------------------------------
  |  Methods inherited from MDMC.MD.container.AtomContainer:
  |
- |  __getitem__(self, index)
+ |  __getitem__(self, index: Union[int, slice]) -&gt; Union[ForwardRef(&#39;Atom&#39;), ForwardRef(&#39;list[Atom]&#39;)]
  |      Returns
  |      -------
  |      Atom, list
@@ -1302,7 +1302,7 @@ None
 Help on class HarmonicPotential in module MDMC.MD.interaction_functions:
 
 class HarmonicPotential(InteractionFunction)
- |  HarmonicPotential(equilibrium_state, potential_strength, **settings)
+ |  HarmonicPotential(equilibrium_state: float, potential_strength: float, **settings: dict)
  |
  |  Harmonic potential for bond stretching, and angular and improper dihedral
  |  vibration, with the form:
@@ -1378,7 +1378,7 @@ class HarmonicPotential(InteractionFunction)
  |  ----------------------------------------------------------------------
  |  Static methods defined here:
  |
- |  __new__(cls, equilibrium_state, potential_strength, **settings)
+ |  __new__(cls, equilibrium_state: float, potential_strength: float, **settings: dict)
  |      Create and return a new object.  See help(type) for accurate signature.
  |
  |  ----------------------------------------------------------------------
@@ -1389,10 +1389,10 @@ class HarmonicPotential(InteractionFunction)
  |
  |  __repr__(self)
  |
- |  __str__(self)
+ |  __str__(self) -&gt; str
  |      Return str(self).
  |
- |  set_parameters_interactions(self, interaction)
+ |  set_parameters_interactions(self, interaction: &#39;Interaction&#39;) -&gt; None
  |      Sets the ``parent`` ``Interaction`` for all ``Parameters`` objects
  |
  |      Parameters
@@ -1606,13 +1606,13 @@ class Control(builtins.object)
  |
  |  __repr__(self)
  |
- |  __str__(self)
+ |  __str__(self) -&gt; str
  |      Return str(self).
  |
- |  equilibrate(self)
+ |  equilibrate(self) -&gt; None
  |      Run molecular dynamics to equilibrate the ``Universe``.
  |
- |  refine(self, n_steps: int)
+ |  refine(self, n_steps: int) -&gt; None
  |      Refines the specified potential parameters
  |
  |      Parameters
@@ -1629,7 +1629,7 @@ class Control(builtins.object)
  |
  |          control.refine(100)
  |
- |  step(self)
+ |  step(self) -&gt; None
  |      Do a full step: generate and run MD to calculate FoM for existing
  |      parameters, iterate parameters a step forward and reset MD (phasespace)
  |      if previous step was rejected and reset_config = true

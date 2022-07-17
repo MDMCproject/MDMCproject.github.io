@@ -121,12 +121,16 @@
 
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Callable</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Interaction</span>
 
 
 <div class="viewcode-block" id="InteractionFunction"><a class="viewcode-back" href="../../../pages/modules/md/interaction_functions.html#MDMC.MD.interaction_functions.InteractionFunction">[docs]</a><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;parameters&#39;</span><span class="p">)</span>
@@ -144,7 +148,7 @@
 <span class="sd">        the value and `str` is the unit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
         <span class="c1"># locals which are excluded from Parameter creation</span>
         <span class="n">excluded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="s1">&#39;__class__&#39;</span><span class="p">]</span>
@@ -157,7 +161,7 @@
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">parameter</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="n">parameters</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span>
                                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
@@ -172,7 +176,7 @@
                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters_values</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">parameters_values</span><span class="p">)]))</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the interaction function&#39;s parameters</span>
 
@@ -185,12 +189,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span>
 
     <span class="nd">@parameters</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">parameters_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parameters_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the values for all ``Parameters`` objects</span>
 
@@ -203,7 +207,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the name of the class of the ``InteractionFunction``</span>
 
@@ -215,7 +219,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 
-<div class="viewcode-block" id="InteractionFunction.set_parameters_interactions"><a class="viewcode-back" href="../../../pages/modules/md/interaction_functions.html#MDMC.MD.interaction_functions.InteractionFunction.set_parameters_interactions">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interaction</span><span class="p">):</span>
+<div class="viewcode-block" id="InteractionFunction.set_parameters_interactions"><a class="viewcode-back" href="../../../pages/modules/md/interaction_functions.html#MDMC.MD.interaction_functions.InteractionFunction.set_parameters_interactions">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interaction</span><span class="p">:</span> <span class="s1">&#39;Interaction&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the ``parent`` ``Interaction`` for all ``Parameters`` objects</span>
 
@@ -230,7 +234,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">parameter</span><span class="p">]</span><span class="o">.</span><span class="n">interactions</span> <span class="o">=</span> <span class="n">interaction</span></div></div>
 
 
-<div class="viewcode-block" id="inter_func_decorator"><a class="viewcode-back" href="../../../pages/modules/md/interaction_functions.html#MDMC.MD.interaction_functions.inter_func_decorator">[docs]</a><span class="k">def</span> <span class="nf">inter_func_decorator</span><span class="p">(</span><span class="o">*</span><span class="n">parameter_units</span><span class="p">):</span>
+<div class="viewcode-block" id="inter_func_decorator"><a class="viewcode-back" href="../../../pages/modules/md/interaction_functions.html#MDMC.MD.interaction_functions.inter_func_decorator">[docs]</a><span class="k">def</span> <span class="nf">inter_func_decorator</span><span class="p">(</span><span class="o">*</span><span class="n">parameter_units</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decorates a method to add units to all positional and any relevant keyword</span>
 <span class="sd">    arguments</span>
@@ -345,7 +349,7 @@
 
     <span class="nd">@inter_func_decorator</span><span class="p">((</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">ENERGY</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
                           <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">ENERGY</span><span class="p">))</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">C</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span></div>
 
@@ -387,7 +391,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@inter_func_decorator</span><span class="p">((</span><span class="s1">&#39;charge&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">CHARGE</span><span class="p">))</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charge</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charge</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span></div>
 
@@ -457,7 +461,7 @@
 <span class="sd">        hp = HarmonicPotential(180., 20.92, interaction_type=&#39;improper&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">equilibrium_state</span><span class="p">,</span> <span class="n">potential_strength</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">equilibrium_state</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">potential_strength</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
         <span class="c1"># interaction_type is a required keyword, but has to be passed through</span>
         <span class="c1"># settings so that it can be correctly passed in inter_func_decorator</span>
@@ -555,7 +559,7 @@
 <span class="sd">                               function=periodic)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K1</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="o">*</span><span class="n">parameters</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">d1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">parameters</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 
         <span class="c1"># Check that total number of parameters is divisible by 3</span>
         <span class="c1"># Check that all n values are non-negative ints</span>
@@ -620,7 +624,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@inter_func_decorator</span><span class="p">((</span><span class="s1">&#39;epsilon&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">ENERGY</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;sigma&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span><span class="p">))</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span><span class="s1">&#39;epsilon&#39;</span><span class="p">:</span> <span class="n">epsilon</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="n">sigma</span><span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cutoff&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
