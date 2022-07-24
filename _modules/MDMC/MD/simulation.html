@@ -700,7 +700,7 @@
 <span class="sd">            The mass density of all of the atoms of the ``Universe``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">mass</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">mass</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span>
 
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">MASS</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
@@ -1040,14 +1040,11 @@
                            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">j</span><span class="p">)</span>
         <span class="c1"># Create dict of interactions for each atom type pair</span>
         <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">atom_type_pairs</span><span class="p">:</span>
-            <span class="n">pairs_interactions</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactions</span><span class="p">:</span>
-                <span class="n">cond1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">)</span>
-                         <span class="ow">and</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">atom_types</span><span class="p">)</span>
-                <span class="n">cond2</span> <span class="o">=</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="n">Coulombic</span><span class="p">)</span>
-                         <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">atom_types</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">cond1</span> <span class="ow">or</span> <span class="n">cond2</span><span class="p">:</span>
-                    <span class="n">pairs_interactions</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inter</span><span class="p">)</span>
+            <span class="n">pairs_interactions</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">inter</span> <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactions</span>
+                                        <span class="k">if</span> <span class="p">((</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">)</span>
+                                             <span class="ow">and</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">atom_types</span><span class="p">))</span> <span class="ow">or</span>
+                                            <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="n">Coulombic</span><span class="p">)</span>
+                                             <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">atom_types</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">))]</span>
 
         <span class="k">return</span> <span class="n">pairs_interactions</span>
 
