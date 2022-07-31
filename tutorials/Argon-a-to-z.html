@@ -480,9 +480,9 @@ between 8 and 12 ang is found to give near identifical results.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+LAMMPS output is captured by PyLammps wrapper
 LAMMPS (29 Sep 2021 - Update 3)
   using 4 OpenMP thread(s) per MPI task
-LAMMPS output is captured by PyLammps wrapper
 LAMMPS (29 Sep 2021 - Update 3)
   using 4 OpenMP thread(s) per MPI task
 LAMMPS output is captured by PyLammps wrapper
@@ -529,14 +529,18 @@ steps.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fit_parameters</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">parameters</span>
+<span class="n">fit_parameters</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.8</span><span class="p">,</span><span class="mf">3.8</span><span class="p">]</span>
+<span class="n">fit_parameters</span><span class="p">[</span><span class="s1">&#39;epsilon&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">]</span>
+
 
 <span class="n">control</span> <span class="o">=</span> <span class="n">Control</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">simulation</span><span class="p">,</span>
                   <span class="n">exp_datasets</span><span class="o">=</span><span class="n">exp_datasets</span><span class="p">,</span>
                   <span class="n">fit_parameters</span><span class="o">=</span><span class="n">fit_parameters</span><span class="p">,</span>
-                  <span class="n">MC_norm</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-                  <span class="n">minimizer_type</span><span class="o">=</span><span class="s2">&quot;MMC&quot;</span><span class="p">,</span>
-                  <span class="n">reset_config</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                  <span class="n">MD_steps</span><span class="o">=</span><span class="mi">570</span><span class="p">)</span>
+                  <span class="n">minimizer_type</span><span class="o">=</span><span class="s2">&quot;GPO&quot;</span><span class="p">,</span>
+                  <span class="n">reset_config</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">MD_steps</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+                  <span class="n">equilibration_steps</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+                  <span class="n">n_points</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -546,7 +550,7 @@ steps.</p>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Control created with:
-  Minimizer                             MMC
+  Minimizer                             GPO
   FoM type               ChiSquaredExpError
   Number of observables                   1
   Number of parameters                    2
@@ -559,7 +563,7 @@ Control created with:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run the refinement, i.e. refine the FF parameters against the data</span>
-<span class="n">control</span><span class="o">.</span><span class="n">refine</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">control</span><span class="o">.</span><span class="n">refine</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -568,21 +572,55 @@ Control created with:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Step         FoM Change state epsilon (#2)   sigma (#3)
-   0       461.9     Accepted        1.024         3.36
-   1         427     Accepted        1.016         3.37
-   2       446.5     Accepted        1.009        3.369
-   3       438.3     Accepted         1.01        3.378
-Refined parameters [&#39;epsilon (#2)&#39;, &#39;sigma (#3)&#39;] have converged coordinate: [1.00971829 3.37803149]
- with a FoM of 438.3306797891016.
- Best point measured was
- epsilon (#2)    1.016331
-sigma (#3)      3.370279
-Name: 1, dtype: object
- for a minimum FoM of 426.97162909895053.
+Step         FoM Change state  Pred coords     Pred FoM epsilon (#2)   sigma (#3)
+   0       344.7     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7        1.024         3.36
+   1       428.3     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.9719        3.532
+   2         620     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.9969        2.905
+   3       794.4     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.9098        3.782
+   4       441.9     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7        1.198         3.47
+   5       605.5     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.7743        2.876
+   6       394.3     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.8962        3.198
+   7       558.3     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.8297        3.693
+   8       359.9     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.7088        3.271
+   9       924.4     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7        1.059        2.812
+  10       372.7     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.9435        3.336
+  11       626.3     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7        1.086        2.966
+  12       504.2     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.7919        3.001
+  13       438.5     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.8095        3.566
+  14       719.8     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7        1.038        3.713
+  15       430.7     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.7406        3.619
+  16       570.8     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7        1.171        3.098
+  17       380.6     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7         1.14        3.223
+  18       456.4     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7        1.024        3.104
+  19       358.2     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.8735        3.441
+  20         348     Accepted [1.0243 kJ / mol, 3.36 Ang]        344.7       0.7001        3.395
+  21       329.1     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1        0.704        3.426
+  22       338.5     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7006        3.416
+  23       350.1     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1        0.703        3.411
+  24       385.7     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1        1.087        3.333
+  25       342.1     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7021        3.415
+  26       360.6     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7015        3.441
+  27       364.1     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1        0.701        3.376
+  28       354.1     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.8204        3.368
+  29       406.9     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7034        3.117
+  30       347.2     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1        0.703        3.474
+  31       358.2     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7025        3.481
+  32       334.2     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7006        3.313
+  33       349.3     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7006        3.328
+  34       335.9     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1        0.701        3.348
+  35       342.6     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7005        3.358
+  36       349.9     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7767        3.359
+  37       362.1     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7002        3.302
+  38       341.3     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7831         3.39
+  39       331.4     Accepted [0.7039678953919272 kJ / mol, 3.425818024314377 Ang]        329.1       0.7004         3.38
+Best point measured was
+329.088039967832 for a minimum FoM of 329.088039967832.
+
+ Predicted minimum coordinate is [0.7039678953919272 kJ / mol, 3.425818024314377 Ang] for a minimum FoM of 329.088039967832.
+
 
 Automatic Scale Factors
-  data/Well_s_q_omega_Ar_data.xml  0.221598
+  data/Well_s_q_omega_Ar_data.xml  0.214235
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">

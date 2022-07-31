@@ -134,6 +134,8 @@
 <span class="sd">true of calls to PyLammps.eval, and may also occur in other cases (anything that</span>
 <span class="sd">ends up using the OutputCapture class).</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
@@ -141,6 +143,10 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">PyLammps</span>
@@ -149,21 +155,22 @@
                               <span class="s1">&#39; not in the PYTHONPATH. See LAMMPS documentation&#39;</span>
                               <span class="s1">&#39; on Python to rectify this.&#39;</span>
                               <span class="p">)</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+<span class="kn">from</span> <span class="nn">MDMC.common.units</span> <span class="kn">import</span> <span class="n">Unit</span>
 <span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">unit_decorator_getter</span><span class="p">,</span> \
     <span class="n">repr_decorator</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="kn">import</span> <span class="n">Universe</span><span class="p">,</span> <span class="n">KSpaceSolver</span><span class="p">,</span> <span class="n">ConstraintAlgorithm</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngine</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">BondedInteraction</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">BondedInteraction</span><span class="p">,</span> <span class="n">Interaction</span><span class="p">,</span> \
+    <span class="n">NonBondedInteraction</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">TemporalConfiguration</span><span class="p">,</span> \
     <span class="n">Trajectory</span>
 <span class="kn">from</span> <span class="nn">MDMC.utilities.partitioning</span> <span class="kn">import</span> <span class="n">partition</span><span class="p">,</span> <span class="n">partition_interactions</span>
 
-
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
 
 <span class="c1"># pylint: disable=c-extension-no-member, too-many-lines</span>
 <span class="c1"># to avoid MPI warnings</span>
@@ -192,7 +199,7 @@
 <span class="sd">        The ``PyLammps`` object owned by this class</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atom_style</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp</span><span class="p">:</span> <span class="n">PyLammps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">atom_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;full&#39;</span><span class="p">):</span>
 
         <span class="c1"># Set communicator to MPI predefined intracommunicator instance which</span>
         <span class="c1"># contains all processes</span>
@@ -216,7 +223,7 @@
                      <span class="s1">&#39;added to class&#39;</span> <span class="k">if</span> <span class="n">lmp</span> <span class="k">else</span> <span class="s1">&#39;created by class&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">system_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">system_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">namedtuple</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the ``PyLammps`` wrapper system ``state`` `dict`</span>
 
@@ -238,7 +245,7 @@
         <span class="k">return</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;System&#39;</span><span class="p">,</span> <span class="n">system_state</span><span class="o">.</span><span class="n">keys</span><span class="p">())(</span><span class="o">*</span><span class="n">system_state</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;list[dict]&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the ``PyLammps`` wrapper `list` of ``fixes``</span>
 
@@ -258,7 +265,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">fixes</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fix_styles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fix_styles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;list[str]&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the styles of the ``fixes`` applied in LAMMPS</span>
 
@@ -271,7 +278,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">fix</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">fix</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixes</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fix_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fix_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;list[str]&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the names of the ``fixes`` applied in LAMMPS</span>
 
@@ -284,7 +291,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">fix</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">fix</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixes</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dumps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">dumps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the PyLammps wrapper list of dumps</span>
 
@@ -338,7 +345,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">saved_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">saved_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the saved configuration of the atomic positions</span>
 
@@ -355,7 +362,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saved_config</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the temperature of the simulation in ``K``</span>
 
@@ -369,12 +376,12 @@
 
     <span class="nd">@temperature</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TEMPERATURE</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the pressure of the simulation in ``atm``</span>
 
@@ -388,12 +395,12 @@
 
     <span class="nd">@pressure</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">PRESSURE</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span><span class="o">.</span><span class="n">pressure</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;LAMMPSEnsemble&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the ensemble object which applies a ``thermostat`` and/or</span>
 <span class="sd">        ``barostat`` to LAMMPS</span>
@@ -407,12 +414,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span><span class="o">.</span><span class="n">ensemble</span>
 
     <span class="nd">@ensemble</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;LAMMPSEnsemble&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span><span class="o">.</span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the `str` which specifies the thermostat</span>
 
@@ -425,12 +432,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">thermostat</span>
 
     <span class="nd">@thermostat</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the `str` which specifies the barostat</span>
 
@@ -443,11 +450,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">barostat</span>
 
     <span class="nd">@barostat</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">barostat</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="LAMMPSEngine.setup_universe"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_universe">[docs]</a>    <span class="k">def</span> <span class="nf">setup_universe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.setup_universe"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_universe">[docs]</a>    <span class="k">def</span> <span class="nf">setup_universe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">Universe</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the simulation box, the atomic configuration, and the topology</span>
 <span class="sd">        in LAMMPS</span>
@@ -467,7 +474,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span> <span class="o">=</span> <span class="n">LAMMPSUniverse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_saved_config</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.setup_simulation"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">setup_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.setup_simulation"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.setup_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">setup_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets simulation parameters in LAMMPS, such as the thermodynamic</span>
 <span class="sd">        variables, thermostat/barostat parameters and trajectory settings</span>
@@ -483,7 +490,8 @@
                                                <span class="n">lmp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span>
                                                <span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.minimize"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.minimize"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="c1"># Check fix styles for shake or rattle styles and remove them</span>
         <span class="k">if</span> <span class="s1">&#39;constrain&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_names</span><span class="p">:</span>
@@ -515,7 +523,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">apply_ensemble_fixes</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="LAMMPSEngine.run"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+            <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">equilibration</span><span class="p">:</span>
             <span class="c1"># Remove previous dumps if they exist</span>
             <span class="k">if</span> <span class="s1">&#39;traj1&#39;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dump</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dump</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dumps</span><span class="p">]:</span>
@@ -557,7 +565,8 @@
         <span class="k">if</span> <span class="n">equilibration</span> <span class="ow">and</span> <span class="n">reset_to_nve</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.convert_trajectory"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.convert_trajectory">[docs]</a>    <span class="k">def</span> <span class="nf">convert_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.convert_trajectory"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.convert_trajectory">[docs]</a>    <span class="k">def</span> <span class="nf">convert_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trajectory</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts between a LAMMPS trajectory dump and an MDMC ``Trajectory``</span>
 
@@ -595,7 +604,7 @@
 <span class="sd">            If ``trajectory_file`` describes a triclinic universe.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">create_atom</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">create_atom</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Atom</span><span class="p">:</span>
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Create an MDMC ``Atom`` from a line in a LAMMPS dump (trajectory) file</span>
 
@@ -740,11 +749,11 @@
                 <span class="n">line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="o">*</span><span class="n">configs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.update_parameters"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.update_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.update_parameters"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.update_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span><span class="o">.</span><span class="n">update_parameters</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.save_config"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.save_config">[docs]</a>    <span class="k">def</span> <span class="nf">save_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.save_config"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.save_config">[docs]</a>    <span class="k">def</span> <span class="nf">save_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="c1"># So that the identical calculation is not performed for all processes,</span>
         <span class="c1"># only calculate for rank 0 process</span>
@@ -772,7 +781,7 @@
         <span class="n">saved_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">saved_config</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_saved_config</span> <span class="o">=</span> <span class="n">saved_config</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.reset_config"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.reset_config">[docs]</a>    <span class="k">def</span> <span class="nf">reset_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEngine.reset_config"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.reset_config">[docs]</a>    <span class="k">def</span> <span class="nf">reset_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_config</span><span class="p">)</span></div></div>
 
@@ -841,7 +850,7 @@
 <span class="sd">        (with ``improper == True``) to a LAMMPS ``ID``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">lmp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">Universe</span><span class="p">,</span> <span class="n">lmp</span><span class="p">:</span> <span class="n">PyLammps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atom_style&#39;</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">universe</span>
@@ -870,7 +879,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_parameters</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nonbonded_mix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">nonbonded_mix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the formula used to calculate nonbonded interactions between</span>
 <span class="sd">        different ``atom_types``</span>
@@ -892,7 +901,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nonbonded_mix</span>
 
     <span class="nd">@nonbonded_mix</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">nonbonded_mix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">nonbonded_mix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_nonbonded_mix</span> <span class="o">=</span> <span class="n">value</span>
@@ -903,7 +912,7 @@
                                  <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">supported</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_nonbonded_mix</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-<div class="viewcode-block" id="LAMMPSUniverse.update_parameters"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.update_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSUniverse.update_parameters"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.update_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the LAMMPS force field parameters from the MDMC universe</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -915,7 +924,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_bonded_interactions</span><span class="p">(</span><span class="s1">&#39;improper&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">impropers</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_dispersions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_define_simulation_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_define_simulation_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">Universe</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Defines a region and creates a simulation box that fills this region</span>
 
@@ -979,7 +988,7 @@
 
     <span class="c1"># ID is an acronym</span>
     <span class="c1"># pylint: disable=invalid-name</span>
-    <span class="k">def</span> <span class="nf">_create_lammps_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">region_ID</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_create_lammps_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">Universe</span><span class="p">,</span> <span class="n">region_ID</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a geometry of the simulation box in LAMMPS</span>
 
@@ -998,7 +1007,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">region</span><span class="p">(</span><span class="n">region_ID</span><span class="p">,</span> <span class="s1">&#39;block&#39;</span><span class="p">,</span> <span class="n">xlo</span><span class="p">,</span> <span class="n">xhi</span><span class="p">,</span> <span class="n">ylo</span><span class="p">,</span> <span class="n">yhi</span><span class="p">,</span> <span class="n">zlo</span><span class="p">,</span> <span class="n">zhi</span><span class="p">,</span>
                         <span class="n">units</span><span class="o">=</span><span class="s1">&#39;box&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_build_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_build_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">Universe</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds atoms to LAMMPS</span>
 
@@ -1038,7 +1047,7 @@
                     <span class="n">lmp_atom_id</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">atom_dict</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">lmp_atom_id</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LAMMPSUniverse.set_config"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.set_config">[docs]</a>    <span class="k">def</span> <span class="nf">set_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSUniverse.set_config"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.set_config">[docs]</a>    <span class="k">def</span> <span class="nf">set_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Changes the positions of all of the atoms in the LAMMPS wrapper</span>
 
@@ -1076,7 +1085,7 @@
                              <span class="n">config</span><span class="p">[</span><span class="n">id_offset</span><span class="p">][</span><span class="n">index</span><span class="p">])</span></div>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_max_n_interaction</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_max_n_interaction</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Atom</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1103,7 +1112,7 @@
             <span class="n">max_inters</span> <span class="o">=</span> <span class="n">n_inters</span> <span class="k">if</span> <span class="n">n_inters</span> <span class="o">&gt;</span> <span class="n">max_inters</span> <span class="k">else</span> <span class="n">max_inters</span>
         <span class="k">return</span> <span class="n">max_inters</span>
 
-    <span class="k">def</span> <span class="nf">_add_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_add_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">Universe</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add the bonded and nonbonded interactions to LAMMPS</span>
 
@@ -1203,7 +1212,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">apply_constraints</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_pair_commands</span><span class="p">(</span><span class="n">universe</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_pair_commands</span><span class="p">(</span><span class="n">universe</span><span class="p">:</span> <span class="n">Universe</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parses all the ``NonBondedInteractions`` for every appropriate</span>
 <span class="sd">        combination of ``atom_type`` pairs in an MDMC ``Universe``, returning</span>
@@ -1264,7 +1273,7 @@
 
         <span class="k">return</span> <span class="n">pair_styles</span><span class="p">,</span> <span class="n">pair_modifiers</span><span class="p">,</span> <span class="n">pair_coeff_cmds</span>
 
-    <span class="k">def</span> <span class="nf">_update_charges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_update_charges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the ``charges`` in LAMMPS</span>
 
@@ -1285,7 +1294,7 @@
                 <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;LAMMPS requires all atoms in the universe&#39;</span>
                                      <span class="s1">&#39; to have a charge.&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
 
-    <span class="k">def</span> <span class="nf">_update_dispersions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">pair_coeff_cmds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_update_dispersions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">Universe</span><span class="p">,</span> <span class="n">pair_coeff_cmds</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates ``Dispersion`` interactions in LAMMPS</span>
 
@@ -1308,7 +1317,7 @@
         <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">pair_coeff_cmds</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">pair_coeff</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_modify_nonbonded_styles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_mods</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_modify_nonbonded_styles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_mods</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies modifications to nonbonded ``pair_styles``, such as the VdW tail</span>
 <span class="sd">        correction or setting a mixing style for interactions acting on unlike</span>
@@ -1328,7 +1337,8 @@
         <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">pair_mods</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">pair_modify</span><span class="p">(</span><span class="s1">&#39;pair&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">mod</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_create_bonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp_name</span><span class="p">,</span> <span class="n">bonded_interactions</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_create_bonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                    <span class="n">bonded_interactions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BondedInteraction</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates coefficients and new bonded interactions in LAMMPS, and fills</span>
 <span class="sd">        the relevant ``BondedInteraction`` ID (e.g. ``self.bond_ID`` for bonds,</span>
@@ -1387,7 +1397,8 @@
                                       <span class="s1">&#39;special&#39;</span><span class="p">,</span>
                                       <span class="n">special</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_update_bonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp_name</span><span class="p">,</span> <span class="n">bonded_interactions</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_update_bonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                    <span class="n">bonded_interactions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BondedInteraction</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the bonded interaction coefficients, which are then applied to</span>
 <span class="sd">        any bonded interactions which have previously been set</span>
@@ -1414,7 +1425,7 @@
         <span class="k">for</span> <span class="n">b_i</span> <span class="ow">in</span> <span class="n">bonded_interactions</span><span class="p">:</span>
             <span class="n">coeff_function</span><span class="p">(</span><span class="n">b_i_IDs</span><span class="p">[</span><span class="n">b_i</span><span class="p">],</span> <span class="o">*</span><span class="n">parse_bonded_coefficients</span><span class="p">(</span><span class="n">b_i</span><span class="p">))</span>
 
-<div class="viewcode-block" id="LAMMPSUniverse.apply_constraints"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.apply_constraints">[docs]</a>    <span class="k">def</span> <span class="nf">apply_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSUniverse.apply_constraints"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSUniverse.apply_constraints">[docs]</a>    <span class="k">def</span> <span class="nf">apply_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a constraint ``fix`` to LAMMPS for all bonds and bond angles which</span>
 <span class="sd">        are constrained</span>
@@ -1484,7 +1495,7 @@
 <span class="sd">        Simulation ensemble, which applies a ``thermostat`` and ``barostat``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">traj_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">lmp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">,</span> <span class="n">traj_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">lmp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atom_style&#39;</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">universe</span>
@@ -1507,7 +1518,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_kspace_solver</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the simulation time step in ``fs``</span>
 
@@ -1521,7 +1532,7 @@
 
     <span class="nd">@time_step</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TIME</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1531,7 +1542,7 @@
             <span class="k">pass</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the temperature of the simulation in ``K``</span>
 
@@ -1545,7 +1556,7 @@
 
     <span class="nd">@temperature</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TEMPERATURE</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">value</span>
@@ -1575,7 +1586,7 @@
             <span class="k">pass</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the pressure of the simulation in ``atm``</span>
 
@@ -1589,12 +1600,12 @@
 
     <span class="nd">@pressure</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">PRESSURE</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">pressure</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the string which specifies the thermostat</span>
 
@@ -1607,12 +1618,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">thermostat</span>
 
     <span class="nd">@thermostat</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the string which specifies the barostat</span>
 
@@ -1625,12 +1636,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">barostat</span>
 
     <span class="nd">@barostat</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">barostat</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">skin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">skin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the skin distance in ``Ang``</span>
 
@@ -1646,14 +1657,14 @@
 
     <span class="nd">@skin</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">skin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">skin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_skin</span> <span class="o">=</span> <span class="n">value</span>
         <span class="c1"># Set the neighor list parameters in the LAMMPS wrapper</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">neighbor</span><span class="p">(</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_skin</span><span class="p">),</span> <span class="s1">&#39;bin&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">neighbor_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">neighbor_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the number of steps between neighbor list updates</span>
 
@@ -1666,7 +1677,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbor_steps</span>
 
     <span class="nd">@neighbor_steps</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">neighbor_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">neighbor_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_neighbor_steps</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1677,7 +1688,7 @@
             <span class="k">pass</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">lin_momentum_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">lin_momentum_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the number of steps between resetting the linear momentum</span>
 
@@ -1690,14 +1701,14 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lin_momentum_steps</span>
 
     <span class="nd">@lin_momentum_steps</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">lin_momentum_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">lin_momentum_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_lin_momentum_steps</span> <span class="o">=</span> <span class="n">value</span>
         <span class="c1"># Set the momentum removers in the LAMMPS wrapper</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_momentum_removers</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ang_momentum_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ang_momentum_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the number of steps between resetting the angular momentum</span>
 
@@ -1710,13 +1721,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ang_momentum_steps</span>
 
     <span class="nd">@ang_momentum_steps</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ang_momentum_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ang_momentum_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ang_momentum_steps</span> <span class="o">=</span> <span class="n">value</span>
         <span class="c1"># Set the momentum removers in the LAMMPS wrapper</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_momentum_removers</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_set_momentum_removers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_momentum_removers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the ``fixes`` in LAMMPS which remove the linear and angular</span>
 <span class="sd">        momentum of the simulation</span>
@@ -1741,7 +1752,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;RemoveAngularMomentum&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;momentum&#39;</span><span class="p">,</span>
                                  <span class="bp">self</span><span class="o">.</span><span class="n">ang_momentum_steps</span><span class="p">,</span> <span class="s1">&#39;angular&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_set_kspace_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_kspace_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a k-space solver in LAMMPS using ``kspace_style``, if one is</span>
 <span class="sd">        required</span>
@@ -1833,8 +1844,8 @@
 <span class="sd">        applies to rescale thermostats.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pressure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thermostat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">barostat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lmp</span><span class="p">,</span> <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pressure</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">thermostat</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">barostat</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
         <span class="c1"># Requires a lmp object as thermostats cannot be applied before</span>
         <span class="c1"># configuration is defined</span>
@@ -1857,9 +1868,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">barostat</span> <span class="o">=</span> <span class="n">barostat</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the simulation time step in ``fs``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `float`</span>
+<span class="sd">            Simulation time step in ``fs``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span>
@@ -1871,7 +1887,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the temperature of the simulation in ``K``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1880,13 +1896,13 @@
 
     <span class="nd">@temperature</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TEMPERATURE</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_ensemble_fixes</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the pressure of the simulation in ``atm``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1895,7 +1911,7 @@
 
     <span class="nd">@pressure</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">PRESSURE</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_pressure</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_ensemble_fixes</span><span class="p">()</span>
@@ -1903,7 +1919,7 @@
     <span class="c1"># Unit has to be applied to getter due to operation in setter</span>
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TIME</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">t_damp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">t_damp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the number of time steps over which the ``temperature`` is</span>
 <span class="sd">        relaxed</span>
@@ -1930,7 +1946,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_damp</span>
 
     <span class="nd">@t_damp</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">t_damp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">t_damp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># LAMMPS requires t_damp to be given in units of time, but it is</span>
@@ -1947,7 +1963,7 @@
     <span class="c1"># Unit has to be applied to getter due to operation in setter</span>
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TIME</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">p_damp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">p_damp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the number of time steps over which the ``pressure`` is</span>
 <span class="sd">        relaxed</span>
@@ -1974,7 +1990,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p_damp</span>
 
     <span class="nd">@p_damp</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">p_damp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">p_damp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># LAMMPS requires p_damp to be given in units of time, but it is</span>
@@ -1989,7 +2005,7 @@
                                      <span class="s1">&#39; before p_damp&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">t_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">t_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the fraction by which the ``temperature`` is rescaled to the</span>
 <span class="sd">        target temperature</span>
@@ -2011,7 +2027,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_fraction</span>
 
     <span class="nd">@t_fraction</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">t_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">t_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="c1"># Must be a fraction</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="mf">0.</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
@@ -2020,7 +2036,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;the t_fraction must be between 0.0 and 1.0&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">t_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">t_window</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the ``temperature`` range in ``K`` in which the</span>
 <span class="sd">        ``temperature`` is not rescaled</span>
@@ -2037,12 +2053,12 @@
 
     <span class="nd">@t_window</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TEMPERATURE</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">t_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">t_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_t_window</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the `str` which specifies the thermostat</span>
 
@@ -2055,7 +2071,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thermostat</span>
 
     <span class="nd">@thermostat</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">thermostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="n">value</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;all ensembles with a thermostat must have a&#39;</span>
@@ -2065,7 +2081,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_ensemble_fixes</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the `str` which specifies the barostat</span>
 
@@ -2078,7 +2094,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_barostat</span>
 
     <span class="nd">@barostat</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">barostat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="n">value</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressure</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;all ensembles with a barostat must have a&#39;</span>
@@ -2088,7 +2104,7 @@
         <span class="c1"># Set the thermostat and barostat in LAMMPS wrapper</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_ensemble_fixes</span><span class="p">()</span>
 
-<div class="viewcode-block" id="LAMMPSEnsemble.remove_ensemble_fixes"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEnsemble.remove_ensemble_fixes">[docs]</a>    <span class="k">def</span> <span class="nf">remove_ensemble_fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEnsemble.remove_ensemble_fixes"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEnsemble.remove_ensemble_fixes">[docs]</a>    <span class="k">def</span> <span class="nf">remove_ensemble_fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes all LAMMPS ``fixes`` relating to the ensemble i.e. removes all</span>
 <span class="sd">        thermostats and barostats</span>
@@ -2107,7 +2123,7 @@
                              <span class="n">name</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">unfix</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LAMMPSEnsemble.apply_ensemble_fixes"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEnsemble.apply_ensemble_fixes">[docs]</a>    <span class="k">def</span> <span class="nf">apply_ensemble_fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LAMMPSEnsemble.apply_ensemble_fixes"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEnsemble.apply_ensemble_fixes">[docs]</a>    <span class="k">def</span> <span class="nf">apply_ensemble_fixes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Passes the required LAMMPS ``fixes`` to apply a specific thermodynamic</span>
 <span class="sd">        ensemble to the simulation</span>
@@ -2216,7 +2232,8 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="convert_unit"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.convert_unit">[docs]</a><span class="k">def</span> <span class="nf">convert_unit</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_lammps</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="convert_unit"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.convert_unit">[docs]</a><span class="k">def</span> <span class="nf">convert_unit</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                 <span class="n">unit</span><span class="p">:</span> <span class="n">Unit</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">to_lammps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts between MDMC units and LAMMPS real units</span>
 
@@ -2240,7 +2257,7 @@
 <span class="sd">        MDMC units. Return type is same as ``value`` type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">expand_components</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">expand_components</span><span class="p">(</span><span class="n">unit</span><span class="p">:</span> <span class="n">Unit</span><span class="p">,</span> <span class="n">system</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Expands out the ``components`` of a ``Unit``, so that the ``Unit`` is</span>
 <span class="sd">        expressed purely in terms of ``base`` ``Unit`` objects. The only</span>
@@ -2264,7 +2281,7 @@
 <span class="sd">            `list` of all ``base`` ``Unit`` objects in the denominator</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">is_sublist_of_list</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="n">lst</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">is_sublist_of_list</span><span class="p">(</span><span class="n">sub</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Determines if all of the elements in a sublist are in a `list`,</span>
 <span class="sd">            including ensuring that any duplicates in the sublist have at least</span>
@@ -2286,7 +2303,7 @@
 
             <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">lst</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">sub</span><span class="p">))</span>
 
-        <span class="k">def</span> <span class="nf">remove_components</span><span class="p">(</span><span class="n">remove_comps</span><span class="p">,</span> <span class="n">comps</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">remove_components</span><span class="p">(</span><span class="n">remove_comps</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">comps</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Removes all elements of a `list` of ``components`` from another</span>
 <span class="sd">            `list` of ``components``</span>
@@ -2412,7 +2429,7 @@
     <span class="k">return</span> <span class="n">value</span></div>
 
 
-<div class="viewcode-block" id="parse_bonded_styles"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_bonded_styles">[docs]</a><span class="k">def</span> <span class="nf">parse_bonded_styles</span><span class="p">(</span><span class="n">interaction</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_bonded_styles"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_bonded_styles">[docs]</a><span class="k">def</span> <span class="nf">parse_bonded_styles</span><span class="p">(</span><span class="n">interaction</span><span class="p">:</span> <span class="n">BondedInteraction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts MDMC ``InteractionFunction`` names for ``BondedInteractions`` to</span>
 <span class="sd">    LAMMP bond styles</span>
@@ -2454,7 +2471,7 @@
                               <span class="s1">&#39; implemented in the LAMMPS facade&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="parse_nonbonded_styles"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_styles">[docs]</a><span class="k">def</span> <span class="nf">parse_nonbonded_styles</span><span class="p">(</span><span class="n">interaction</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_nonbonded_styles"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_styles">[docs]</a><span class="k">def</span> <span class="nf">parse_nonbonded_styles</span><span class="p">(</span><span class="n">interaction</span><span class="p">:</span> <span class="n">BondedInteraction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts MDMC ``InteractionFunction`` names for ``NonBondedInteractions`` to</span>
 <span class="sd">    LAMMPS pair styles</span>
@@ -2510,7 +2527,7 @@
     <span class="k">return</span> <span class="n">lmp_str</span><span class="p">,</span> <span class="n">parse_nonbonded_modifications</span><span class="p">(</span><span class="n">interaction</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="parse_nonbonded_modifications"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_modifications">[docs]</a><span class="k">def</span> <span class="nf">parse_nonbonded_modifications</span><span class="p">(</span><span class="n">interaction</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_nonbonded_modifications"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_modifications">[docs]</a><span class="k">def</span> <span class="nf">parse_nonbonded_modifications</span><span class="p">(</span><span class="n">interaction</span><span class="p">:</span> <span class="n">Interaction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parses MDMC ``Interaction`` attributes into `list` that can be used with</span>
 <span class="sd">    LAMMPS ``pair_modify`` command</span>
@@ -2544,7 +2561,7 @@
     <span class="k">return</span> <span class="n">mods</span></div>
 
 
-<div class="viewcode-block" id="parse_all_nonbonded_styles"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_all_nonbonded_styles">[docs]</a><span class="k">def</span> <span class="nf">parse_all_nonbonded_styles</span><span class="p">(</span><span class="n">interactions</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_all_nonbonded_styles"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_all_nonbonded_styles">[docs]</a><span class="k">def</span> <span class="nf">parse_all_nonbonded_styles</span><span class="p">(</span><span class="n">interactions</span><span class="p">:</span> <span class="n">NonBondedInteraction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[tuple, list[str]]&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts all ``NonBondedInteractions`` to LAMMPS pair styles</span>
 
@@ -2587,7 +2604,7 @@
 <span class="sd">        range ``Coulombic``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">check_validity</span><span class="p">(</span><span class="n">pair_style</span><span class="p">,</span> <span class="n">cutoffs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check_validity</span><span class="p">(</span><span class="n">pair_style</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cutoffs</span><span class="p">:</span> <span class="s1">&#39;list[float]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tests the validity of a LAMMPS ``pair_style``.</span>
 
@@ -2681,7 +2698,7 @@
     <span class="k">return</span> <span class="n">combined_parsed_inters</span></div>
 
 
-<div class="viewcode-block" id="parse_bonded_coefficients"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_bonded_coefficients">[docs]</a><span class="k">def</span> <span class="nf">parse_bonded_coefficients</span><span class="p">(</span><span class="n">interaction</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_bonded_coefficients"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_bonded_coefficients">[docs]</a><span class="k">def</span> <span class="nf">parse_bonded_coefficients</span><span class="p">(</span><span class="n">interaction</span><span class="p">:</span> <span class="n">BondedInteraction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Orders MDMC ``Parameter`` objects for input to LAMMPS ``bond_coeff`` and</span>
 <span class="sd">    ``angle_coeff``</span>
@@ -2748,7 +2765,8 @@
     <span class="k">return</span> <span class="p">[</span><span class="n">style</span><span class="p">]</span> <span class="o">+</span> <span class="n">ordered_parameters</span></div>
 
 
-<div class="viewcode-block" id="parse_dispersion_coefficients"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_dispersion_coefficients">[docs]</a><span class="k">def</span> <span class="nf">parse_dispersion_coefficients</span><span class="p">(</span><span class="n">interactions</span><span class="p">,</span> <span class="n">nonbonded_styles</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_dispersion_coefficients"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_dispersion_coefficients">[docs]</a><span class="k">def</span> <span class="nf">parse_dispersion_coefficients</span><span class="p">(</span><span class="n">interactions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">NonBondedInteraction</span><span class="p">],</span>
+                                  <span class="n">nonbonded_styles</span><span class="p">:</span> <span class="s1">&#39;list[tuple]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Orders MDMC ``Parameter`` objects for input to LAMMPS ``pair_coeff``</span>
 
@@ -2831,7 +2849,7 @@
     <span class="k">return</span> <span class="n">coeff_cmds</span></div>
 
 
-<div class="viewcode-block" id="parse_kspace_solver"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_kspace_solver">[docs]</a><span class="k">def</span> <span class="nf">parse_kspace_solver</span><span class="p">(</span><span class="n">solver</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_kspace_solver"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_kspace_solver">[docs]</a><span class="k">def</span> <span class="nf">parse_kspace_solver</span><span class="p">(</span><span class="n">solver</span><span class="p">:</span> <span class="n">KSpaceSolver</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an MDMC ``KSpaceSolver`` for input to LAMMPS ``kspace_style``</span>
 
@@ -2859,8 +2877,9 @@
     <span class="k">return</span> <span class="p">[</span><span class="n">solver_name</span><span class="p">,</span> <span class="n">solver</span><span class="o">.</span><span class="n">accuracy</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="parse_constraint"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_constraint">[docs]</a><span class="k">def</span> <span class="nf">parse_constraint</span><span class="p">(</span><span class="n">constraint_algorithm</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bond_ID_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">angles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angle_ID_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_constraint"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_constraint">[docs]</a><span class="k">def</span> <span class="nf">parse_constraint</span><span class="p">(</span><span class="n">constraint_algorithm</span><span class="p">:</span> <span class="n">ConstraintAlgorithm</span><span class="p">,</span>
+                     <span class="n">bonds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Bond</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bond_ID_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">angles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BondAngle</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">angle_ID_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="c1"># ID is an acronym</span>
     <span class="c1"># pylint: disable=invalid-name</span>
     <span class="sd">&quot;&quot;&quot;</span>
