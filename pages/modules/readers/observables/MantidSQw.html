@@ -154,21 +154,29 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.readers.observables.MantidSQw.</span></span><span class="sig-name descname"><span class="pre">MantidSQw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/MDMC/readers/observables/MantidSQw.html#MantidSQw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.readers.observables.MantidSQw.MantidSQw" title="Permalink to this definition"></a></dt>
 <dd><p>A class for reading SQw files from Mantid</p>
 <dl class="simple">
-<dt>Mantid’s ascii output uses two files:</dt><dd><ul class="simple">
+<dt>Mantid’s ascii output uses one or two files, either:</dt><dd><ul class="simple">
 <li><p>A file containing the SQw data and error for the range of energy values measured at each
-detector (or group of detectors) ID with <code class="docutils literal notranslate"><span class="pre">file_name</span></code></p></li>
-<li><p>A file giving the momentum value associated with each detector (or group of detectors) ID,
-with the name given by <code class="docutils literal notranslate"><span class="pre">file_name</span> <span class="pre">+</span> <span class="pre">'_detectors'</span></code></p></li>
+Q with <code class="docutils literal notranslate"><span class="pre">file_name</span></code>
+or</p></li>
+<li><p>A file containing the SQw data and error for the range of energy values measured at each
+detector (or group of detectors) ID with <code class="docutils literal notranslate"><span class="pre">file_name</span></code> and a file giving the momentum
+value associated with each detector (or group of detectors) ID, with the name given by
+<code class="docutils literal notranslate"><span class="pre">file_name</span> <span class="pre">+</span> <span class="pre">'_detectors'</span></code></p></li>
 </ul>
 </dd>
 </dl>
+<p>If a single file is supplied, then it is assumed that the Q values are included in the data,
+this is the typical output of Mantid reduced ISIS data. An example reduction script is included
+in doc/tutorials/data/water_reduction_IRIS.py
+If there are two files then it is assumed that the second file links the detector ID’s with the
+corresponding Q’s</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="MDMC.readers.observables.MantidSQw.MantidSQw.detector_IDs">
-<span class="sig-name descname"><span class="pre">detector_IDs</span></span><a class="headerlink" href="#MDMC.readers.observables.MantidSQw.MantidSQw.detector_IDs" title="Permalink to this definition"></a></dt>
-<dd><p>File containing the ID’s of the detectors</p>
+<dt class="sig sig-object py" id="MDMC.readers.observables.MantidSQw.MantidSQw.ID_or_Q">
+<span class="sig-name descname"><span class="pre">ID_or_Q</span></span><a class="headerlink" href="#MDMC.readers.observables.MantidSQw.MantidSQw.ID_or_Q" title="Permalink to this definition"></a></dt>
+<dd><p>File containing the ID’s of the detectors, default=None</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>file</p>
+<dd class="field-odd"><p>file, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -176,10 +184,10 @@ with the name given by <code class="docutils literal notranslate"><span class="p
 <dl class="py attribute">
 <dt class="sig sig-object py" id="MDMC.readers.observables.MantidSQw.MantidSQw.file_detectors">
 <span class="sig-name descname"><span class="pre">file_detectors</span></span><a class="headerlink" href="#MDMC.readers.observables.MantidSQw.MantidSQw.file_detectors" title="Permalink to this definition"></a></dt>
-<dd><p>File containing the errors on the dependent variables</p>
+<dd><p>File containing the errors on the dependent variables, default=None</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>file</p>
+<dd class="field-odd"><p>file, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -187,7 +195,7 @@ with the name given by <code class="docutils literal notranslate"><span class="p
 <dl class="py attribute">
 <dt class="sig sig-object py" id="MDMC.readers.observables.MantidSQw.MantidSQw.file_variables">
 <span class="sig-name descname"><span class="pre">file_variables</span></span><a class="headerlink" href="#MDMC.readers.observables.MantidSQw.MantidSQw.file_variables" title="Permalink to this definition"></a></dt>
-<dd><p>File containing the variables for each detector (group) ID</p>
+<dd><p>File containing the variables for each detector ID or Q</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>file</p>
@@ -223,8 +231,8 @@ Q is wavevector transfer (in Ang^-1)</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.readers.observables.MantidSQw.MantidSQw.parse_variables">
 <span class="sig-name descname"><span class="pre">parse_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.10)"><span class="pre">IO</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/MDMC/readers/observables/MantidSQw.html#MantidSQw.parse_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.readers.observables.MantidSQw.MantidSQw.parse_variables" title="Permalink to this definition"></a></dt>
-<dd><p>Parses the values for energy, SQw and its error for each detector, but not the momentum of
-that detector.</p>
+<dd><p>Parses the values for energy, SQw and its error for each detector, or momentum value
+if it is defined instead of detector_ID</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>file</strong> (<em>file</em>) – Open file containing the variables</p>
