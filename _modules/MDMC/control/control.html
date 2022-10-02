@@ -230,6 +230,9 @@
 <span class="sd">        Verbose level 1 gives final time for the whole method.</span>
 <span class="sd">        Verbose level 2 gives final time and also a progress bar.</span>
 <span class="sd">        Verbose level 3 gives final time, a progress bar, and time per step.</span>
+<span class="sd">    print_full_settings: bool, optional</span>
+<span class="sd">        Whether to print all settings/attributes/parameters passed to this object,</span>
+<span class="sd">        defaults to False.</span>
 <span class="sd">    **settings: dict, optional</span>
 <span class="sd">        Settings to be passed into other functions, e.g. MC_norm=1 for MC optimiser if MMC</span>
 <span class="sd">        minimiser is used.</span>
@@ -276,6 +279,7 @@
                  <span class="n">reset_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">equilibration_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">print_all_settings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">step_timings</span> <span class="o">=</span> <span class="kc">None</span>
@@ -401,8 +405,8 @@
             <span class="k">if</span> <span class="s1">&#39;resolution&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dset</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="c1"># create list of user keys for resolutions to add to the error</span>
                 <span class="n">userkeys</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">resolution_factory</span><span class="o">.</span><span class="n">resolutions</span><span class="p">:</span>
-                    <span class="n">userkeys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;resolution&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">resolution_factory</span><span class="o">.</span><span class="n">resolutions</span><span class="p">:</span>
+                    <span class="n">userkeys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">setting</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;resolution&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;A resolution function must be added. Recognised functions are &quot;</span> <span class="o">+</span>
                                <span class="nb">str</span><span class="p">(</span><span class="n">userkeys</span><span class="p">)</span> <span class="o">+</span>
                                <span class="s2">&quot;. If you meant to apply no resolution,&quot;</span>
@@ -415,14 +419,58 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
 
         <span class="c1"># setup the dataframe for stdout</span>
-        <span class="n">setup_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">minimizer_type</span><span class="p">],</span>
-                                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span>
-                                    <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">)],</span>
-                                    <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)]],</span>
-                                   <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;  Minimizer&#39;</span><span class="p">,</span>
-                                          <span class="s1">&#39;  FoM type&#39;</span><span class="p">,</span>
-                                          <span class="s1">&#39;  Number of observables&#39;</span><span class="p">,</span>
-                                          <span class="s1">&#39;  Number of parameters&#39;</span><span class="p">])</span>
+        <span class="n">data_array</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="s2">&quot;-&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">minimizer_type</span><span class="p">],</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span>
+            <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">)],</span>
+            <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)],</span>
+        <span class="p">]</span>
+
+        <span class="n">index_array</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;- Attributes&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;  Minimizer&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;  FoM type&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;  Number of observables&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;  Number of parameters&#39;</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Printing settings</span>
+        <span class="k">if</span> <span class="n">print_all_settings</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MD_steps&quot;</span><span class="p">,</span> <span class="s2">&quot;equilibration_steps&quot;</span><span class="p">,</span> <span class="s2">&quot;reset_config&quot;</span><span class="p">,</span> <span class="s2">&quot;verbose&quot;</span><span class="p">]:</span>
+                <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">item</span><span class="p">]])</span>
+
+            <span class="c1"># pylint: disable=consider-using-dict-items</span>
+            <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;- Control Settings&quot;</span><span class="p">)</span>
+            <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
+                <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">setting</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">settings</span><span class="p">[</span><span class="n">setting</span><span class="p">]])</span>
+
+            <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;- Parameters&quot;</span><span class="p">)</span>
+            <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">fit_parameters</span><span class="p">:</span>
+                <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">parameter</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+
+            <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;- Experimental Datasets&quot;</span><span class="p">)</span>
+            <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">exp_datasets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">exp_datasets</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">dataset</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
+
+            <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;- FoM Options&quot;</span><span class="p">)</span>
+            <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">FoM_options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">FoM_options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">FoM_options</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
+
+        <span class="n">setup_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_array</span><span class="p">,</span>
+                                   <span class="n">index</span><span class="o">=</span><span class="n">index_array</span><span class="p">)</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Control created with:</span><span class="se">\n</span><span class="si">{</span><span class="n">setup_frame</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
