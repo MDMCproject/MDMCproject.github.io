@@ -811,7 +811,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      used for a cubic universe.
  |  force_field : ForceField, optional
  |      A force field to apply to the Universe. The force fields available are:
- |      SPC, OPLSAA, TIP3P, TIP3PFB, SPCE. Default is None.
+ |      TIP3P, TIP3PFB, SPCE, SPC, OPLSAA. Default is None.
  |  structures : list, optional
  |      ``Structure`` objects contained in the ``Universe``. Default is None.
  |  **settings
@@ -885,7 +885,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          The ``ForceField`` to parameterize ``interactions`` (if provided),
  |          or all the ``interactions`` in the ``Universe``. The available
  |          ``ForceField`` are:
- |          SPC, OPLSAA, TIP3P, TIP3PFB, SPCE
+ |          TIP3P, TIP3PFB, SPCE, SPC, OPLSAA
  |      *interactions
  |          ``Interaction`` objects to parameterize with the ``ForceField``
  |      **settings
@@ -926,7 +926,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      force_field : str, optional
  |          The force field to be applied to the structure. The available
  |          ``ForceField`` are:
- |          SPC, OPLSAA, TIP3P, TIP3PFB, SPCE
+ |          TIP3P, TIP3PFB, SPCE, SPC, OPLSAA
  |      center : bool, optional
  |          Whether to center `structure` within the Universe as it is
  |          added
@@ -954,7 +954,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      force_field : str
  |          Applies a ``ForceField`` to the ``Universe``. The available
  |          ``ForceField`` are:
- |          SPC, OPLSAA, TIP3P, TIP3PFB, SPCE
+ |          TIP3P, TIP3PFB, SPCE, SPC, OPLSAA
  |      num_density: float
  |          Non-negative `float` specifying the number density of the
  |          ``Structure``, in units of ``Structure / Ang ^ -3``
@@ -985,7 +985,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          of not converging.
  |      solvent : str, optional
  |          A `str` specifying an inbuilt ``Solvent`` from the following:
- |          TIP3P, TIP3PFB, SPCE, SPC.
+ |          TIP3PFB, TIP3P, SPCE, SPC.
  |          The default is &#39;SPCE&#39;.
  |      **settings
  |          ``constraint_algorithm`` (`ConstraintAlgorithm`)
@@ -1107,7 +1107,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      Get or set the ``ForceField`` acting on the Universe
  |
  |      The available force fields are:
- |      SPC, OPLSAA, TIP3P, TIP3PFB, SPCE
+ |      TIP3P, TIP3PFB, SPCE, SPC, OPLSAA
  |
  |      Returns
  |      -------
@@ -1615,6 +1615,27 @@ class Control(builtins.object)
  |
  |  equilibrate(self) -&gt; None
  |      Run molecular dynamics to equilibrate the ``Universe``.
+ |
+ |  plot_results(self, points: int = 100000, MC_norm: float = 20.0) -&gt; None
+ |      Performs a random sample across the coordinate space giving a predicted figure of merit at
+ |      every point. Then removes points with poor figures of merit, according to a
+ |      Metropolis-Hastings type rule, where the likelihood of keeping a point is dependant on the
+ |      exponent of the difference between its figure of merit, and that of the best one found,
+ |      divided by MC_norm. A corner plot is then returned (a matplotlib figure object), which can
+ |      be displayed or exported.
+ |
+ |      Parameters
+ |      ----------
+ |      points : int, optional
+ |          The number of samples to initially generate, defaults to 100,000
+ |      MC_norm : float, optional
+ |          The denominator of the exponent, controlling how likley points are to be kept,
+ |          defaults to 20.0
+ |
+ |      Returns
+ |      -------
+ |      corner plot : Matplotlib.figure.Figure
+ |          A plot displaying every parameter combination with their variances and covariances
  |
  |  refine(self, n_steps: int) -&gt; None
  |      Refines the specified potential parameters
