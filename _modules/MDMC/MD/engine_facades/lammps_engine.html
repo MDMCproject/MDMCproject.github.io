@@ -144,6 +144,7 @@
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -873,6 +874,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">improper_ID</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nonbonded_mix</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="k">if</span> <span class="s2">&quot;OMP_NUM_THREADS&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="n">omp_num_threads_str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">omp_num_threads</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">omp_num_threads_str</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">omp_num_threads</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;package omp 0&quot;</span><span class="p">)</span>  <span class="c1"># use OMP_NUM_THREADS</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;suffix omp&quot;</span><span class="p">)</span>  <span class="c1"># add /omp to relevant styles</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_define_simulation_box</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_topology</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
@@ -1437,7 +1449,7 @@
         <span class="c1"># *_ is for pylint as it does not know about the output of partition_interactions</span>
         <span class="n">bonds</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">partition_interactions</span><span class="p">([</span><span class="n">inter</span> <span class="k">for</span> <span class="n">inter</span>
                                                     <span class="ow">in</span> <span class="n">b_inters</span>
-                                                    <span class="k">if</span> <span class="n">inter</span><span class="o">.</span><span class="n">constrained</span><span class="p">],</span>
+                                                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="s1">&#39;constrained&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)],</span>
                                                    <span class="p">[</span><span class="s1">&#39;Bond&#39;</span><span class="p">,</span> <span class="s1">&#39;BondAngle&#39;</span><span class="p">],</span> <span class="n">lst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">algorithm</span> <span class="o">=</span> <span class="n">parse_constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">constraint_algorithm</span><span class="p">,</span>
                                      <span class="n">bonds</span><span class="o">=</span><span class="n">bonds</span><span class="p">,</span> <span class="n">bond_ID_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bond_ID</span><span class="p">,</span>
@@ -2471,7 +2483,7 @@
                               <span class="s1">&#39; implemented in the LAMMPS facade&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="parse_nonbonded_styles"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_styles">[docs]</a><span class="k">def</span> <span class="nf">parse_nonbonded_styles</span><span class="p">(</span><span class="n">interaction</span><span class="p">:</span> <span class="n">BondedInteraction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="parse_nonbonded_styles"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.parse_nonbonded_styles">[docs]</a><span class="k">def</span> <span class="nf">parse_nonbonded_styles</span><span class="p">(</span><span class="n">interaction</span><span class="p">:</span> <span class="n">NonBondedInteraction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts MDMC ``InteractionFunction`` names for ``NonBondedInteractions`` to</span>
 <span class="sd">    LAMMPS pair styles</span>
@@ -2521,8 +2533,8 @@
                 <span class="n">lmp_str</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s1">&#39;/cut&#39;</span>
         <span class="n">lmp_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cutoff</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;This InteractionFunction has not been&#39;</span>
-                                  <span class="s1">&#39; implemented in the LAMMPS facade&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;You have not specified a `cutoff` for the&#39;</span>
+                                  <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">interaction</span><span class="si">}</span><span class="s1"> InteractionFunction.&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">lmp_str</span><span class="p">,</span> <span class="n">parse_nonbonded_modifications</span><span class="p">(</span><span class="n">interaction</span><span class="p">)</span></div>
 

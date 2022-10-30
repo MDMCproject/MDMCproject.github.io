@@ -158,7 +158,7 @@
 <span class="sd">    dimensions : numpy.ndarray, list, float</span>
 <span class="sd">        Dimensions of the ``Universe``, in units of ``Ang``. A `float` can be</span>
 <span class="sd">        used for a cubic universe.</span>
-<span class="sd">    force_field : ForceField, optional</span>
+<span class="sd">    force_fields : ForceField, optional</span>
 <span class="sd">        A force field to apply to the Universe. The force fields available are:</span>
 <span class="sd">        DYNAMIC_FORCE_FIELD_LIST. Default is None.</span>
 <span class="sd">    structures : list, optional</span>
@@ -182,8 +182,8 @@
 <span class="sd">        Dimensions of the ``Universe`` in units of ``Ang``.</span>
 <span class="sd">    configuration : Configuration</span>
 <span class="sd">        Stores the content, i.e. configuration of atoms etc within the universe</span>
-<span class="sd">    force_field : ForceField or None</span>
-<span class="sd">        Force field to apply to the Universe</span>
+<span class="sd">    force_fields : ForceField or None</span>
+<span class="sd">        Force field applied to apply to the Universe</span>
 <span class="sd">    kspace_solver : KSpaceSolver</span>
 <span class="sd">        The k-space solver to be used for both electrostatic and dispersive</span>
 <span class="sd">        interactions.</span>
@@ -194,10 +194,34 @@
 <span class="sd">    constraint_algorithm : ConstraintAlgorithm</span>
 <span class="sd">        The constraint algorithm which will be applied to constrained</span>
 <span class="sd">        ``BondedInteractions``.</span>
+<span class="sd">    interactions</span>
+<span class="sd">    bonded_interactions</span>
+<span class="sd">    nonbonded_interactions</span>
+<span class="sd">    bonded_interaction_pairs</span>
+<span class="sd">    n_bonded</span>
+<span class="sd">    n_nonbonded</span>
+<span class="sd">    n_interactions</span>
+<span class="sd">    parameters</span>
+<span class="sd">    volume</span>
+<span class="sd">    element_list</span>
+<span class="sd">    element_dict</span>
+<span class="sd">    element_lookup</span>
+<span class="sd">    atoms</span>
+<span class="sd">    n_atoms</span>
+<span class="sd">    molecule_list</span>
+<span class="sd">    n_molecules</span>
+<span class="sd">    structure_list</span>
+<span class="sd">    top_level_structure_list</span>
+<span class="sd">    equivalent_top_level_structures_dict</span>
+<span class="sd">    force_fields</span>
+<span class="sd">    atom_types</span>
+<span class="sd">    atom_type_interactions</span>
+<span class="sd">    density</span>
+<span class="sd">    solvent_density</span>
+<span class="sd">    nbis_by_atom_type_pairs</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">force_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structures</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">force_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structures</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_atom_types</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
@@ -511,12 +535,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Atom]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get a list of the atoms in the Universe</span>
+<span class="sd">        Get a list of the atoms in the ``Universe``</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list</span>
-<span class="sd">            The atoms in the Universe</span>
+<span class="sd">            The atoms in the ``Universe``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">atoms</span>
@@ -647,7 +671,7 @@
     <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">force_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the ``ForceField`` acting on the Universe</span>
+<span class="sd">        Get the ``ForceField`` acting on the ``Universe``</span>
 
 <span class="sd">        The available force fields are:</span>
 <span class="sd">        DYNAMIC_FORCE_FIELD_LIST</span>
@@ -1480,6 +1504,8 @@
 <span class="sd">    settings : dict</span>
 <span class="sd">        The settings passed to the ``Simulation``.  See the Parameters section</span>
 <span class="sd">        for details.</span>
+<span class="sd">    time_step</span>
+<span class="sd">    trajectory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># TODO: Potentially separate out universe and simulation setup</span>
