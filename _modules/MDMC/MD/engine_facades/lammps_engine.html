@@ -1495,6 +1495,7 @@
 <span class="sd">        ``neighbor_steps`` (`int`)</span>
 <span class="sd">        ``remove_linear_momentum`` (`int`)</span>
 <span class="sd">        ``remove_angular_momentum`` (`int`)</span>
+<span class="sd">        ``velocity_seed`` (`int`): The seed to be used by LAMMPS to create velocities.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -1512,6 +1513,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atom_style&#39;</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">universe</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">LAMMPSEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">velocity_seed</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;velocity_seed&#39;</span><span class="p">,</span> <span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9999</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;temperature&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">traj_step</span> <span class="o">=</span> <span class="n">traj_step</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="n">time_step</span>
@@ -1579,10 +1581,10 @@
                                  <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">zero_velocity</span><span class="p">):</span>
                     <span class="c1"># If we have not set any velocities (they are all the default value of zero)</span>
-                    <span class="c1"># then &quot;create&quot; a velocity for each atom</span>
+                    <span class="c1"># then &quot;create&quot; a velocity for each atom according to user-specified or</span>
+                    <span class="c1"># random seed</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">velocity</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span>
-                                      <span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span><span class="p">),</span>
-                                      <span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9999</span><span class="p">))</span>
+                                      <span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity_seed</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">zero_velocity</span><span class="p">):</span>
                         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Some but not all atom velocities set. Atoms with non-zero velocity&#39;</span>
