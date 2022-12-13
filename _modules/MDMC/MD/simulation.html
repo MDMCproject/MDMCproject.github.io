@@ -134,7 +134,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Atom</span>
     <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Interaction</span>
-    <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">Trajectory</span>
+    <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
 
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -175,6 +175,8 @@
 <span class="sd">        ``constraint_algorithm`` (`ConstraintAlgorithm`)</span>
 <span class="sd">            The constraint algorithm which will be applied to constrained</span>
 <span class="sd">            ``BondedInteractions``.</span>
+<span class="sd">        ``verbose`` (`str`)</span>
+<span class="sd">            If the output of the class instantiation should be reported, default to True.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -242,6 +244,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">kspace_solver</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kspace_solver&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">electrostatic_solver</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;electrostatic_solver&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispersive_solver</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dispersive_solver&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="c1"># kspace_solver is mutually exclusive with the other two solver</span>
         <span class="c1"># attributes</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kspace_solver</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electrostatic_solver</span> <span class="ow">or</span>
@@ -267,8 +271,8 @@
                                           <span class="s1">&#39;  Force field&#39;</span><span class="p">,</span>
                                           <span class="s1">&#39;  Number of atoms&#39;</span><span class="p">])</span>
 
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Universe created with:</span><span class="se">\n</span><span class="si">{</span><span class="n">setup_frame</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Universe created with:</span><span class="se">\n</span><span class="si">{</span><span class="n">setup_frame</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
@@ -1094,7 +1098,7 @@
 <div class="viewcode-block" id="Universe.solvate"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Universe.solvate">[docs]</a>    <span class="nd">@mod_docstring</span><span class="p">({</span><span class="s1">&#39;DYNAMIC_SOLVENT_LIST&#39;</span><span class="p">:</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_solvent_names</span><span class="p">())})</span>
     <span class="k">def</span> <span class="nf">solvate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                 <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">solvent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;SPCE&#39;</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fills the ``Universe`` with solvent molecules according to pre-defined</span>
 <span class="sd">        coordinates.</span>
@@ -1112,6 +1116,9 @@
 <span class="sd">            A `str` specifying an inbuilt ``Solvent`` from the following:</span>
 <span class="sd">            DYNAMIC_SOLVENT_LIST.</span>
 <span class="sd">            The default is &#39;SPCE&#39;.</span>
+<span class="sd">        max_iterations: int, optional</span>
+<span class="sd">            The maximum number of times to try to solvate the universe to</span>
+<span class="sd">            within the required density before stopping. Defaults to 100.</span>
 <span class="sd">        **settings</span>
 <span class="sd">            ``constraint_algorithm`` (`ConstraintAlgorithm`)</span>
 <span class="sd">                A ``ConstraintAlgorithm`` which is applied to the ``Universe``.</span>
@@ -1212,6 +1219,11 @@
             <span class="n">actual</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">)</span> <span class="o">*</span> <span class="n">solvent_mass</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span>
             <span class="n">difference</span> <span class="o">=</span> <span class="p">(</span><span class="n">actual</span> <span class="o">-</span> <span class="n">density</span><span class="p">)</span> <span class="o">/</span> <span class="n">density</span>
             <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">difference</span> <span class="o">/</span> <span class="n">counter</span>
+            <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="n">max_iterations</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;100 Iterations have been tried but the universe is not solvated&#39;</span>
+                   <span class="s1">&#39; to within tolerance. Try increasing the tolerance or Universe size&#39;</span><span class="p">)</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
         <span class="c1"># Once the correct density is achieved, add molecules to universe</span>
         <span class="c1"># and get all bonded interactions</span>
@@ -1239,7 +1251,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">constraint_algorithm</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;constraint_algorithm&#39;</span><span class="p">,</span>
                                                          <span class="n">Shake</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Force field created by solvent </span><span class="si">{</span><span class="n">solvent</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Force field created by solvent </span><span class="si">{</span><span class="n">solvent</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">pass</span>
@@ -1460,8 +1473,8 @@
 <span class="sd">        The ``Universe`` on which the simulation is performed.</span>
 <span class="sd">    traj_step : int</span>
 <span class="sd">        How many steps the simulation should take between dumping each</span>
-<span class="sd">        ``Trajectory`` frame. Along with ``time_step`` determines the time</span>
-<span class="sd">        separation of calculated variables such as energy.</span>
+<span class="sd">        ``CompactTrajectory`` frame. Along with ``time_step`` determines</span>
+<span class="sd">        the time separation of calculated variables such as energy.</span>
 <span class="sd">    time_step : float, optional</span>
 <span class="sd">        Simulation timestep in ``fs``. Default is 1.</span>
 <span class="sd">    engine : str, optional</span>
@@ -1489,6 +1502,8 @@
 <span class="sd">        ``pressure`` (`float`)</span>
 <span class="sd">            Simulation pressure in ``Pa``. This is required if a barostat is</span>
 <span class="sd">            passed.</span>
+<span class="sd">        ``verbose`` (`str`)</span>
+<span class="sd">            If the output of the class instantiation should be reported, default to True.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -1496,8 +1511,8 @@
 <span class="sd">        The ``Universe`` on which the simulation is performed.</span>
 <span class="sd">    traj_step : int</span>
 <span class="sd">        How many steps the simulation should take between dumping each</span>
-<span class="sd">        ``Trajectory`` frame. Along with ``time_step`` determines the time</span>
-<span class="sd">        separation of calculated variables such as energy.</span>
+<span class="sd">        ``CompactTrajectory`` frame. Along with ``time_step`` determines</span>
+<span class="sd">        the time separation of calculated variables such as energy.</span>
 <span class="sd">    engine : MDEngine, optional</span>
 <span class="sd">        A subclass of ``MDEngine`` which provides the interface to the MD</span>
 <span class="sd">        library. Default is ``&#39;lammps&#39;``.</span>
@@ -1518,6 +1533,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="n">MDEngineFacadeFactory</span><span class="o">.</span><span class="n">create_facade</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">parent_simulation</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">()</span>
 
         <span class="n">setup_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Simulation created with </span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s1"> engine&#39;</span>
@@ -1527,7 +1543,8 @@
             <span class="n">setup_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">setup_values</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">setup_keys</span><span class="p">)</span>
             <span class="n">setup_msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; and settings:</span><span class="se">\n</span><span class="si">{</span><span class="n">setup_frame</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="n">setup_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">setup_msg</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1551,13 +1568,13 @@
     <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the number of simulation steps between saving the</span>
-<span class="sd">        ``Trajectory``</span>
+<span class="sd">        ``CompactTrajectory``</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        `int`</span>
-<span class="sd">            Number of simulation steps that elapse between the ``Trajectory``</span>
-<span class="sd">            being stored</span>
+<span class="sd">            Number of simulation steps that elapse between the</span>
+<span class="sd">            ``CompactTrajectory`` being stored</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traj_step</span>
@@ -1663,15 +1680,15 @@
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">process</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Trajectory&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s1">&#39;CompactTrajectory&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The ``Trajectory`` produced by the most recent production run of the</span>
+<span class="sd">        The ``CompactTrajectory`` produced by the most recent production run of the</span>
 <span class="sd">        ``Simulation``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Trajectory</span>
-<span class="sd">            Most recent production run ``Trajectory``, or `None` if no</span>
+<span class="sd">        CompactTrajectory</span>
+<span class="sd">            Most recent production run ``CompactTrajectory``, or `None` if no</span>
 <span class="sd">            production run has been performed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 

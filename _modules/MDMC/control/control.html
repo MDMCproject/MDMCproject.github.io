@@ -218,16 +218,18 @@
 <span class="sd">     cont_slicing : bool, optional</span>
 <span class="sd">        Flag to decide between two possible behaviours when the number of ``MD_steps`` is</span>
 <span class="sd">        larger than the minimum required to calculate the observables. If ``False`` (default) then</span>
-<span class="sd">        the ``Trajectory`` is sliced into non-overlapping sub-``Trajectory`` blocks for each of</span>
-<span class="sd">        which the observable is calculated. If ``True``, then the ``Trajectory`` is sliced into</span>
-<span class="sd">        as many non-identical sub-``Trajectory`` blocks as possible (with overlap allowed).</span>
+<span class="sd">        the ``CompactTrajectory`` is sliced into non-overlapping sub-``CompactTrajectory``</span>
+<span class="sd">        blocks for each of which the observable is calculated. If ``True``, then the</span>
+<span class="sd">        ``CompactTrajectory`` is sliced into as many non-identical sub-``CompactTrajectory``</span>
+<span class="sd">        blocks as possible (with overlap allowed).</span>
 <span class="sd">    use_average : bool, optional</span>
 <span class="sd">        Optional parameter relevant in case ``MD_steps`` is larger than the minimum required</span>
-<span class="sd">        and the MD ``Trajectory`` is sliced into sub-``Trajectory`` blocks. If ``True`` (</span>
-<span class="sd">        default) the observables are averaged over the sub-``Trajectory`` blocks. If ``False``</span>
-<span class="sd">        they are not averaged.</span>
+<span class="sd">        and the MD ``CompactTrajectory`` is sliced into sub-``CompactTrajectory`` blocks.</span>
+<span class="sd">        If ``True`` (default) the observables are averaged over the sub-``CompactTrajectory``</span>
+<span class="sd">        blocks. If ``False`` they are not averaged.</span>
 <span class="sd">    verbose: int, optional</span>
 <span class="sd">        The level of verbosity:</span>
+<span class="sd">        Verbose level -1 hides all outputs for tests.</span>
 <span class="sd">        Verbose level 0 gives no information.</span>
 <span class="sd">        Verbose level 1 gives final time for the whole method.</span>
 <span class="sd">        Verbose level 2 gives final time and also a progress bar.</span>
@@ -238,6 +240,7 @@
 <span class="sd">    **settings: dict, optional</span>
 <span class="sd">        Settings to be passed into other functions, e.g. MC_norm=1 for MC optimiser if MMC</span>
 <span class="sd">        minimiser is used.</span>
+
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
@@ -342,7 +345,7 @@
 
             <span class="n">auto_scale</span> <span class="o">=</span> <span class="n">dset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;auto_scale&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
             <span class="n">rescale_factor</span> <span class="o">=</span> <span class="n">dset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rescale_factor&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">auto_scale</span> <span class="ow">and</span> <span class="n">rescale_factor</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">auto_scale</span> <span class="ow">and</span> <span class="n">rescale_factor</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Both `rescale_factor` and `auto_scale` set for file </span><span class="si">{}</span><span class="s1">;&#39;</span>
                       <span class="s1">&#39; scaling will be automated to minimise FoM&#39;</span>
                       <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dset</span><span class="p">[</span><span class="s1">&#39;file_name&#39;</span><span class="p">]))</span>
@@ -473,8 +476,8 @@
 
         <span class="n">setup_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_array</span><span class="p">,</span>
                                    <span class="n">index</span><span class="o">=</span><span class="n">index_array</span><span class="p">)</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Control created with:</span><span class="se">\n</span><span class="si">{</span><span class="n">setup_frame</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Control created with:</span><span class="se">\n</span><span class="si">{</span><span class="n">setup_frame</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">exp_dataset_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_datasets</span><span class="p">]</span>
@@ -511,19 +514,27 @@
 
         <span class="n">count</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_print_header</span><span class="p">()</span>  <span class="c1"># creates stdout header</span>
-        <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
-        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">verbose_steps</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
-        <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">n_steps</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_print_header</span><span class="p">()</span>  <span class="c1"># creates stdout header</span>
+            <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+            <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">verbose_steps</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">n_steps</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">()</span>
 
-            <span class="n">verbose_manager</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Step </span><span class="si">{</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># advance the refinement by one step</span>
-            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># if progress bar is there, ensure data is on new line</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_print_data</span><span class="p">()</span>
+                <span class="n">verbose_manager</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Step </span><span class="si">{</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># advance the refinement by one step</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># if progress bar is there, ensure data is on new line</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_print_data</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">n_steps</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># advance the refinement by one step</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="c1"># Try/except accounts for n_steps &lt;= -1</span>
         <span class="k">try</span><span class="p">:</span>
@@ -536,7 +547,8 @@
 
         <span class="c1"># print values of final parameters</span>
         <span class="n">result_string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">present_result</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">result_string</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">result_string</span><span class="p">)</span>
 
         <span class="c1"># If automatically scaling data print the scale factor for each dataset</span>
         <span class="n">scaling_keys</span> <span class="o">=</span> <span class="p">[]</span>
@@ -549,12 +561,15 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scaling_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">scaling_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">scaling_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">scaling_values</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">scaling_keys</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Automatic Scale Factors</span><span class="se">\n</span><span class="si">{</span><span class="n">scaling_df</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">average_timing</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_timings</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Average time per step was </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round_</span><span class="p">(</span><span class="n">average_timing</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Average time per step was </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round_</span><span class="p">(</span><span class="n">average_timing</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1"> seconds.&#39;</span><span class="p">)</span>
 
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="s2">&quot;Refinement&quot;</span><span class="p">)</span></div>
 

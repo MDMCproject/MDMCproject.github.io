@@ -114,8 +114,10 @@
 <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">FunctionType</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">weakref</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.common.units</span> <span class="kn">import</span> <span class="n">UnitFloat</span><span class="p">,</span> <span class="n">unit_array</span>
+<span class="kn">from</span> <span class="nn">MDMC.common.time_keeper</span> <span class="kn">import</span> <span class="n">TimeKeeper</span>
 
 
 <div class="viewcode-block" id="unit_decorator"><a class="viewcode-back" href="../../../pages/modules/common/decorators.html#MDMC.common.decorators.unit_decorator">[docs]</a><span class="k">def</span> <span class="nf">unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
@@ -586,6 +588,29 @@
         <span class="k">return</span> <span class="n">inner</span>
 
     <span class="k">return</span> <span class="n">wrapper</span></div>
+
+<div class="viewcode-block" id="time_function_execution"><a class="viewcode-back" href="../../../pages/modules/common/decorators.html#MDMC.common.decorators.time_function_execution">[docs]</a><span class="k">def</span> <span class="nf">time_function_execution</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates an instance of the TimeKeeper and stores the</span>
+<span class="sd">    function execution time in TimeKeeper&#39;s class attributes.</span>
+
+<span class="sd">    This decorator is meant to be used on functions that are</span>
+<span class="sd">    likely to be using up too much CPU time, so the scale</span>
+<span class="sd">    of the problem can be assessed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">decorated_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">tk</span> <span class="o">=</span> <span class="n">TimeKeeper</span><span class="p">()</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__module__</span><span class="p">])</span>
+        <span class="c1"># print(fname)</span>
+        <span class="c1"># print(args)</span>
+        <span class="c1"># print(kwargs)</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">function_called</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">time_passed</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">end_time</span><span class="o">-</span><span class="n">start_time</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">results</span>
+    <span class="k">return</span> <span class="n">decorated_func</span></div>
 </pre></div>
 
            </div>

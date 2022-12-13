@@ -414,9 +414,9 @@ div.rendered_html tbody tr:hover {
 </div>
 <section id="Running-a-simulation">
 <h2>Running a simulation<a class="headerlink" href="#Running-a-simulation" title="Permalink to this headline"></a></h2>
-<p>Below we setup and run a simulation of liquid argon so that we have a <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> from which to calculate an <code class="docutils literal notranslate"><span class="pre">Observable</span></code>.</p>
-<p><strong>As this is minimizing, equilibrating, and running a production run, this should take ~3 minutes to execute</strong>. Minimization lowers the potential energy of the simulated system by adjusting atomic positions. Running a simulation with <code class="docutils literal notranslate"><span class="pre">equilibration</span></code> set to <code class="docutils literal notranslate"><span class="pre">True</span></code> will not record a <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code>, and since we specified neither a thermostat or barastat for the simulation a Berendsen thermostat will be applied for the duration of the equilibration. It will not be present for the second run,
-when the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> is recorded.</p>
+<p>Below we setup and run a simulation of liquid argon so that we have a <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> from which to calculate an <code class="docutils literal notranslate"><span class="pre">Observable</span></code>.</p>
+<p><strong>As this is minimizing, equilibrating, and running a production run, this should take ~3 minutes to execute</strong>. Minimization lowers the potential energy of the simulated system by adjusting atomic positions. Running a simulation with <code class="docutils literal notranslate"><span class="pre">equilibration</span></code> set to <code class="docutils literal notranslate"><span class="pre">True</span></code> will not record a <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>, and since we specified neither a thermostat or barastat for the simulation a Berendsen thermostat will be applied for the duration of the equilibration. It will not be present for the second
+run, when the <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is recorded.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -464,13 +464,13 @@ Universe created with:
 
 Universe contains 1000 Ar atoms
 LAMMPS (29 Sep 2021 - Update 3)
-LAMMPS output is captured by PyLammps wrapper
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
 LAMMPS output is captured by PyLammps wrapper
 LAMMPS (29 Sep 2021 - Update 3)
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
 Total wall time: 0:00:00
 Simulation created with lammps engine and settings:
   temperature  120.0
@@ -600,21 +600,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings: dict) -&gt; None
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -641,15 +641,15 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -700,11 +700,12 @@ CLASSES
      |
      |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -794,7 +795,7 @@ CLASSES
      |  Methods inherited from SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -809,7 +810,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -958,7 +959,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: &#39;Trajectory&#39;, verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -966,8 +967,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -1058,7 +1059,7 @@ CLASSES
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -1073,7 +1074,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -1203,21 +1204,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings: dict) -&gt; None
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -1244,15 +1245,15 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -1303,11 +1304,12 @@ CLASSES
      |
      |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -1397,7 +1399,7 @@ CLASSES
      |  Methods inherited from SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -1412,7 +1414,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -1561,7 +1563,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: &#39;Trajectory&#39;, verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -1569,8 +1571,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -1661,7 +1663,7 @@ CLASSES
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -1676,7 +1678,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -1825,7 +1827,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: &#39;Trajectory&#39;, verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -1833,8 +1835,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -1925,7 +1927,7 @@ CLASSES
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -1940,7 +1942,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -2089,7 +2091,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: &#39;Trajectory&#39;, verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2097,8 +2099,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -2189,7 +2191,7 @@ CLASSES
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -2204,7 +2206,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -2353,7 +2355,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: &#39;Trajectory&#39;, verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2361,8 +2363,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -2453,7 +2455,7 @@ CLASSES
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -2468,7 +2470,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -2617,7 +2619,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: &#39;Trajectory&#39;, verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2625,8 +2627,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -2717,7 +2719,7 @@ CLASSES
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -2732,7 +2734,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -2881,7 +2883,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: &#39;Trajectory&#39;, verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2889,8 +2891,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -2981,7 +2983,7 @@ CLASSES
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -2996,7 +2998,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -3123,21 +3125,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings: dict) -&gt; None
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -3164,15 +3166,15 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -3223,11 +3225,12 @@ CLASSES
      |
      |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -3317,7 +3320,7 @@ CLASSES
      |  Methods inherited from SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -3332,7 +3335,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -3481,7 +3484,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: &#39;Trajectory&#39;, verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -3489,8 +3492,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -3581,7 +3584,7 @@ CLASSES
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -3596,7 +3599,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -3745,7 +3748,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: &#39;Trajectory&#39;, verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -3753,8 +3756,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -3845,7 +3848,7 @@ CLASSES
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -3860,7 +3863,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -3983,9 +3986,9 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, list[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, list[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory]], verbose: int = 0, **settings: dict)
      |      Calculate the pair distribution function, :math:`G(r)`` from a
-     |      ``Trajectory``
+     |      ``CompactTrajectory``
      |
      |      The total pair distribution function (``pdf.PDF``) has the form:
      |
@@ -4017,8 +4020,9 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory or list of CompactTrajectory
+     |          Either a `list` of MD ``CompactTrajectory``s or a
+     |          single ``CompactTrajectory`` object.
      |      verbose: int
      |          Verbose print settings. Not currently implemented for PDF.
      |      **settings
@@ -4104,8 +4108,8 @@ CLASSES
      |      None
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
-     |      ``dependent_variables`` is 1
+     |      The minimum number of ``CompactTrajectory`` frames needed to
+     |      calculate the ``dependent_variables`` is 1
      |
      |      Parameters
      |      ----------
@@ -4270,9 +4274,9 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, list[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings: dict) -&gt; None
+     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, list[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory]], verbose: int = 0, **settings: dict)
      |      Calculate the pair distribution function, :math:`G(r)`` from a
-     |      ``Trajectory``
+     |      ``CompactTrajectory``
      |
      |      The total pair distribution function (``pdf.PDF``) has the form:
      |
@@ -4304,8 +4308,9 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory or list of CompactTrajectory
+     |          Either a `list` of MD ``CompactTrajectory``s or a
+     |          single ``CompactTrajectory`` object.
      |      verbose: int
      |          Verbose print settings. Not currently implemented for PDF.
      |      **settings
@@ -4391,8 +4396,8 @@ CLASSES
      |      None
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
-     |      ``dependent_variables`` is 1
+     |      The minimum number of ``CompactTrajectory`` frames needed to
+     |      calculate the ``dependent_variables`` is 1
      |
      |      Parameters
      |      ----------
@@ -4564,21 +4569,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings: dict) -&gt; None
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -4605,15 +4610,15 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -4664,11 +4669,12 @@ CLASSES
      |
      |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -4758,7 +4764,7 @@ CLASSES
      |  Methods inherited from SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -4773,7 +4779,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -4900,21 +4906,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings: dict) -&gt; None
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -4941,15 +4947,15 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -5000,11 +5006,12 @@ CLASSES
      |
      |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -5094,7 +5101,7 @@ CLASSES
      |  Methods inherited from SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -5109,7 +5116,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -5236,21 +5243,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings: dict) -&gt; None
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -5277,15 +5284,15 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -5336,11 +5343,12 @@ CLASSES
      |
      |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -5430,7 +5438,7 @@ CLASSES
      |  Methods inherited from SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -5445,7 +5453,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -5572,21 +5580,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings: dict) -&gt; None
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -5613,15 +5621,15 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -5672,11 +5680,12 @@ CLASSES
      |
      |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -5766,7 +5775,7 @@ CLASSES
      |  Methods inherited from SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -5781,7 +5790,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -5908,21 +5917,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings: dict) -&gt; None
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -5949,15 +5958,15 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -6008,11 +6017,12 @@ CLASSES
      |
      |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -6102,7 +6112,7 @@ CLASSES
      |  Methods inherited from SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -6117,7 +6127,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -6244,21 +6254,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings: dict) -&gt; None
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -6285,15 +6295,15 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
      |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
@@ -6344,11 +6354,12 @@ CLASSES
      |
      |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -6438,7 +6449,7 @@ CLASSES
      |  Methods inherited from SQwMixins:
      |
      |  maximum_frames(self) -&gt; Optional[int]
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -6453,7 +6464,7 @@ CLASSES
      |          The maximum number of frames
      |
      |  minimum_frames(self, dt: float = None) -&gt; int
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -7568,7 +7579,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='2d1bb3fd-0c5c-4143-a81e-0c6528c2ef42'></div></div>
+<div id='3be95a61-3245-4bb6-a059-fe6a9701192a'></div></div>
 </div>
 <p>Therefore it is strongly recommended that you specify the <span class="math notranslate nohighlight">\(E\)</span> values for calculating the dynamic structure factor.</p>
 <p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calulate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will be probably
@@ -7580,7 +7591,7 @@ reasonable:</p>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># This subtracts the time of the zeroeth step from the time of the first step</span>
 <span class="c1"># It should be equal to the time_step * traj_step passed to Simulation</span>
 <span class="n">trajectory_timestep</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Trajectory time step: </span><span class="si">{}</span><span class="s1"> fs&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">trajectory_timestep</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;CompactTrajectory time step: </span><span class="si">{}</span><span class="s1"> fs&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">trajectory_timestep</span><span class="p">))</span>
 
 <span class="n">n_configurations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">times</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of trajectory configurations: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_configurations</span><span class="p">))</span>
@@ -7592,7 +7603,7 @@ reasonable:</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Trajectory time step: 250.0 fs
+CompactTrajectory time step: 250.0 fs
 Number of trajectory configurations: 481
 </pre></div></div>
 </div>
@@ -8639,7 +8650,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='4752ddb4-b0f8-4fd6-99b8-de74cd97f6f0'></div></div>
+<div id='3f560296-fb19-42c6-b69a-6cc696daba71'></div></div>
 </div>
 <p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the van Well et al. Phys. Rev. A <strong>31</strong> 3391 (1985) data, which the authors corrected for instrument resolution) by reading the data into an SQwCoh object:</p>
 <div class="nbinput nblast docutils container">
@@ -9639,7 +9650,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='d94b0434-af07-4cfa-843a-3b31a5467a0a'></div></div>
+<div id='25e90014-aa76-45a5-a799-c6d4a06f6a96'></div></div>
 </div>
 </section>
 <section id="Other-observables">
@@ -9660,9 +9671,9 @@ if (IPython.notebook.kernel !== null) {
 <div class="highlight"><pre>
 Help on function calculate_from_MD in module MDMC.trajectory_analysis.observables.pdf:
 
-calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, list[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose: int = 0, **settings: dict) -&gt; None
+calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, list[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory]], verbose: int = 0, **settings: dict)
     Calculate the pair distribution function, :math:`G(r)`` from a
-    ``Trajectory``
+    ``CompactTrajectory``
 
     The total pair distribution function (``pdf.PDF``) has the form:
 
@@ -9694,8 +9705,9 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Traj
 
     Parameters
     ----------
-    MD_input : Trajectory or list of Trajectory
-        Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+    MD_input : CompactTrajectory or list of CompactTrajectory
+        Either a `list` of MD ``CompactTrajectory``s or a
+        single ``CompactTrajectory`` object.
     verbose: int
         Verbose print settings. Not currently implemented for PDF.
     **settings

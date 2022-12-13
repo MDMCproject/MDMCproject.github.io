@@ -166,8 +166,7 @@
 <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">BondedInteraction</span><span class="p">,</span> <span class="n">Interaction</span><span class="p">,</span> \
     <span class="n">NonBondedInteraction</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">TemporalConfiguration</span><span class="p">,</span> \
-    <span class="n">Trajectory</span>
+<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
 <span class="kn">from</span> <span class="nn">MDMC.utilities.partitioning</span> <span class="kn">import</span> <span class="n">partition</span><span class="p">,</span> <span class="n">partition_interactions</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -567,9 +566,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="LAMMPSEngine.convert_trajectory"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.convert_trajectory">[docs]</a>    <span class="k">def</span> <span class="nf">convert_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trajectory</span><span class="p">:</span>
+                           <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompactTrajectory</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts between a LAMMPS trajectory dump and an MDMC ``Trajectory``</span>
+<span class="sd">        Converts between a LAMMPS trajectory dump and an MDMC</span>
+<span class="sd">        ``CompactTrajectory``</span>
 
 <span class="sd">        The LAMMPS dump must include at least ``id``, ``atom_type``, and ``xyz``</span>
 <span class="sd">        ``positions``. The ``xyz`` ``positions`` must be consecutive and in that</span>
@@ -593,8 +593,9 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        ``Trajectory``</span>
-<span class="sd">            The MDMC ``Trajectory`` corresponding to the LAMMPS ``trajectory_file``</span>
+<span class="sd">        ``CompactTrajectory``</span>
+<span class="sd">            The MDMC ``CompactTrajectory`` corresponding to the LAMMPS</span>
+<span class="sd">            ``trajectory_file``.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -605,59 +606,40 @@
 <span class="sd">            If ``trajectory_file`` describes a triclinic universe.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">create_atom</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Atom</span><span class="p">:</span>
-            <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Create an MDMC ``Atom`` from a line in a LAMMPS dump (trajectory) file</span>
-
-<span class="sd">            At a minimum it will set the ``ID``, ``atom_type` and ``position`` of</span>
-<span class="sd">            the ``Atom``. It will also set the ``velocity`` if included in the line,</span>
-<span class="sd">            and the ``Universe``, if this was passed to ``convert_trajectory()``.</span>
-
-<span class="sd">            Parameters</span>
-<span class="sd">            ----------</span>
-<span class="sd">            line : numpy.ndarray</span>
-<span class="sd">                ``array`` containing a line from the ATOMS sections of a LAMMPS dump</span>
-<span class="sd">                file. The ``array`` must contain the atom ``ID``, the ``atom_type``,</span>
-<span class="sd">                and the ``x``, ``y``, and ``z`` (or scaled equivalents) components</span>
-<span class="sd">                of the ``position``, which are assumed to be adjacent. It will also</span>
-<span class="sd">                set the ``velocity`` of the atom if this is included in the line.</span>
-
-<span class="sd">            Returns</span>
-<span class="sd">            -------</span>
-<span class="sd">            ``Atom``</span>
-<span class="sd">                MDMC ``Atom`` object corresponding to the ``line``</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-
-            <span class="n">atom_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i_type</span><span class="p">])</span>
-            <span class="c1"># If distance units are same for MDMC and LAMMPS then</span>
-            <span class="c1"># don&#39;t call convert_units - currently hardcoded</span>
-            <span class="c1"># Same goes for velocity and time units</span>
-            <span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">splt</span><span class="p">)</span> <span class="k">for</span> <span class="n">splt</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="n">i_pos</span><span class="p">:</span><span class="n">i_pos</span><span class="o">+</span><span class="mi">3</span><span class="p">]]</span>
-            <span class="c1"># Get symbol and mass from atom_type_properties</span>
-            <span class="c1"># Adjusted for 0 index</span>
-            <span class="n">symbol</span><span class="p">,</span> <span class="n">mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span><span class="o">.</span><span class="n">atom_type_properties</span><span class="p">[</span><span class="n">atom_type</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="n">mass</span><span class="p">)</span>
-            <span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span> <span class="o">=</span> <span class="n">atom_type</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">:</span>
-                <span class="n">atom</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span>
-            <span class="k">if</span> <span class="n">i_vel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">atom</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">splt</span><span class="p">)</span> <span class="k">for</span> <span class="n">splt</span>
-                                 <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="n">i_vel</span><span class="p">:</span><span class="n">i_vel</span><span class="o">+</span><span class="mi">3</span><span class="p">]]</span>
-            <span class="k">return</span> <span class="n">atom</span>
-
         <span class="c1"># Change expected position string if scaled positions are used</span>
         <span class="n">pos_string</span> <span class="o">=</span> <span class="s1">&#39;xs&#39;</span> <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scaled_positions&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;x&#39;</span>
 
-        <span class="c1"># ID is an acronym</span>
-        <span class="c1"># pylint: disable=invalid-name</span>
-        <span class="n">atom_IDs</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atom_IDs&#39;</span><span class="p">)</span>
-
-        <span class="n">configs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">traj_dimensions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">frame_n</span> <span class="o">=</span> <span class="n">start</span>
         <span class="c1"># Use count to create range so that stop can be undefined</span>
         <span class="n">frame_indexes</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
         <span class="c1"># next_frame_n next attribute is assigned dynamically</span>
         <span class="n">next_frame_n</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">frame_indexes</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span>
+
+        <span class="n">traj</span> <span class="o">=</span> <span class="n">CompactTrajectory</span><span class="p">()</span> <span class="c1">#the instance of our new trajectory object</span>
+
+        <span class="k">def</span> <span class="nf">_make_gen</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;A support function for splitting a binary file into buffers</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                reader (file descriptor): an open file or a file-like object</span>
+
+<span class="sd">            Yields:</span>
+<span class="sd">                bytes: a byte string read from the file</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">reader</span><span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">b</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">b</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">reader</span><span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">)</span>
+
+        <span class="c1"># here we check how long the trajectory really is</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_handler</span><span class="p">:</span>
+            <span class="n">file_generator</span> <span class="o">=</span> <span class="n">_make_gen</span><span class="p">(</span><span class="n">file_handler</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>
+            <span class="n">line_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">buf</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="n">file_generator</span> <span class="p">)</span>
+        <span class="c1"># And header_size will tell us how many lines per frame</span>
+        <span class="c1"># are added on top of the atom positions</span>
+        <span class="n">header_size</span> <span class="o">=</span> <span class="mi">0</span>
+
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_handler</span><span class="p">:</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
             <span class="k">while</span> <span class="n">line</span><span class="p">:</span>
@@ -669,25 +651,35 @@
                 <span class="k">if</span> <span class="s1">&#39;ITEM: TIMESTEP&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                     <span class="n">line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
                     <span class="n">frame</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">header_size</span> <span class="o">+=</span> <span class="mi">2</span>
 
                 <span class="k">if</span> <span class="s1">&#39;ITEM: NUMBER OF ATOMS&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                     <span class="n">line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
                     <span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">header_size</span> <span class="o">+=</span> <span class="mi">2</span>
                     <span class="c1"># Check that n_atoms is as expected, if a universe was passed</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">:</span>
                         <span class="k">assert</span> <span class="n">n_atoms</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="s1">&#39;ITEM: BOX BOUNDS&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">header_size</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">traj_dimensions</span> <span class="o">*=</span> <span class="mf">0.0</span>
+                    <span class="n">temp_dim</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="c1"># CURRENTLY ASSUMES ORTHOGONAL SIMULATION BOX</span>
                     <span class="k">if</span> <span class="s1">&#39;xy&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;triclinic simulation boxes have not&#39;</span>
                                         <span class="s1">&#39; been implemented&#39;</span><span class="p">)</span>
                     <span class="c1"># Test dimensions are as expected, if a universe was passed</span>
                     <span class="c1"># and we are not using an NPT or NPH ensemble</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                        <span class="n">line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                        <span class="n">header_size</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">dmin</span><span class="p">,</span> <span class="n">dmax</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">splt</span><span class="p">)</span> <span class="k">for</span> <span class="n">splt</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+                        <span class="n">temp_dim</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dmin</span><span class="p">,</span> <span class="n">dmax</span><span class="p">))</span>
+                        <span class="n">traj_dimensions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dmax</span><span class="o">-</span><span class="n">dmin</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="s1">&#39;npt&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_names</span> <span class="ow">or</span> <span class="s1">&#39;nph&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_names</span><span class="p">):</span>
                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-                            <span class="n">line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-                            <span class="n">dmin</span><span class="p">,</span> <span class="n">dmax</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">splt</span><span class="p">)</span> <span class="k">for</span> <span class="n">splt</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+                            <span class="n">dmin</span><span class="p">,</span> <span class="n">dmax</span> <span class="o">=</span> <span class="n">temp_dim</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                             <span class="k">assert</span> <span class="n">dmin</span> <span class="o">==</span> <span class="mf">0.0</span>
                             <span class="c1"># unit is taken from universe dimensions (which is a</span>
                             <span class="c1"># UnitArray)</span>
@@ -695,6 +687,7 @@
                                                         <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="s1">&#39;ITEM: ATOMS&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">header_size</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">if</span> <span class="n">frame_n</span> <span class="o">==</span> <span class="n">start</span><span class="p">:</span>
                         <span class="c1"># LAMMPS dump files contain order of LAMMPS atom properties,</span>
                         <span class="c1"># at each time step. As these should not change with time</span>
@@ -712,6 +705,15 @@
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">i_vel</span> <span class="o">=</span> <span class="kc">None</span>
 
+                        <span class="c1"># now we try to get the correct number of frames in the trajectory</span>
+                        <span class="n">real_n_steps</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">line_count</span> <span class="o">//</span> <span class="p">(</span><span class="n">n_atoms</span> <span class="o">+</span> <span class="n">header_size</span><span class="p">)</span>
+
+                        <span class="n">traj</span><span class="o">.</span><span class="n">preAllocate</span><span class="p">(</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">real_n_steps</span><span class="p">,</span>
+                                         <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">n_atoms</span><span class="p">,</span>
+                                         <span class="n">useVelocity</span> <span class="o">=</span> <span class="n">i_vel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+                        <span class="n">traj</span><span class="o">.</span><span class="n">setDimensions</span><span class="p">(</span><span class="n">traj_dimensions</span><span class="p">)</span>
+
                     <span class="k">if</span> <span class="n">frame_n</span> <span class="o">==</span> <span class="n">next_frame_n</span><span class="p">:</span>
                         <span class="c1"># Reads all atom lines before creating any atoms. By</span>
                         <span class="c1"># creating a list of tuples of (LAMMPS_ID, atom), this</span>
@@ -719,27 +721,33 @@
                         <span class="c1"># is required as by default LAMMPS does not sort by ID, so</span>
                         <span class="c1"># the same atom will not appear in the same place for each</span>
                         <span class="c1"># time step.</span>
+                        <span class="n">header_size</span> <span class="o">=</span> <span class="mi">0</span>
                         <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
                         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">):</span>
-                            <span class="n">line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                            <span class="n">split_line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
                             <span class="c1"># convert id to int</span>
-                            <span class="n">line</span><span class="p">[</span><span class="n">i_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i_id</span><span class="p">])</span>
-                            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                            <span class="n">split_line</span><span class="p">[</span><span class="n">i_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">split_line</span><span class="p">[</span><span class="n">i_id</span><span class="p">])</span>
+                            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">split_line</span><span class="p">)</span>
                         <span class="c1"># sort list of lists based on id</span>
                         <span class="n">lines</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">i_id</span><span class="p">])</span>
 
-                        <span class="n">atoms</span> <span class="o">=</span> <span class="p">[]</span>
-                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-                            <span class="c1"># Checks if only specific atom_IDs are required, and if</span>
-                            <span class="c1"># so, only creates atoms which have those IDs</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">atom_IDs</span> <span class="ow">or</span> <span class="n">line</span><span class="p">[</span><span class="n">i_id</span><span class="p">]</span> <span class="ow">in</span> <span class="n">atom_IDs</span><span class="p">:</span>
-                                <span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">create_atom</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+                        <span class="n">sorted_lines</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">traj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-                        <span class="c1"># Multiply the number of timesteps by dt to calculate the</span>
-                        <span class="c1"># elapsed time</span>
-                        <span class="n">configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TemporalConfiguration</span><span class="p">(</span><span class="n">frame</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
-                                                             <span class="o">*</span><span class="n">atoms</span><span class="p">))</span>
+                        <span class="n">atom_types</span> <span class="o">=</span> <span class="n">sorted_lines</span><span class="p">[:,</span><span class="n">i_type</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">traj</span><span class="o">.</span><span class="n">validateTypes</span><span class="p">(</span><span class="n">atom_types</span><span class="p">):</span>
+                            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;CompactTrajectory received wrong atom type array&quot;</span><span class="p">)</span>
 
+                        <span class="k">if</span> <span class="n">i_vel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">traj</span><span class="o">.</span><span class="n">writeOneStep</span><span class="p">(</span><span class="n">step_num</span> <span class="o">=</span> <span class="n">frame_n</span><span class="p">,</span>
+                                          <span class="n">time</span> <span class="o">=</span> <span class="n">frame</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
+                                          <span class="n">positions</span> <span class="o">=</span> <span class="n">sorted_lines</span><span class="p">[:,</span><span class="n">i_pos</span><span class="p">:</span><span class="n">i_pos</span><span class="o">+</span><span class="mi">3</span><span class="p">],</span>
+                                          <span class="n">velocities</span> <span class="o">=</span> <span class="n">sorted_lines</span><span class="p">[:,</span><span class="n">i_vel</span><span class="p">:</span><span class="n">i_vel</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">traj</span><span class="o">.</span><span class="n">writeOneStep</span><span class="p">(</span><span class="n">step_num</span> <span class="o">=</span> <span class="n">frame_n</span><span class="p">,</span>
+                                          <span class="n">time</span> <span class="o">=</span> <span class="n">frame</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
+                                          <span class="n">positions</span> <span class="o">=</span> <span class="n">sorted_lines</span><span class="p">[:,</span><span class="n">i_pos</span><span class="p">:</span><span class="n">i_pos</span><span class="o">+</span><span class="mi">3</span><span class="p">])</span>
+
+                        <span class="n">traj</span><span class="o">.</span><span class="n">setDimensions</span><span class="p">(</span><span class="n">traj_dimensions</span><span class="p">,</span> <span class="n">step_num</span> <span class="o">=</span> <span class="n">frame_n</span><span class="p">)</span>
                         <span class="c1"># next_frame_n next attribute is assigned dynamically</span>
                         <span class="c1"># pylint: disable=no-member</span>
                         <span class="n">next_frame_n</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">frame_indexes</span><span class="p">)</span>
@@ -748,7 +756,26 @@
                         <span class="k">break</span>
 
                 <span class="n">line</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="o">*</span><span class="n">configs</span><span class="p">)</span></div>
+        <span class="n">atom_symbols</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">atom_masses</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">at_id</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">atom_types</span><span class="p">):</span>
+            <span class="n">symbol</span><span class="p">,</span> <span class="n">mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span><span class="o">.</span><span class="n">atom_type_properties</span><span class="p">[</span><span class="n">at_id</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">atom_symbols</span><span class="p">[</span><span class="n">at_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">symbol</span>
+            <span class="n">atom_masses</span><span class="p">[</span><span class="n">at_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">mass</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">labelAtoms</span><span class="p">(</span><span class="n">atom_symbols</span><span class="p">,</span> <span class="n">atom_masses</span><span class="p">)</span>
+        <span class="c1"># electric charges, for completeness</span>
+        <span class="c1"># (otherwise we cannot output an Atom from CompactTrajectory)</span>
+        <span class="n">charge_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">struc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_simulation</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">structure_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">struc</span><span class="p">,</span> <span class="n">Atom</span><span class="p">):</span>
+                <span class="n">charge_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">struc</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">struc</span><span class="o">.</span><span class="n">charge</span><span class="p">])</span>
+        <span class="n">charges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">charge_list</span><span class="p">)</span>
+        <span class="n">sequence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">charges</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">charges</span> <span class="o">=</span> <span class="n">charges</span><span class="p">[</span><span class="n">sequence</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">setCharge</span><span class="p">(</span><span class="n">charges</span><span class="p">)</span>
+        <span class="c1"># we conclude the creation of the trajectory</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">traj</span></div>
 
 <div class="viewcode-block" id="LAMMPSEngine.update_parameters"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.update_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
@@ -769,9 +796,14 @@
                         <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
                         <span class="n">n_atoms</span><span class="p">)</span>
             <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_atoms</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+            <span class="n">tmp_mass</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">type_ID</span><span class="p">,</span> <span class="n">atom_type_group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span><span class="o">.</span><span class="n">atom_types</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">tmp_mass</span><span class="p">[</span><span class="n">type_ID</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">atom_type_group</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">):</span>
                 <span class="n">atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">atoms</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">])</span>
+                <span class="n">atom_type</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">type</span>
+                <span class="c1"># _, mass = self.lmp_universe.atom_type_properties[atom_type-1]</span>
+                <span class="n">atoms</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">tmp_mass</span><span class="p">[</span><span class="n">atom_type</span><span class="p">],</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">])</span>
             <span class="n">saved_config</span> <span class="o">=</span> <span class="n">atoms</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">saved_config</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1483,7 +1515,7 @@
 <span class="sd">        The MDMC ``Universe`` used to create the ``LAMMPSUniverse``.</span>
 <span class="sd">    traj_step : int</span>
 <span class="sd">        How many steps the simulation should take between dumping each</span>
-<span class="sd">        ``Trajectory`` frame</span>
+<span class="sd">        ``CompactTrajectory`` frame</span>
 <span class="sd">    time_step : float, optional</span>
 <span class="sd">        Simulation timestep in ``fs``, default is ``1.``</span>
 <span class="sd">    lmp : PyLammps, optional</span>
@@ -1502,8 +1534,8 @@
 <span class="sd">    universe : Universe</span>
 <span class="sd">        An MDMC ``Universe`` object.</span>
 <span class="sd">    traj_step : int</span>
-<span class="sd">        Number of simulation steps that elapse between the ``Trajectory`` being</span>
-<span class="sd">        stored.</span>
+<span class="sd">        Number of simulation steps that elapse between the ``CompactTrajectory``</span>
+<span class="sd">        being stored.</span>
 <span class="sd">    ensemble : LAMMPSEnsemble</span>
 <span class="sd">        Simulation ensemble, which applies a ``thermostat`` and ``barostat``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
