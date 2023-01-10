@@ -108,8 +108,6 @@
   <h1>Source code for MDMC.common.mathematics</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module containing mathematical functions&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">fft</span><span class="p">,</span> <span class="n">ifft</span>
 
@@ -151,14 +149,14 @@
 <span class="sd">        ``input1`` if ``input2`` is `None`)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">num_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input1</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input1</span><span class="p">)</span>
 
-    <span class="n">fft1</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">fft1</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">input2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fft2</span> <span class="o">=</span> <span class="n">fft1</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">fft2</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input2</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">fft2</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input2</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Calculate the cyclic correlation function</span>
     <span class="n">cyclic_corr</span> <span class="o">=</span> <span class="n">ifft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">fft1</span><span class="p">)</span> <span class="o">*</span> <span class="n">fft2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -167,13 +165,13 @@
     <span class="c1"># 1 / (N - m)</span>
     <span class="c1"># where m is the number of each individual step</span>
     <span class="k">if</span> <span class="n">normalise</span><span class="p">:</span>
-        <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_steps</span><span class="p">))</span>
+        <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">cyclic_corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.</span>
 
-    <span class="n">corr</span> <span class="o">=</span> <span class="n">prefactor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">num_steps</span><span class="p">])</span>
+    <span class="n">corr</span> <span class="o">=</span> <span class="n">prefactor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">corr</span></div>
 
@@ -200,11 +198,11 @@
 <span class="sd">        ``input1`` if ``input2`` is `None`)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">num_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input1</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input1</span><span class="p">)</span>
 
-    <span class="n">fft1</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">fft1</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="n">fft2</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input2</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">fft2</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input2</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Calculate the cyclic correlation function</span>
     <span class="n">cyclic_corr</span> <span class="o">=</span> <span class="n">ifft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">fft1</span><span class="p">)</span> <span class="o">*</span> <span class="n">fft2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -212,17 +210,16 @@
     <span class="c1"># Normalise for variable number of contributions to each correlation:</span>
     <span class="c1"># 1 / (N - m)</span>
     <span class="c1"># where m is the number of each individual step</span>
-    <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_steps</span><span class="p">))</span>
+    <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
     <span class="c1"># I have to guarantee that the array is a 2D array on input</span>
     <span class="n">cyclic_corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">corr</span> <span class="o">=</span> <span class="n">prefactor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">num_steps</span><span class="p">])</span>
+    <span class="n">corr</span> <span class="o">=</span> <span class="n">prefactor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">corr</span></div>
 
 <span class="c1"># We could trying numba.jit here later to speed things up.</span>
-<div class="viewcode-block" id="faster_autocorrelation"><a class="viewcode-back" href="../../../pages/modules/common/mathematics.html#MDMC.common.mathematics.faster_autocorrelation">[docs]</a><span class="k">def</span> <span class="nf">faster_autocorrelation</span><span class="p">(</span><span class="n">input1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                           <span class="n">weights</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="faster_autocorrelation"><a class="viewcode-back" href="../../../pages/modules/common/mathematics.html#MDMC.common.mathematics.faster_autocorrelation">[docs]</a><span class="k">def</span> <span class="nf">faster_autocorrelation</span><span class="p">(</span><span class="n">input1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The autocorrelation of a vector.</span>
 
@@ -241,27 +238,21 @@
 <span class="sd">        ``input1`` if ``input2`` is `None`)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">num_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input1</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input1</span><span class="p">)</span>
 
-    <span class="n">fft1</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">fft1</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Calculate the cyclic correlation function</span>
     <span class="n">cyclic_corr</span> <span class="o">=</span> <span class="n">ifft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">fft1</span><span class="p">)</span> <span class="o">*</span> <span class="n">fft1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Normalise for variable number of contributions to each correlation:</span>
-    <span class="c1"># 1 / (num_steps - m)</span>
+    <span class="c1"># 1 / (N - m)</span>
     <span class="c1"># where m is the number of each individual step</span>
-    <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_steps</span><span class="p">))</span>
+    <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
     <span class="c1"># I have to guarantee that the array is a 2D array on input</span>
-    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">temp_weights</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">)))</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">temp_weights</span> <span class="o">=</span> <span class="n">weights</span>
-        <span class="n">cyclic_corr</span> <span class="o">*=</span> <span class="n">temp_weights</span>
     <span class="n">cyclic_corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">corr</span> <span class="o">=</span> <span class="n">prefactor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">num_steps</span><span class="p">])</span>
+    <span class="n">corr</span> <span class="o">=</span> <span class="n">prefactor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">cyclic_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">corr</span></div>
 
