@@ -464,13 +464,13 @@ Universe created with:
 
 Universe contains 1000 Ar atoms
 LAMMPS (29 Sep 2021 - Update 3)
-LAMMPS output is captured by PyLammps wrapper
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
 LAMMPS output is captured by PyLammps wrapper
 LAMMPS (29 Sep 2021 - Update 3)
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
 Total wall time: 0:00:00
 Simulation created with lammps engine and settings:
   temperature  120.0
@@ -520,13 +520,13 @@ NAME
 DESCRIPTION
     Observables (/ indicates alias)
     -----------
+    PDF / PairDistributionFunction
     DynamicStructureFactor / SQw
     CoherentDynamicStructureFactor / SQwCoherent / SQwCoh / SQw_coh
     IncoherentDynamicStructureFactor / SQwIncoherentSQwIncoh / SQw_incoh
     IntermediateScatteringFunction / FQt
     CoherentIntermediateScatteringFunction / FQtCoherent / FQtCoh / FQt_coh
     IncoherentIntermediateScatteringFunction / FQtIncoherentFQtIncoh / FQt_incoh
-    PDF / PairDistributionFunction
 
     Examples
     --------
@@ -3952,15 +3952,25 @@ CLASSES
 
     PDF = class PairDistributionFunction(MDMC.trajectory_analysis.observables.obs.Observable)
      |  A class for containing, calculating and reading a pair distribution function (PDF).
+     |
+     |  We derive our definitions for this from the following publication:
+     |  &#34;A comparison of various commonly used correlation functions for describing total scattering&#34;
+     |  Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+     |  DOI: https://doi.org/10.1107/S0021889800019993
+     |
      |  We employ the following mathematical form for the total pair distribution function (``PDF``):
      |
      |      .. math::
      |
      |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
      |
+     |
      |      where :math:`c_i` is the number concentration of element :math:`i`,
-     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-     |      and the partial pair distribution, :math:`g_{ij}`, is:
+     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`.
+     |      (This corresponds to equation 8 in the above publication)
+     |
+     |
+     |  The partial pair distribution, :math:`g_{ij}`, is:
      |
      |      .. math::
      |
@@ -3971,6 +3981,7 @@ CLASSES
      |      :math:`\Delta{r}`, and :math:`\rho_{j}` is the number density of
      |      atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
      |      :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
+     |      (This corresponds to equation 10 in the above publication)
      |
      |  The total PDF is contained in ``PDF`` and the partial pair PDFs (if calculated or imported)
      |  are contained in ``partial_pdfs``.
@@ -3986,19 +3997,11 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, list[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory]], verbose: int = 0, **settings: dict)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
      |      Calculate the pair distribution function, :math:`G(r)`` from a
      |      ``CompactTrajectory``
      |
-     |      The total pair distribution function (``pdf.PDF``) has the form:
-     |
-     |      .. math::
-     |
-     |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
-     |
-     |      where :math:`c_i` is the number concentration of element :math:`i`,
-     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-     |      and the partial pair distribution, :math:`g_{ij}`, is:
+     |      The partial pair distribution for a pair i-j, :math:`g_{ij}`, is:
      |
      |      .. math::
      |
@@ -4010,6 +4013,23 @@ CLASSES
      |      atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
      |      :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
      |
+     |      This corresponds to the equation (8) in the following paper:
+     |      &#34;A comparison of various commonly used correlation functions for
+     |       describing total scattering&#34;
+     |      Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+     |      DOI: https://doi.org/10.1107/S0021889800019993
+     |
+     |      The total pair distribution function (``pdf.PDF``) has the form:
+     |
+     |      .. math::
+     |
+     |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
+     |
+     |      where :math:`c_i` is the proportion of element :math:`i` in the material,
+     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`
+     |
+     |      This corresponds to the equation (10) in the above paper.
+     |
      |      Independent variables can either be set previously or defined within
      |      settings.
      |
@@ -4020,36 +4040,41 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : CompactTrajectory or list of CompactTrajectory
-     |          Either a `list` of MD ``CompactTrajectory``s or a
-     |          single ``CompactTrajectory`` object.
+     |      MD_input : CompactTrajectory
+     |           A single ``CompactTrajectory`` object.
      |      verbose: int
      |          Verbose print settings. Not currently implemented for PDF.
      |      **settings
      |          n_frames : int
      |              The number of frames from which the pdf and its error are
-     |              calculated. If this is not passed, 1% of the total number of
-     |              frames are used (rounded up to nearest int).
+     |              calculated. These frames are selected uniformly, and the step is taken to be
+     |              n_frames / total number of frames rounded to the nearest positive integer.
+     |              If this is not passed, 1% of the total number of frames are used
+     |              (rounded up to the nearest positive integer).
+     |          use_average : bool
+     |              Optional parameter. If set to True then the mean value for PDF is
+     |              calculated across selected frames from the trajectory. Also, the errors
+     |              are set to the standard deviation calculated over the multiple frames.
+     |              If set to False (default), only the last frame of the trajectory is used and
+     |              n_frames will be ignored.
      |          subset : list of tuples
      |              The subset of element pairs from which the PDF is calculated.
      |              This can be used to calculate the partial PDFs of a
      |              multicomponent system. If this is not passed, all combinations
      |              of elements are used i.e. the PDF is the total PDF.
      |          b_coh : dict
-     |              Definitions of the coherent neutron scattering lengths for one
-     |              or more elements. This can be used to calculate the PDF of a
-     |              system where one or more elements has a coherent scattering
-     |              length different from the coherent scattering length in
-     |              MDMC.common.atom_properties (i.e. if it has been isotopically
-     |              substituted).
+     |              A dictionary containing coherent scattering length values for one or more elements.
+     |              This can be used to calculate the PDF of a system where one or more elements
+     |              has a coherent scattering length different from the coherent scattering length in
+     |              MDMC.common.atom_properties (i.e. if it has been isotopically substituted).
      |          r_min : float
-     |              The minimum ``r`` (atomic separation) for which the PDF will be
+     |              The minimum ``r`` (atomic separation) in Angstrom for which the PDF will be
      |              calculated. If this, ``r_max``, and ``r_step`` are passed then
      |              these will create a range for the independent variable ``r``,
      |              which will overwrite any ``r`` which has previously been
      |              defined. This cannot be passed if ``r`` is passed.
      |          r_max : float
-     |              The maximum ``r`` (atomic separation) for which the PDF will be
+     |              The maximum ``r`` (atomic separation) in Angstrom for which the PDF will be
      |              calculated. If this, ``r_min``, and ``r_step`` are passed then
      |              these will create a range for the independent variable ``r``,
      |              which will overwrite any ``r`` which has previously been
@@ -4061,12 +4086,13 @@ CLASSES
      |              ``r``, which will overwrite any ``r`` which has previously been
      |              defined. This cannot be passed if ``r`` is passed.
      |          r : numpy.ndarray
-     |              The uniform ``r`` values for which the PDF will be calculated.
+     |              The uniform ``r`` values in Angstrom for which the PDF will be calculated.
      |              This cannot be passed if ``r_min``, ``r_max``, and ``r_step``
      |              are passed.
      |          dimensions : array-like
      |              A 3 element `array-like` (`list`, `tuple`) with the dimensions
-     |              of the ``Universe``.
+     |              of the ``Universe`` in Angstrom.
+     |
      |
      |      Examples
      |      --------
@@ -4092,12 +4118,19 @@ CLASSES
      |
      |          pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
      |
-     |      To calculate the total PDF for r values of [1., 2., 3., 4., ]:
+     |      To calculate the total PDF for r values of [1., 2., 3., 4.]:
      |
      |          .. highlight:: python
      |          .. code-block:: python
      |
-     |          pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
+     |          pdf.calculate_from_MD(trajectory, r=[1., 2., 3., 4.])
+     |
+     |      To calculate the total PDF over an average of 5 frames:
+     |
+     |          .. highlight:: python
+     |          .. code-block:: python
+     |
+     |          pdf.calculate_from_MD(trajectory, use_average=True, n_frames=5)
      |
      |  maximum_frames(self) -&gt; None
      |      There is no hard limit on the number of frames that can be used, so
@@ -4240,15 +4273,25 @@ CLASSES
 
     class PairDistributionFunction(MDMC.trajectory_analysis.observables.obs.Observable)
      |  A class for containing, calculating and reading a pair distribution function (PDF).
+     |
+     |  We derive our definitions for this from the following publication:
+     |  &#34;A comparison of various commonly used correlation functions for describing total scattering&#34;
+     |  Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+     |  DOI: https://doi.org/10.1107/S0021889800019993
+     |
      |  We employ the following mathematical form for the total pair distribution function (``PDF``):
      |
      |      .. math::
      |
      |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
      |
+     |
      |      where :math:`c_i` is the number concentration of element :math:`i`,
-     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-     |      and the partial pair distribution, :math:`g_{ij}`, is:
+     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`.
+     |      (This corresponds to equation 8 in the above publication)
+     |
+     |
+     |  The partial pair distribution, :math:`g_{ij}`, is:
      |
      |      .. math::
      |
@@ -4259,6 +4302,7 @@ CLASSES
      |      :math:`\Delta{r}`, and :math:`\rho_{j}` is the number density of
      |      atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
      |      :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
+     |      (This corresponds to equation 10 in the above publication)
      |
      |  The total PDF is contained in ``PDF`` and the partial pair PDFs (if calculated or imported)
      |  are contained in ``partial_pdfs``.
@@ -4274,19 +4318,11 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, list[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory]], verbose: int = 0, **settings: dict)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
      |      Calculate the pair distribution function, :math:`G(r)`` from a
      |      ``CompactTrajectory``
      |
-     |      The total pair distribution function (``pdf.PDF``) has the form:
-     |
-     |      .. math::
-     |
-     |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
-     |
-     |      where :math:`c_i` is the number concentration of element :math:`i`,
-     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-     |      and the partial pair distribution, :math:`g_{ij}`, is:
+     |      The partial pair distribution for a pair i-j, :math:`g_{ij}`, is:
      |
      |      .. math::
      |
@@ -4298,6 +4334,23 @@ CLASSES
      |      atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
      |      :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
      |
+     |      This corresponds to the equation (8) in the following paper:
+     |      &#34;A comparison of various commonly used correlation functions for
+     |       describing total scattering&#34;
+     |      Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+     |      DOI: https://doi.org/10.1107/S0021889800019993
+     |
+     |      The total pair distribution function (``pdf.PDF``) has the form:
+     |
+     |      .. math::
+     |
+     |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
+     |
+     |      where :math:`c_i` is the proportion of element :math:`i` in the material,
+     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`
+     |
+     |      This corresponds to the equation (10) in the above paper.
+     |
      |      Independent variables can either be set previously or defined within
      |      settings.
      |
@@ -4308,36 +4361,41 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : CompactTrajectory or list of CompactTrajectory
-     |          Either a `list` of MD ``CompactTrajectory``s or a
-     |          single ``CompactTrajectory`` object.
+     |      MD_input : CompactTrajectory
+     |           A single ``CompactTrajectory`` object.
      |      verbose: int
      |          Verbose print settings. Not currently implemented for PDF.
      |      **settings
      |          n_frames : int
      |              The number of frames from which the pdf and its error are
-     |              calculated. If this is not passed, 1% of the total number of
-     |              frames are used (rounded up to nearest int).
+     |              calculated. These frames are selected uniformly, and the step is taken to be
+     |              n_frames / total number of frames rounded to the nearest positive integer.
+     |              If this is not passed, 1% of the total number of frames are used
+     |              (rounded up to the nearest positive integer).
+     |          use_average : bool
+     |              Optional parameter. If set to True then the mean value for PDF is
+     |              calculated across selected frames from the trajectory. Also, the errors
+     |              are set to the standard deviation calculated over the multiple frames.
+     |              If set to False (default), only the last frame of the trajectory is used and
+     |              n_frames will be ignored.
      |          subset : list of tuples
      |              The subset of element pairs from which the PDF is calculated.
      |              This can be used to calculate the partial PDFs of a
      |              multicomponent system. If this is not passed, all combinations
      |              of elements are used i.e. the PDF is the total PDF.
      |          b_coh : dict
-     |              Definitions of the coherent neutron scattering lengths for one
-     |              or more elements. This can be used to calculate the PDF of a
-     |              system where one or more elements has a coherent scattering
-     |              length different from the coherent scattering length in
-     |              MDMC.common.atom_properties (i.e. if it has been isotopically
-     |              substituted).
+     |              A dictionary containing coherent scattering length values for one or more elements.
+     |              This can be used to calculate the PDF of a system where one or more elements
+     |              has a coherent scattering length different from the coherent scattering length in
+     |              MDMC.common.atom_properties (i.e. if it has been isotopically substituted).
      |          r_min : float
-     |              The minimum ``r`` (atomic separation) for which the PDF will be
+     |              The minimum ``r`` (atomic separation) in Angstrom for which the PDF will be
      |              calculated. If this, ``r_max``, and ``r_step`` are passed then
      |              these will create a range for the independent variable ``r``,
      |              which will overwrite any ``r`` which has previously been
      |              defined. This cannot be passed if ``r`` is passed.
      |          r_max : float
-     |              The maximum ``r`` (atomic separation) for which the PDF will be
+     |              The maximum ``r`` (atomic separation) in Angstrom for which the PDF will be
      |              calculated. If this, ``r_min``, and ``r_step`` are passed then
      |              these will create a range for the independent variable ``r``,
      |              which will overwrite any ``r`` which has previously been
@@ -4349,12 +4407,13 @@ CLASSES
      |              ``r``, which will overwrite any ``r`` which has previously been
      |              defined. This cannot be passed if ``r`` is passed.
      |          r : numpy.ndarray
-     |              The uniform ``r`` values for which the PDF will be calculated.
+     |              The uniform ``r`` values in Angstrom for which the PDF will be calculated.
      |              This cannot be passed if ``r_min``, ``r_max``, and ``r_step``
      |              are passed.
      |          dimensions : array-like
      |              A 3 element `array-like` (`list`, `tuple`) with the dimensions
-     |              of the ``Universe``.
+     |              of the ``Universe`` in Angstrom.
+     |
      |
      |      Examples
      |      --------
@@ -4380,12 +4439,19 @@ CLASSES
      |
      |          pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
      |
-     |      To calculate the total PDF for r values of [1., 2., 3., 4., ]:
+     |      To calculate the total PDF for r values of [1., 2., 3., 4.]:
      |
      |          .. highlight:: python
      |          .. code-block:: python
      |
-     |          pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
+     |          pdf.calculate_from_MD(trajectory, r=[1., 2., 3., 4.])
+     |
+     |      To calculate the total PDF over an average of 5 frames:
+     |
+     |          .. highlight:: python
+     |          .. code-block:: python
+     |
+     |          pdf.calculate_from_MD(trajectory, use_average=True, n_frames=5)
      |
      |  maximum_frames(self) -&gt; None
      |      There is no hard limit on the number of frames that can be used, so
@@ -7579,7 +7645,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='440f517f-c1ee-47d9-a385-0740049fda77'></div></div>
+<div id='3a9221a0-3177-4506-b1c2-932dc3e8a4d2'></div></div>
 </div>
 <p>Therefore it is strongly recommended that you specify the <span class="math notranslate nohighlight">\(E\)</span> values for calculating the dynamic structure factor.</p>
 <p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calulate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will be probably
@@ -8650,7 +8716,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='cb194e38-6631-4c30-aa1f-1ae303e22086'></div></div>
+<div id='510de418-febd-4d08-b980-a740a9af5ed4'></div></div>
 </div>
 <p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the van Well et al. Phys. Rev. A <strong>31</strong> 3391 (1985) data, which the authors corrected for instrument resolution) by reading the data into an SQwCoh object:</p>
 <div class="nbinput nblast docutils container">
@@ -9650,7 +9716,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='6af1c102-d88b-48d9-8a3e-39b817aef9ab'></div></div>
+<div id='ae885b27-e40f-4f98-bd77-7ad8d48e1e73'></div></div>
 </div>
 </section>
 <section id="Other-observables">
@@ -9671,19 +9737,11 @@ if (IPython.notebook.kernel !== null) {
 <div class="highlight"><pre>
 Help on function calculate_from_MD in module MDMC.trajectory_analysis.observables.pdf:
 
-calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, list[MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory]], verbose: int = 0, **settings: dict)
+calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
     Calculate the pair distribution function, :math:`G(r)`` from a
     ``CompactTrajectory``
 
-    The total pair distribution function (``pdf.PDF``) has the form:
-
-    .. math::
-
-        G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
-
-    where :math:`c_i` is the number concentration of element :math:`i`,
-    :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-    and the partial pair distribution, :math:`g_{ij}`, is:
+    The partial pair distribution for a pair i-j, :math:`g_{ij}`, is:
 
     .. math::
 
@@ -9695,6 +9753,23 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_traject
     atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
     :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
 
+    This corresponds to the equation (8) in the following paper:
+    &#34;A comparison of various commonly used correlation functions for
+     describing total scattering&#34;
+    Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+    DOI: https://doi.org/10.1107/S0021889800019993
+
+    The total pair distribution function (``pdf.PDF``) has the form:
+
+    .. math::
+
+        G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
+
+    where :math:`c_i` is the proportion of element :math:`i` in the material,
+    :math:`b_i` is the (coherent) scattering length of element :math:`i`
+
+    This corresponds to the equation (10) in the above paper.
+
     Independent variables can either be set previously or defined within
     settings.
 
@@ -9705,36 +9780,41 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_traject
 
     Parameters
     ----------
-    MD_input : CompactTrajectory or list of CompactTrajectory
-        Either a `list` of MD ``CompactTrajectory``s or a
-        single ``CompactTrajectory`` object.
+    MD_input : CompactTrajectory
+         A single ``CompactTrajectory`` object.
     verbose: int
         Verbose print settings. Not currently implemented for PDF.
     **settings
         n_frames : int
             The number of frames from which the pdf and its error are
-            calculated. If this is not passed, 1% of the total number of
-            frames are used (rounded up to nearest int).
+            calculated. These frames are selected uniformly, and the step is taken to be
+            n_frames / total number of frames rounded to the nearest positive integer.
+            If this is not passed, 1% of the total number of frames are used
+            (rounded up to the nearest positive integer).
+        use_average : bool
+            Optional parameter. If set to True then the mean value for PDF is
+            calculated across selected frames from the trajectory. Also, the errors
+            are set to the standard deviation calculated over the multiple frames.
+            If set to False (default), only the last frame of the trajectory is used and
+            n_frames will be ignored.
         subset : list of tuples
             The subset of element pairs from which the PDF is calculated.
             This can be used to calculate the partial PDFs of a
             multicomponent system. If this is not passed, all combinations
             of elements are used i.e. the PDF is the total PDF.
         b_coh : dict
-            Definitions of the coherent neutron scattering lengths for one
-            or more elements. This can be used to calculate the PDF of a
-            system where one or more elements has a coherent scattering
-            length different from the coherent scattering length in
-            MDMC.common.atom_properties (i.e. if it has been isotopically
-            substituted).
+            A dictionary containing coherent scattering length values for one or more elements.
+            This can be used to calculate the PDF of a system where one or more elements
+            has a coherent scattering length different from the coherent scattering length in
+            MDMC.common.atom_properties (i.e. if it has been isotopically substituted).
         r_min : float
-            The minimum ``r`` (atomic separation) for which the PDF will be
+            The minimum ``r`` (atomic separation) in Angstrom for which the PDF will be
             calculated. If this, ``r_max``, and ``r_step`` are passed then
             these will create a range for the independent variable ``r``,
             which will overwrite any ``r`` which has previously been
             defined. This cannot be passed if ``r`` is passed.
         r_max : float
-            The maximum ``r`` (atomic separation) for which the PDF will be
+            The maximum ``r`` (atomic separation) in Angstrom for which the PDF will be
             calculated. If this, ``r_min``, and ``r_step`` are passed then
             these will create a range for the independent variable ``r``,
             which will overwrite any ``r`` which has previously been
@@ -9746,12 +9826,13 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_traject
             ``r``, which will overwrite any ``r`` which has previously been
             defined. This cannot be passed if ``r`` is passed.
         r : numpy.ndarray
-            The uniform ``r`` values for which the PDF will be calculated.
+            The uniform ``r`` values in Angstrom for which the PDF will be calculated.
             This cannot be passed if ``r_min``, ``r_max``, and ``r_step``
             are passed.
         dimensions : array-like
             A 3 element `array-like` (`list`, `tuple`) with the dimensions
-            of the ``Universe``.
+            of the ``Universe`` in Angstrom.
+
 
     Examples
     --------
@@ -9777,12 +9858,19 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.compact_traject
 
         pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
 
-    To calculate the total PDF for r values of [1., 2., 3., 4., ]:
+    To calculate the total PDF for r values of [1., 2., 3., 4.]:
 
         .. highlight:: python
         .. code-block:: python
 
-        pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
+        pdf.calculate_from_MD(trajectory, r=[1., 2., 3., 4.])
+
+    To calculate the total PDF over an average of 5 frames:
+
+        .. highlight:: python
+        .. code-block:: python
+
+        pdf.calculate_from_MD(trajectory, use_average=True, n_frames=5)
 
 </pre></div></div>
 </div>
