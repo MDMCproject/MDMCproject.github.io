@@ -216,25 +216,11 @@ When not provided, the minimum number of steps needed for successful
 calculation of the observables is used. If provided, the actual number
 of steps may be reduced to prevent running MD that won’t be used when
 calculating dependent variables. Default is <cite>None</cite>.</p></li>
-<li><p><strong>equilibration_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – <dl class="simple">
-<dt>Number of molecular dynamics steps used to equilibrate the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> in between each</dt><dd><p>refinement step. When changes to the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> are small, this equilibration can be
-much shorter than the equilibration needed before starting the refinement process, but in
-general will vary depending on the details of the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> and <code class="docutils literal notranslate"><span class="pre">Parameters</span></code>. Default
-is 0.</p>
-</dd>
-<dt>cont_slicing<span class="classifier">bool, optional</span></dt><dd><p>Flag to decide between two possible behaviours when the number of <code class="docutils literal notranslate"><span class="pre">MD_steps</span></code> is
-larger than the minimum required to calculate the observables. If <code class="docutils literal notranslate"><span class="pre">False</span></code> (default) then
-the <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is sliced into non-overlapping sub-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>
-blocks for each of which the observable is calculated. If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the
-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is sliced into as many non-identical sub-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>
-blocks as possible (with overlap allowed).</p>
-</dd>
-</dl>
-</p></li>
-<li><p><strong>use_average</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Optional parameter relevant in case <code class="docutils literal notranslate"><span class="pre">MD_steps</span></code> is larger than the minimum required
-and the MD <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is sliced into sub-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> blocks.
-If <code class="docutils literal notranslate"><span class="pre">True</span></code> (default) the observables are averaged over the sub-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>
-blocks. If <code class="docutils literal notranslate"><span class="pre">False</span></code> they are not averaged.</p></li>
+<li><p><strong>equilibration_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – Number of molecular dynamics steps used to equilibrate the <code class="docutils literal notranslate"><span class="pre">Universe</span></code>
+in between each refinement step. When changes to the <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> are small,
+this equilibration can be much shorter than the equilibration needed before
+starting the refinement process, but in general will vary depending on
+the details of the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> and <code class="docutils literal notranslate"><span class="pre">Parameters</span></code>. Default is 0.</p></li>
 <li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The level of verbosity:
 Verbose level -1 hides all outputs for tests.
 Verbose level 0 gives no information.
@@ -243,8 +229,28 @@ Verbose level 2 gives final time and also a progress bar.
 Verbose level 3 gives final time, a progress bar, and time per step.</p></li>
 <li><p><strong>print_full_settings</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to print all settings/attributes/parameters passed to this object,
 defaults to False.</p></li>
-<li><p><strong>**settings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – Settings to be passed into other functions, e.g. MC_norm=1 for MC optimiser if MMC
-minimiser is used.</p></li>
+<li><p><strong>**settings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – <dl class="simple">
+<dt>cont_slicing<span class="classifier">bool, optional</span></dt><dd><p>Flag to decide between two possible behaviours when the number of <code class="docutils literal notranslate"><span class="pre">MD_steps</span></code> is
+larger than the minimum required to calculate the observables. If <code class="docutils literal notranslate"><span class="pre">False</span></code> (default)
+then the <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is sliced into non-overlapping sub-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>
+blocks for each of which the observable is calculated. If <code class="docutils literal notranslate"><span class="pre">True</span></code>, then the
+<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is sliced into as many non-identical sub-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>
+blocks as possible (with overlap allowed).</p>
+</dd>
+<dt>results_filename: str</dt><dd><p>The name of the file in which the results of the MDMC run will be stored</p>
+</dd>
+<dt>n_points: int</dt><dd><p>If the GPR or GPO minimisers are used, this variable determines the number
+of points to measure and minimise parameters</p>
+</dd>
+<dt>MC_norm: int</dt><dd><p>1 if the MMC minimiser is to be used for parameter optimisation.</p>
+</dd>
+<dt>use_average<span class="classifier">bool, optional</span></dt><dd><p>Optional parameter relevant in case <code class="docutils literal notranslate"><span class="pre">MD_steps</span></code> is larger than the minimum required
+and the MD <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is sliced into sub-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> blocks.
+If <code class="docutils literal notranslate"><span class="pre">True</span></code> (default) the observables are averaged over the sub-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>
+blocks. If <code class="docutils literal notranslate"><span class="pre">False</span></code> they are not averaged.</p>
+</dd>
+</dl>
+</p></li>
 </ul>
 </dd>
 </dl>
