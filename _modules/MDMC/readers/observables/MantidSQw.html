@@ -108,11 +108,13 @@
   <h1>Source code for MDMC.readers.observables.MantidSQw</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Readers for dynamic data&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">SQwReader</span>
 
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MantidSQw"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw">[docs]</a><span class="k">class</span> <span class="nc">MantidSQw</span><span class="p">(</span><span class="n">SQwReader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -196,7 +198,13 @@
 
         <span class="c1"># Mantid sets errors to 0 if the corresponding datum is 0.  Change these to</span>
         <span class="c1"># inf so that error calculations can still be performed on them.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;We have set the error bar to infinity for any zero error values, this allows</span><span class="se">\</span>
+<span class="s2">                us to calculate chi-squared but effectively ignores these points, this may not</span><span class="se">\</span>
+<span class="s2">                be what you want to do, consider using a FoM which doesn&#39;t need errors if</span><span class="se">\</span>
+<span class="s2">                this is an issue&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MantidSQw.parse_variables"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.parse_variables">[docs]</a>    <span class="k">def</span> <span class="nf">parse_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">IO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[float]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

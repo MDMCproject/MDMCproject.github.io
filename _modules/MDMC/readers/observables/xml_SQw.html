@@ -107,7 +107,7 @@
              
   <h1>Source code for MDMC.readers.observables.xml_SQw</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;XML reader for SQw data&quot;&quot;&quot;</span>
-
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TextIO</span>
 
@@ -117,6 +117,7 @@
 <span class="kn">from</span> <span class="nn">MDMC.common.constants</span> <span class="kn">import</span> <span class="n">h_bar</span>
 <span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">SQwReader</span>
 
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="XML_SQw"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/xml_SQw.html#MDMC.readers.observables.xml_SQw.XML_SQw">[docs]</a><span class="k">class</span> <span class="nc">XML_SQw</span><span class="p">(</span><span class="n">SQwReader</span><span class="p">):</span>
 
@@ -186,7 +187,17 @@
         <span class="c1"># np.shape(SQw) == (np.size(Q), np.size(E))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SQw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="p">),</span> <span class="p">[</span><span class="n">n_w</span><span class="p">,</span> <span class="n">n_Q</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">),</span> <span class="p">[</span><span class="n">n_w</span><span class="p">,</span> <span class="n">n_Q</span><span class="p">]))</span></div>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">),</span> <span class="p">[</span><span class="n">n_w</span><span class="p">,</span> <span class="n">n_Q</span><span class="p">]))</span>
+
+        <span class="c1"># Change any zero error points to</span>
+        <span class="c1"># inf so that error calculations can still be performed on them.</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> We have set the error bar to infinity for any zero error values, this allows </span><span class="se">\</span>
+<span class="s2">                us to calculate chi-squared but effectively ignores these points, this may not </span><span class="se">\</span>
+<span class="s2">                be what you want to do, consider using a FoM which doesn&#39;t need errors i f</span><span class="se">\</span>
+<span class="s2">                this is an issue </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="XML_SQw.dict_from_element"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/xml_SQw.html#MDMC.readers.observables.xml_SQw.XML_SQw.dict_from_element">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">dict_from_element</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
