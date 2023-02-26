@@ -345,8 +345,7 @@
 <span class="sd">        objects will have a single ``Coulombic`` interaction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
-        <span class="n">atoms</span> <span class="o">=</span> <span class="n">_group_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="n">atoms</span> <span class="o">=</span> <span class="n">_group_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
     <span class="c1"># If no grouping then each atom_group is a single atom</span>
     <span class="k">for</span> <span class="n">atom_group</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
         <span class="c1"># A Coulomb function is set so that the interaction can be parametrized</span>
@@ -403,7 +402,7 @@
     <span class="c1"># being in its own group (i.e. no tuples of atoms are grouped together).</span>
     <span class="c1"># This ensures that interactions_atoms will always have the correct</span>
     <span class="c1"># dimensions</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">key</span> <span class="o">=</span> <span class="nb">id</span>
     <span class="n">interactions_atoms</span> <span class="o">=</span> <span class="n">_group_atoms</span><span class="p">(</span><span class="n">interactions_atoms</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
@@ -430,8 +429,11 @@
 <span class="sd">        Where each tuple contains a group of equivalent ``Atom`` objects, based</span>
 <span class="sd">        on ``key``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">pass</span>  <span class="c1"># If the key passed in is None then it has no idea how to compare `Atom`s</span>
 
-    <span class="n">atoms</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groupby</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)]</span>
 
 
