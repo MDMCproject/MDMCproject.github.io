@@ -230,6 +230,10 @@ Verbose level 3 gives final time, a progress bar, and time per step.</p></li>
 <li><p><strong>print_full_settings</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to print all settings/attributes/parameters passed to this object,
 defaults to False.</p></li>
 <li><p><strong>**settings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – <dl class="simple">
+<dt>n_steps: int</dt><dd><p>The maximum number of refinement steps to be. An optional parameter that,
+if specified, will be used in the <code class="docutils literal notranslate"><span class="pre">refine</span></code> method unless a different value
+of <code class="docutils literal notranslate"><span class="pre">n_steps</span></code> is explicitly passed when running <code class="docutils literal notranslate"><span class="pre">refine</span></code>.</p>
+</dd>
 <dt>cont_slicing<span class="classifier">bool, optional</span></dt><dd><p>Flag to decide between two possible behaviours when the number of <code class="docutils literal notranslate"><span class="pre">MD_steps</span></code> is
 larger than the minimum required to calculate the observables. If <code class="docutils literal notranslate"><span class="pre">False</span></code> (default)
 then the <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is sliced into non-overlapping sub-<code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>
@@ -238,9 +242,6 @@ blocks for each of which the observable is calculated. If <code class="docutils 
 blocks as possible (with overlap allowed).</p>
 </dd>
 <dt>results_filename: str</dt><dd><p>The name of the file in which the results of the MDMC run will be stored</p>
-</dd>
-<dt>n_points: int</dt><dd><p>If the GPR or GPO minimisers are used, this variable determines the number
-of points to measure and minimise parameters</p>
 </dd>
 <dt>MC_norm: int</dt><dd><p>1 if the MMC minimiser is to be used for parameter optimisation.</p>
 </dd>
@@ -356,18 +357,16 @@ the Figure of Merit</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.control.control.Control.plot_results">
-<span class="sig-name descname"><span class="pre">plot_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MC_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.plot_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.plot_results" title="Permalink to this definition"></a></dt>
-<dd><p>Performs a random sample across the coordinate space giving a predicted figure of merit at
-every point. Then removes points with poor figures of merit, according to a
-Metropolis-Hastings type rule, where the likelihood of keeping a point is dependant on the
-exponent of the difference between its figure of merit, and that of the best one found,
-divided by MC_norm. A corner plot is then returned (a matplotlib figure object), which can
-be displayed or exported.</p>
+<span class="sig-name descname"><span class="pre">plot_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MH_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.plot_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.plot_results" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiates an insstance of the PlotResults class and generates a cornerplot
+from the data in self.results_filename</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The filename and path to the history file. Defaults to None which
+then uses self.results_filename</p></li>
 <li><p><strong>points</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The number of samples to initially generate, defaults to 100,000</p></li>
-<li><p><strong>MC_norm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – The denominator of the exponent, controlling how likley points are to be kept,
+<li><p><strong>MH_norm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – The denominator of the exponent, controlling how likley points are to be kept,
 defaults to 20.0</p></li>
 </ul>
 </dd>
@@ -382,11 +381,15 @@ defaults to 20.0</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.control.control.Control.refine">
-<span class="sig-name descname"><span class="pre">refine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.refine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.refine" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">refine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.refine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.refine" title="Permalink to this definition"></a></dt>
 <dd><p>Refines the specified potential parameters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – maximum number of steps for the refinement</p>
+<dd class="field-odd"><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Maximum number of steps for the refinement. Must be specified either when creating
+the <code class="docutils literal notranslate"><span class="pre">Control</span></code> object or when calling this method. The value specified to this
+method supersedes the value passed (if any) when the <code class="docutils literal notranslate"><span class="pre">Control</span></code> object was created.
+If nothing is passed, the method will check if a number was specified when the
+<code class="docutils literal notranslate"><span class="pre">Control</span></code> object was created and use that value.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>

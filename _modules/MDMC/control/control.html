@@ -115,11 +115,10 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">corner</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span><span class="p">,</span> <span class="n">interp2d</span>
-<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">OptimizeResult</span>
 <span class="kn">from</span> <span class="nn">verbosemanager</span> <span class="kn">import</span> <span class="n">VerboseManager</span>
 
+<span class="kn">from</span> <span class="nn">MDMC.control.plot_results</span> <span class="kn">import</span> <span class="n">PlotResults</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="kn">import</span> <span class="n">Simulation</span>
@@ -226,6 +225,10 @@
 <span class="sd">        Whether to print all settings/attributes/parameters passed to this object,</span>
 <span class="sd">        defaults to False.</span>
 <span class="sd">    **settings: dict, optional</span>
+<span class="sd">        n_steps: int</span>
+<span class="sd">            The maximum number of refinement steps to be. An optional parameter that,</span>
+<span class="sd">            if specified, will be used in the ``refine`` method unless a different value</span>
+<span class="sd">            of ``n_steps`` is explicitly passed when running ``refine``.</span>
 <span class="sd">        cont_slicing : bool, optional</span>
 <span class="sd">            Flag to decide between two possible behaviours when the number of ``MD_steps`` is</span>
 <span class="sd">            larger than the minimum required to calculate the observables. If ``False`` (default)</span>
@@ -235,9 +238,6 @@
 <span class="sd">            blocks as possible (with overlap allowed).</span>
 <span class="sd">        results_filename: str</span>
 <span class="sd">            The name of the file in which the results of the MDMC run will be stored</span>
-<span class="sd">        n_points: int</span>
-<span class="sd">            If the GPR or GPO minimisers are used, this variable determines the number</span>
-<span class="sd">            of points to measure and minimise parameters</span>
 <span class="sd">        MC_norm: int</span>
 <span class="sd">            1 if the MMC minimiser is to be used for parameter optimisation.</span>
 <span class="sd">        use_average : bool, optional</span>
@@ -312,6 +312,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_config</span> <span class="o">=</span> <span class="n">reset_config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span> <span class="o">=</span> <span class="n">equilibration_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n_steps&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;results_filename&#39;</span><span class="p">,</span>
                                 <span class="sa">f</span><span class="s1">&#39;results_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">--%H-%M-%S&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">)</span>
@@ -321,8 +322,8 @@
         <span class="c1"># step (i.e. the setup) is always accepted.</span>
         <span class="c1"># pylint: disable=line-too-long</span>
         <span class="c1"># disable this pylint warning as this can&#39;t be fixed in a way that looks good</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span> <span class="o">=</span> <span class="n">MinimizerFactory</span><span class="o">.</span><span class="n">create_minimizer</span><span class="p">(</span><span class="n">minimizer_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">,</span>
-                                                           <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span> <span class="o">=</span> <span class="n">MinimizerFactory</span><span class="o">.</span><span class="n">create_minimizer</span><span class="p">(</span><span class="n">minimizer_type</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
+                                                           <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
 
 
         <span class="c1"># Create experimental observables from datasets and placeholders for</span>
@@ -491,14 +492,18 @@
         <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> refining </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="si">}</span><span class="s2"> parameter</span><span class="si">{</span><span class="n">plural</span><span class="si">}</span><span class="s2"> &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;using </span><span class="si">{</span><span class="n">exp_dataset_types</span><span class="si">}</span><span class="s2"> data types&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Control.refine"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.refine">[docs]</a>    <span class="k">def</span> <span class="nf">refine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Control.refine"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.refine">[docs]</a>    <span class="k">def</span> <span class="nf">refine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Refines the specified potential parameters</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        n_steps : int</span>
-<span class="sd">            maximum number of steps for the refinement</span>
+<span class="sd">            Maximum number of steps for the refinement. Must be specified either when creating</span>
+<span class="sd">            the ``Control`` object or when calling this method. The value specified to this</span>
+<span class="sd">            method supersedes the value passed (if any) when the ``Control`` object was created.</span>
+<span class="sd">            If nothing is passed, the method will check if a number was specified when the</span>
+<span class="sd">            ``Control`` object was created and use that value.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -510,9 +515,15 @@
 <span class="sd">            control.refine(100)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="n">n_steps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The number of maximum refinement steps has not been specified&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>
+
         <span class="c1"># calculate verbose steps</span>
         <span class="c1"># 4 steps per refinement step, and n + 1 steps total</span>
-        <span class="n">verbose_steps</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">verbose_steps</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
         <span class="c1"># initialise step timings list for average step timings at end</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">step_timings</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -619,95 +630,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">step_timings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">step_timings</span><span class="p">)</span></div>
 
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_expected_minimum_random_sampling</span><span class="p">(</span><span class="n">optimized_result</span><span class="p">:</span> <span class="n">OptimizeResult</span><span class="p">,</span>
-                    <span class="n">n_random_starts</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list, float, list, list[list]]&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Control.plot_results"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.plot_results">[docs]</a>    <span class="k">def</span> <span class="nf">plot_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">MH_norm</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">20.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This is almost verbatim a copy of code from scikit-optimize but with the samples as</span>
-<span class="sd">        an additional output:</span>
-<span class="sd">        https://github.com/scikit-optimize/scikit-optimize/blob/de32b5fd2205a1e58526f3cacd0422a26d315d0f/skopt/utils.py#L259</span>
+<span class="sd">        Instantiates an insstance of the PlotResults class and generates a cornerplot</span>
+<span class="sd">        from the data in self.results_filename</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        optimized_result : `OptimizeResult`, scipy object</span>
-<span class="sd">            The optimization result returned by a `skopt` minimizer.</span>
-<span class="sd">        n_random_starts : int, default=100000</span>
-<span class="sd">            The number of random points for the minimization of the surrogate</span>
-<span class="sd">            model.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        min_x : list</span>
-<span class="sd">            location of the minimum.</span>
-<span class="sd">        y_random[index_best_objective] : float</span>
-<span class="sd">            the surrogate function value at the minimum.</span>
-<span class="sd">        y_random : np.array</span>
-<span class="sd">            An array of length &quot;n_random_starts&quot; containing surrogate function values at each point</span>
-<span class="sd">        random_samples : list[list]</span>
-<span class="sd">            A list of length &quot;n_random_starts&quot; containing the coordinates of each prediction</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># sample points from search space, set a random seed for reproducibility = 7 w.l.o.g.</span>
-        <span class="n">random_samples</span> <span class="o">=</span> <span class="n">optimized_result</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">n_random_starts</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
-
-        <span class="c1"># make estimations with surrogate</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">optimized_result</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">y_random</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">optimized_result</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">random_samples</span><span class="p">))</span>
-        <span class="n">index_best_objective</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">y_random</span><span class="p">)</span>
-        <span class="n">min_x</span> <span class="o">=</span> <span class="n">random_samples</span><span class="p">[</span><span class="n">index_best_objective</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">min_x</span><span class="p">,</span> <span class="n">y_random</span><span class="p">[</span><span class="n">index_best_objective</span><span class="p">],</span> <span class="n">y_random</span><span class="p">,</span> <span class="n">random_samples</span>
-
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_remove_points</span><span class="p">(</span><span class="n">chi_squared</span><span class="p">:</span> <span class="s1">&#39;list[float]&#39;</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="s1">&#39;list[list]&#39;</span><span class="p">,</span>
-                       <span class="n">MC_norm</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">20.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list, list]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Removes points with poor figure of merit based on a Metropolis-Hastings type rule,</span>
-<span class="sd">        where the likelihood of keeping a point is dependent on the exponent of the difference</span>
-<span class="sd">        between its figure of merit, and that of the best one found, divided by MC_norm.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        chi_squared : list[float]</span>
-<span class="sd">            A list of the predicted chi-squared value at each coordinate</span>
-<span class="sd">        coords : list[list]</span>
-<span class="sd">            A list of the coordinates at which all of the chi-squared predictions are made</span>
-<span class="sd">        MC_norm : float, optional</span>
-<span class="sd">            The denominator of the exponent used to control the liklihood of keeping a point,</span>
-<span class="sd">            defaults to 20.0</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        reduced_chi : list</span>
-<span class="sd">            A list of the remaining chi-squared points</span>
-<span class="sd">        reduced_coords : list[list]</span>
-<span class="sd">            A list of the remaining coordinates</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>  <span class="c1"># Set for reproducible output - will always retain same points</span>
-        <span class="n">lowest_chi</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">chi_squared</span><span class="p">)</span>
-
-        <span class="n">points_to_keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">chi_squared</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> \
-                         <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">lowest_chi</span> <span class="o">-</span> <span class="n">chi_squared</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">lowest_chi</span><span class="o">/</span><span class="n">MC_norm</span><span class="p">))</span>
-        <span class="n">reduced_chi</span><span class="o">=</span><span class="n">chi_squared</span><span class="p">[</span><span class="n">points_to_keep</span><span class="p">]</span>
-        <span class="n">reduced_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords</span><span class="p">)[</span><span class="n">points_to_keep</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">reduced_chi</span><span class="p">,</span> <span class="n">reduced_coords</span>
-
-<div class="viewcode-block" id="Control.plot_results"><a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.plot_results">[docs]</a>    <span class="k">def</span> <span class="nf">plot_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">MC_norm</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">20.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Performs a random sample across the coordinate space giving a predicted figure of merit at</span>
-<span class="sd">        every point. Then removes points with poor figures of merit, according to a</span>
-<span class="sd">        Metropolis-Hastings type rule, where the likelihood of keeping a point is dependant on the</span>
-<span class="sd">        exponent of the difference between its figure of merit, and that of the best one found,</span>
-<span class="sd">        divided by MC_norm. A corner plot is then returned (a matplotlib figure object), which can</span>
-<span class="sd">        be displayed or exported.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
+<span class="sd">        filename : str, optional</span>
+<span class="sd">            The filename and path to the history file. Defaults to None which</span>
+<span class="sd">            then uses self.results_filename</span>
 <span class="sd">        points : int, optional</span>
 <span class="sd">            The number of samples to initially generate, defaults to 100,000</span>
-<span class="sd">        MC_norm : float, optional</span>
+<span class="sd">        MH_norm : float, optional</span>
 <span class="sd">            The denominator of the exponent, controlling how likley points are to be kept,</span>
 <span class="sd">            defaults to 20.0</span>
 
@@ -716,24 +651,11 @@
 <span class="sd">        corner plot : Matplotlib.figure.Figure</span>
 <span class="sd">            A plot displaying every parameter combination with their variances and covariances</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">y_random</span><span class="p">,</span> <span class="n">coords</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expected_minimum_random_sampling</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">n_random_starts</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> </span><span class="se">\n</span><span class="s2"> Your model has not been run for enough iterations to make a reasonable &quot;</span>
-                   <span class="s2">&quot;guess at the best figure of merit. Please run for at least 20 steps. </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="n">_</span><span class="p">,</span> <span class="n">reduced_coordinate_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_remove_points</span><span class="p">(</span><span class="n">y_random</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">MC_norm</span><span class="p">)</span>
-
-        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reduced_coordinate_list</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reduced_coordinate_list</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="n">data</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reduced_coordinate_list</span><span class="p">)[:,</span><span class="n">i</span><span class="p">]</span>
-
-        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">]</span>
-        <span class="n">cornerplot</span> <span class="o">=</span> <span class="n">corner</span><span class="o">.</span><span class="n">corner</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="p">,</span> <span class="n">quantiles</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.34</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.68</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span>
+        <span class="n">plotter</span> <span class="o">=</span> <span class="n">PlotResults</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">MH_norm</span><span class="o">=</span><span class="n">MH_norm</span><span class="p">,</span> <span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">,</span>
+                              <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.34</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.68</span><span class="p">])</span>
+        <span class="n">cornerplot</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">create_cornerplot</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">cornerplot</span></div>
 
