@@ -1593,17 +1593,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">setup_universe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">setup_simulation</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Simulation.minimize"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Simulation.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="Simulation.minimize"><a class="viewcode-back" href="../../../pages/modules/md/simulation.html#MDMC.MD.simulation.Simulation.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">minimize_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Minimizes the total potential energy of the simulated system by</span>
-<span class="sd">        modifying the positions of the constituent atoms until one of the</span>
-<span class="sd">        stopping criteria is met.</span>
+<span class="sd">        Performs an MD run intertwined with periodic structure relaxation.</span>
+<span class="sd">        This way after a local minimum is found, the system is taken</span>
+<span class="sd">        out of the minimum to explore a larger volume of the parameter</span>
+<span class="sd">        space.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        n_steps : int</span>
-<span class="sd">            Maximum number of steps to run the minimization</span>
+<span class="sd">            Total number of the MD run steps</span>
+<span class="sd">        minimize_every: int, optional</span>
+<span class="sd">            Number of MD steps between two consecutive minimizations</span>
 <span class="sd">        verbose: bool, optional</span>
 <span class="sd">            Whether to print statements when the minimization has been started and completed</span>
 <span class="sd">            (including the number of minimization steps and time taken). Default is `False`.</span>
@@ -1618,11 +1623,11 @@
 <span class="sd">            ``ftol`` (`float`)</span>
 <span class="sd">                If the magnitude of the global force is less than ``ftol``,</span>
 <span class="sd">                minimization is stopped. Default depends on engine used.</span>
+<span class="sd">            ``maxiter`` (`int`)</span>
+<span class="sd">                Maximum number of iterations of a single structure</span>
+<span class="sd">                relaxation procedure. Default depends on engine used.</span>
 <span class="sd">            ``maxeval`` (`int`)</span>
 <span class="sd">                Maximum number of force evaluations to perform. Default depends</span>
-<span class="sd">                on engine used.</span>
-<span class="sd">            ``nfreq`` (`int`)</span>
-<span class="sd">                Frequency at which minimisation is performed. Default depends</span>
 <span class="sd">                on engine used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1632,9 +1637,10 @@
         <span class="c1"># step in this function so verbose levels 2 or 3 would not provide extra information</span>
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">verbose</span><span class="p">))</span>
 
-        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running minimization for </span><span class="si">{</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">output_log</span><span class="o">=</span><span class="n">output_log</span><span class="p">,</span> <span class="n">work_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span>
-                             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running minimization every </span><span class="si">{</span><span class="n">minimize_every</span><span class="si">}</span><span class="s2"> steps &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;in an MD run with </span><span class="si">{</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">minimize_every</span><span class="p">,</span> <span class="n">output_log</span><span class="o">=</span><span class="n">output_log</span><span class="p">,</span> <span class="n">work_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span>
+                             <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
 
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="s2">&quot;Minimization&quot;</span><span class="p">)</span></div>
 

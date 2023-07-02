@@ -459,8 +459,32 @@
                                                <span class="n">lmp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span>
                                                <span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LAMMPSEngine.minimize"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="LAMMPSEngine.minimize"><a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">minimize_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                 <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves the atoms towards a potential energy minimum,</span>
+<span class="sd">        by performing an MD simulation interrupted periodically</span>
+<span class="sd">        by a structure relaxation. In the end, the configuration</span>
+<span class="sd">        with the lowest potential energy reached during the run</span>
+<span class="sd">        is kept.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_steps : int</span>
+<span class="sd">            Number of MD simulation steps</span>
+<span class="sd">        minimize_every : int, optional, default 10</span>
+<span class="sd">            The structure relaxation will be performed every</span>
+<span class="sd">            &#39;minimize_every&#39; steps of the MD simulation</span>
+<span class="sd">        output_log : str, optional</span>
+<span class="sd">            Not used in this facade</span>
+<span class="sd">        work_dir : str, optional</span>
+<span class="sd">            Not used in this facade</span>
+<span class="sd">        **settings</span>
+<span class="sd">        etol: float, energy tolerance criteria for energy minimisation</span>
+<span class="sd">        ftol: float, force tolerance criteria for force minimisation, active only if non-zero</span>
+<span class="sd">        maxiter: int,  maximum number of steps in a single structure relaxation</span>
+<span class="sd">        maxeval: int,  maximum number of force calculations in a single structure relaxation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Check fix styles for shake or rattle styles and remove them</span>
         <span class="k">if</span> <span class="s1">&#39;constrain&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_names</span><span class="p">:</span>
@@ -472,18 +496,38 @@
 
         <span class="n">etol</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;etol&#39;</span><span class="p">,</span> <span class="mf">1.e-4</span><span class="p">)</span>
         <span class="n">ftol</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ftol&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="n">maxiter</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;maxiter&#39;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
         <span class="n">maxeval</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;maxeval&#39;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> minimize: {n_steps: </span><span class="si">%s</span><span class="s1">, etol: </span><span class="si">%s</span><span class="s1">, ftol: </span><span class="si">%s</span><span class="s1">,&#39;</span>
-                    <span class="s1">&#39; maxeval: </span><span class="si">%s</span><span class="s1">}&#39;</span><span class="p">,</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> minimize: {n_steps: </span><span class="si">%s</span><span class="s1">, minimize_every: </span><span class="si">%s</span><span class="s1">, etol: </span><span class="si">%s</span><span class="s1">, ftol: </span><span class="si">%s</span><span class="s1">,&#39;</span>
+                    <span class="s1">&#39; maxiter: </span><span class="si">%s</span><span class="s1">, maxeval: </span><span class="si">%s</span><span class="s1">}&#39;</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
                     <span class="n">n_steps</span><span class="p">,</span>
+                    <span class="n">minimize_every</span><span class="p">,</span>
                     <span class="n">etol</span><span class="p">,</span>
                     <span class="n">ftol</span><span class="p">,</span>
+                    <span class="n">maxiter</span><span class="p">,</span>
                     <span class="n">maxeval</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">etol</span><span class="p">,</span>
                           <span class="n">ftol</span><span class="p">,</span>
-                          <span class="n">n_steps</span><span class="p">,</span>
-                          <span class="n">maxeval</span><span class="p">)</span>
+                          <span class="n">maxiter</span><span class="p">,</span>  <span class="c1"># this is the number of relaxation steps</span>
+                          <span class="n">maxeval</span><span class="p">)</span>  <span class="c1"># this is the number of force evaluations</span>
+        <span class="n">best_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;pe&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_steps</span><span class="o">/</span><span class="n">minimize_every</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">velocity</span><span class="p">(</span>
+                        <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lmp_simulation</span><span class="o">.</span><span class="n">temperature</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">minimize_every</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">etol</span><span class="p">,</span>
+                              <span class="n">ftol</span><span class="p">,</span>
+                              <span class="n">maxiter</span><span class="p">,</span>  <span class="c1"># this is the number of relaxation steps</span>
+                              <span class="n">maxeval</span><span class="p">)</span>  <span class="c1"># this is the number of force evaluations</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;pe&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">energy</span> <span class="o">&lt;</span> <span class="n">best_energy</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+                <span class="n">best_energy</span> <span class="o">=</span> <span class="n">energy</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_config</span><span class="p">()</span>
 
         <span class="c1"># Reapply the constraints</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">constraint_algorithm</span><span class="p">:</span>
