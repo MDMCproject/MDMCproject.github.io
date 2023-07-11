@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -107,34 +108,35 @@
   <h1>Source code for MDMC.trajectory_analysis.observables.obs_factory</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Factory class for generating observables&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> \
-    <span class="n">Observable</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+    <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> <span class="n">Observable</span>
 
 
 <div class="viewcode-block" id="ObservableFactory"><a class="viewcode-back" href="../../../../pages/modules/trajectory_analysis/observables/obs_factory.html#MDMC.trajectory_analysis.observables.obs_factory.ObservableFactory">[docs]</a><span class="k">class</span> <span class="nc">ObservableFactory</span><span class="p">:</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides a factory for creating an ``Observable``.  Any module within the</span>
 <span class="sd">    observables submodule can be created with a string of the class name, as</span>
 <span class="sd">    long as it is a subclass of ``Observable``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">registry</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Observable</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">registry</span><span class="p">:</span> <span class="s1">&#39;dict[str, Observable]&#39;</span> <span class="o">=</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="ObservableFactory.register"><a class="viewcode-back" href="../../../../pages/modules/trajectory_analysis/observables/obs_factory.html#MDMC.trajectory_analysis.observables.obs_factory.ObservableFactory.register">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="s1">&#39;Union[str, Iterable]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A class level decorator for registering Observable classes</span>
 
-<span class="sd">        The name with which the Observable is registered should be the parameter</span>
-<span class="sd">        passed to the decorator.</span>
+<span class="sd">        The names of the modules with which the Observable is registered</span>
+<span class="sd">        should be the parameter passed to the decorator.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        name : str</span>
-<span class="sd">            The name with which the Observable is registered</span>
+<span class="sd">        names : str</span>
+<span class="sd">            The names of the modules with which the Observable is registered</span>
 
 <span class="sd">        Example</span>
 <span class="sd">        -------</span>
@@ -147,7 +149,7 @@
 <span class="sd">                class SQw(Observable):</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">class_wrapper</span><span class="p">(</span><span class="n">wrapped_class</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">class_wrapper</span><span class="p">(</span><span class="n">wrapped_class</span><span class="p">:</span> <span class="s1">&#39;Observable&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable&#39;</span><span class="p">:</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">names</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrapped_class</span>
@@ -159,8 +161,8 @@
         <span class="k">return</span> <span class="n">class_wrapper</span></div>
 
 <div class="viewcode-block" id="ObservableFactory.create_observable"><a class="viewcode-back" href="../../../../pages/modules/trajectory_analysis/observables/obs_factory.html#MDMC.trajectory_analysis.observables.obs_factory.ObservableFactory.create_observable">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create_observable</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Observable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">create_observable</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Observable&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an ``Observable`` object from a module name</span>
 
 <span class="sd">        The ``Observable`` object must be registered with the</span>
@@ -169,7 +171,7 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        name : str</span>
-<span class="sd">            The name of with which the ``Observable`` is registered</span>
+<span class="sd">            The name of the module with which the ``Observable`` is registered</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -180,14 +182,14 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_observable</span><span class="p">(</span><span class="n">name</span><span class="p">)()</span></div>
 
 <div class="viewcode-block" id="ObservableFactory.get_observable"><a class="viewcode-back" href="../../../../pages/modules/trajectory_analysis/observables/obs_factory.html#MDMC.trajectory_analysis.observables.obs_factory.ObservableFactory.get_observable">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">get_observable</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">Observable</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">get_observable</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Observable]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets an ``Observable`` class from a registry name</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        module_name : str</span>
-<span class="sd">            The name of with which the ``Observable`` is registered</span>
+<span class="sd">        name : str</span>
+<span class="sd">            The name of the module with which the ``Observable`` is registered</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>

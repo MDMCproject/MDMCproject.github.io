@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -107,14 +108,17 @@
   <h1>Source code for MDMC.readers.observables.LAMPSQw</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Readers for dynamic data&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Iterable</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">SQwReader</span>
 
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="LAMPSQw"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw">[docs]</a><span class="k">class</span> <span class="nc">LAMPSQw</span><span class="p">(</span><span class="n">SQwReader</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class for reading SQw files from LAMP</span>
 
 <span class="sd">    LAMP&#39;s ascii output uses three files: 1 for independent variables and</span>
@@ -128,11 +132,11 @@
 <span class="sd">        File containing the independent variables</span>
 <span class="sd">    file_dep : file</span>
 <span class="sd">        File containing the dependent variables</span>
-<span class="sd">    file_dep_err</span>
+<span class="sd">    file_dep_err: file</span>
 <span class="sd">        File containing the errors on the dependent variables</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_Y_dim</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_X_dim</span> <span class="o">=</span> <span class="kc">None</span>
@@ -140,8 +144,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">file_dep</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_indep</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Open the files for independent variables, dependent variables and errors</span>
 <span class="sd">        on the dependent variables</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -152,15 +156,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">file_dep</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_dep_err</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;ascii_e&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Closes all three files after parsing&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Closes all three files after parsing&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">file_indep</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_dep</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_dep_err</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-<div class="viewcode-block" id="LAMPSQw.parse"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="LAMPSQw.parse"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parse into SQw format</span>
 
 <span class="sd">        E is the energy transfer (in meV)</span>
@@ -174,10 +178,16 @@
         <span class="c1"># LAMP sets errors -1 if the corresponding datum is 0.  Change these to</span>
         <span class="c1"># inf so that error calculations can still be performed on them but</span>
         <span class="c1"># result in inf.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;We have set the error bar to infinity for any zero error values, this allows</span><span class="se">\</span>
+<span class="s2">                us to calculate chi-squared but effectively ignores these points, this may not</span><span class="se">\</span>
+<span class="s2">                be what you want to do, consider using a FoM which doesn&#39;t need errors if</span><span class="se">\</span>
+<span class="s2">                this is an issue&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LAMPSQw.parse_indep_var"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw.parse_indep_var">[docs]</a>    <span class="k">def</span> <span class="nf">parse_indep_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="LAMPSQw.parse_indep_var"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw.parse_indep_var">[docs]</a>    <span class="k">def</span> <span class="nf">parse_indep_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">IO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[np.ndarray, np.ndarray]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parses the independent variables</span>
 
 <span class="sd">        Splits the file so that the data can be extracted into a ``array`` by</span>
@@ -223,8 +233,8 @@
 
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
 
-<div class="viewcode-block" id="LAMPSQw.parse_dep_var"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw.parse_dep_var">[docs]</a>    <span class="k">def</span> <span class="nf">parse_dep_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="LAMPSQw.parse_dep_var"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/LAMPSQw.html#MDMC.readers.observables.LAMPSQw.LAMPSQw.parse_dep_var">[docs]</a>    <span class="k">def</span> <span class="nf">parse_dep_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">IO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parses the dependent variables or their errors.</span>
 
 <span class="sd">        Parameters</span>
@@ -242,8 +252,8 @@
         <span class="n">dep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">file_split</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Y_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_dim</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dep</span></div>
 
-    <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">str_iter</span><span class="p">,</span> <span class="o">*</span><span class="n">dimensions</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">str_iter</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="o">*</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Iterates over an iterator from a file and extracts the numerical values</span>
 <span class="sd">        as data.</span>
 

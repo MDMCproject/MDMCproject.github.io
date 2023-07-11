@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Creating an Observable from a Simulation &mdash; MDMC 0.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -21,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Selecting Fitting Parameters" href="selecting-fitting-parameters.html" />
-    <link rel="prev" title="&lt;no title&gt;" href="running-a-simulation.html" /> 
+    <link rel="prev" title="Running a Simulation in MDMC" href="running-a-simulation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -55,6 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Creating an Observable from a Simulation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#Running-a-simulation">Running a simulation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#3D-surface-plotting">3D surface plotting</a></li>
@@ -386,7 +388,7 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Creating-an-Observable-from-a-Simulation">
+<section id="Creating-an-Observable-from-a-Simulation">
 <h1>Creating an Observable from a Simulation<a class="headerlink" href="#Creating-an-Observable-from-a-Simulation" title="Permalink to this headline"></a></h1>
 <p>When running a refinement, MDMC makes quantitative comparisons between properties measured experimentally and calculated from MD simulations: within MDMC each of these properties is an <code class="docutils literal notranslate"><span class="pre">Observable</span></code>. Examples of these observables are the dynamic structure factor, <span class="math notranslate nohighlight">\(S(Q,\omega)\)</span>, and the pair distribution function, <span class="math notranslate nohighlight">\(G(r)\)</span>.</p>
 <p>Within a refinement, each <code class="docutils literal notranslate"><span class="pre">Observable</span></code> is calculated from MD automatically. However it is also useful to be able to calculate an <code class="docutils literal notranslate"><span class="pre">Observable</span></code> from an MD simulation and plot it, which is demonstrated in this tutorial.</p>
@@ -410,11 +412,11 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="Running-a-simulation">
+<section id="Running-a-simulation">
 <h2>Running a simulation<a class="headerlink" href="#Running-a-simulation" title="Permalink to this headline"></a></h2>
-<p>Below we setup and run a simulation of liquid argon so that we have a <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> from which to calculate an <code class="docutils literal notranslate"><span class="pre">Observable</span></code>.</p>
-<p><strong>As this is minimizing, equilibrating, and running a production run, this should take ~3 minutes to execute</strong>. Minimization lowers the potential energy of the simulated system by adjusting atomic positions. Running a simulation with <code class="docutils literal notranslate"><span class="pre">equilibration</span></code> set to <code class="docutils literal notranslate"><span class="pre">True</span></code> will not record a <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code>, and since we specified neither a thermostat or barastat for the simulation a Berendsen thermostat will be applied for the duration of the equilibration. It will not be present for the second run,
-when the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> is recorded.</p>
+<p>Below we setup and run a simulation of liquid argon so that we have a <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> from which to calculate an <code class="docutils literal notranslate"><span class="pre">Observable</span></code>.</p>
+<p><strong>As this is minimizing, equilibrating, and running a production run, this should take ~3 minutes to execute</strong>. Minimization lowers the potential energy of the simulated system by adjusting atomic positions. Running a simulation with <code class="docutils literal notranslate"><span class="pre">equilibration</span></code> set to <code class="docutils literal notranslate"><span class="pre">True</span></code> will not record a <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>, and since we specified neither a thermostat or barastat for the simulation a Berendsen thermostat will be applied for the duration of the equilibration. It will not be present for the second
+run, when the <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is recorded.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -442,7 +444,7 @@ when the <code class="docutils literal notranslate"><span class="pre">Trajectory
                         <span class="n">traj_step</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
 
 <span class="c1"># Energy Minimization and equilibration</span>
-<span class="n">simulation</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 <span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">12025</span><span class="p">)</span>
 <span class="n">trajectory</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">trajectory</span>
@@ -454,7 +456,7 @@ when the <code class="docutils literal notranslate"><span class="pre">Trajectory
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Supported DL_POLY version 4.10
+Supported DL_POLY version 5.0
 Universe created with:
   Dimensions       [38.44, 38.44, 38.44]
   Force field                       None
@@ -466,16 +468,16 @@ OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98
   using 1 OpenMP thread(s) per MPI task
 LAMMPS output is captured by PyLammps wrapper
 LAMMPS (29 Sep 2021 - Update 3)
+LAMMPS output is captured by PyLammps wrapper
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
-LAMMPS output is captured by PyLammps wrapper
 Total wall time: 0:00:00
 Simulation created with lammps engine and settings:
   temperature  120.0
 
 </pre></div></div>
 </div>
-<div class="section" id="3D-surface-plotting">
+<section id="3D-surface-plotting">
 <h3>3D surface plotting<a class="headerlink" href="#3D-surface-plotting" title="Permalink to this headline"></a></h3>
 <p>Below we define a simple function for plotting 3D surfaces, which we will use for plotting the observables.</p>
 <div class="nbinput nblast docutils container">
@@ -484,16 +486,16 @@ Simulation created with lammps engine and settings:
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_surface</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
     <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
     <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="n">surf</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="Calculating-S(Q,\omega)">
+</section>
+</section>
+<section id="Calculating-S(Q,\omega)">
 <h2>Calculating <span class="math notranslate nohighlight">\(S(Q,\omega)\)</span><a class="headerlink" href="#Calculating-S(Q,\omega)" title="Permalink to this headline"></a></h2>
 <p>To see which observables can be calculated, use the <code class="docutils literal notranslate"><span class="pre">help</span></code> function to look at the observables module documentation:</p>
 <div class="nbinput docutils container">
@@ -521,8 +523,8 @@ DESCRIPTION
     DynamicStructureFactor / SQw
     CoherentDynamicStructureFactor / SQwCoherent / SQwCoh / SQw_coh
     IncoherentDynamicStructureFactor / SQwIncoherentSQwIncoh / SQw_incoh
-    PDF / PairDistributionFunction
     IntermediateScatteringFunction / FQt
+    PDF / PairDistributionFunction
     CoherentIntermediateScatteringFunction / FQtCoherent / FQtCoh / FQt_coh
     IncoherentIntermediateScatteringFunction / FQtIncoherentFQtIncoh / FQt_incoh
 
@@ -581,7 +583,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_dt(self)
+     |  calculate_dt(self) -&gt; float
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
      |      the time separation that the user has given as an input, as it only
@@ -598,21 +600,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -639,17 +641,17 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
-     |  calculate_resolution_functions(self, dt)
+     |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
      |      SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so
      |      should only be called for an observable which has been created from relevant resolution
@@ -675,7 +677,7 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
-     |  validate_energy(self, dt)
+     |  validate_energy(self, dt: float) -&gt; None
      |      Asserts that the user set frame separation ``dt`` leads to energy
      |      separation that matches that of the experiment. If not, it
      |      includes the time separation required in the error.
@@ -696,13 +698,14 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Static methods inherited from AbstractSQw:
      |
-     |  calculate_E(nE: int, dt: float)
+     |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -730,8 +733,8 @@ CLASSES
      |  SQw_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
-     |      SQw, the dynamic structure factor (in ``arb``)
+     |      Get the dependent variables: this is SQw, the
+     |      dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -791,8 +794,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Methods inherited from SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -806,8 +809,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -854,7 +857,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -884,8 +887,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -919,7 +921,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution) -&gt; &#39;FQt&#39;
      |      Apply instrument resolution to an FQt object.
      |
      |      Parameters
@@ -931,7 +933,7 @@ CLASSES
      |      -------
      |      The FQt object with resolution applied.
      |
-     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |  calculate_SQw(self, energy: &#39;list[float]&#39;, resolution: MDMC.resolution.resolution.Resolution = None) -&gt; &#39;np.ndarray&#39;
      |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
      |
      |      In order to obtain ``len(energy)`` values in energy, we reflect the
@@ -957,7 +959,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -965,8 +967,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -986,7 +988,7 @@ CLASSES
      |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
+     |      Get the dependent variables: this is
      |      FQt, the intermediate scattering function (in ``arb``)
      |
      |      Returns
@@ -1006,7 +1008,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, list]
+     |      dict[str, list]
      |          The shape of the SQw dependent variable
      |
      |  uniformity_requirements
@@ -1018,7 +1020,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
      |
      |  ----------------------------------------------------------------------
@@ -1050,14 +1052,14 @@ CLASSES
      |
      |      Returns
      |      -------
-     |      array
+     |      numpy.array
      |          1D array of times in ``fs``
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -1071,8 +1073,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -1119,7 +1121,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -1149,8 +1151,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -1186,7 +1187,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_dt(self)
+     |  calculate_dt(self) -&gt; float
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
      |      the time separation that the user has given as an input, as it only
@@ -1203,21 +1204,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -1244,17 +1245,17 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
-     |  calculate_resolution_functions(self, dt)
+     |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
      |      SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so
      |      should only be called for an observable which has been created from relevant resolution
@@ -1280,7 +1281,7 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
-     |  validate_energy(self, dt)
+     |  validate_energy(self, dt: float) -&gt; None
      |      Asserts that the user set frame separation ``dt`` leads to energy
      |      separation that matches that of the experiment. If not, it
      |      includes the time separation required in the error.
@@ -1301,13 +1302,14 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Static methods inherited from AbstractSQw:
      |
-     |  calculate_E(nE: int, dt: float)
+     |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -1335,8 +1337,8 @@ CLASSES
      |  SQw_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
-     |      SQw, the dynamic structure factor (in ``arb``)
+     |      Get the dependent variables: this is SQw, the
+     |      dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -1396,8 +1398,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Methods inherited from SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -1411,8 +1413,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -1459,7 +1461,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -1489,8 +1491,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -1524,7 +1525,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution) -&gt; &#39;FQt&#39;
      |      Apply instrument resolution to an FQt object.
      |
      |      Parameters
@@ -1536,7 +1537,7 @@ CLASSES
      |      -------
      |      The FQt object with resolution applied.
      |
-     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |  calculate_SQw(self, energy: &#39;list[float]&#39;, resolution: MDMC.resolution.resolution.Resolution = None) -&gt; &#39;np.ndarray&#39;
      |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
      |
      |      In order to obtain ``len(energy)`` values in energy, we reflect the
@@ -1562,7 +1563,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -1570,8 +1571,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -1591,7 +1592,7 @@ CLASSES
      |  Readonly properties inherited from AbstractFQt:
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
+     |      Get the dependent variables: this is
      |      FQt, the intermediate scattering function (in ``arb``)
      |
      |      Returns
@@ -1611,7 +1612,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, list]
+     |      dict[str, list]
      |          The shape of the SQw dependent variable
      |
      |  uniformity_requirements
@@ -1623,7 +1624,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
      |
      |  ----------------------------------------------------------------------
@@ -1655,14 +1656,14 @@ CLASSES
      |
      |      Returns
      |      -------
-     |      array
+     |      numpy.array
      |          1D array of times in ``fs``
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -1676,8 +1677,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -1724,7 +1725,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -1754,8 +1755,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -1789,7 +1789,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution) -&gt; &#39;FQt&#39;
      |      Apply instrument resolution to an FQt object.
      |
      |      Parameters
@@ -1801,7 +1801,7 @@ CLASSES
      |      -------
      |      The FQt object with resolution applied.
      |
-     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |  calculate_SQw(self, energy: &#39;list[float]&#39;, resolution: MDMC.resolution.resolution.Resolution = None) -&gt; &#39;np.ndarray&#39;
      |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
      |
      |      In order to obtain ``len(energy)`` values in energy, we reflect the
@@ -1827,7 +1827,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -1835,8 +1835,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -1856,7 +1856,7 @@ CLASSES
      |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
+     |      Get the dependent variables: this is
      |      FQt, the intermediate scattering function (in ``arb``)
      |
      |      Returns
@@ -1876,7 +1876,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, list]
+     |      dict[str, list]
      |          The shape of the SQw dependent variable
      |
      |  uniformity_requirements
@@ -1888,7 +1888,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
      |
      |  ----------------------------------------------------------------------
@@ -1920,14 +1920,14 @@ CLASSES
      |
      |      Returns
      |      -------
-     |      array
+     |      numpy.array
      |          1D array of times in ``fs``
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -1941,8 +1941,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -1989,7 +1989,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -2019,8 +2019,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -2054,7 +2053,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution) -&gt; &#39;FQt&#39;
      |      Apply instrument resolution to an FQt object.
      |
      |      Parameters
@@ -2066,7 +2065,7 @@ CLASSES
      |      -------
      |      The FQt object with resolution applied.
      |
-     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |  calculate_SQw(self, energy: &#39;list[float]&#39;, resolution: MDMC.resolution.resolution.Resolution = None) -&gt; &#39;np.ndarray&#39;
      |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
      |
      |      In order to obtain ``len(energy)`` values in energy, we reflect the
@@ -2092,7 +2091,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2100,8 +2099,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -2121,7 +2120,7 @@ CLASSES
      |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
+     |      Get the dependent variables: this is
      |      FQt, the intermediate scattering function (in ``arb``)
      |
      |      Returns
@@ -2141,7 +2140,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, list]
+     |      dict[str, list]
      |          The shape of the SQw dependent variable
      |
      |  uniformity_requirements
@@ -2153,7 +2152,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
      |
      |  ----------------------------------------------------------------------
@@ -2185,14 +2184,14 @@ CLASSES
      |
      |      Returns
      |      -------
-     |      array
+     |      numpy.array
      |          1D array of times in ``fs``
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -2206,8 +2205,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -2254,7 +2253,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -2284,8 +2283,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -2319,7 +2317,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution) -&gt; &#39;FQt&#39;
      |      Apply instrument resolution to an FQt object.
      |
      |      Parameters
@@ -2331,7 +2329,7 @@ CLASSES
      |      -------
      |      The FQt object with resolution applied.
      |
-     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |  calculate_SQw(self, energy: &#39;list[float]&#39;, resolution: MDMC.resolution.resolution.Resolution = None) -&gt; &#39;np.ndarray&#39;
      |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
      |
      |      In order to obtain ``len(energy)`` values in energy, we reflect the
@@ -2357,7 +2355,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2365,8 +2363,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -2386,7 +2384,7 @@ CLASSES
      |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
+     |      Get the dependent variables: this is
      |      FQt, the intermediate scattering function (in ``arb``)
      |
      |      Returns
@@ -2406,7 +2404,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, list]
+     |      dict[str, list]
      |          The shape of the SQw dependent variable
      |
      |  uniformity_requirements
@@ -2418,7 +2416,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
      |
      |  ----------------------------------------------------------------------
@@ -2450,14 +2448,14 @@ CLASSES
      |
      |      Returns
      |      -------
-     |      array
+     |      numpy.array
      |          1D array of times in ``fs``
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -2471,8 +2469,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -2519,7 +2517,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -2549,8 +2547,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -2584,7 +2581,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution) -&gt; &#39;FQt&#39;
      |      Apply instrument resolution to an FQt object.
      |
      |      Parameters
@@ -2596,7 +2593,7 @@ CLASSES
      |      -------
      |      The FQt object with resolution applied.
      |
-     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |  calculate_SQw(self, energy: &#39;list[float]&#39;, resolution: MDMC.resolution.resolution.Resolution = None) -&gt; &#39;np.ndarray&#39;
      |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
      |
      |      In order to obtain ``len(energy)`` values in energy, we reflect the
@@ -2622,7 +2619,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2630,8 +2627,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -2651,7 +2648,7 @@ CLASSES
      |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
+     |      Get the dependent variables: this is
      |      FQt, the intermediate scattering function (in ``arb``)
      |
      |      Returns
@@ -2671,7 +2668,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, list]
+     |      dict[str, list]
      |          The shape of the SQw dependent variable
      |
      |  uniformity_requirements
@@ -2683,7 +2680,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
      |
      |  ----------------------------------------------------------------------
@@ -2715,14 +2712,14 @@ CLASSES
      |
      |      Returns
      |      -------
-     |      array
+     |      numpy.array
      |          1D array of times in ``fs``
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -2736,8 +2733,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -2784,7 +2781,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -2814,8 +2811,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -2849,7 +2845,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution) -&gt; &#39;FQt&#39;
      |      Apply instrument resolution to an FQt object.
      |
      |      Parameters
@@ -2861,7 +2857,7 @@ CLASSES
      |      -------
      |      The FQt object with resolution applied.
      |
-     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |  calculate_SQw(self, energy: &#39;list[float]&#39;, resolution: MDMC.resolution.resolution.Resolution = None) -&gt; &#39;np.ndarray&#39;
      |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
      |
      |      In order to obtain ``len(energy)`` values in energy, we reflect the
@@ -2887,7 +2883,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -2895,8 +2891,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -2916,7 +2912,7 @@ CLASSES
      |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
+     |      Get the dependent variables: this is
      |      FQt, the intermediate scattering function (in ``arb``)
      |
      |      Returns
@@ -2936,7 +2932,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, list]
+     |      dict[str, list]
      |          The shape of the SQw dependent variable
      |
      |  uniformity_requirements
@@ -2948,7 +2944,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
      |
      |  ----------------------------------------------------------------------
@@ -2980,14 +2976,14 @@ CLASSES
      |
      |      Returns
      |      -------
-     |      array
+     |      numpy.array
      |          1D array of times in ``fs``
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -3001,8 +2997,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -3049,7 +3045,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -3079,8 +3075,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -3113,7 +3108,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_dt(self)
+     |  calculate_dt(self) -&gt; float
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
      |      the time separation that the user has given as an input, as it only
@@ -3130,21 +3125,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -3171,17 +3166,17 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
-     |  calculate_resolution_functions(self, dt)
+     |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
      |      SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so
      |      should only be called for an observable which has been created from relevant resolution
@@ -3207,7 +3202,7 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
-     |  validate_energy(self, dt)
+     |  validate_energy(self, dt: float) -&gt; None
      |      Asserts that the user set frame separation ``dt`` leads to energy
      |      separation that matches that of the experiment. If not, it
      |      includes the time separation required in the error.
@@ -3228,13 +3223,14 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Static methods inherited from AbstractSQw:
      |
-     |  calculate_E(nE: int, dt: float)
+     |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -3262,8 +3258,8 @@ CLASSES
      |  SQw_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
-     |      SQw, the dynamic structure factor (in ``arb``)
+     |      Get the dependent variables: this is SQw, the
+     |      dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -3323,8 +3319,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Methods inherited from SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -3338,8 +3334,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -3386,7 +3382,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -3416,8 +3412,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -3451,7 +3446,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution) -&gt; &#39;FQt&#39;
      |      Apply instrument resolution to an FQt object.
      |
      |      Parameters
@@ -3463,7 +3458,7 @@ CLASSES
      |      -------
      |      The FQt object with resolution applied.
      |
-     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |  calculate_SQw(self, energy: &#39;list[float]&#39;, resolution: MDMC.resolution.resolution.Resolution = None) -&gt; &#39;np.ndarray&#39;
      |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
      |
      |      In order to obtain ``len(energy)`` values in energy, we reflect the
@@ -3489,7 +3484,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -3497,8 +3492,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -3518,7 +3513,7 @@ CLASSES
      |  Readonly properties inherited from MDMC.trajectory_analysis.observables.fqt.AbstractFQt:
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
+     |      Get the dependent variables: this is
      |      FQt, the intermediate scattering function (in ``arb``)
      |
      |      Returns
@@ -3538,7 +3533,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, list]
+     |      dict[str, list]
      |          The shape of the SQw dependent variable
      |
      |  uniformity_requirements
@@ -3550,7 +3545,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
      |
      |  ----------------------------------------------------------------------
@@ -3582,14 +3577,14 @@ CLASSES
      |
      |      Returns
      |      -------
-     |      array
+     |      numpy.array
      |          1D array of times in ``fs``
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -3603,8 +3598,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -3651,7 +3646,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -3681,8 +3676,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -3716,7 +3710,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution)
+     |  apply_resolution(self, resolution: MDMC.resolution.resolution.Resolution) -&gt; &#39;FQt&#39;
      |      Apply instrument resolution to an FQt object.
      |
      |      Parameters
@@ -3728,7 +3722,7 @@ CLASSES
      |      -------
      |      The FQt object with resolution applied.
      |
-     |  calculate_SQw(self, energy, resolution: MDMC.resolution.resolution.Resolution = None)
+     |  calculate_SQw(self, energy: &#39;list[float]&#39;, resolution: MDMC.resolution.resolution.Resolution = None) -&gt; &#39;np.ndarray&#39;
      |      Calculates S(Q, w) from F(Q, t), accounting for instrument resolution.
      |
      |      In order to obtain ``len(energy)`` values in energy, we reflect the
@@ -3754,7 +3748,7 @@ CLASSES
      |      numpy.ndarray
      |          The S(Q, w) calculated from F(Q, t)
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict) -&gt; None
      |      Calculates the intermediate scattering function from a trajectory.
      |
      |      ``independent_variables`` can either be set previously or defined within
@@ -3762,8 +3756,8 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |          a single ``CompactTrajectory`` object.
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -3783,7 +3777,7 @@ CLASSES
      |  Readonly properties inherited from AbstractFQt:
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
+     |      Get the dependent variables: this is
      |      FQt, the intermediate scattering function (in ``arb``)
      |
      |      Returns
@@ -3803,7 +3797,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, list]
+     |      dict[str, list]
      |          The shape of the SQw dependent variable
      |
      |  uniformity_requirements
@@ -3815,7 +3809,7 @@ CLASSES
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;t&#39; and &#39;Q&#39;.
      |
      |  ----------------------------------------------------------------------
@@ -3847,14 +3841,14 @@ CLASSES
      |
      |      Returns
      |      -------
-     |      array
+     |      numpy.array
      |          1D array of times in ``fs``
      |
      |  ----------------------------------------------------------------------
      |  Methods inherited from MDMC.trajectory_analysis.observables.sqw.SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -3868,8 +3862,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -3916,7 +3910,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -3946,8 +3940,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -3959,15 +3952,25 @@ CLASSES
 
     PDF = class PairDistributionFunction(MDMC.trajectory_analysis.observables.obs.Observable)
      |  A class for containing, calculating and reading a pair distribution function (PDF).
+     |
+     |  We derive our definitions for this from the following publication:
+     |  &#34;A comparison of various commonly used correlation functions for describing total scattering&#34;
+     |  Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+     |  DOI: https://doi.org/10.1107/S0021889800019993
+     |
      |  We employ the following mathematical form for the total pair distribution function (``PDF``):
      |
      |      .. math::
      |
      |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
      |
+     |
      |      where :math:`c_i` is the number concentration of element :math:`i`,
-     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-     |      and the partial pair distribution, :math:`g_{ij}`, is:
+     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`.
+     |      (This corresponds to equation 8 in the above publication)
+     |
+     |
+     |  The partial pair distribution, :math:`g_{ij}`, is:
      |
      |      .. math::
      |
@@ -3978,6 +3981,7 @@ CLASSES
      |      :math:`\Delta{r}`, and :math:`\rho_{j}` is the number density of
      |      atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
      |      :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
+     |      (This corresponds to equation 10 in the above publication)
      |
      |  The total PDF is contained in ``PDF`` and the partial pair PDFs (if calculated or imported)
      |  are contained in ``partial_pdfs``.
@@ -3993,19 +3997,11 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose=0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
      |      Calculate the pair distribution function, :math:`G(r)`` from a
-     |      ``Trajectory``
+     |      ``CompactTrajectory``
      |
-     |      The total pair distribution function (``pdf.PDF``) has the form:
-     |
-     |      .. math::
-     |
-     |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
-     |
-     |      where :math:`c_i` is the number concentration of element :math:`i`,
-     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-     |      and the partial pair distribution, :math:`g_{ij}`, is:
+     |      The partial pair distribution for a pair i-j, :math:`g_{ij}`, is:
      |
      |      .. math::
      |
@@ -4017,6 +4013,23 @@ CLASSES
      |      atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
      |      :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
      |
+     |      This corresponds to the equation (8) in the following paper:
+     |      &#34;A comparison of various commonly used correlation functions for
+     |       describing total scattering&#34;
+     |      Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+     |      DOI: https://doi.org/10.1107/S0021889800019993
+     |
+     |      The total pair distribution function (``pdf.PDF``) has the form:
+     |
+     |      .. math::
+     |
+     |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
+     |
+     |      where :math:`c_i` is the proportion of element :math:`i` in the material,
+     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`
+     |
+     |      This corresponds to the equation (10) in the above paper.
+     |
      |      Independent variables can either be set previously or defined within
      |      settings.
      |
@@ -4027,35 +4040,41 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |           A single ``CompactTrajectory`` object.
      |      verbose: int
      |          Verbose print settings. Not currently implemented for PDF.
      |      **settings
      |          n_frames : int
      |              The number of frames from which the pdf and its error are
-     |              calculated. If this is not passed, 1% of the total number of
-     |              frames are used (rounded up to nearest int).
+     |              calculated. These frames are selected uniformly, and the step is taken to be
+     |              n_frames / total number of frames rounded to the nearest positive integer.
+     |              If this is not passed, 1% of the total number of frames are used
+     |              (rounded up to the nearest positive integer).
+     |          use_average : bool
+     |              Optional parameter. If set to True then the mean value for PDF is
+     |              calculated across selected frames from the trajectory. Also, the errors
+     |              are set to the standard deviation calculated over the multiple frames.
+     |              If set to False (default), only the last frame of the trajectory is used and
+     |              n_frames will be ignored.
      |          subset : list of tuples
      |              The subset of element pairs from which the PDF is calculated.
      |              This can be used to calculate the partial PDFs of a
      |              multicomponent system. If this is not passed, all combinations
      |              of elements are used i.e. the PDF is the total PDF.
      |          b_coh : dict
-     |              Definitions of the coherent neutron scattering lengths for one
-     |              or more elements. This can be used to calculate the PDF of a
-     |              system where one or more elements has a coherent scattering
-     |              length different from the coherent scattering length in
-     |              MDMC.common.atom_properties (i.e. if it has been isotopically
-     |              substituted).
+     |              A dictionary containing coherent scattering length values for one or more elements.
+     |              This can be used to calculate the PDF of a system where one or more elements
+     |              has a coherent scattering length different from the coherent scattering length in
+     |              MDMC.common.atom_properties (i.e. if it has been isotopically substituted).
      |          r_min : float
-     |              The minimum ``r`` (atomic separation) for which the PDF will be
+     |              The minimum ``r`` (atomic separation) in Angstrom for which the PDF will be
      |              calculated. If this, ``r_max``, and ``r_step`` are passed then
      |              these will create a range for the independent variable ``r``,
      |              which will overwrite any ``r`` which has previously been
      |              defined. This cannot be passed if ``r`` is passed.
      |          r_max : float
-     |              The maximum ``r`` (atomic separation) for which the PDF will be
+     |              The maximum ``r`` (atomic separation) in Angstrom for which the PDF will be
      |              calculated. If this, ``r_min``, and ``r_step`` are passed then
      |              these will create a range for the independent variable ``r``,
      |              which will overwrite any ``r`` which has previously been
@@ -4067,12 +4086,13 @@ CLASSES
      |              ``r``, which will overwrite any ``r`` which has previously been
      |              defined. This cannot be passed if ``r`` is passed.
      |          r : numpy.ndarray
-     |              The uniform ``r`` values for which the PDF will be calculated.
+     |              The uniform ``r`` values in Angstrom for which the PDF will be calculated.
      |              This cannot be passed if ``r_min``, ``r_max``, and ``r_step``
      |              are passed.
      |          dimensions : array-like
      |              A 3 element `array-like` (`list`, `tuple`) with the dimensions
-     |              of the ``Universe``.
+     |              of the ``Universe`` in Angstrom.
+     |
      |
      |      Examples
      |      --------
@@ -4098,14 +4118,21 @@ CLASSES
      |
      |          pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
      |
-     |      To calculate the total PDF for r values of [1., 2., 3., 4., ]:
+     |      To calculate the total PDF for r values of [1., 2., 3., 4.]:
      |
      |          .. highlight:: python
      |          .. code-block:: python
      |
-     |          pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
+     |          pdf.calculate_from_MD(trajectory, r=[1., 2., 3., 4.])
      |
-     |  maximum_frames(self)
+     |      To calculate the total PDF over an average of 5 frames:
+     |
+     |          .. highlight:: python
+     |          .. code-block:: python
+     |
+     |          pdf.calculate_from_MD(trajectory, use_average=True, n_frames=5)
+     |
+     |  maximum_frames(self) -&gt; None
      |      There is no hard limit on the number of frames that can be used, so
      |      return None
      |
@@ -4113,9 +4140,9 @@ CLASSES
      |      -------
      |      None
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
-     |      ``dependent_variables`` is 1
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to
+     |      calculate the ``dependent_variables`` is 1
      |
      |      Parameters
      |      ----------
@@ -4136,8 +4163,7 @@ CLASSES
      |  PDF_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: these are
-     |      PDF, the pair distribution function (in ``barn``)
+     |      Get the dependent variables: these are PDF, the pair distribution function (in ``barn``)
      |
      |      Returns
      |      -------
@@ -4154,21 +4180,21 @@ CLASSES
      |          The shape of the PDF dependent variable
      |
      |  uniformity_requirements
-     |      # Defines the current limitations on the atomic separation distance &#39;r&#39;
+     |      Defines the current limitations on the atomic separation distance &#39;r&#39;
      |      of the ``PairDistributionFunction`` ``Observable.
      |      The requirement is that &#39;r&#39; must be uniform, but it does not have to start at zero.
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;r&#39;.
      |
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
      |
      |  errors
-     |      Get or set the errors on the dependent variables, the pair distribution
-     |      function (in ``arb``)
+     |      Get or set the errors on the dependent variables, the pair distribution function
+     |      (in ``arb``)
      |
      |      Returns
      |      -------
@@ -4199,7 +4225,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -4235,8 +4261,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -4248,15 +4273,25 @@ CLASSES
 
     class PairDistributionFunction(MDMC.trajectory_analysis.observables.obs.Observable)
      |  A class for containing, calculating and reading a pair distribution function (PDF).
+     |
+     |  We derive our definitions for this from the following publication:
+     |  &#34;A comparison of various commonly used correlation functions for describing total scattering&#34;
+     |  Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+     |  DOI: https://doi.org/10.1107/S0021889800019993
+     |
      |  We employ the following mathematical form for the total pair distribution function (``PDF``):
      |
      |      .. math::
      |
      |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
      |
+     |
      |      where :math:`c_i` is the number concentration of element :math:`i`,
-     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-     |      and the partial pair distribution, :math:`g_{ij}`, is:
+     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`.
+     |      (This corresponds to equation 8 in the above publication)
+     |
+     |
+     |  The partial pair distribution, :math:`g_{ij}`, is:
      |
      |      .. math::
      |
@@ -4267,6 +4302,7 @@ CLASSES
      |      :math:`\Delta{r}`, and :math:`\rho_{j}` is the number density of
      |      atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
      |      :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
+     |      (This corresponds to equation 10 in the above publication)
      |
      |  The total PDF is contained in ``PDF`` and the partial pair PDFs (if calculated or imported)
      |  are contained in ``partial_pdfs``.
@@ -4282,19 +4318,11 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose=0, **settings)
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
      |      Calculate the pair distribution function, :math:`G(r)`` from a
-     |      ``Trajectory``
+     |      ``CompactTrajectory``
      |
-     |      The total pair distribution function (``pdf.PDF``) has the form:
-     |
-     |      .. math::
-     |
-     |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
-     |
-     |      where :math:`c_i` is the number concentration of element :math:`i`,
-     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-     |      and the partial pair distribution, :math:`g_{ij}`, is:
+     |      The partial pair distribution for a pair i-j, :math:`g_{ij}`, is:
      |
      |      .. math::
      |
@@ -4306,6 +4334,23 @@ CLASSES
      |      atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
      |      :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
      |
+     |      This corresponds to the equation (8) in the following paper:
+     |      &#34;A comparison of various commonly used correlation functions for
+     |       describing total scattering&#34;
+     |      Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+     |      DOI: https://doi.org/10.1107/S0021889800019993
+     |
+     |      The total pair distribution function (``pdf.PDF``) has the form:
+     |
+     |      .. math::
+     |
+     |          G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
+     |
+     |      where :math:`c_i` is the proportion of element :math:`i` in the material,
+     |      :math:`b_i` is the (coherent) scattering length of element :math:`i`
+     |
+     |      This corresponds to the equation (10) in the above paper.
+     |
      |      Independent variables can either be set previously or defined within
      |      settings.
      |
@@ -4316,35 +4361,41 @@ CLASSES
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory or list of Trajectory
-     |          Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+     |      MD_input : CompactTrajectory
+     |           A single ``CompactTrajectory`` object.
      |      verbose: int
      |          Verbose print settings. Not currently implemented for PDF.
      |      **settings
      |          n_frames : int
      |              The number of frames from which the pdf and its error are
-     |              calculated. If this is not passed, 1% of the total number of
-     |              frames are used (rounded up to nearest int).
+     |              calculated. These frames are selected uniformly, and the step is taken to be
+     |              n_frames / total number of frames rounded to the nearest positive integer.
+     |              If this is not passed, 1% of the total number of frames are used
+     |              (rounded up to the nearest positive integer).
+     |          use_average : bool
+     |              Optional parameter. If set to True then the mean value for PDF is
+     |              calculated across selected frames from the trajectory. Also, the errors
+     |              are set to the standard deviation calculated over the multiple frames.
+     |              If set to False (default), only the last frame of the trajectory is used and
+     |              n_frames will be ignored.
      |          subset : list of tuples
      |              The subset of element pairs from which the PDF is calculated.
      |              This can be used to calculate the partial PDFs of a
      |              multicomponent system. If this is not passed, all combinations
      |              of elements are used i.e. the PDF is the total PDF.
      |          b_coh : dict
-     |              Definitions of the coherent neutron scattering lengths for one
-     |              or more elements. This can be used to calculate the PDF of a
-     |              system where one or more elements has a coherent scattering
-     |              length different from the coherent scattering length in
-     |              MDMC.common.atom_properties (i.e. if it has been isotopically
-     |              substituted).
+     |              A dictionary containing coherent scattering length values for one or more elements.
+     |              This can be used to calculate the PDF of a system where one or more elements
+     |              has a coherent scattering length different from the coherent scattering length in
+     |              MDMC.common.atom_properties (i.e. if it has been isotopically substituted).
      |          r_min : float
-     |              The minimum ``r`` (atomic separation) for which the PDF will be
+     |              The minimum ``r`` (atomic separation) in Angstrom for which the PDF will be
      |              calculated. If this, ``r_max``, and ``r_step`` are passed then
      |              these will create a range for the independent variable ``r``,
      |              which will overwrite any ``r`` which has previously been
      |              defined. This cannot be passed if ``r`` is passed.
      |          r_max : float
-     |              The maximum ``r`` (atomic separation) for which the PDF will be
+     |              The maximum ``r`` (atomic separation) in Angstrom for which the PDF will be
      |              calculated. If this, ``r_min``, and ``r_step`` are passed then
      |              these will create a range for the independent variable ``r``,
      |              which will overwrite any ``r`` which has previously been
@@ -4356,12 +4407,13 @@ CLASSES
      |              ``r``, which will overwrite any ``r`` which has previously been
      |              defined. This cannot be passed if ``r`` is passed.
      |          r : numpy.ndarray
-     |              The uniform ``r`` values for which the PDF will be calculated.
+     |              The uniform ``r`` values in Angstrom for which the PDF will be calculated.
      |              This cannot be passed if ``r_min``, ``r_max``, and ``r_step``
      |              are passed.
      |          dimensions : array-like
      |              A 3 element `array-like` (`list`, `tuple`) with the dimensions
-     |              of the ``Universe``.
+     |              of the ``Universe`` in Angstrom.
+     |
      |
      |      Examples
      |      --------
@@ -4387,14 +4439,21 @@ CLASSES
      |
      |          pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
      |
-     |      To calculate the total PDF for r values of [1., 2., 3., 4., ]:
+     |      To calculate the total PDF for r values of [1., 2., 3., 4.]:
      |
      |          .. highlight:: python
      |          .. code-block:: python
      |
-     |          pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
+     |          pdf.calculate_from_MD(trajectory, r=[1., 2., 3., 4.])
      |
-     |  maximum_frames(self)
+     |      To calculate the total PDF over an average of 5 frames:
+     |
+     |          .. highlight:: python
+     |          .. code-block:: python
+     |
+     |          pdf.calculate_from_MD(trajectory, use_average=True, n_frames=5)
+     |
+     |  maximum_frames(self) -&gt; None
      |      There is no hard limit on the number of frames that can be used, so
      |      return None
      |
@@ -4402,9 +4461,9 @@ CLASSES
      |      -------
      |      None
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
-     |      ``dependent_variables`` is 1
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to
+     |      calculate the ``dependent_variables`` is 1
      |
      |      Parameters
      |      ----------
@@ -4425,8 +4484,7 @@ CLASSES
      |  PDF_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: these are
-     |      PDF, the pair distribution function (in ``barn``)
+     |      Get the dependent variables: these are PDF, the pair distribution function (in ``barn``)
      |
      |      Returns
      |      -------
@@ -4443,21 +4501,21 @@ CLASSES
      |          The shape of the PDF dependent variable
      |
      |  uniformity_requirements
-     |      # Defines the current limitations on the atomic separation distance &#39;r&#39;
+     |      Defines the current limitations on the atomic separation distance &#39;r&#39;
      |      of the ``PairDistributionFunction`` ``Observable.
      |      The requirement is that &#39;r&#39; must be uniform, but it does not have to start at zero.
      |
      |      Return
      |      ------
-     |      Dict[str, Dict[str, bool]]
+     |      dict[str, dict[str, bool]]
      |          Dictionary of uniformity restrictions for &#39;r&#39;.
      |
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
      |
      |  errors
-     |      Get or set the errors on the dependent variables, the pair distribution
-     |      function (in ``arb``)
+     |      Get or set the errors on the dependent variables, the pair distribution function
+     |      (in ``arb``)
      |
      |      Returns
      |      -------
@@ -4488,7 +4546,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -4524,8 +4582,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -4561,7 +4618,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_dt(self)
+     |  calculate_dt(self) -&gt; float
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
      |      the time separation that the user has given as an input, as it only
@@ -4578,21 +4635,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -4619,17 +4676,17 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
-     |  calculate_resolution_functions(self, dt)
+     |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
      |      SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so
      |      should only be called for an observable which has been created from relevant resolution
@@ -4655,7 +4712,7 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
-     |  validate_energy(self, dt)
+     |  validate_energy(self, dt: float) -&gt; None
      |      Asserts that the user set frame separation ``dt`` leads to energy
      |      separation that matches that of the experiment. If not, it
      |      includes the time separation required in the error.
@@ -4676,13 +4733,14 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Static methods inherited from AbstractSQw:
      |
-     |  calculate_E(nE: int, dt: float)
+     |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -4710,8 +4768,8 @@ CLASSES
      |  SQw_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
-     |      SQw, the dynamic structure factor (in ``arb``)
+     |      Get the dependent variables: this is SQw, the
+     |      dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -4771,8 +4829,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Methods inherited from SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -4786,8 +4844,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -4834,7 +4892,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -4864,8 +4922,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -4898,7 +4955,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_dt(self)
+     |  calculate_dt(self) -&gt; float
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
      |      the time separation that the user has given as an input, as it only
@@ -4915,21 +4972,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -4956,17 +5013,17 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
-     |  calculate_resolution_functions(self, dt)
+     |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
      |      SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so
      |      should only be called for an observable which has been created from relevant resolution
@@ -4992,7 +5049,7 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
-     |  validate_energy(self, dt)
+     |  validate_energy(self, dt: float) -&gt; None
      |      Asserts that the user set frame separation ``dt`` leads to energy
      |      separation that matches that of the experiment. If not, it
      |      includes the time separation required in the error.
@@ -5013,13 +5070,14 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Static methods inherited from AbstractSQw:
      |
-     |  calculate_E(nE: int, dt: float)
+     |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -5047,8 +5105,8 @@ CLASSES
      |  SQw_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
-     |      SQw, the dynamic structure factor (in ``arb``)
+     |      Get the dependent variables: this is SQw, the
+     |      dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -5108,8 +5166,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Methods inherited from SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -5123,8 +5181,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -5171,7 +5229,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -5201,8 +5259,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -5235,7 +5292,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_dt(self)
+     |  calculate_dt(self) -&gt; float
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
      |      the time separation that the user has given as an input, as it only
@@ -5252,21 +5309,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -5293,17 +5350,17 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
-     |  calculate_resolution_functions(self, dt)
+     |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
      |      SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so
      |      should only be called for an observable which has been created from relevant resolution
@@ -5329,7 +5386,7 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
-     |  validate_energy(self, dt)
+     |  validate_energy(self, dt: float) -&gt; None
      |      Asserts that the user set frame separation ``dt`` leads to energy
      |      separation that matches that of the experiment. If not, it
      |      includes the time separation required in the error.
@@ -5350,13 +5407,14 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Static methods inherited from AbstractSQw:
      |
-     |  calculate_E(nE: int, dt: float)
+     |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -5384,8 +5442,8 @@ CLASSES
      |  SQw_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
-     |      SQw, the dynamic structure factor (in ``arb``)
+     |      Get the dependent variables: this is SQw, the
+     |      dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -5445,8 +5503,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Methods inherited from SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -5460,8 +5518,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -5508,7 +5566,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -5538,8 +5596,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -5572,7 +5629,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_dt(self)
+     |  calculate_dt(self) -&gt; float
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
      |      the time separation that the user has given as an input, as it only
@@ -5589,21 +5646,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -5630,17 +5687,17 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
-     |  calculate_resolution_functions(self, dt)
+     |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
      |      SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so
      |      should only be called for an observable which has been created from relevant resolution
@@ -5666,7 +5723,7 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
-     |  validate_energy(self, dt)
+     |  validate_energy(self, dt: float) -&gt; None
      |      Asserts that the user set frame separation ``dt`` leads to energy
      |      separation that matches that of the experiment. If not, it
      |      includes the time separation required in the error.
@@ -5687,13 +5744,14 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Static methods inherited from AbstractSQw:
      |
-     |  calculate_E(nE: int, dt: float)
+     |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -5721,8 +5779,8 @@ CLASSES
      |  SQw_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
-     |      SQw, the dynamic structure factor (in ``arb``)
+     |      Get the dependent variables: this is SQw, the
+     |      dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -5782,8 +5840,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Methods inherited from SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -5797,8 +5855,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -5845,7 +5903,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -5875,8 +5933,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -5909,7 +5966,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_dt(self)
+     |  calculate_dt(self) -&gt; float
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
      |      the time separation that the user has given as an input, as it only
@@ -5926,21 +5983,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -5967,17 +6024,17 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
-     |  calculate_resolution_functions(self, dt)
+     |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
      |      SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so
      |      should only be called for an observable which has been created from relevant resolution
@@ -6003,7 +6060,7 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
-     |  validate_energy(self, dt)
+     |  validate_energy(self, dt: float) -&gt; None
      |      Asserts that the user set frame separation ``dt`` leads to energy
      |      separation that matches that of the experiment. If not, it
      |      includes the time separation required in the error.
@@ -6024,13 +6081,14 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Static methods inherited from AbstractSQw:
      |
-     |  calculate_E(nE: int, dt: float)
+     |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -6058,8 +6116,8 @@ CLASSES
      |  SQw_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
-     |      SQw, the dynamic structure factor (in ``arb``)
+     |      Get the dependent variables: this is SQw, the
+     |      dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -6119,8 +6177,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Methods inherited from SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -6134,8 +6192,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -6182,7 +6240,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -6212,8 +6270,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -6246,7 +6303,7 @@ CLASSES
      |  __init__(self)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |
-     |  calculate_dt(self)
+     |  calculate_dt(self) -&gt; float
      |      Calculates the time separation of frames required by the experimental
      |      dataset, assuming uniform spacing. Note that this may be different from
      |      the time separation that the user has given as an input, as it only
@@ -6263,21 +6320,21 @@ CLASSES
      |      float
      |          The time separation required by the current values of ``self.E``
      |
-     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.trajectory.Trajectory, verbose: int = 0, **settings)
-     |      Calculate the dynamic structure factor, S(Q, w) from a ``Trajectory``.
+     |  calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
+     |      Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.
      |
-     |      If the ``Trajectory`` has more frames than the ``self.maximum_frames()`` that can be
-     |      used to recreate the grid of energy points, it can slice the ``Trajectory`` into
-     |      sub-trajectories of length ``self.maximum_frames()``, with the slicing specified through
-     |      the settings ``use_average`` and ``cont_slicing``.
+     |      If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``
+     |      that can be used to recreate the grid of energy points, it can slice the
+     |      ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,
+     |      with the slicing specified through the settings ``use_average`` and ``cont_slicing``.
      |
      |      The ``independent_variable`` ``Q`` can either be set previously or defined within
      |      ``**settings``.
      |
      |      Parameters
      |      ----------
-     |      MD_input : Trajectory
-     |          An MDMC ``Trajectory`` from which to calculate ``SQw``
+     |      MD_input : CompactTrajectory
+     |          An MDMC ``CompactTrajectory`` from which to calculate ``SQw``
      |      verbose: int, optional
      |          The level of verbosity:
      |          Verbose level 0 gives no information.
@@ -6304,17 +6361,17 @@ CLASSES
      |          ``use_average`` (`bool`)
      |              Optional parameter if a list of more than one ``Trajectory`` is used. If set to
      |              True (default) then the mean value for S(Q, w) is calculated. Also, the errors
-     |              are set to the standard deviation calculated over the list of ``Trajectory``
-     |              objects.
+     |              are set to the standard deviation calculated over the list of
+     |              ``CompactTrajectory`` objects.
      |           ``cont_slicing`` (`bool`)
      |              Flag to decide between two possible behaviours when the number of ``MD_steps`` is
      |              larger than the minimum required to calculate the observables. If ``False``
-     |              (default) then the ``Trajectory`` is sliced into non-overlapping
-     |              sub-``Trajectory`` blocks for each of which the observable is calculated. If
-     |              ``True``, then the ``Trajectory`` is sliced into as many non-identical
-     |              sub-``Trajectory`` blocks as possible (with overlap allowed).
+     |              (default) then the ``CompactTrajectory`` is sliced into non-overlapping
+     |              sub-``CompactTrajectory`` blocks for each of which the observable is calculated.
+     |              If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical
+     |              sub-``CompactTrajectory`` blocks as possible (with overlap allowed).
      |
-     |  calculate_resolution_functions(self, dt)
+     |  calculate_resolution_functions(self, dt: float) -&gt; dict
      |      Generates a resolution function in momentum and time that can be used in the calculation of
      |      SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so
      |      should only be called for an observable which has been created from relevant resolution
@@ -6340,7 +6397,7 @@ CLASSES
      |          and momentum (respectively) and returns a 2D array of values for the instrument
      |          resolution.
      |
-     |  validate_energy(self, dt)
+     |  validate_energy(self, dt: float) -&gt; None
      |      Asserts that the user set frame separation ``dt`` leads to energy
      |      separation that matches that of the experiment. If not, it
      |      includes the time separation required in the error.
@@ -6361,13 +6418,14 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Static methods inherited from AbstractSQw:
      |
-     |  calculate_E(nE: int, dt: float)
+     |  calculate_E(nE: int, dt: float) -&gt; numpy.ndarray
      |      Calculates an array of ``nE`` uniformly spaced energy values from the
-     |      time separation of the ``Trajectory`` frames, ``dt``. The frequencies
-     |      are determined by the Fast Fourier Transform, as implemented by numpy,
-     |      for ``2 * nE`` points in time which we then crop to only include ``nE``
-     |      positive frequencies. As we are dealing with frequency rather than
-     |      angular frequency here, the relation to between energy is given by:
+     |      time separation of the ``CompactTrajectory`` frames, ``dt``. The
+     |      frequencie are determined by the Fast Fourier Transform, as implemented
+     |      by numpy, for ``2 * nE`` points in time which we then crop to only
+     |      include ``nE`` positive frequencies. As we are dealing with frequency
+     |      rather than angular frequency here, the relation to between energy
+     |      is given by:
      |
      |      .. math::
      |
@@ -6395,8 +6453,8 @@ CLASSES
      |  SQw_err
      |
      |  dependent_variables
-     |      Get or set the dependent variables: this is
-     |      SQw, the dynamic structure factor (in ``arb``)
+     |      Get the dependent variables: this is SQw, the
+     |      dynamic structure factor (in ``arb``)
      |
      |      Returns
      |      -------
@@ -6456,8 +6514,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Methods inherited from SQwMixins:
      |
-     |  maximum_frames(self)
-     |      The maximum number of ``Trajectory`` frames that can be used to
+     |  maximum_frames(self) -&gt; Optional[int]
+     |      The maximum number of ``CompactTrajectory`` frames that can be used to
      |      calculate the ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `True`, it is the number of energy steps + 1, in order to allow for
@@ -6471,8 +6529,8 @@ CLASSES
      |      int
      |          The maximum number of frames
      |
-     |  minimum_frames(self, dt: float = None)
-     |      The minimum number of ``Trajectory`` frames needed to calculate the
+     |  minimum_frames(self, dt: float = None) -&gt; int
+     |      The minimum number of ``CompactTrajectory`` frames needed to calculate the
      |      ``dependent_variables`` depends on ``self.use_FFT``.
      |
      |      If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for
@@ -6519,7 +6577,7 @@ CLASSES
      |
      |  __repr__(self)
      |
-     |  read_from_file(self, reader, file_name)
+     |  read_from_file(self, reader: str, file_name: str) -&gt; None
      |      Reads in experimental data from a file using a specified reader
      |
      |      Parameters
@@ -6549,8 +6607,7 @@ CLASSES
      |      Returns
      |      -------
      |      str
-     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or
-     |          ``&#39;MD&#39;``
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``
      |
      |  use_FFT
      |      Get or set whether to use FFT when calculating from MD
@@ -6564,7 +6621,7 @@ DATA
     __all__ = [&#39;CoherentDynamicStructureFactor&#39;, &#39;CoherentIntermediateScat...
 
 FILE
-    /usr/local/lib/python3.9/site-packages/MDMC/trajectory_analysis/observables/__init__.py
+    /usr/local/lib/python3.11/site-packages/MDMC/trajectory_analysis/observables/__init__.py
 
 
 </pre></div></div>
@@ -6738,6 +6795,7 @@ mpl.figure.prototype._init_canvas = function () {
     var fig = this;
 
     var canvas_div = (this.canvas_div = document.createElement('div'));
+    canvas_div.setAttribute('tabindex', '0');
     canvas_div.setAttribute(
         'style',
         'border: 1px solid #ddd;' +
@@ -6748,7 +6806,8 @@ mpl.figure.prototype._init_canvas = function () {
             'outline: 0;' +
             'overflow: hidden;' +
             'position: relative;' +
-            'resize: both;'
+            'resize: both;' +
+            'z-index: 2;'
     );
 
     function on_keyboard_event_closure(name) {
@@ -6771,7 +6830,13 @@ mpl.figure.prototype._init_canvas = function () {
 
     var canvas = (this.canvas = document.createElement('canvas'));
     canvas.classList.add('mpl-canvas');
-    canvas.setAttribute('style', 'box-sizing: content-box;');
+    canvas.setAttribute(
+        'style',
+        'box-sizing: content-box;' +
+            'pointer-events: none;' +
+            'position: relative;' +
+            'z-index: 0;'
+    );
 
     this.context = canvas.getContext('2d');
 
@@ -6791,7 +6856,12 @@ mpl.figure.prototype._init_canvas = function () {
     ));
     rubberband_canvas.setAttribute(
         'style',
-        'box-sizing: content-box; position: absolute; left: 0; top: 0; z-index: 1;'
+        'box-sizing: content-box;' +
+            'left: 0;' +
+            'pointer-events: none;' +
+            'position: absolute;' +
+            'top: 0;' +
+            'z-index: 1;'
     );
 
     // Apply a ponyfill if ResizeObserver is not implemented by browser.
@@ -6841,10 +6911,10 @@ mpl.figure.prototype._init_canvas = function () {
                 canvas.setAttribute('width', width * fig.ratio);
                 canvas.setAttribute('height', height * fig.ratio);
             }
-            canvas.setAttribute(
-                'style',
-                'width: ' + width + 'px; height: ' + height + 'px;'
-            );
+            /* This rescales the canvas back to display pixels, so that it
+             * appears correct on HiDPI screens. */
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
 
             rubberband_canvas.setAttribute('width', width);
             rubberband_canvas.setAttribute('height', height);
@@ -6860,34 +6930,53 @@ mpl.figure.prototype._init_canvas = function () {
     this.resizeObserverInstance.observe(canvas_div);
 
     function on_mouse_event_closure(name) {
-        return function (event) {
-            return fig.mouse_event(event, name);
-        };
+        /* User Agent sniffing is bad, but WebKit is busted:
+         * https://bugs.webkit.org/show_bug.cgi?id=144526
+         * https://bugs.webkit.org/show_bug.cgi?id=181818
+         * The worst that happens here is that they get an extra browser
+         * selection when dragging, if this check fails to catch them.
+         */
+        var UA = navigator.userAgent;
+        var isWebKit = /AppleWebKit/.test(UA) && !/Chrome/.test(UA);
+        if(isWebKit) {
+            return function (event) {
+                /* This prevents the web browser from automatically changing to
+                 * the text insertion cursor when the button is pressed. We
+                 * want to control all of the cursor setting manually through
+                 * the 'cursor' event from matplotlib */
+                event.preventDefault()
+                return fig.mouse_event(event, name);
+            };
+        } else {
+            return function (event) {
+                return fig.mouse_event(event, name);
+            };
+        }
     }
 
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mousedown',
         on_mouse_event_closure('button_press')
     );
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mouseup',
         on_mouse_event_closure('button_release')
     );
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'dblclick',
         on_mouse_event_closure('dblclick')
     );
     // Throttle sequential mouse events to 1 every 20ms.
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mousemove',
         on_mouse_event_closure('motion_notify')
     );
 
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mouseenter',
         on_mouse_event_closure('figure_enter')
     );
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mouseleave',
         on_mouse_event_closure('figure_leave')
     );
@@ -6915,7 +7004,7 @@ mpl.figure.prototype._init_canvas = function () {
     };
 
     // Disable right mouse context menu.
-    this.rubberband_canvas.addEventListener('contextmenu', function (_e) {
+    canvas_div.addEventListener('contextmenu', function (_e) {
         event.preventDefault();
         return false;
     });
@@ -7070,7 +7159,7 @@ mpl.figure.prototype.handle_figure_label = function (fig, msg) {
 };
 
 mpl.figure.prototype.handle_cursor = function (fig, msg) {
-    fig.rubberband_canvas.style.cursor = msg['cursor'];
+    fig.canvas_div.style.cursor = msg['cursor'];
 };
 
 mpl.figure.prototype.handle_message = function (fig, msg) {
@@ -7182,30 +7271,22 @@ mpl.figure.prototype._make_on_message_function = function (fig) {
     };
 };
 
-// from https://stackoverflow.com/questions/1114465/getting-mouse-location-in-canvas
-mpl.findpos = function (e) {
-    //this section is from http://www.quirksmode.org/js/events_properties.html
-    var targ;
-    if (!e) {
-        e = window.event;
+function getModifiers(event) {
+    var mods = [];
+    if (event.ctrlKey) {
+        mods.push('ctrl');
     }
-    if (e.target) {
-        targ = e.target;
-    } else if (e.srcElement) {
-        targ = e.srcElement;
+    if (event.altKey) {
+        mods.push('alt');
     }
-    if (targ.nodeType === 3) {
-        // defeat Safari bug
-        targ = targ.parentNode;
+    if (event.shiftKey) {
+        mods.push('shift');
     }
-
-    // pageX,Y are the mouse positions relative to the document
-    var boundingRect = targ.getBoundingClientRect();
-    var x = e.pageX - (boundingRect.left + document.body.scrollLeft);
-    var y = e.pageY - (boundingRect.top + document.body.scrollTop);
-
-    return { x: x, y: y };
-};
+    if (event.metaKey) {
+        mods.push('meta');
+    }
+    return mods;
+}
 
 /*
  * return a copy of an object with only non-object keys
@@ -7222,29 +7303,25 @@ function simpleKeys(original) {
 }
 
 mpl.figure.prototype.mouse_event = function (event, name) {
-    var canvas_pos = mpl.findpos(event);
-
     if (name === 'button_press') {
         this.canvas.focus();
         this.canvas_div.focus();
     }
 
-    var x = canvas_pos.x * this.ratio;
-    var y = canvas_pos.y * this.ratio;
+    // from https://stackoverflow.com/q/1114465
+    var boundingRect = this.canvas.getBoundingClientRect();
+    var x = (event.clientX - boundingRect.left) * this.ratio;
+    var y = (event.clientY - boundingRect.top) * this.ratio;
 
     this.send_message(name, {
         x: x,
         y: y,
         button: event.button,
         step: event.step,
+        modifiers: getModifiers(event),
         guiEvent: simpleKeys(event),
     });
 
-    /* This prevents the web browser from automatically changing to
-     * the text insertion cursor when the button is pressed.  We want
-     * to control all of the cursor setting manually through the
-     * 'cursor' event from matplotlib */
-    event.preventDefault();
     return false;
 };
 
@@ -7299,9 +7376,9 @@ mpl.figure.prototype.toolbar_button_onmouseover = function (tooltip) {
 ///////////////// REMAINING CONTENT GENERATED BY embed_js.py /////////////////
 // prettier-ignore
 var _JSXTOOLS_RESIZE_OBSERVER=function(A){var t,i=new WeakMap,n=new WeakMap,a=new WeakMap,r=new WeakMap,o=new Set;function s(e){if(!(this instanceof s))throw new TypeError("Constructor requires 'new' operator");i.set(this,e)}function h(){throw new TypeError("Function is not a constructor")}function c(e,t,i,n){e=0 in arguments?Number(arguments[0]):0,t=1 in arguments?Number(arguments[1]):0,i=2 in arguments?Number(arguments[2]):0,n=3 in arguments?Number(arguments[3]):0,this.right=(this.x=this.left=e)+(this.width=i),this.bottom=(this.y=this.top=t)+(this.height=n),Object.freeze(this)}function d(){t=requestAnimationFrame(d);var s=new WeakMap,p=new Set;o.forEach((function(t){r.get(t).forEach((function(i){var r=t instanceof window.SVGElement,o=a.get(t),d=r?0:parseFloat(o.paddingTop),f=r?0:parseFloat(o.paddingRight),l=r?0:parseFloat(o.paddingBottom),u=r?0:parseFloat(o.paddingLeft),g=r?0:parseFloat(o.borderTopWidth),m=r?0:parseFloat(o.borderRightWidth),w=r?0:parseFloat(o.borderBottomWidth),b=u+f,F=d+l,v=(r?0:parseFloat(o.borderLeftWidth))+m,W=g+w,y=r?0:t.offsetHeight-W-t.clientHeight,E=r?0:t.offsetWidth-v-t.clientWidth,R=b+v,z=F+W,M=r?t.width:parseFloat(o.width)-R-E,O=r?t.height:parseFloat(o.height)-z-y;if(n.has(t)){var k=n.get(t);if(k[0]===M&&k[1]===O)return}n.set(t,[M,O]);var S=Object.create(h.prototype);S.target=t,S.contentRect=new c(u,d,M,O),s.has(i)||(s.set(i,[]),p.add(i)),s.get(i).push(S)}))})),p.forEach((function(e){i.get(e).call(e,s.get(e),e)}))}return s.prototype.observe=function(i){if(i instanceof window.Element){r.has(i)||(r.set(i,new Set),o.add(i),a.set(i,window.getComputedStyle(i)));var n=r.get(i);n.has(this)||n.add(this),cancelAnimationFrame(t),t=requestAnimationFrame(d)}},s.prototype.unobserve=function(i){if(i instanceof window.Element&&r.has(i)){var n=r.get(i);n.has(this)&&(n.delete(this),n.size||(r.delete(i),o.delete(i))),n.size||r.delete(i),o.size||cancelAnimationFrame(t)}},A.DOMRectReadOnly=c,A.ResizeObserver=s,A.ResizeObserverEntry=h,A}; // eslint-disable-line
-mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home icon-home", "home"], ["Back", "Back to previous view", "fa fa-arrow-left icon-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right icon-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Left button pans, Right button zooms\nx/y fixes axis, CTRL fixes aspect", "fa fa-arrows icon-move", "pan"], ["Zoom", "Zoom to rectangle\nx/y fixes axis", "fa fa-square-o icon-check-empty", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o icon-save", "download"]];
+mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home", "home"], ["Back", "Back to previous view", "fa fa-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Left button pans, Right button zooms\nx/y fixes axis, CTRL fixes aspect", "fa fa-arrows", "pan"], ["Zoom", "Zoom to rectangle\nx/y fixes axis", "fa fa-square-o", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o", "download"]];
 
-mpl.extensions = ["eps", "jpeg", "pgf", "pdf", "png", "ps", "raw", "svg", "tif"];
+mpl.extensions = ["eps", "jpeg", "pgf", "pdf", "png", "ps", "raw", "svg", "tif", "webp"];
 
 mpl.default_extension = "png";/* global mpl */
 
@@ -7585,7 +7662,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='07591e1a-60c1-4f8b-b8e9-7a5003709255'></div></div>
+<div id='2bacc5ad-d6bd-4c4f-996a-f2a4faaef0a0'></div></div>
 </div>
 <p>Therefore it is strongly recommended that you specify the <span class="math notranslate nohighlight">\(E\)</span> values for calculating the dynamic structure factor.</p>
 <p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calulate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will be probably
@@ -7597,7 +7674,7 @@ reasonable:</p>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># This subtracts the time of the zeroeth step from the time of the first step</span>
 <span class="c1"># It should be equal to the time_step * traj_step passed to Simulation</span>
 <span class="n">trajectory_timestep</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Trajectory time step: </span><span class="si">{}</span><span class="s1"> fs&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">trajectory_timestep</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;CompactTrajectory time step: </span><span class="si">{}</span><span class="s1"> fs&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">trajectory_timestep</span><span class="p">))</span>
 
 <span class="n">n_configurations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">times</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of trajectory configurations: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_configurations</span><span class="p">))</span>
@@ -7609,7 +7686,7 @@ reasonable:</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Trajectory time step: 250.0 fs
+CompactTrajectory time step: 250.0 fs
 Number of trajectory configurations: 481
 </pre></div></div>
 </div>
@@ -7806,6 +7883,7 @@ mpl.figure.prototype._init_canvas = function () {
     var fig = this;
 
     var canvas_div = (this.canvas_div = document.createElement('div'));
+    canvas_div.setAttribute('tabindex', '0');
     canvas_div.setAttribute(
         'style',
         'border: 1px solid #ddd;' +
@@ -7816,7 +7894,8 @@ mpl.figure.prototype._init_canvas = function () {
             'outline: 0;' +
             'overflow: hidden;' +
             'position: relative;' +
-            'resize: both;'
+            'resize: both;' +
+            'z-index: 2;'
     );
 
     function on_keyboard_event_closure(name) {
@@ -7839,7 +7918,13 @@ mpl.figure.prototype._init_canvas = function () {
 
     var canvas = (this.canvas = document.createElement('canvas'));
     canvas.classList.add('mpl-canvas');
-    canvas.setAttribute('style', 'box-sizing: content-box;');
+    canvas.setAttribute(
+        'style',
+        'box-sizing: content-box;' +
+            'pointer-events: none;' +
+            'position: relative;' +
+            'z-index: 0;'
+    );
 
     this.context = canvas.getContext('2d');
 
@@ -7859,7 +7944,12 @@ mpl.figure.prototype._init_canvas = function () {
     ));
     rubberband_canvas.setAttribute(
         'style',
-        'box-sizing: content-box; position: absolute; left: 0; top: 0; z-index: 1;'
+        'box-sizing: content-box;' +
+            'left: 0;' +
+            'pointer-events: none;' +
+            'position: absolute;' +
+            'top: 0;' +
+            'z-index: 1;'
     );
 
     // Apply a ponyfill if ResizeObserver is not implemented by browser.
@@ -7909,10 +7999,10 @@ mpl.figure.prototype._init_canvas = function () {
                 canvas.setAttribute('width', width * fig.ratio);
                 canvas.setAttribute('height', height * fig.ratio);
             }
-            canvas.setAttribute(
-                'style',
-                'width: ' + width + 'px; height: ' + height + 'px;'
-            );
+            /* This rescales the canvas back to display pixels, so that it
+             * appears correct on HiDPI screens. */
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
 
             rubberband_canvas.setAttribute('width', width);
             rubberband_canvas.setAttribute('height', height);
@@ -7928,34 +8018,53 @@ mpl.figure.prototype._init_canvas = function () {
     this.resizeObserverInstance.observe(canvas_div);
 
     function on_mouse_event_closure(name) {
-        return function (event) {
-            return fig.mouse_event(event, name);
-        };
+        /* User Agent sniffing is bad, but WebKit is busted:
+         * https://bugs.webkit.org/show_bug.cgi?id=144526
+         * https://bugs.webkit.org/show_bug.cgi?id=181818
+         * The worst that happens here is that they get an extra browser
+         * selection when dragging, if this check fails to catch them.
+         */
+        var UA = navigator.userAgent;
+        var isWebKit = /AppleWebKit/.test(UA) && !/Chrome/.test(UA);
+        if(isWebKit) {
+            return function (event) {
+                /* This prevents the web browser from automatically changing to
+                 * the text insertion cursor when the button is pressed. We
+                 * want to control all of the cursor setting manually through
+                 * the 'cursor' event from matplotlib */
+                event.preventDefault()
+                return fig.mouse_event(event, name);
+            };
+        } else {
+            return function (event) {
+                return fig.mouse_event(event, name);
+            };
+        }
     }
 
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mousedown',
         on_mouse_event_closure('button_press')
     );
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mouseup',
         on_mouse_event_closure('button_release')
     );
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'dblclick',
         on_mouse_event_closure('dblclick')
     );
     // Throttle sequential mouse events to 1 every 20ms.
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mousemove',
         on_mouse_event_closure('motion_notify')
     );
 
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mouseenter',
         on_mouse_event_closure('figure_enter')
     );
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mouseleave',
         on_mouse_event_closure('figure_leave')
     );
@@ -7983,7 +8092,7 @@ mpl.figure.prototype._init_canvas = function () {
     };
 
     // Disable right mouse context menu.
-    this.rubberband_canvas.addEventListener('contextmenu', function (_e) {
+    canvas_div.addEventListener('contextmenu', function (_e) {
         event.preventDefault();
         return false;
     });
@@ -8138,7 +8247,7 @@ mpl.figure.prototype.handle_figure_label = function (fig, msg) {
 };
 
 mpl.figure.prototype.handle_cursor = function (fig, msg) {
-    fig.rubberband_canvas.style.cursor = msg['cursor'];
+    fig.canvas_div.style.cursor = msg['cursor'];
 };
 
 mpl.figure.prototype.handle_message = function (fig, msg) {
@@ -8250,30 +8359,22 @@ mpl.figure.prototype._make_on_message_function = function (fig) {
     };
 };
 
-// from https://stackoverflow.com/questions/1114465/getting-mouse-location-in-canvas
-mpl.findpos = function (e) {
-    //this section is from http://www.quirksmode.org/js/events_properties.html
-    var targ;
-    if (!e) {
-        e = window.event;
+function getModifiers(event) {
+    var mods = [];
+    if (event.ctrlKey) {
+        mods.push('ctrl');
     }
-    if (e.target) {
-        targ = e.target;
-    } else if (e.srcElement) {
-        targ = e.srcElement;
+    if (event.altKey) {
+        mods.push('alt');
     }
-    if (targ.nodeType === 3) {
-        // defeat Safari bug
-        targ = targ.parentNode;
+    if (event.shiftKey) {
+        mods.push('shift');
     }
-
-    // pageX,Y are the mouse positions relative to the document
-    var boundingRect = targ.getBoundingClientRect();
-    var x = e.pageX - (boundingRect.left + document.body.scrollLeft);
-    var y = e.pageY - (boundingRect.top + document.body.scrollTop);
-
-    return { x: x, y: y };
-};
+    if (event.metaKey) {
+        mods.push('meta');
+    }
+    return mods;
+}
 
 /*
  * return a copy of an object with only non-object keys
@@ -8290,29 +8391,25 @@ function simpleKeys(original) {
 }
 
 mpl.figure.prototype.mouse_event = function (event, name) {
-    var canvas_pos = mpl.findpos(event);
-
     if (name === 'button_press') {
         this.canvas.focus();
         this.canvas_div.focus();
     }
 
-    var x = canvas_pos.x * this.ratio;
-    var y = canvas_pos.y * this.ratio;
+    // from https://stackoverflow.com/q/1114465
+    var boundingRect = this.canvas.getBoundingClientRect();
+    var x = (event.clientX - boundingRect.left) * this.ratio;
+    var y = (event.clientY - boundingRect.top) * this.ratio;
 
     this.send_message(name, {
         x: x,
         y: y,
         button: event.button,
         step: event.step,
+        modifiers: getModifiers(event),
         guiEvent: simpleKeys(event),
     });
 
-    /* This prevents the web browser from automatically changing to
-     * the text insertion cursor when the button is pressed.  We want
-     * to control all of the cursor setting manually through the
-     * 'cursor' event from matplotlib */
-    event.preventDefault();
     return false;
 };
 
@@ -8367,9 +8464,9 @@ mpl.figure.prototype.toolbar_button_onmouseover = function (tooltip) {
 ///////////////// REMAINING CONTENT GENERATED BY embed_js.py /////////////////
 // prettier-ignore
 var _JSXTOOLS_RESIZE_OBSERVER=function(A){var t,i=new WeakMap,n=new WeakMap,a=new WeakMap,r=new WeakMap,o=new Set;function s(e){if(!(this instanceof s))throw new TypeError("Constructor requires 'new' operator");i.set(this,e)}function h(){throw new TypeError("Function is not a constructor")}function c(e,t,i,n){e=0 in arguments?Number(arguments[0]):0,t=1 in arguments?Number(arguments[1]):0,i=2 in arguments?Number(arguments[2]):0,n=3 in arguments?Number(arguments[3]):0,this.right=(this.x=this.left=e)+(this.width=i),this.bottom=(this.y=this.top=t)+(this.height=n),Object.freeze(this)}function d(){t=requestAnimationFrame(d);var s=new WeakMap,p=new Set;o.forEach((function(t){r.get(t).forEach((function(i){var r=t instanceof window.SVGElement,o=a.get(t),d=r?0:parseFloat(o.paddingTop),f=r?0:parseFloat(o.paddingRight),l=r?0:parseFloat(o.paddingBottom),u=r?0:parseFloat(o.paddingLeft),g=r?0:parseFloat(o.borderTopWidth),m=r?0:parseFloat(o.borderRightWidth),w=r?0:parseFloat(o.borderBottomWidth),b=u+f,F=d+l,v=(r?0:parseFloat(o.borderLeftWidth))+m,W=g+w,y=r?0:t.offsetHeight-W-t.clientHeight,E=r?0:t.offsetWidth-v-t.clientWidth,R=b+v,z=F+W,M=r?t.width:parseFloat(o.width)-R-E,O=r?t.height:parseFloat(o.height)-z-y;if(n.has(t)){var k=n.get(t);if(k[0]===M&&k[1]===O)return}n.set(t,[M,O]);var S=Object.create(h.prototype);S.target=t,S.contentRect=new c(u,d,M,O),s.has(i)||(s.set(i,[]),p.add(i)),s.get(i).push(S)}))})),p.forEach((function(e){i.get(e).call(e,s.get(e),e)}))}return s.prototype.observe=function(i){if(i instanceof window.Element){r.has(i)||(r.set(i,new Set),o.add(i),a.set(i,window.getComputedStyle(i)));var n=r.get(i);n.has(this)||n.add(this),cancelAnimationFrame(t),t=requestAnimationFrame(d)}},s.prototype.unobserve=function(i){if(i instanceof window.Element&&r.has(i)){var n=r.get(i);n.has(this)&&(n.delete(this),n.size||(r.delete(i),o.delete(i))),n.size||r.delete(i),o.size||cancelAnimationFrame(t)}},A.DOMRectReadOnly=c,A.ResizeObserver=s,A.ResizeObserverEntry=h,A}; // eslint-disable-line
-mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home icon-home", "home"], ["Back", "Back to previous view", "fa fa-arrow-left icon-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right icon-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Left button pans, Right button zooms\nx/y fixes axis, CTRL fixes aspect", "fa fa-arrows icon-move", "pan"], ["Zoom", "Zoom to rectangle\nx/y fixes axis", "fa fa-square-o icon-check-empty", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o icon-save", "download"]];
+mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home", "home"], ["Back", "Back to previous view", "fa fa-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Left button pans, Right button zooms\nx/y fixes axis, CTRL fixes aspect", "fa fa-arrows", "pan"], ["Zoom", "Zoom to rectangle\nx/y fixes axis", "fa fa-square-o", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o", "download"]];
 
-mpl.extensions = ["eps", "jpeg", "pgf", "pdf", "png", "ps", "raw", "svg", "tif"];
+mpl.extensions = ["eps", "jpeg", "pgf", "pdf", "png", "ps", "raw", "svg", "tif", "webp"];
 
 mpl.default_extension = "png";/* global mpl */
 
@@ -8653,7 +8750,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='e9d3226e-b4eb-427b-b869-3f50668ef947'></div></div>
+<div id='c415219b-e768-4b16-9081-5aa3dc959872'></div></div>
 </div>
 <p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the van Well et al. Phys. Rev. A <strong>31</strong> 3391 (1985) data, which the authors corrected for instrument resolution) by reading the data into an SQwCoh object:</p>
 <div class="nbinput nblast docutils container">
@@ -8803,6 +8900,7 @@ mpl.figure.prototype._init_canvas = function () {
     var fig = this;
 
     var canvas_div = (this.canvas_div = document.createElement('div'));
+    canvas_div.setAttribute('tabindex', '0');
     canvas_div.setAttribute(
         'style',
         'border: 1px solid #ddd;' +
@@ -8813,7 +8911,8 @@ mpl.figure.prototype._init_canvas = function () {
             'outline: 0;' +
             'overflow: hidden;' +
             'position: relative;' +
-            'resize: both;'
+            'resize: both;' +
+            'z-index: 2;'
     );
 
     function on_keyboard_event_closure(name) {
@@ -8836,7 +8935,13 @@ mpl.figure.prototype._init_canvas = function () {
 
     var canvas = (this.canvas = document.createElement('canvas'));
     canvas.classList.add('mpl-canvas');
-    canvas.setAttribute('style', 'box-sizing: content-box;');
+    canvas.setAttribute(
+        'style',
+        'box-sizing: content-box;' +
+            'pointer-events: none;' +
+            'position: relative;' +
+            'z-index: 0;'
+    );
 
     this.context = canvas.getContext('2d');
 
@@ -8856,7 +8961,12 @@ mpl.figure.prototype._init_canvas = function () {
     ));
     rubberband_canvas.setAttribute(
         'style',
-        'box-sizing: content-box; position: absolute; left: 0; top: 0; z-index: 1;'
+        'box-sizing: content-box;' +
+            'left: 0;' +
+            'pointer-events: none;' +
+            'position: absolute;' +
+            'top: 0;' +
+            'z-index: 1;'
     );
 
     // Apply a ponyfill if ResizeObserver is not implemented by browser.
@@ -8906,10 +9016,10 @@ mpl.figure.prototype._init_canvas = function () {
                 canvas.setAttribute('width', width * fig.ratio);
                 canvas.setAttribute('height', height * fig.ratio);
             }
-            canvas.setAttribute(
-                'style',
-                'width: ' + width + 'px; height: ' + height + 'px;'
-            );
+            /* This rescales the canvas back to display pixels, so that it
+             * appears correct on HiDPI screens. */
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
 
             rubberband_canvas.setAttribute('width', width);
             rubberband_canvas.setAttribute('height', height);
@@ -8925,34 +9035,53 @@ mpl.figure.prototype._init_canvas = function () {
     this.resizeObserverInstance.observe(canvas_div);
 
     function on_mouse_event_closure(name) {
-        return function (event) {
-            return fig.mouse_event(event, name);
-        };
+        /* User Agent sniffing is bad, but WebKit is busted:
+         * https://bugs.webkit.org/show_bug.cgi?id=144526
+         * https://bugs.webkit.org/show_bug.cgi?id=181818
+         * The worst that happens here is that they get an extra browser
+         * selection when dragging, if this check fails to catch them.
+         */
+        var UA = navigator.userAgent;
+        var isWebKit = /AppleWebKit/.test(UA) && !/Chrome/.test(UA);
+        if(isWebKit) {
+            return function (event) {
+                /* This prevents the web browser from automatically changing to
+                 * the text insertion cursor when the button is pressed. We
+                 * want to control all of the cursor setting manually through
+                 * the 'cursor' event from matplotlib */
+                event.preventDefault()
+                return fig.mouse_event(event, name);
+            };
+        } else {
+            return function (event) {
+                return fig.mouse_event(event, name);
+            };
+        }
     }
 
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mousedown',
         on_mouse_event_closure('button_press')
     );
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mouseup',
         on_mouse_event_closure('button_release')
     );
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'dblclick',
         on_mouse_event_closure('dblclick')
     );
     // Throttle sequential mouse events to 1 every 20ms.
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mousemove',
         on_mouse_event_closure('motion_notify')
     );
 
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mouseenter',
         on_mouse_event_closure('figure_enter')
     );
-    rubberband_canvas.addEventListener(
+    canvas_div.addEventListener(
         'mouseleave',
         on_mouse_event_closure('figure_leave')
     );
@@ -8980,7 +9109,7 @@ mpl.figure.prototype._init_canvas = function () {
     };
 
     // Disable right mouse context menu.
-    this.rubberband_canvas.addEventListener('contextmenu', function (_e) {
+    canvas_div.addEventListener('contextmenu', function (_e) {
         event.preventDefault();
         return false;
     });
@@ -9135,7 +9264,7 @@ mpl.figure.prototype.handle_figure_label = function (fig, msg) {
 };
 
 mpl.figure.prototype.handle_cursor = function (fig, msg) {
-    fig.rubberband_canvas.style.cursor = msg['cursor'];
+    fig.canvas_div.style.cursor = msg['cursor'];
 };
 
 mpl.figure.prototype.handle_message = function (fig, msg) {
@@ -9247,30 +9376,22 @@ mpl.figure.prototype._make_on_message_function = function (fig) {
     };
 };
 
-// from https://stackoverflow.com/questions/1114465/getting-mouse-location-in-canvas
-mpl.findpos = function (e) {
-    //this section is from http://www.quirksmode.org/js/events_properties.html
-    var targ;
-    if (!e) {
-        e = window.event;
+function getModifiers(event) {
+    var mods = [];
+    if (event.ctrlKey) {
+        mods.push('ctrl');
     }
-    if (e.target) {
-        targ = e.target;
-    } else if (e.srcElement) {
-        targ = e.srcElement;
+    if (event.altKey) {
+        mods.push('alt');
     }
-    if (targ.nodeType === 3) {
-        // defeat Safari bug
-        targ = targ.parentNode;
+    if (event.shiftKey) {
+        mods.push('shift');
     }
-
-    // pageX,Y are the mouse positions relative to the document
-    var boundingRect = targ.getBoundingClientRect();
-    var x = e.pageX - (boundingRect.left + document.body.scrollLeft);
-    var y = e.pageY - (boundingRect.top + document.body.scrollTop);
-
-    return { x: x, y: y };
-};
+    if (event.metaKey) {
+        mods.push('meta');
+    }
+    return mods;
+}
 
 /*
  * return a copy of an object with only non-object keys
@@ -9287,29 +9408,25 @@ function simpleKeys(original) {
 }
 
 mpl.figure.prototype.mouse_event = function (event, name) {
-    var canvas_pos = mpl.findpos(event);
-
     if (name === 'button_press') {
         this.canvas.focus();
         this.canvas_div.focus();
     }
 
-    var x = canvas_pos.x * this.ratio;
-    var y = canvas_pos.y * this.ratio;
+    // from https://stackoverflow.com/q/1114465
+    var boundingRect = this.canvas.getBoundingClientRect();
+    var x = (event.clientX - boundingRect.left) * this.ratio;
+    var y = (event.clientY - boundingRect.top) * this.ratio;
 
     this.send_message(name, {
         x: x,
         y: y,
         button: event.button,
         step: event.step,
+        modifiers: getModifiers(event),
         guiEvent: simpleKeys(event),
     });
 
-    /* This prevents the web browser from automatically changing to
-     * the text insertion cursor when the button is pressed.  We want
-     * to control all of the cursor setting manually through the
-     * 'cursor' event from matplotlib */
-    event.preventDefault();
     return false;
 };
 
@@ -9364,9 +9481,9 @@ mpl.figure.prototype.toolbar_button_onmouseover = function (tooltip) {
 ///////////////// REMAINING CONTENT GENERATED BY embed_js.py /////////////////
 // prettier-ignore
 var _JSXTOOLS_RESIZE_OBSERVER=function(A){var t,i=new WeakMap,n=new WeakMap,a=new WeakMap,r=new WeakMap,o=new Set;function s(e){if(!(this instanceof s))throw new TypeError("Constructor requires 'new' operator");i.set(this,e)}function h(){throw new TypeError("Function is not a constructor")}function c(e,t,i,n){e=0 in arguments?Number(arguments[0]):0,t=1 in arguments?Number(arguments[1]):0,i=2 in arguments?Number(arguments[2]):0,n=3 in arguments?Number(arguments[3]):0,this.right=(this.x=this.left=e)+(this.width=i),this.bottom=(this.y=this.top=t)+(this.height=n),Object.freeze(this)}function d(){t=requestAnimationFrame(d);var s=new WeakMap,p=new Set;o.forEach((function(t){r.get(t).forEach((function(i){var r=t instanceof window.SVGElement,o=a.get(t),d=r?0:parseFloat(o.paddingTop),f=r?0:parseFloat(o.paddingRight),l=r?0:parseFloat(o.paddingBottom),u=r?0:parseFloat(o.paddingLeft),g=r?0:parseFloat(o.borderTopWidth),m=r?0:parseFloat(o.borderRightWidth),w=r?0:parseFloat(o.borderBottomWidth),b=u+f,F=d+l,v=(r?0:parseFloat(o.borderLeftWidth))+m,W=g+w,y=r?0:t.offsetHeight-W-t.clientHeight,E=r?0:t.offsetWidth-v-t.clientWidth,R=b+v,z=F+W,M=r?t.width:parseFloat(o.width)-R-E,O=r?t.height:parseFloat(o.height)-z-y;if(n.has(t)){var k=n.get(t);if(k[0]===M&&k[1]===O)return}n.set(t,[M,O]);var S=Object.create(h.prototype);S.target=t,S.contentRect=new c(u,d,M,O),s.has(i)||(s.set(i,[]),p.add(i)),s.get(i).push(S)}))})),p.forEach((function(e){i.get(e).call(e,s.get(e),e)}))}return s.prototype.observe=function(i){if(i instanceof window.Element){r.has(i)||(r.set(i,new Set),o.add(i),a.set(i,window.getComputedStyle(i)));var n=r.get(i);n.has(this)||n.add(this),cancelAnimationFrame(t),t=requestAnimationFrame(d)}},s.prototype.unobserve=function(i){if(i instanceof window.Element&&r.has(i)){var n=r.get(i);n.has(this)&&(n.delete(this),n.size||(r.delete(i),o.delete(i))),n.size||r.delete(i),o.size||cancelAnimationFrame(t)}},A.DOMRectReadOnly=c,A.ResizeObserver=s,A.ResizeObserverEntry=h,A}; // eslint-disable-line
-mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home icon-home", "home"], ["Back", "Back to previous view", "fa fa-arrow-left icon-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right icon-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Left button pans, Right button zooms\nx/y fixes axis, CTRL fixes aspect", "fa fa-arrows icon-move", "pan"], ["Zoom", "Zoom to rectangle\nx/y fixes axis", "fa fa-square-o icon-check-empty", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o icon-save", "download"]];
+mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home", "home"], ["Back", "Back to previous view", "fa fa-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Left button pans, Right button zooms\nx/y fixes axis, CTRL fixes aspect", "fa fa-arrows", "pan"], ["Zoom", "Zoom to rectangle\nx/y fixes axis", "fa fa-square-o", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o", "download"]];
 
-mpl.extensions = ["eps", "jpeg", "pgf", "pdf", "png", "ps", "raw", "svg", "tif"];
+mpl.extensions = ["eps", "jpeg", "pgf", "pdf", "png", "ps", "raw", "svg", "tif", "webp"];
 
 mpl.default_extension = "png";/* global mpl */
 
@@ -9650,10 +9767,10 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='58fbe849-ee6e-4653-9cce-7032de104b0e'></div></div>
+<div id='e918220c-b0ba-4ded-bb0d-cc1d043d6277'></div></div>
 </div>
-</div>
-<div class="section" id="Other-observables">
+</section>
+<section id="Other-observables">
 <h2>Other observables<a class="headerlink" href="#Other-observables" title="Permalink to this headline"></a></h2>
 <p>The same applies for the observables, such as the pair distribution function <span class="math notranslate nohighlight">\(G(r)\)</span>. To determine how to calculate another observables from an MD trajectory, please see the associated help documentation:</p>
 <div class="nbinput docutils container">
@@ -9671,19 +9788,11 @@ if (IPython.notebook.kernel !== null) {
 <div class="highlight"><pre>
 Help on function calculate_from_MD in module MDMC.trajectory_analysis.observables.pdf:
 
-calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Trajectory, List[MDMC.trajectory_analysis.trajectory.Trajectory]], verbose=0, **settings)
+calculate_from_MD(self, MD_input: MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory, verbose: int = 0, **settings: dict)
     Calculate the pair distribution function, :math:`G(r)`` from a
-    ``Trajectory``
+    ``CompactTrajectory``
 
-    The total pair distribution function (``pdf.PDF``) has the form:
-
-    .. math::
-
-        G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
-
-    where :math:`c_i` is the number concentration of element :math:`i`,
-    :math:`b_i` is the (coherent) scattering length of element :math:`i`,
-    and the partial pair distribution, :math:`g_{ij}`, is:
+    The partial pair distribution for a pair i-j, :math:`g_{ij}`, is:
 
     .. math::
 
@@ -9695,6 +9804,23 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Traj
     atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that
     :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.
 
+    This corresponds to the equation (8) in the following paper:
+    &#34;A comparison of various commonly used correlation functions for
+     describing total scattering&#34;
+    Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.
+    DOI: https://doi.org/10.1107/S0021889800019993
+
+    The total pair distribution function (``pdf.PDF``) has the form:
+
+    .. math::
+
+        G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)
+
+    where :math:`c_i` is the proportion of element :math:`i` in the material,
+    :math:`b_i` is the (coherent) scattering length of element :math:`i`
+
+    This corresponds to the equation (10) in the above paper.
+
     Independent variables can either be set previously or defined within
     settings.
 
@@ -9705,35 +9831,41 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Traj
 
     Parameters
     ----------
-    MD_input : Trajectory or list of Trajectory
-        Either a `list` of MD ``Trajectory``s or a single ``Trajectory`` object.
+    MD_input : CompactTrajectory
+         A single ``CompactTrajectory`` object.
     verbose: int
         Verbose print settings. Not currently implemented for PDF.
     **settings
         n_frames : int
             The number of frames from which the pdf and its error are
-            calculated. If this is not passed, 1% of the total number of
-            frames are used (rounded up to nearest int).
+            calculated. These frames are selected uniformly, and the step is taken to be
+            n_frames / total number of frames rounded to the nearest positive integer.
+            If this is not passed, 1% of the total number of frames are used
+            (rounded up to the nearest positive integer).
+        use_average : bool
+            Optional parameter. If set to True then the mean value for PDF is
+            calculated across selected frames from the trajectory. Also, the errors
+            are set to the standard deviation calculated over the multiple frames.
+            If set to False (default), only the last frame of the trajectory is used and
+            n_frames will be ignored.
         subset : list of tuples
             The subset of element pairs from which the PDF is calculated.
             This can be used to calculate the partial PDFs of a
             multicomponent system. If this is not passed, all combinations
             of elements are used i.e. the PDF is the total PDF.
         b_coh : dict
-            Definitions of the coherent neutron scattering lengths for one
-            or more elements. This can be used to calculate the PDF of a
-            system where one or more elements has a coherent scattering
-            length different from the coherent scattering length in
-            MDMC.common.atom_properties (i.e. if it has been isotopically
-            substituted).
+            A dictionary containing coherent scattering length values for one or more elements.
+            This can be used to calculate the PDF of a system where one or more elements
+            has a coherent scattering length different from the coherent scattering length in
+            MDMC.common.atom_properties (i.e. if it has been isotopically substituted).
         r_min : float
-            The minimum ``r`` (atomic separation) for which the PDF will be
+            The minimum ``r`` (atomic separation) in Angstrom for which the PDF will be
             calculated. If this, ``r_max``, and ``r_step`` are passed then
             these will create a range for the independent variable ``r``,
             which will overwrite any ``r`` which has previously been
             defined. This cannot be passed if ``r`` is passed.
         r_max : float
-            The maximum ``r`` (atomic separation) for which the PDF will be
+            The maximum ``r`` (atomic separation) in Angstrom for which the PDF will be
             calculated. If this, ``r_min``, and ``r_step`` are passed then
             these will create a range for the independent variable ``r``,
             which will overwrite any ``r`` which has previously been
@@ -9745,12 +9877,13 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Traj
             ``r``, which will overwrite any ``r`` which has previously been
             defined. This cannot be passed if ``r`` is passed.
         r : numpy.ndarray
-            The uniform ``r`` values for which the PDF will be calculated.
+            The uniform ``r`` values in Angstrom for which the PDF will be calculated.
             This cannot be passed if ``r_min``, ``r_max``, and ``r_step``
             are passed.
         dimensions : array-like
             A 3 element `array-like` (`list`, `tuple`) with the dimensions
-            of the ``Universe``.
+            of the ``Universe`` in Angstrom.
+
 
     Examples
     --------
@@ -9776,12 +9909,19 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Traj
 
         pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
 
-    To calculate the total PDF for r values of [1., 2., 3., 4., ]:
+    To calculate the total PDF for r values of [1., 2., 3., 4.]:
 
         .. highlight:: python
         .. code-block:: python
 
-        pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})
+        pdf.calculate_from_MD(trajectory, r=[1., 2., 3., 4.])
+
+    To calculate the total PDF over an average of 5 frames:
+
+        .. highlight:: python
+        .. code-block:: python
+
+        pdf.calculate_from_MD(trajectory, use_average=True, n_frames=5)
 
 </pre></div></div>
 </div>
@@ -9793,14 +9933,14 @@ calculate_from_MD(self, MD_input: Union[MDMC.trajectory_analysis.trajectory.Traj
 </pre></div>
 </div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="running-a-simulation.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="running-a-simulation.html" class="btn btn-neutral float-left" title="Running a Simulation in MDMC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="selecting-fitting-parameters.html" class="btn btn-neutral float-right" title="Selecting Fitting Parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

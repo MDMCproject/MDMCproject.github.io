@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -107,54 +108,71 @@
   <h1>Source code for MDMC.readers.observables.MantidSQw</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Readers for dynamic data&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">SQwReader</span>
 
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MantidSQw"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw">[docs]</a><span class="k">class</span> <span class="nc">MantidSQw</span><span class="p">(</span><span class="n">SQwReader</span><span class="p">):</span>
-
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class for reading SQw files from Mantid</span>
 
-<span class="sd">    Mantid&#39;s ascii output uses two files:</span>
+<span class="sd">    Mantid&#39;s ascii output uses one or two files, either:</span>
 <span class="sd">      - A file containing the SQw data and error for the range of energy values measured at each</span>
-<span class="sd">        detector (or group of detectors) ID with ``file_name``</span>
-<span class="sd">      - A file giving the momentum value associated with each detector (or group of detectors) ID,</span>
-<span class="sd">        with the name given by ``file_name + &#39;_detectors&#39;``</span>
+<span class="sd">        Q with ``file_name``</span>
+<span class="sd">        or</span>
+<span class="sd">      - A file containing the SQw data and error for the range of energy values measured at each</span>
+<span class="sd">        detector (or group of detectors) ID with ``file_name`` and a file giving the momentum</span>
+<span class="sd">        value associated with each detector (or group of detectors) ID, with the name given by</span>
+<span class="sd">        ``file_name + &#39;_detectors&#39;``</span>
+<span class="sd">    If a single file is supplied, then it is assumed that the Q values are included in the data,</span>
+<span class="sd">    this is the typical output of Mantid reduced ISIS data. An example reduction script is included</span>
+<span class="sd">    in doc/tutorials/data/water_reduction_IRIS.py</span>
+<span class="sd">    If there are two files then it is assumed that the second file links the detector ID&#39;s with the</span>
+<span class="sd">    corresponding Q&#39;s</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
+<span class="sd">    ID_or_Q : file, optional</span>
+<span class="sd">        File containing the ID&#39;s of the detectors, default=None</span>
+<span class="sd">    file_detectors : file, optional</span>
+<span class="sd">        File containing the errors on the dependent variables, default=None</span>
 <span class="sd">    file_variables : file</span>
-<span class="sd">        File containing the variables for each detector (group) ID</span>
-<span class="sd">    file_detectors : file</span>
-<span class="sd">        File containing the errors on the dependent variables</span>
+<span class="sd">        File containing the variables for each detector ID or Q</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">detector_IDs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector_ID_or_Q</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Open the files for variables and detector momenta</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Open the files for variables and detector momenta&quot;&quot;&quot;</span>
         <span class="c1"># pylint: disable=consider-using-with</span>
         <span class="c1"># as this is an abstracted open method</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;_detectors&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;_detectors&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Closes variable and detector files after parsing&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Closes variable and detector files after parsing&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
 
-<div class="viewcode-block" id="MantidSQw.parse"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="MantidSQw.parse"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parse into SQw format</span>
 
 <span class="sd">        E is the energy transfer (in meV)</span>
@@ -163,7 +181,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_variables</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_detectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_detectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_detectors</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_ID_or_Q</span><span class="p">)</span>
 
         <span class="c1"># Explicitly sort data</span>
         <span class="n">E_argsort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
@@ -177,12 +198,18 @@
 
         <span class="c1"># Mantid sets errors to 0 if the corresponding datum is 0.  Change these to</span>
         <span class="c1"># inf so that error calculations can still be performed on them.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;We have set the error bar to infinity for any zero error values, this allows</span><span class="se">\</span>
+<span class="s2">                us to calculate chi-squared but effectively ignores these points, this may not</span><span class="se">\</span>
+<span class="s2">                be what you want to do, consider using a FoM which doesn&#39;t need errors if</span><span class="se">\</span>
+<span class="s2">                this is an issue&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MantidSQw.parse_variables"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.parse_variables">[docs]</a>    <span class="k">def</span> <span class="nf">parse_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parses the values for energy, SQw and its error for each detector, but not the momentum of</span>
-<span class="sd">        that detector.</span>
+<div class="viewcode-block" id="MantidSQw.parse_variables"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.parse_variables">[docs]</a>    <span class="k">def</span> <span class="nf">parse_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">IO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[float]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parses the values for energy, SQw and its error for each detector, or momentum value</span>
+<span class="sd">        if it is defined instead of detector_ID</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -196,7 +223,7 @@
 <span class="sd">            (SQw) and E is the errors of Y</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">detector_IDs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector_ID_or_Q</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -206,7 +233,7 @@
 
             <span class="n">strings</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">detector_IDs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">strings</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">detector_ID_or_Q</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">strings</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;E&#39;</span><span class="p">:</span> <span class="p">[]})</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;X&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_float</span><span class="p">(</span><span class="n">strings</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -214,8 +241,8 @@
                 <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;E&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_float</span><span class="p">(</span><span class="n">strings</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
 
         <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;X&#39;</span><span class="p">])</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_IDs</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)))</span>
-        <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_IDs</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)))</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_ID_or_Q</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)))</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_ID_or_Q</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">datum</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
             <span class="c1"># X data should be the same for each detector</span>
             <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">datum</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">X</span><span class="p">)</span>
@@ -224,8 +251,8 @@
 
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">E</span></div>
 
-<div class="viewcode-block" id="MantidSQw.parse_detectors"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.parse_detectors">[docs]</a>    <span class="k">def</span> <span class="nf">parse_detectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="MantidSQw.parse_detectors"><a class="viewcode-back" href="../../../../pages/modules/readers/observables/MantidSQw.html#MDMC.readers.observables.MantidSQw.MantidSQw.parse_detectors">[docs]</a>    <span class="k">def</span> <span class="nf">parse_detectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">IO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parses the detector momenta values.</span>
 
 <span class="sd">        Parameters</span>
@@ -239,7 +266,7 @@
 <span class="sd">            A 1D array of momenta values</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_IDs</span><span class="p">))</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_ID_or_Q</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">headings</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">)</span>
@@ -261,7 +288,7 @@
                 <span class="n">spectrum_no</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">spectrum_index</span><span class="p">]</span>
                 <span class="n">Q_value</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">Q_index</span><span class="p">]</span>
                 <span class="c1"># Ensure that we assign Q values in the same order as detector_IDs</span>
-                <span class="n">Q</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_IDs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span>
+                <span class="n">Q</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">detector_ID_or_Q</span><span class="o">.</span><span class="n">index</span><span class="p">(</span>
                     <span class="n">spectrum_no</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_float</span><span class="p">(</span><span class="n">Q_value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Q</span></div></div>

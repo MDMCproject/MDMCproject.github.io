@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -114,13 +115,15 @@
 <span class="sd">a sequence of Parameter objects.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
 <span class="kn">import</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">count</span>
 <span class="kn">import</span> <span class="nn">operator</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">weakref</span>
 
@@ -129,11 +132,14 @@
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span><span class="p">,</span> \
     <span class="n">unit_decorator_getter</span>
 
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Interaction</span>
+
 
 <div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameter">[docs]</a><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;fixed&#39;</span><span class="p">,</span> <span class="s1">&#39;constraints&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;interactions_name&#39;</span><span class="p">,</span> <span class="s1">&#39;functions_name&#39;</span><span class="p">,</span> <span class="s1">&#39;tied&#39;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A force field parameter which can be fixed or constrained within limits</span>
 
 <span class="sd">    The value of a parameter cannot be set if ``fixed==True``.</span>
@@ -177,8 +183,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_tie_parameter</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the value of the ``Parameter``</span>
 
 <span class="sd">        The value will not be changed if it is ``fixed`` or ``tied``, or if it</span>
@@ -204,7 +210,7 @@
 
     <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;fixed&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Unable to change fixed parameter&quot;</span><span class="p">)</span>
@@ -217,8 +223,8 @@
 
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the constraint of the ``Parameter``</span>
 
 <span class="sd">        Returns</span>
@@ -235,7 +241,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span>
 
     <span class="nd">@constraints</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraints</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="c1"># Checks if constraints are a 2 element tuple of floats, that the</span>
         <span class="c1"># zeroeth element is less than or equal to the first, and that</span>
@@ -248,8 +254,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span> <span class="o">=</span> <span class="n">constraints</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or append to the parent ``Interaction`` objects for this</span>
 <span class="sd">        ``Parameter``</span>
 
@@ -271,7 +277,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">interaction</span><span class="p">()</span> <span class="k">for</span> <span class="n">interaction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interactions</span><span class="p">]</span>
 
     <span class="nd">@interactions</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interaction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interaction</span><span class="p">:</span> <span class="s1">&#39;Interaction&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="c1"># Test if interaction is of the same type as any interactions already</span>
         <span class="c1"># stored</span>
@@ -289,8 +295,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_interactions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">interaction</span><span class="p">))</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">tie</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">tie</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the ``value`` of a the ``Parameter`` that this ``Parameter`` is tied</span>
 <span class="sd">        to</span>
 
@@ -308,8 +314,8 @@
         <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tie</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">))</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">tied</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">tied</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get whether this ``Parameter`` is tied</span>
 
 <span class="sd">        Returns</span>
@@ -321,8 +327,8 @@
 
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tie&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Parameter.set_tie"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameter.set_tie">[docs]</a>    <span class="k">def</span> <span class="nf">set_tie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameter.set_tie"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameter.set_tie">[docs]</a>    <span class="k">def</span> <span class="nf">set_tie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This ``ties`` the ``Parameter.value`` to the ``value`` of another</span>
 <span class="sd">        ``Parameter``</span>
 
@@ -345,11 +351,11 @@
             <span class="s1">&#39;self._tie_parameter().value&#39;</span> <span class="o">+</span> <span class="n">expr</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;eval&#39;</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_generate_ID</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Generates a unique ID for the Parameter that has just been created.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_generate_ID</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates a unique ID for the Parameter that has just been created.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_ID_generator</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="n">condition</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Fixed &#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed</span> <span class="k">else</span> <span class="s1">&#39;Tied &#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tied</span> <span class="k">else</span>
                      <span class="s1">&#39;Constrained &#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -366,8 +372,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Parameter.validate_value"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameter.validate_value">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">validate_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">validate_value</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">constraints</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the ``Parameter.value`` by testing if it is within the</span>
 <span class="sd">        ``constraints``</span>
 
@@ -375,6 +381,8 @@
 <span class="sd">        ----------</span>
 <span class="sd">        values : float</span>
 <span class="sd">            The value of the ``Parameter``</span>
+<span class="sd">        constraints: tuple</span>
+<span class="sd">            A 2-tuple of the lower and upper constraints respectively.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -383,7 +391,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">constraints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">constraints</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Value must be within constraints&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value must be within constraints, </span><span class="se">\</span>
+<span class="s2">                            value is: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">, constraints are: </span><span class="si">{</span><span class="n">constraints</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
     <span class="c1"># comparison operator so parameters are always in the same order on MMC refinement headings</span>
     <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -391,7 +400,7 @@
 
 
 <div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A `dict-like` object where every element is a ``Parameter`` indexed by name,</span>
 <span class="sd">    which contains a number of helper methods for filtering.</span>
 
@@ -412,18 +421,18 @@
 <span class="sd">        An alphabetically-sorted numpy array of the ``Parameter``s stored in this object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_parameters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;list[Parameter]&quot;</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_parameters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Parameter</span><span class="p">,</span> <span class="s1">&#39;list[Parameter]&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">init_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">init_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_input</span><span class="p">(</span><span class="n">init_parameters</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">init_parameters</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Parameter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
         <span class="c1"># disable this method to ensure parameter keys are always the parameter name</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parameters should be added to using Parameters.append(parameter), &quot;</span>
                         <span class="s2">&quot;with a parameter or list of parameters as your argument.&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Parameter</span><span class="p">,</span> <span class="s1">&#39;list[Parameter]&#39;</span><span class="p">]:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -433,14 +442,21 @@
             <span class="n">matching_parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
             <span class="k">if</span> <span class="n">matching_parameters</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_parameters</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Calling a parameter name with no ID fetches the first &quot;</span>
-                                  <span class="s2">&quot;parameter with that name; this may cause buggy or &quot;</span>
-                                  <span class="s2">&quot;inconsistent behaviour!&quot;</span><span class="p">)</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Calling a parameter name with no ID returns a &quot;</span>
+                                  <span class="s2">&quot;list of all parameters with that name; &quot;</span>
+                                  <span class="s2">&quot;this may create inconsistent behaviour!&quot;</span><span class="p">)</span>
+                    <span class="c1">#pylint: disable=super-with-arguments</span>
+                    <span class="c1"># for some reason when we run it without arguments,</span>
+                    <span class="c1"># it complains in jupyter notebooks</span>
+                    <span class="c1"># see http://thomas-cokelaer.info/blog/2011/09/382/</span>
+                    <span class="k">return</span> <span class="nb">sorted</span><span class="p">([</span><span class="nb">super</span><span class="p">(</span><span class="n">Parameters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                                   <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">matching_parameters</span><span class="p">],</span>
+                                   <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
                 <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">matching_parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">raise</span> <span class="ne">KeyError</span> <span class="kn">from</span> <span class="nn">error</span>
 
-<div class="viewcode-block" id="Parameters.append"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;list[Parameter]&quot;</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameters.append"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s1">&#39;list[Parameter]&#39;</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Appends a ``Parameter`` or list of ``Parameter``s to the dict,</span>
 <span class="sd">        with the parameter name as its key.</span>
 
@@ -457,7 +473,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">as_array</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The parameters in the object as a sorted numpy array.</span>
 
 <span class="sd">        Returns</span>
@@ -468,8 +484,8 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
-<div class="viewcode-block" id="Parameters.filter"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameters.filter"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Parameter</span><span class="p">],</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters using a predicate</span>
 
 <span class="sd">        Parameters</span>
@@ -486,8 +502,8 @@
 
         <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">()))))</span></div>
 
-<div class="viewcode-block" id="Parameters.filter_name"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_name">[docs]</a>    <span class="k">def</span> <span class="nf">filter_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameters.filter_name"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_name">[docs]</a>    <span class="k">def</span> <span class="nf">filter_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters by ``name``</span>
 
 <span class="sd">        Parameters</span>
@@ -503,8 +519,8 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Parameters.filter_value"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_value">[docs]</a>    <span class="k">def</span> <span class="nf">filter_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comparison</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameters.filter_value"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_value">[docs]</a>    <span class="k">def</span> <span class="nf">filter_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comparison</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters by ``value``</span>
 
 <span class="sd">        Parameters</span>
@@ -532,8 +548,8 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">ops</span><span class="p">[</span><span class="n">comparison</span><span class="p">](</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Parameters.filter_interaction"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_interaction">[docs]</a>    <span class="k">def</span> <span class="nf">filter_interaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interaction_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameters.filter_interaction"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_interaction">[docs]</a>    <span class="k">def</span> <span class="nf">filter_interaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interaction_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters based on the name of the ``Interaction`` of each ``Parameter``</span>
 
 <span class="sd">        Parameters</span>
@@ -551,8 +567,8 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">interactions_name</span> <span class="o">==</span> <span class="n">interaction_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Parameters.filter_function"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_function">[docs]</a>    <span class="k">def</span> <span class="nf">filter_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameters.filter_function"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_function">[docs]</a>    <span class="k">def</span> <span class="nf">filter_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters based on the name of the ``InteractionFunction`` of each</span>
 <span class="sd">        ``Parameter``</span>
 
@@ -571,8 +587,8 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">functions_name</span> <span class="o">==</span> <span class="n">function_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Parameters.filter_atom_attribute"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_atom_attribute">[docs]</a>    <span class="k">def</span> <span class="nf">filter_atom_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameters.filter_atom_attribute"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_atom_attribute">[docs]</a>    <span class="k">def</span> <span class="nf">filter_atom_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters based on the attribute of ``Atom`` objects which have each</span>
 <span class="sd">        ``Parameter`` applied to them</span>
 
@@ -605,8 +621,8 @@
                                      <span class="k">for</span> <span class="n">atom</span>
                                      <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">atoms</span><span class="p">)])</span></div>
 
-<div class="viewcode-block" id="Parameters.filter_structure"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_structure">[docs]</a>    <span class="k">def</span> <span class="nf">filter_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameters.filter_structure"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.filter_structure">[docs]</a>    <span class="k">def</span> <span class="nf">filter_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters based on the name of the ``Structure`` to which each</span>
 <span class="sd">        ``Parameter`` applies</span>
 
@@ -623,7 +639,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">check_structure_name</span><span class="p">(</span><span class="n">parameter</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Checks the name of all structures</span>
 
 <span class="sd">            Returns</span>
@@ -649,20 +665,20 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">check_structure_name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Parameters.log_parameters"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.log_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">log_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Logs all Parameters by ID&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Parameters.log_parameters"><a class="viewcode-back" href="../../../pages/modules/md/parameters.html#MDMC.MD.parameters.Parameters.log_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">log_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Logs all Parameters by ID&quot;&quot;&quot;</span>
 
         <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;List of all parameters with ID: </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parameter</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parameter</span><span class="o">.</span><span class="n">repr</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Details on which Parameter corresponds to each ID have been written to the log.&quot;</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_check_input</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Parameter]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ensures that input to a Parameters object is in the correct form.</span>
 
 <span class="sd">        Raises an error if the input is not either a Parameter</span>

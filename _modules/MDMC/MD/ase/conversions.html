@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -108,8 +109,10 @@
 <span></span><span class="sd">&quot;&quot;&quot;This module enables conversion between MDMC Structure objects and ASE</span>
 <span class="sd">Atom and Atoms objects.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">ase</span>
 <span class="c1"># For some reason importing ase alone is not importing ase.io.x3d, therefore:</span>
@@ -122,7 +125,7 @@
 
 <div class="viewcode-block" id="ASEAtoms"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.ASEAtoms">[docs]</a><span class="k">class</span> <span class="nc">ASEAtoms</span><span class="p">(</span><span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of ``ase.atoms.Atoms`` with explicit bonds defined between atoms</span>
 
 <span class="sd">    Attributes</span>
@@ -149,8 +152,8 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;There must be an ID for every atom&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">IDs</span> <span class="o">=</span> <span class="n">IDs</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">,</span> <span class="nb">slice</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ase</span><span class="o">.</span><span class="n">atom</span><span class="o">.</span><span class="n">Atom</span><span class="p">,</span> <span class="n">ASEAtoms</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extends ``ase.atoms.Atoms._getitem__`` so that ``bonds`` are dealt with</span>
 <span class="sd">        correctly. This means that any bond between two atoms in the subset</span>
 <span class="sd">        defined by `i` are assigned to the new item returned.</span>
@@ -187,8 +190,8 @@
     <span class="c1"># format (redefined builtin) is used as this is method signature in ASE base</span>
     <span class="c1"># class</span>
     <span class="c1">#pylint: disable=redefined-builtin</span>
-<div class="viewcode-block" id="ASEAtoms.write"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.ASEAtoms.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ASEAtoms.write"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.ASEAtoms.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Override ase.atoms.Atoms.write so that writing to X3D uses custom X3D</span>
 <span class="sd">        class</span>
 
@@ -209,8 +212,8 @@
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="convert_to_ase_atom"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_to_ase_atom">[docs]</a><span class="k">def</span> <span class="nf">convert_to_ase_atom</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="convert_to_ase_atom"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_to_ase_atom">[docs]</a><span class="k">def</span> <span class="nf">convert_to_ase_atom</span><span class="p">(</span><span class="n">atom</span><span class="p">:</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ase</span><span class="o">.</span><span class="n">atom</span><span class="o">.</span><span class="n">Atom</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an MDMC ``Atom`` to an ``ase.atom.Atom``</span>
 
 <span class="sd">    Parameters</span>
@@ -235,8 +238,12 @@
                          <span class="n">charge</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="convert_from_ase_atom"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_from_ase_atom">[docs]</a><span class="k">def</span> <span class="nf">convert_from_ase_atom</span><span class="p">(</span><span class="n">ase_atom</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_charge</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="convert_from_ase_atom"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_from_ase_atom">[docs]</a><span class="k">def</span> <span class="nf">convert_from_ase_atom</span><span class="p">(</span><span class="n">ase_atom</span><span class="p">:</span> <span class="n">ASEAtoms</span><span class="p">,</span>
+                          <span class="n">atom_type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">set_charge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                          <span class="n">cutoff</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Atom&#39;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an ``ase.atom.Atom`` to an MDMC ``Atom``.</span>
 
 <span class="sd">    As MDMC automatically generates atom ``ID``, ``ase_atom.index`` is not</span>
@@ -278,8 +285,8 @@
     <span class="k">return</span> <span class="n">Atom</span><span class="p">(</span><span class="n">ase_atom</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_ase_atoms"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.get_ase_atoms">[docs]</a><span class="k">def</span> <span class="nf">get_ase_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="get_ase_atoms"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.get_ase_atoms">[docs]</a><span class="k">def</span> <span class="nf">get_ase_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">cell</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ASEAtoms</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gets an ``ASEAtoms`` object equivalent to ``atoms``, including the bonding</span>
 
 <span class="sd">    Parameters</span>
@@ -314,8 +321,8 @@
                     <span class="n">IDs</span><span class="o">=</span><span class="n">IDs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="convert_bond"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_bond">[docs]</a><span class="k">def</span> <span class="nf">convert_bond</span><span class="p">(</span><span class="n">bond</span><span class="p">,</span> <span class="n">index_conv</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="convert_bond"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_bond">[docs]</a><span class="k">def</span> <span class="nf">convert_bond</span><span class="p">(</span><span class="n">bond</span><span class="p">:</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">index_conv</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts ``Bond`` objects into the form required by the ASE GUI</span>
 
 <span class="sd">    Parameters</span>
@@ -340,8 +347,8 @@
     <span class="k">return</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">indexing</span><span class="p">,</span> <span class="n">atom_pair</span><span class="p">)))</span> <span class="k">for</span> <span class="n">atom_pair</span> <span class="ow">in</span> <span class="n">bond</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="convert_bonds"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_bonds">[docs]</a><span class="k">def</span> <span class="nf">convert_bonds</span><span class="p">(</span><span class="n">bonds</span><span class="p">,</span> <span class="n">index_conv</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="convert_bonds"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.convert_bonds">[docs]</a><span class="k">def</span> <span class="nf">convert_bonds</span><span class="p">(</span><span class="n">bonds</span><span class="p">:</span> <span class="s1">&#39;list[Bond]&#39;</span><span class="p">,</span> <span class="n">index_conv</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts ``Bond`` objects into the form required by the ASE GUI</span>
 
 <span class="sd">    Parameters</span>
@@ -369,7 +376,7 @@
 
 <div class="viewcode-block" id="X3D"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D">[docs]</a><span class="k">class</span> <span class="nc">X3D</span><span class="p">(</span><span class="n">x3d</span><span class="o">.</span><span class="n">X3D</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to write X3D or X3DOM (html) which can be read by web browers</span>
 
 <span class="sd">    This is used for inline IPython (Jupyter) visualisation with X3DOM. It</span>
@@ -382,7 +389,7 @@
 <span class="sd">        The ``ase.atoms.Atoms`` object to write</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
         <span class="c1"># 3000 atoms was picked because at this number of atoms the view is such</span>
@@ -391,8 +398,8 @@
         <span class="c1"># viewed on 2018 macbook pro (2.6GHz, 16GB DDR4, 4GB GDDR5)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reduce_memory</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3000</span>
 
-<div class="viewcode-block" id="X3D.write"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;X3DOM&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="X3D.write"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">datatype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;X3DOM&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes output to an &#39;X3DOM&#39; (html) or &#39;X3D&#39; file</span>
 
 <span class="sd">        Parameters</span>
@@ -462,8 +469,8 @@
         <span class="k">elif</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;X3D&#39;</span><span class="p">:</span>
             <span class="n">w</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;/X3D&gt;&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="X3D.atom_lines"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.atom_lines">[docs]</a>    <span class="k">def</span> <span class="nf">atom_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="X3D.atom_lines"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.atom_lines">[docs]</a>    <span class="k">def</span> <span class="nf">atom_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">atom</span><span class="o">.</span><span class="n">Atom</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a segment of X3D lines representing an atom</span>
 
 <span class="sd">        Parameters</span>
@@ -505,8 +512,8 @@
         <span class="n">lines</span> <span class="o">+=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;/Transform&gt;&#39;</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">lines</span></div>
 
-<div class="viewcode-block" id="X3D.bond_lines"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.bond_lines">[docs]</a>    <span class="k">def</span> <span class="nf">bond_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bond</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="X3D.bond_lines"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.bond_lines">[docs]</a>    <span class="k">def</span> <span class="nf">bond_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bond</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a cylinder representing a bond</span>
 
 <span class="sd">        Parameters</span>
@@ -564,8 +571,8 @@
 
         <span class="k">return</span> <span class="n">lines</span></div>
 
-<div class="viewcode-block" id="X3D.get_center_of_rotation"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.get_center_of_rotation">[docs]</a>    <span class="k">def</span> <span class="nf">get_center_of_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="X3D.get_center_of_rotation"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.get_center_of_rotation">[docs]</a>    <span class="k">def</span> <span class="nf">get_center_of_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the center of rotation for the viewpoint</span>
 
 <span class="sd">        Returns</span>
@@ -586,8 +593,8 @@
                               <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)],</span>
                              <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="X3D.get_viewpoint_z"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.get_viewpoint_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_viewpoint_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="X3D.get_viewpoint_z"><a class="viewcode-back" href="../../../../pages/modules/md/ase/conversions.html#MDMC.MD.ase.conversions.X3D.get_viewpoint_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_viewpoint_z</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the z position of the viewpoint which will display all of the</span>
 <span class="sd">        `atoms`</span>
 

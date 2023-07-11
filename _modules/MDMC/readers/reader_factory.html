@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/molecular-visualization.html">Molecular Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-simulation.html">Running a Simulation in MDMC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/creating-an-observable.html">Creating an Observable from a Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/selecting-fitting-parameters.html">Selecting Fitting Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement</a></li>
@@ -110,18 +111,21 @@
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">isclass</span><span class="p">,</span> <span class="n">isabstract</span><span class="p">,</span> <span class="n">getmembers</span><span class="p">,</span> <span class="n">getmodule</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">MDMC.readers.reader</span> <span class="kn">import</span> <span class="n">Reader</span>
 
 <div class="viewcode-block" id="ReaderFactory"><a class="viewcode-back" href="../../../pages/modules/readers/reader_factory.html#MDMC.readers.reader_factory.ReaderFactory">[docs]</a><span class="k">class</span> <span class="nc">ReaderFactory</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides a abstract base class for methods and properties common to all</span>
 <span class="sd">    reader factories</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ReaderFactory.create_reader"><a class="viewcode-back" href="../../../pages/modules/readers/reader_factory.html#MDMC.readers.reader_factory.ReaderFactory.create_reader">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create_reader</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">create_reader</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Reader&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a reader object from a module name</span>
 
 <span class="sd">        The reader object must be the first class in the module. The base class</span>
@@ -158,7 +162,7 @@
 <div class="viewcode-block" id="ReaderFactory.base_class"><a class="viewcode-back" href="../../../pages/modules/readers/reader_factory.html#MDMC.readers.reader_factory.ReaderFactory.base_class">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">base_class</span><span class="p">():</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This should be implemented to return the base class of objects returned</span>
 <span class="sd">        by the ``ReaderFactory``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -166,8 +170,8 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_name_from_alias</span><span class="p">(</span><span class="n">alias</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_name_from_alias</span><span class="p">(</span><span class="n">alias</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts an ``alias`` into a module name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
