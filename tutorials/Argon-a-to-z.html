@@ -391,7 +391,8 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">MDMC.control</span> <span class="kn">import</span> <span class="n">Control</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">LennardJones</span><span class="p">,</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">Universe</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">LennardJones</span><span class="p">,</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">Universe</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.packmol</span> <span class="kn">import</span> <span class="n">PackmolSetup</span><span class="p">,</span> <span class="n">PackmolFiller</span>
 </pre></div>
 </div>
 </div>
@@ -418,6 +419,7 @@ div.rendered_html tbody tr:hover {
 <span class="c1"># 38.4441 A will contain 1000 Ar atoms</span>
 <span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="mf">23.0668</span><span class="p">)</span>
 <span class="n">Ar</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;Ar&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="mf">36.0</span><span class="p">)</span>
+
 <span class="c1"># Calculating number of Ar atoms needed to obtain density</span>
 <span class="n">n_ar_atoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">density</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">dimensions</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of argon atoms = </span><span class="si">{</span><span class="n">n_ar_atoms</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -532,7 +534,8 @@ steps.</p>
                   <span class="n">minimizer_type</span><span class="o">=</span><span class="s2">&quot;GPO&quot;</span><span class="p">,</span>
                   <span class="n">reset_config</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                   <span class="n">MD_steps</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
-                  <span class="n">equilibration_steps</span><span class="o">=</span><span class="mi">4000</span><span class="p">)</span>
+                  <span class="n">equilibration_steps</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
+                  <span class="n">data_printer</span><span class="o">=</span><span class="s1">&#39;ipython&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -564,63 +567,232 @@ Control created with:
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>FoM</th>
+      <th>epsilon (#2)</th>
+      <th>sigma (#3)</th>
+    </tr>
+    <tr>
+      <th>Step</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>18.027880</td>
+      <td>1.024300</td>
+      <td>3.360000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>47.085200</td>
+      <td>1.043844</td>
+      <td>3.505240</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>659.998393</td>
+      <td>1.093889</td>
+      <td>2.815663</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>411.919177</td>
+      <td>0.919516</td>
+      <td>3.780650</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>80.342892</td>
+      <td>1.495079</td>
+      <td>3.436889</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>365.185623</td>
+      <td>0.648673</td>
+      <td>2.783596</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>91.046260</td>
+      <td>0.892343</td>
+      <td>3.137861</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>152.276961</td>
+      <td>0.759477</td>
+      <td>3.681787</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>113.874723</td>
+      <td>0.517653</td>
+      <td>3.217887</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>1201.626358</td>
+      <td>1.217111</td>
+      <td>2.713417</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>27.099467</td>
+      <td>0.986962</td>
+      <td>3.289796</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>838.480537</td>
+      <td>1.272722</td>
+      <td>2.882390</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>272.547507</td>
+      <td>0.683786</td>
+      <td>2.921166</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>55.357196</td>
+      <td>0.718951</td>
+      <td>3.542950</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>341.226996</td>
+      <td>1.176461</td>
+      <td>3.704159</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>62.148449</td>
+      <td>0.581250</td>
+      <td>3.600365</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>637.707463</td>
+      <td>1.442156</td>
+      <td>3.027460</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>168.323071</td>
+      <td>1.379929</td>
+      <td>3.165794</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>214.921530</td>
+      <td>1.148286</td>
+      <td>3.033985</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>22.158765</td>
+      <td>0.847010</td>
+      <td>3.404806</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>21.857461</td>
+      <td>1.216242</td>
+      <td>3.297933</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>19.444072</td>
+      <td>0.997208</td>
+      <td>3.392510</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>20.327387</td>
+      <td>1.063050</td>
+      <td>3.352050</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>17.280471</td>
+      <td>0.977369</td>
+      <td>3.374166</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>14.603831</td>
+      <td>0.950838</td>
+      <td>3.373311</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Step         FoM Change state  Pred coords     Pred FoM epsilon (#2)   sigma (#3)
-   0       17.72     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.024         3.36
-   1       65.88     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.044        3.505
-   2         620     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.094        2.816
-   3       376.8     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72       0.9195        3.781
-   4       67.97     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.495        3.437
-   5       357.9     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72       0.6487        2.784
-   6       88.77     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72       0.8923        3.138
-   7       148.2     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72       0.7595        3.682
-   8       107.7     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72       0.5177        3.218
-   9        1129     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.217        2.713
-  10       26.63     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        0.987         3.29
-  11       840.8     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.273        2.882
-  12       257.2     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72       0.6838        2.921
-  13       48.18     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        0.719        3.543
-  14       340.3     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.176        3.704
-  15       54.65     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72       0.5812          3.6
-  16       577.4     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.442        3.027
-  17       162.1     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72         1.38        3.166
-  18       202.3     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.148        3.034
-  19       24.08     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        0.847        3.405
-  20       22.02     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.144        3.294
-  21        22.6     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.001        3.367
-  22       19.21     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72        1.072        3.331
-  23        34.6     Accepted [1.0243 kJ / mol, 3.36 Ang]        17.72       0.5013        3.461
-  24       15.66     Accepted [1.250262762054411 kJ / mol, 3.3408060786825793 Ang]        15.66         1.25        3.341
 
 The refinement has finished.
 
 Minimum measured point is:
-(1.250262762054411 kJ / mol, 3.3408060786825793 Ang) with an FoM of 15.65859497834996.
+(0.9508381381405456 kJ / mol, 3.373311484019586 Ang) with an FoM of 14.60383062856943.
 
 Minimum point predicted is:
-(1.250262762054411 kJ / mol, 3.3408060786825793 Ang) for an FoM of 15.65859497834996.
+(0.9508381381405456 kJ / mol, 3.373311484019586 Ang) for an FoM of 14.60383062856943.
 
 
 
 Automatic Scale Factors
-  data/Well_s_q_omega_Ar_data.xml  20.079354
-Parameter means = [1.2397232  3.34631505], Parameter errors = [0.05284783 0.01327271]
+  data/Well_s_q_omega_Ar_data.xml  20.16824
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:root:Too few points to create valid contours
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Parameter means = [0.92918972 3.36743791], Parameter errors = [0.02485102 0.01290124]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Argon-a-to-z_16_1.png" src="../_images/tutorials_Argon-a-to-z_16_1.png" />
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
+<img alt="../_images/tutorials_Argon-a-to-z_16_4.png" src="../_images/tutorials_Argon-a-to-z_16_4.png" />
 </div>
 </div>
 </section>
