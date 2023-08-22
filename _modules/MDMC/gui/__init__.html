@@ -106,50 +106,41 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.gui.__init__</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Functions for viewing MDMC configurations via ASE.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span></span><span class="sd">&quot;&quot;&quot;Contains the GUI elements of MDMC</span>
 
-<span class="kn">import</span> <span class="nn">ase.visualize</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
+<span class="sd">Contents</span>
+<span class="sd">--------</span>
+<span class="sd">view</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">Universe</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.ase.convert</span> <span class="kn">import</span> <span class="n">MDMC_to_ASE</span>
+<span class="kn">from</span> <span class="nn">MDMC</span> <span class="kn">import</span> <span class="n">MD</span>
 
-<div class="viewcode-block" id="view"><a class="viewcode-back" href="../../../pages/modules/gui.html#MDMC.gui.__init__.view">[docs]</a><span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Universe</span><span class="p">],</span>
-         <span class="n">viewer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;X3D&#39;</span><span class="p">,</span>
-         <span class="n">max_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">HTML</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="view"><a class="viewcode-back" href="../../../pages/modules/gui.html#MDMC.gui.__init__.view">[docs]</a><span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="n">atom_container</span><span class="p">:</span> <span class="s1">&#39;list[MD.Atom, MD.AtomContainer]&#39;</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="s1">&#39;X3DOM&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    View an MDMC Structure or Universe.</span>
-<span class="sd">    Wrapper around the ASE viewer.</span>
+<span class="sd">    Launches a GUI for viewing collections of ``Atom`` objects</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    obj: Structure or AtomContainer</span>
-<span class="sd">        The MDMC molecular object to be viewed.</span>
-<span class="sd">    viewer: str</span>
-<span class="sd">        The viewer.</span>
-<span class="sd">    max_atoms: int, default 2000</span>
-<span class="sd">        The maximum number of atoms to be displayed.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    HTML or None</span>
-<span class="sd">        Either opens the relevant GUI, or returns a HTML object</span>
-<span class="sd">        (in the case of HTML viewers like X3D).</span>
+<span class="sd">    atom_container : list of Atom, AtomContainer</span>
+<span class="sd">        An object which contains some ``Atom`` objects. This can either be in</span>
+<span class="sd">        the sense that it is a list of `Atom` objects, or it could be an object</span>
+<span class="sd">        which has the ``atoms`` attribute (e.g. an ``AtomContainer``). If</span>
+<span class="sd">        ``atom_collection`` also has a ``dimensions`` attribute (such as</span>
+<span class="sd">        ``Universe``), then this is used to set the volume displayed; otherwise</span>
+<span class="sd">        the volume is determined by the extents of the ``Atom`` objects.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Universe</span><span class="p">):</span>
-        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">dimensions</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">atom_container</span><span class="o">.</span><span class="n">dimensions</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
         <span class="n">dimensions</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">atom_container</span><span class="o">.</span><span class="n">atoms</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">atom_container</span>
 
-    <span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">MDMC_to_ASE</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">dimensions</span><span class="p">)[:</span><span class="n">max_atoms</span><span class="p">]</span>  <span class="c1"># take first max_atoms atoms</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">visualize</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="n">viewer</span><span class="p">)</span>
-    <span class="c1"># running the view command will open the window for most viewers, but</span>
-    <span class="c1"># for HTML viewers like X3D it needs to be returned</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">HTML</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">output</span>
-    <span class="k">return</span> <span class="kc">None</span></div>
+    <span class="k">return</span> <span class="n">MD</span><span class="o">.</span><span class="n">ase</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="n">viewer</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">dimensions</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
