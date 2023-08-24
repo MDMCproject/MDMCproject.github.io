@@ -56,7 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="applying-a-forcefield.html">Applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Molecular Visualization</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#'X3DOM'"><code class="docutils literal notranslate"><span class="pre">'X3DOM'</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#'X3D'"><code class="docutils literal notranslate"><span class="pre">'X3D'</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#'ASE'"><code class="docutils literal notranslate"><span class="pre">'ASE'</span></code></a></li>
 </ul>
 </li>
@@ -386,29 +386,32 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Molecular-Visualization">
 <h1>Molecular Visualization<a class="headerlink" href="#Molecular-Visualization" title="Permalink to this headline"></a></h1>
-<p>After defining the configuration and topology of a <code class="docutils literal notranslate"><span class="pre">Universe</span></code>, either manually or by reading a configuration file, it is useful to visualize the setup. The <code class="docutils literal notranslate"><span class="pre">view</span></code> function provides a simple molecular visualizer for establishing the accuracy of a simulation setup. It can be used to visualize one or more <code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects, one or more <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> objects, or a <code class="docutils literal notranslate"><span class="pre">Universe</span></code>.</p>
+<p>After defining the configuration and topology of a <code class="docutils literal notranslate"><span class="pre">Universe</span></code>, either manually or by reading a configuration file, it is useful to visualize the setup. The <code class="docutils literal notranslate"><span class="pre">view</span></code> function provides a simple molecular visualizer for establishing the accuracy of a simulation setup. It can be used to visualize one or more <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> objects, or a <code class="docutils literal notranslate"><span class="pre">Universe</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start by simply creating H and O atoms</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Bond</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">Universe</span>
 <span class="n">H1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.4238</span><span class="p">)</span>
 <span class="n">O</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.81649</span><span class="p">,</span> <span class="mf">0.57736</span><span class="p">),</span> <span class="n">charge</span><span class="o">=-</span><span class="mf">0.8476</span><span class="p">)</span>
 <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">H1</span><span class="p">,</span> <span class="n">O</span><span class="p">]</span>
+<span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">H1</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">O</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Two different viewers are available:</p>
-<section id="'X3DOM'">
-<h2><code class="docutils literal notranslate"><span class="pre">'X3DOM'</span></code><a class="headerlink" href="#'X3DOM'" title="Permalink to this headline"></a></h2>
-<p>This is an inline viewer which displays within a Jupyter notebook. It is ideally suited to &lt;3000 atoms, and may suffer performance issues when displaying more than this. <code class="docutils literal notranslate"><span class="pre">'X3DOM'</span></code> is the default viewer when <code class="docutils literal notranslate"><span class="pre">view</span></code> is called.</p>
+<section id="'X3D'">
+<h2><code class="docutils literal notranslate"><span class="pre">'X3D'</span></code><a class="headerlink" href="#'X3D'" title="Permalink to this headline"></a></h2>
+<p>This is an inline viewer which displays within a Jupyter notebook. It is ideally suited to &lt;3000 atoms, and may suffer performance issues when displaying more than this. <code class="docutils literal notranslate"><span class="pre">'X3D'</span></code> is the default viewer when <code class="docutils literal notranslate"><span class="pre">view</span></code> is called.</p>
 </section>
 <section id="'ASE'">
 <h2><code class="docutils literal notranslate"><span class="pre">'ASE'</span></code><a class="headerlink" href="#'ASE'" title="Permalink to this headline"></a></h2>
 <p>This is a modified version of the default <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/">ASE</a> GUI. It displays in a separate window (which may appear on the desktop), and requires X11 forwarding to be enabled if MDMC is being run from within a Docker container. This viewer has a few additional menu options, which are discussed below.</p>
 <p>Both viewers require ASE to be installed.</p>
-<p>As mentioned above, calling view without passing <code class="docutils literal notranslate"><span class="pre">viewer</span></code> uses <code class="docutils literal notranslate"><span class="pre">'X3DOM'</span></code> as the viewer, which displays inline in a Jupyter notebook. It should display:</p>
+<p>As mentioned above, calling view without passing <code class="docutils literal notranslate"><span class="pre">viewer</span></code> uses <code class="docutils literal notranslate"><span class="pre">'X3D'</span></code> as the viewer, which displays inline in a Jupyter notebook. It should display:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -442,7 +445,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>And using the <code class="docutils literal notranslate"><span class="pre">'ASE'</span></code> viewer:</p>
+<p>And using the <code class="docutils literal notranslate"><span class="pre">'ASE'</span></code> viewer, press <code class="docutils literal notranslate"><span class="pre">Ctrl+B</span></code> to show bonds:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>

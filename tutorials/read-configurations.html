@@ -53,7 +53,12 @@
 <li class="toctree-l1"><a class="reference internal" href="building-a-universe.html">Building an MDMC Universe</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Reading atoms from configuration files</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#Equivalence-specified-by-atom_types">Equivalence specified by <code class="docutils literal notranslate"><span class="pre">atom_types</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Equivalence-specified-by-names">Equivalence specified by <code class="docutils literal notranslate"><span class="pre">names</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Equivalence-specified-by-names">Equivalence specified by <code class="docutils literal notranslate"><span class="pre">names</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Getting-configurations-directly-from-databases-or-PubChem">Getting configurations directly from databases or PubChem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Building-from-an-ASE-built-in-database">Building from an ASE built-in database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Building-from-the-Internet">Building from the Internet</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units in MDMC</a></li>
@@ -387,13 +392,10 @@ div.rendered_html tbody tr:hover {
 <section id="Reading-atoms-from-configuration-files">
 <h1>Reading atoms from configuration files<a class="headerlink" href="#Reading-atoms-from-configuration-files" title="Permalink to this headline"></a></h1>
 <p>MDMC enables reading atomic configurations and topologies (if included) from configuration files.</p>
-<p>The implemented file formats are:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://www.iucr.org/resources/cif/documentation">Crystallographic Information File</a> (CIF)</p></li>
-</ul>
+<p>Atomic configurations are read through ASE, so any <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/io/io.html">format supported by ASE is available</a>.</p>
 <p>In theory, it is possible to read a configuration file by simply passing it to the <code class="docutils literal notranslate"><span class="pre">read</span></code> function, as MDMC will determine the file format from the extension, if it is a supported format:</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.readers.configurations</span> <span class="kn">import</span> <span class="n">read</span>
@@ -404,8 +406,16 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The return type is: &lt;class &#39;list&#39;&gt;
+</pre></div></div>
+</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># We can use this to create a Molecule</span>
@@ -416,11 +426,11 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>The paracetamol <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> read from the CIF file can be visualized using the <code class="docutils literal notranslate"><span class="pre">view</span></code> function:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.gui</span> <span class="kn">import</span> <span class="n">view</span>
-<span class="n">view</span><span class="p">(</span><span class="n">paracetamol</span><span class="p">)</span>
+<span class="n">view</span><span class="p">(</span><span class="n">paracetamol</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="s1">&#39;ASE&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -459,7 +469,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># from MDMC.readers.configurations import read</span>
-<span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/Paracetamol.cif&#39;</span><span class="p">,</span> <span class="n">atom_types</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="c1"># Oxygens</span>
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/Paracetamol.cif&#39;</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="c1"># Oxygens</span>
                                            <span class="mi">3</span><span class="p">,</span> <span class="c1"># Nitrogen</span>
                                            <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="c1"># Carbons</span>
                                            <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">])</span> <span class="c1"># Hydrogens</span>
@@ -481,7 +491,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># from MDMC.readers.configurations import read</span>
-<span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/Paracetamol.cif&#39;</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;109&#39;</span><span class="p">,</span> <span class="s1">&#39;177&#39;</span><span class="p">,</span> <span class="c1"># Oxygens</span>
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s1">&#39;data/Paracetamol.cif&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;109&#39;</span><span class="p">,</span> <span class="s1">&#39;177&#39;</span><span class="p">,</span> <span class="c1"># Oxygens</span>
                                             <span class="s1">&#39;207&#39;</span><span class="p">,</span> <span class="c1"># Nitrogen</span>
                                             <span class="s1">&#39;208&#39;</span><span class="p">,</span> <span class="s1">&#39;108&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;178&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;185&#39;</span><span class="p">,</span> <span class="c1"># Carbons</span>
                                             <span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;183&#39;</span><span class="p">,</span> <span class="s1">&#39;110&#39;</span><span class="p">])</span> <span class="c1"># Hydrogens</span>
@@ -532,6 +542,82 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <p><img alt="Display for paracetamol with charges" src="../_images/gui_paracetamol_charges.png" /></p>
+<section id="Getting-configurations-directly-from-databases-or-PubChem">
+<h3>Getting configurations directly from databases or PubChem<a class="headerlink" href="#Getting-configurations-directly-from-databases-or-PubChem" title="Permalink to this headline"></a></h3>
+<p>As configurations are read via ASE, MDMC supports converting any ASE <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> object into a list of MDMC <code class="docutils literal notranslate"><span class="pre">Atom</span></code>s. Indeed, all our file reader is really doing is this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">MDMC</span><span class="o">.</span><span class="n">MD</span><span class="o">.</span><span class="n">ase</span><span class="o">.</span><span class="n">convert</span><span class="o">.</span><span class="n">ASE_to_MDMC</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and much in the same way, anything that can be read as ASE atoms can be converted into an MDMC Molecule. In particular, we will see how to read in molecules from ASE’s built-in databases and from PubChem.</p>
+<p><strong>A warning on using databases and the Internet: For quality of research, it is recommended that a file is used (and made available) for any read-in configurations used in research. This allows both the creator of the configuration to be credited, and also ensures your work is reproducible (as databases or websites can change!)</strong></p>
+</section>
+</section>
+<section id="Building-from-an-ASE-built-in-database">
+<h2>Building from an ASE built-in database<a class="headerlink" href="#Building-from-an-ASE-built-in-database" title="Permalink to this headline"></a></h2>
+<p>ASE has several built in databases containing many popular molecules. The <code class="docutils literal notranslate"><span class="pre">ase.build.molecule</span></code> function allows users to <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/build/build.html#ase.build.molecule">read in ASE molecules from these databases</a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">molecule</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.ase.convert</span> <span class="kn">import</span> <span class="n">ASE_to_MDMC</span>
+
+<span class="c1"># we read in a benzene molecule</span>
+<span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">molecule</span><span class="p">(</span><span class="s2">&quot;C6H6&quot;</span><span class="p">)</span>
+<span class="n">MDMC_atoms</span> <span class="o">=</span> <span class="n">ASE_to_MDMC</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">)</span>
+<span class="n">benzene</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">MDMC_atoms</span><span class="p">)</span>
+<span class="n">view</span><span class="p">(</span><span class="n">benzene</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p><a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/collections.html#collections">Please see the relevant documentation</a> for more information on ASE’s built-in databases.</p>
+</section>
+<section id="Building-from-the-Internet">
+<h2>Building from the Internet<a class="headerlink" href="#Building-from-the-Internet" title="Permalink to this headline"></a></h2>
+<p>ASE also <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/data.html#ase.data.pubchem.pubchem_atoms_search">has an integration with PubChem</a>, which allows you to search the <a class="reference external" href="https://pubchem.ncbi.nlm.nih.gov/">PubChem website</a> directly and read in the result as an ASE <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> object. This can again be easily converted to an MDMC molecule.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.data.pubchem</span> <span class="kn">import</span> <span class="n">pubchem_atoms_search</span>
+
+<span class="c1"># search by name, CID or SMILES string</span>
+<span class="n">ase_aspirin</span> <span class="o">=</span> <span class="n">pubchem_atoms_search</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;aspirin&#39;</span><span class="p">)</span>
+<span class="n">aspirin</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">ASE_to_MDMC</span><span class="p">(</span><span class="n">ase_aspirin</span><span class="p">))</span>
+
+<span class="n">ase_glucose</span> <span class="o">=</span> <span class="n">pubchem_atoms_search</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="s1">&#39;5793&#39;</span><span class="p">)</span>
+<span class="n">glucose</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">ASE_to_MDMC</span><span class="p">(</span><span class="n">ase_glucose</span><span class="p">))</span>
+
+<span class="n">ase_benzaldehyde</span> <span class="o">=</span> <span class="n">pubchem_atoms_search</span><span class="p">(</span><span class="n">smiles</span><span class="o">=</span><span class="s1">&#39;C1=CC=C(C=C1)C=O&#39;</span><span class="p">)</span>
+<span class="n">benzaldehyde</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">ASE_to_MDMC</span><span class="p">(</span><span class="n">ase_benzaldehyde</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">view</span><span class="p">(</span><span class="n">aspirin</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">view</span><span class="p">(</span><span class="n">glucose</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">view</span><span class="p">(</span><span class="n">benzaldehyde</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 
