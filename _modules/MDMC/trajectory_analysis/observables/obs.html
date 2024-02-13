@@ -109,10 +109,8 @@
 <span></span><span class="sd">&quot;&quot;&quot;Module defining a class for storing, calculating and reading in observables</span>
 <span class="sd">from molecular dynamics trajectories.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
-<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span> <span class="k">as</span> <span class="n">PoolExecutor</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader_factory</span> <span class="kn">import</span> <span class="n">ObservableReaderFactory</span>
@@ -121,29 +119,6 @@
     <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
-<span class="n">N_CPUS_MP</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="c1"># A (Thread)PoolExecutor is created here, and is later imported</span>
-<span class="c1"># by other observables.</span>
-<span class="c1"># The same environment variable that defines the number of OMP threads</span>
-<span class="c1"># is used here to fix the max number of threads for the pool executor.</span>
-<span class="c1"># vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv</span>
-<span class="k">if</span> <span class="s2">&quot;OMP_NUM_THREADS&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
-    <span class="n">omp_num_threads_str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">omp_num_threads</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">omp_num_threads_str</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">omp_num_threads</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">N_CPUS_MP</span> <span class="o">=</span> <span class="n">omp_num_threads</span>
-
-<span class="c1"># NOTE: The import in line 7 specifies that the PoolExecutor</span>
-<span class="c1"># is a ThreadPoolExecutor.</span>
-<span class="c1"># There is still a possibility of replacing it with a</span>
-<span class="c1"># ProcessPoolExecutor. The thread-based version is better for</span>
-<span class="c1"># performance based on the tests so far.</span>
-<span class="n">executor</span> <span class="o">=</span> <span class="n">PoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">N_CPUS_MP</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Observable"><a class="viewcode-back" href="../../../../pages/modules/trajectory_analysis/observables/obs.html#MDMC.trajectory_analysis.observables.obs.Observable">[docs]</a><span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;origin&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Observable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
