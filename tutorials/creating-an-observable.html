@@ -1,20 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Creating an Observable from a Simulation &mdash; MDMC 0.2 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -30,11 +34,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> MDMC
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MDMC
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -107,8 +115,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Creating an Observable from a Simulation</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Creating an Observable from a Simulation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/tutorials/creating-an-observable.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -118,278 +126,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-div.rendered_html th {
-  font-weight: bold;
-}
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="Creating-an-Observable-from-a-Simulation">
-<h1>Creating an Observable from a Simulation<a class="headerlink" href="#Creating-an-Observable-from-a-Simulation" title="Permalink to this headline"></a></h1>
+  <section id="Creating-an-Observable-from-a-Simulation">
+<h1>Creating an Observable from a Simulation<a class="headerlink" href="#Creating-an-Observable-from-a-Simulation" title="Link to this heading"></a></h1>
 <p>When running a refinement, MDMC makes quantitative comparisons between properties measured experimentally and calculated from MD simulations: within MDMC each of these properties is an <code class="docutils literal notranslate"><span class="pre">Observable</span></code>. Examples of these observables are the dynamic structure factor, <span class="math notranslate nohighlight">\(S(Q,\omega)\)</span>, and the pair distribution function, <span class="math notranslate nohighlight">\(G(r)\)</span>.</p>
 <p>Within a refinement, each <code class="docutils literal notranslate"><span class="pre">Observable</span></code> is calculated from MD automatically. However it is also useful to be able to calculate an <code class="docutils literal notranslate"><span class="pre">Observable</span></code> from an MD simulation and plot it, which is demonstrated in this tutorial.</p>
 <p>This tutorial requires matplotlib to be installed:</p>
@@ -413,7 +151,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <section id="Running-a-simulation">
-<h2>Running a simulation<a class="headerlink" href="#Running-a-simulation" title="Permalink to this headline"></a></h2>
+<h2>Running a simulation<a class="headerlink" href="#Running-a-simulation" title="Link to this heading"></a></h2>
 <p>Below we setup and run a simulation of liquid argon so that we have a <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> from which to calculate an <code class="docutils literal notranslate"><span class="pre">Observable</span></code>.</p>
 <p><strong>As this is minimizing, equilibrating, and running a production run, this should take ~3 minutes to execute</strong>. Minimization lowers the potential energy of the simulated system by adjusting atomic positions. Running a simulation with <code class="docutils literal notranslate"><span class="pre">equilibration</span></code> set to <code class="docutils literal notranslate"><span class="pre">True</span></code> will not record a <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>, and since we specified neither a thermostat or barastat for the simulation a Berendsen thermostat will be applied for the duration of the equilibration. It will not be present for the second
 run, when the <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> is recorded.</p>
@@ -464,9 +202,9 @@ OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98
   using 1 OpenMP thread(s) per MPI task
 LAMMPS output is captured by PyLammps wrapper
 LAMMPS (29 Sep 2021 - Update 3)
-LAMMPS output is captured by PyLammps wrapper
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
 Total wall time: 0:00:00
 Simulation created with lammps engine and settings:
   temperature  120.0
@@ -474,7 +212,7 @@ Simulation created with lammps engine and settings:
 </pre></div></div>
 </div>
 <section id="3D-surface-plotting">
-<h3>3D surface plotting<a class="headerlink" href="#3D-surface-plotting" title="Permalink to this headline"></a></h3>
+<h3>3D surface plotting<a class="headerlink" href="#3D-surface-plotting" title="Link to this heading"></a></h3>
 <p>Below we define a simple function for plotting 3D surfaces, which we will use for plotting the observables.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -492,7 +230,7 @@ Simulation created with lammps engine and settings:
 </section>
 </section>
 <section id="Calculating-S(Q,\omega)">
-<h2>Calculating <span class="math notranslate nohighlight">\(S(Q,\omega)\)</span><a class="headerlink" href="#Calculating-S(Q,\omega)" title="Permalink to this headline"></a></h2>
+<h2>Calculating <span class="math notranslate nohighlight">\(S(Q,\omega)\)</span><a class="headerlink" href="#Calculating-S(Q,\omega)" title="Link to this heading"></a></h2>
 <p>To see which observables can be calculated, use the <code class="docutils literal notranslate"><span class="pre">help</span></code> function to look at the observables module documentation:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -521,8 +259,8 @@ DESCRIPTION
     IncoherentDynamicStructureFactor / SQwIncoherentSQwIncoh / SQw_incoh
     IntermediateScatteringFunction / FQt
     CoherentIntermediateScatteringFunction / FQtCoherent / FQtCoh / FQt_coh
-    IncoherentIntermediateScatteringFunction / FQtIncoherentFQtIncoh / FQt_incoh
     PDF / PairDistributionFunction
+    IncoherentIntermediateScatteringFunction / FQtIncoherentFQtIncoh / FQt_incoh
 
     Examples
     --------
@@ -7016,6 +6754,15 @@ mpl.figure.prototype._init_canvas = function () {
     }
 
     this.resizeObserverInstance = new this.ResizeObserver(function (entries) {
+        // There's no need to resize if the WebSocket is not connected:
+        // - If it is still connecting, then we will get an initial resize from
+        //   Python once it connects.
+        // - If it has disconnected, then resizing will clear the canvas and
+        //   never get anything back to refill it, so better to not resize and
+        //   keep something visible.
+        if (fig.ws.readyState != 1) {
+            return;
+        }
         var nentries = entries.length;
         for (var i = 0; i < nentries; i++) {
             var entry = entries[i];
@@ -7063,7 +6810,7 @@ mpl.figure.prototype._init_canvas = function () {
             // And update the size in Python. We ignore the initial 0/0 size
             // that occurs as the element is placed into the DOM, which should
             // otherwise not happen due to the minimum size styling.
-            if (fig.ws.readyState == 1 && width != 0 && height != 0) {
+            if (width != 0 && height != 0) {
                 fig.request_resize(width, height);
             }
         }
@@ -7803,10 +7550,10 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='e7a326bf-f5ba-4e37-a6e9-1407881b3383'></div></div>
+<div id='2d098f45-beb9-4190-bdba-2d95ac7cbed6'></div></div>
 </div>
 <p>Therefore it is strongly recommended that you specify the <span class="math notranslate nohighlight">\(E\)</span> values for calculating the dynamic structure factor.</p>
-<p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calulate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will be probably
+<p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calulate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will be probably
 reasonable:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -7862,7 +7609,7 @@ Calculated E values are:
  8.06455201 8.1679437 ] meV
 </pre></div></div>
 </div>
-<p>Of course if the <span class="math notranslate nohighlight">\(E\)</span> resolution required is lower (i.e. step between the <code class="docutils literal notranslate"><span class="pre">E</span></code> values can be larger), the number of E values specified can be reduced:</p>
+<p>Of course if the <span class="math notranslate nohighlight">\(E\)</span> resolution required is lower (i.e. step between the <code class="docutils literal notranslate"><span class="pre">E</span></code> values can be larger), the number of E values specified can be reduced:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
@@ -8104,6 +7851,15 @@ mpl.figure.prototype._init_canvas = function () {
     }
 
     this.resizeObserverInstance = new this.ResizeObserver(function (entries) {
+        // There's no need to resize if the WebSocket is not connected:
+        // - If it is still connecting, then we will get an initial resize from
+        //   Python once it connects.
+        // - If it has disconnected, then resizing will clear the canvas and
+        //   never get anything back to refill it, so better to not resize and
+        //   keep something visible.
+        if (fig.ws.readyState != 1) {
+            return;
+        }
         var nentries = entries.length;
         for (var i = 0; i < nentries; i++) {
             var entry = entries[i];
@@ -8151,7 +7907,7 @@ mpl.figure.prototype._init_canvas = function () {
             // And update the size in Python. We ignore the initial 0/0 size
             // that occurs as the element is placed into the DOM, which should
             // otherwise not happen due to the minimum size styling.
-            if (fig.ws.readyState == 1 && width != 0 && height != 0) {
+            if (width != 0 && height != 0) {
                 fig.request_resize(width, height);
             }
         }
@@ -8891,9 +8647,9 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='72a3cc3c-a755-486d-882f-3a08f4837083'></div></div>
+<div id='4f1a4736-89dc-4673-ada7-f47cab6acbbb'></div></div>
 </div>
-<p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the van Well et al. Phys. Rev. A <strong>31</strong> 3391 (1985) data, which the authors corrected for instrument resolution) by reading the data into an SQwCoh object:</p>
+<p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the van Well et al. Phys. Rev. A <strong>31</strong> 3391 (1985) data, which the authors corrected for instrument resolution) by reading the data into an SQwCoh object:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
@@ -9121,6 +8877,15 @@ mpl.figure.prototype._init_canvas = function () {
     }
 
     this.resizeObserverInstance = new this.ResizeObserver(function (entries) {
+        // There's no need to resize if the WebSocket is not connected:
+        // - If it is still connecting, then we will get an initial resize from
+        //   Python once it connects.
+        // - If it has disconnected, then resizing will clear the canvas and
+        //   never get anything back to refill it, so better to not resize and
+        //   keep something visible.
+        if (fig.ws.readyState != 1) {
+            return;
+        }
         var nentries = entries.length;
         for (var i = 0; i < nentries; i++) {
             var entry = entries[i];
@@ -9168,7 +8933,7 @@ mpl.figure.prototype._init_canvas = function () {
             // And update the size in Python. We ignore the initial 0/0 size
             // that occurs as the element is placed into the DOM, which should
             // otherwise not happen due to the minimum size styling.
-            if (fig.ws.readyState == 1 && width != 0 && height != 0) {
+            if (width != 0 && height != 0) {
                 fig.request_resize(width, height);
             }
         }
@@ -9908,11 +9673,11 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='9cb0a009-3968-4ef0-ae77-7fc31f9449dd'></div></div>
+<div id='09426ce6-b47b-4af3-af8c-d345810ae163'></div></div>
 </div>
 </section>
 <section id="Other-observables">
-<h2>Other observables<a class="headerlink" href="#Other-observables" title="Permalink to this headline"></a></h2>
+<h2>Other observables<a class="headerlink" href="#Other-observables" title="Link to this heading"></a></h2>
 <p>The same applies for the observables, such as the pair distribution function <span class="math notranslate nohighlight">\(G(r)\)</span>. To determine how to calculate another observables from an MD trajectory, please see the associated help documentation:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
