@@ -120,6 +120,7 @@
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span><span class="p">,</span> <span class="n">interp2d</span>
@@ -654,7 +655,7 @@
 
 <div class="viewcode-block" id="Control.equilibrate">
 <a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.equilibrate">[docs]</a>
-    <span class="k">def</span> <span class="nf">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">equilibration</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -663,7 +664,7 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        n_steps : int</span>
-<span class="sd">            Number of simulation steps to run</span>
+<span class="sd">            Number of simulation steps to run.</span>
 <span class="sd">        verbose: bool, optional</span>
 <span class="sd">            Whether to print statements upon starting and completing the run.</span>
 <span class="sd">            Default is `False`.</span>
@@ -675,8 +676,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">n_steps</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">auto_equilibrate</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span><span class="n">equilibration</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span>
-                                <span class="n">output_log</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">,</span><span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">output_log</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">,</span><span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Control.step">
@@ -1100,7 +1100,9 @@
     <span class="k">def</span> <span class="nf">_validate_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Try and validate the energy of the ``Observable`` provided, and pass if</span>
-<span class="sd">        it does not have a ``validate_energy`` function itself</span>
+<span class="sd">        it does not have a ``validate_energy`` function itself. The time step and trajectory step</span>
+<span class="sd">        may be changed in the validate_energy method of the specific observable if necessary, to</span>
+<span class="sd">        achieve an energy separation that matches that of the experimental data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1112,12 +1114,19 @@
 <span class="sd">        None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Calculate the time separation between trajectory frames, dt, imposed</span>
-        <span class="c1"># by the simulation</span>
-        <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">traj_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time_step</span>
-
         <span class="k">with</span> <span class="n">suppress</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
-            <span class="n">obs</span><span class="o">.</span><span class="n">validate_energy</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+
+            <span class="n">changed</span><span class="p">,</span> <span class="n">traj_step</span><span class="p">,</span> <span class="n">time_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt_required</span> \
+                  <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">validate_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">changed</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">traj_step</span> <span class="o">=</span> <span class="n">traj_step</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="n">time_step</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot; The given traj_step and time_step values were not&quot;</span>
+                    <span class="s2">&quot; compatibile with the dataset specified.</span><span class="se">\n</span><span class="s2">The values &quot;</span>
+                    <span class="s2">&quot;(whilst prioritising time_step) have been changed to&quot;</span>
+                    <span class="s2">&quot; traj_step: </span><span class="si">%d</span><span class="s2">, and time_step: </span><span class="si">%f</span><span class="s2">. </span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;Context: for this dataset, traj_step multiplied by time_step&quot;</span>
+                    <span class="s2">&quot; must be ~= </span><span class="si">%f</span><span class="s2"> (6 d.p). </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="p">,</span> <span class="n">traj_step</span><span class="p">,</span><span class="n">time_step</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dt_required</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_input_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">general_set</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1145,7 +1154,6 @@
                                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">input_check</span><span class="si">}</span><span class="s2"> &quot;</span>
                                 <span class="s2">&quot;from the dataset, please check your inputs again.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span></div>
 
-            
 </pre></div>
 
            </div>
