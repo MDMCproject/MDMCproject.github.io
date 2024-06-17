@@ -116,9 +116,10 @@
 <span></span><span class="sd">&quot;&quot;&quot;A module for performing the refinement&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">statistics</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -300,10 +301,12 @@
                  <span class="n">minimizer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;MMC&#39;</span><span class="p">,</span> <span class="n">FoM_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">reset_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">equilibration_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">previous_history</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="n">print_all_settings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_history</span> <span class="o">=</span> <span class="n">previous_history</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">step_timings</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span> <span class="o">=</span> <span class="n">simulation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exp_datasets</span> <span class="o">=</span> <span class="n">exp_datasets</span>
@@ -334,9 +337,9 @@
         <span class="c1"># step (i.e. the setup) is always accepted.</span>
         <span class="c1"># pylint: disable=line-too-long</span>
         <span class="c1"># disable this pylint warning as this can&#39;t be fixed in a way that looks good</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span> <span class="o">=</span> <span class="n">MinimizerFactory</span><span class="o">.</span><span class="n">create_minimizer</span><span class="p">(</span><span class="n">minimizer_type</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
-                                                           <span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span> <span class="o">=</span> <span class="n">MinimizerFactory</span><span class="o">.</span><span class="n">create_minimizer</span><span class="p">(</span><span class="n">minimizer_type</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">,</span>
+                                                           <span class="n">previous_history</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_loaded_step</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">previous_history</span><span class="p">)</span>
 
         <span class="c1"># Create experimental observables from datasets and placeholders for</span>
         <span class="c1"># experimental observables calculated from MD</span>
@@ -689,16 +692,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
-
         <span class="c1"># Generate FoM by running MD for this step and then calculate FoM</span>
-        <span class="n">fom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_FoM</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_loaded_step</span><span class="p">:</span>
+            <span class="n">fom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">FoM_old</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first_loaded_step</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_FoM</span><span class="p">()</span>
 
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="s2">&quot;Selecting new parameters and updating engine&quot;</span><span class="p">)</span>
         <span class="c1"># Select new parameters to consider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">fom</span><span class="p">)</span>
         <span class="c1"># Update the MD engine with new parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_engine_parameters</span><span class="p">()</span>
-
         <span class="c1"># When reset_config=true reset the MD (phasespace) back if the</span>
         <span class="c1"># previous step was rejected</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_config</span><span class="p">:</span>
