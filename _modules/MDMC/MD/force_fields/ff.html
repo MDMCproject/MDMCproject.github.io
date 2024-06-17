@@ -436,7 +436,7 @@
 <span class="sd">            The ``Atom`` for which the mass will be set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">ff_atom</span> <span class="o">=</span> <span class="n">filter_ordered_dataframe</span><span class="p">([</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="p">],</span>
+        <span class="n">ff_atom</span> <span class="o">=</span> <span class="n">filter_ordered_dataframe</span><span class="p">([</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="p">],</span>
                                            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
                                            <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;element&#39;</span><span class="p">])</span>
         <span class="n">atom</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">ff_atom</span><span class="o">.</span><span class="n">mass</span></div>
@@ -477,10 +477,10 @@
                 <span class="c1"># Raise an error if the name/element combination can&#39;t be found</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">tuple_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_name_group</span><span class="p">[(</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                                                              <span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="p">)])</span>
+                                                              <span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="p">)])</span>
                 <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unable to find atom of element &quot;</span><span class="si">{</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="si">}</span><span class="s1">&quot; recorded with&#39;</span>
-                                   <span class="sa">f</span><span class="s1">&#39; the name &quot;</span><span class="si">{</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; &#39;</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unable to find atom of element &quot;</span><span class="si">{</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s1">&quot; &#39;</span>
+                                   <span class="sa">f</span><span class="s1">&#39;recorded with the name &quot;</span><span class="si">{</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; &#39;</span>
                                    <span class="s1">&#39;in the specified force field file.&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
 
             <span class="n">groups</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tuple_groups</span><span class="p">))</span>
@@ -592,7 +592,7 @@
         <span class="n">atom_names_elements</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">coulombic</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_convert_atom_type_name</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
-            <span class="n">atom_names_elements</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="p">))</span>
+            <span class="n">atom_names_elements</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="p">))</span>
 
         <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;element&#39;</span><span class="p">]</span>
         <span class="n">matching_atoms</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">filter_ordered_dataframe</span><span class="p">(</span><span class="n">name_element</span><span class="p">,</span>
@@ -667,7 +667,7 @@
             <span class="c1"># single atom when determining ff_atom_type</span>
             <span class="c1"># ff_atom_type is different to MDMC atom_type</span>
             <span class="n">atom_name_element</span> <span class="o">=</span> <span class="p">(</span><span class="n">atom_pairs</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                                 <span class="n">atom_pairs</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">element</span><span class="p">)</span>
+                                 <span class="n">atom_pairs</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
             <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;element&#39;</span><span class="p">]</span>
             <span class="n">ff_atom_type</span> <span class="o">=</span> <span class="n">filter_ordered_dataframe</span><span class="p">(</span><span class="n">atom_name_element</span><span class="p">,</span>
                                                     <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
