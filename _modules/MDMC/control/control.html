@@ -381,6 +381,7 @@
                                              <span class="n">rescale_factor</span><span class="o">=</span><span class="n">rescale_factor</span><span class="p">,</span>
                                              <span class="n">auto_scale</span><span class="o">=</span><span class="n">auto_scale</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">observable_pair</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recreated_independent_vars</span>  <span class="o">=</span> <span class="p">{}</span>
 
             <span class="c1"># Take the largest minimum number of MD_steps needed by any dataset</span>
             <span class="n">min_MD_steps_dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_minimum_MD_steps</span><span class="p">(</span>
@@ -769,6 +770,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_run_MD</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trim_dependent_variables</span><span class="p">()</span>
 
         <span class="n">FoM_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
 
@@ -869,6 +871,8 @@
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="s2">&quot;Calculating observables from the MD trajectory&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">observable_pairs</span><span class="p">:</span>
             <span class="n">obs_timings</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">calculate_from_MD</span><span class="p">(</span><span class="n">trj</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pair</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span><span class="s1">&#39;SQw&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">recreated_independent_vars</span><span class="p">[</span><span class="s1">&#39;SQw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">recreated_Q</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">obs_timings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">obs_timings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">:</span>
@@ -1157,7 +1161,35 @@
             <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;There was an issue retrieving the input: &quot;</span>
                                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">input_check</span><span class="si">}</span><span class="s2"> &quot;</span>
-                                <span class="s2">&quot;from the dataset, please check your inputs again.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span></div>
+                                <span class="s2">&quot;from the dataset, please check your inputs again.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+
+    <span class="k">def</span> <span class="nf">_trim_dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trims the dependent variable data, and the associated errors, for observables</span>
+<span class="sd">        where necessary. One such application is when the smallest q_values cannot be recreated by</span>
+<span class="sd">        the simulation, this trimming removes the data associated with q_values which cannot be</span>
+<span class="sd">        recreated.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># loop through observable pairs and trim dependent var data accordingly</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">pair</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">):</span>
+            <span class="n">obs</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="n">obs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">recreated_independent_vars</span><span class="p">:</span>
+                <span class="n">exp_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">exp_obs</span>
+                <span class="n">md_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span>
+
+                <span class="n">recreated_independent_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recreated_independent_vars</span><span class="p">[</span><span class="n">obs</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> \
+                <span class="nb">len</span><span class="p">(</span><span class="n">md_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
+
+                    <span class="n">exp_obs</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="p">[</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">num</span><span class="p">]</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">recreated_independent_vars</span><span class="p">]</span>
+                    <span class="n">exp_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="p">[</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">num</span><span class="p">]</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">recreated_independent_vars</span><span class="p">]</span></div>
 
 </pre></div>
 
