@@ -93,11 +93,15 @@
 <li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.observable_pairs"><code class="docutils literal notranslate"><span class="pre">Control.observable_pairs</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.FoM_calculator"><code class="docutils literal notranslate"><span class="pre">Control.FoM_calculator</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.MD_steps"><code class="docutils literal notranslate"><span class="pre">Control.MD_steps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.calculating_max_FoM"><code class="docutils literal notranslate"><span class="pre">Control.calculating_max_FoM()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.engine_recovery_from_equil"><code class="docutils literal notranslate"><span class="pre">Control.engine_recovery_from_equil()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.equilibrate"><code class="docutils literal notranslate"><span class="pre">Control.equilibrate()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.minimize"><code class="docutils literal notranslate"><span class="pre">Control.minimize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.plot_results"><code class="docutils literal notranslate"><span class="pre">Control.plot_results()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.refine"><code class="docutils literal notranslate"><span class="pre">Control.refine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.resetting_engine"><code class="docutils literal notranslate"><span class="pre">Control.resetting_engine()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.step"><code class="docutils literal notranslate"><span class="pre">Control.step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#MDMC.control.control.Control.trial_reduce_time_step"><code class="docutils literal notranslate"><span class="pre">Control.trial_reduce_time_step()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -253,6 +257,9 @@ blocks. If <code class="docutils literal notranslate"><span class="pre">False</s
 <dt>data_printer: str, default ‘plaintext’</dt><dd><p>How to display the data during minimisation. Current options are ‘plaintext’ (default,
 plaintext printing) or ‘ipython’ (prettier HTML printing via iPython)</p>
 </dd>
+<dt>time_step_reductions<span class="classifier">int, optional</span></dt><dd><p>The number of attempts to reduce the time_step of the simulation in order to fix an
+equilibration that keeps failing. Defaults to a value of 2.</p>
+</dd>
 </dl>
 </p></li>
 </ul>
@@ -353,9 +360,50 @@ the Figure of Merit</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="MDMC.control.control.Control.calculating_max_FoM">
+<span class="sig-name descname"><span class="pre">calculating_max_FoM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.calculating_max_FoM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.calculating_max_FoM" title="Link to this definition"></a></dt>
+<dd><p>Calculates a maximum Figure of Merit value by comparing a set of experimental observable
+data, to arrays consisting of numbers close to zero. For use when the MD Engine fails with
+a set of parameter values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>max_FoM</strong> – value of maximum FoM</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.control.control.Control.engine_recovery_from_equil">
+<span class="sig-name descname"><span class="pre">engine_recovery_from_equil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">work_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.engine_recovery_from_equil"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.engine_recovery_from_equil" title="Link to this definition"></a></dt>
+<dd><p>Handles an MDEngineError thrown by the MD engine. Currently this error is only raised by
+LAMMPS.</p>
+<p>The time_step is reduced, and the engine cleared, and then an equilibration is performed.
+If the equilibration is unsuccessful when the attempt limit is reached, an MDEngineError is
+raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Number of simulation steps to run.</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to print statements upon starting and completing the run.</p></li>
+<li><p><strong>output_log</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – Log file for the MD engine to write to.</p></li>
+<li><p><strong>work_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – Working directory for the MD engine to write to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="MDMC.control.control.Control.equilibrate">
 <span class="sig-name descname"><span class="pre">equilibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.equilibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.equilibrate" title="Link to this definition"></a></dt>
 <dd><p>Run molecular dynamics to equilibrate the <code class="docutils literal notranslate"><span class="pre">Universe</span></code>.</p>
+<p>If the equilibration fails, a method to reduce the time_step and re-try, is called.
+If this re-try also fails, then an MDEngineError is raised.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -453,11 +501,38 @@ If nothing is passed, the method will check if a number was specified when the
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="MDMC.control.control.Control.resetting_engine">
+<span class="sig-name descname"><span class="pre">resetting_engine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.resetting_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.resetting_engine" title="Link to this definition"></a></dt>
+<dd><p>Clears and resets the MD engine when there is an error thrown by the
+equilibration or production methods. Currently this is only applicable to LAMMPS.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="MDMC.control.control.Control.step">
-<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.step" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bad_param_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.step" title="Link to this definition"></a></dt>
 <dd><p>Do a full step: generate and run MD to calculate FoM for existing
 parameters, iterate parameters a step forward and reset MD (phasespace)
 if previous step was rejected and reset_config = true</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bad_param_location</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Represents whether the equilibration at these parameter value failed or not.
+If equilibration failed, value is True.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.control.control.Control.trial_reduce_time_step">
+<span class="sig-name descname"><span class="pre">trial_reduce_time_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduction_factor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/MDMC/control/control.html#Control.trial_reduce_time_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.control.control.Control.trial_reduce_time_step" title="Link to this definition"></a></dt>
+<dd><p>Reduces the time_step by the reduction factor specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>reduction_factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – represents the value which will be multiplied with the time_step in order to reduce it</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

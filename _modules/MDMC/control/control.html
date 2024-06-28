@@ -138,6 +138,7 @@
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span> \
     <span class="kn">import</span> <span class="nn">ObservableFactory</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> <span class="n">Observable</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngineError</span>
 
 
 <div class="viewcode-block" id="Control">
@@ -259,6 +260,9 @@
 <span class="sd">        data_printer: str, default &#39;plaintext&#39;</span>
 <span class="sd">            How to display the data during minimisation. Current options are &#39;plaintext&#39; (default,</span>
 <span class="sd">            plaintext printing) or &#39;ipython&#39; (prettier HTML printing via iPython)</span>
+<span class="sd">        time_step_reductions : int, optional</span>
+<span class="sd">            The number of attempts to reduce the time_step of the simulation in order to fix an</span>
+<span class="sd">            equilibration that keeps failing. Defaults to a value of 2.</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
@@ -332,6 +336,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;results_filename&#39;</span><span class="p">,</span>
                                 <span class="sa">f</span><span class="s1">&#39;results_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">--%H-%M-%S&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">)</span>
         <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;results_filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;time_step_reductions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;time_step_reductions&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># Minimizer FoM_old is always initialised to infinity, so that first MC</span>
         <span class="c1"># step (i.e. the setup) is always accepted.</span>
@@ -382,6 +387,7 @@
                                              <span class="n">auto_scale</span><span class="o">=</span><span class="n">auto_scale</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">observable_pair</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">recreated_independent_vars</span>  <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">production_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time_step</span>
 
             <span class="c1"># Take the largest minimum number of MD_steps needed by any dataset</span>
             <span class="n">min_MD_steps_dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_minimum_MD_steps</span><span class="p">(</span>
@@ -401,6 +407,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span> <span class="o">=</span> <span class="n">FoMFactory</span><span class="o">.</span><span class="n">create_FoM</span><span class="p">(</span><span class="n">FoM_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">,</span>
                                                     <span class="n">norm</span><span class="o">=</span><span class="n">FoM_norm</span><span class="p">,</span>
                                                     <span class="n">n_parameters</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_FoM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculating_max_FoM</span><span class="p">()</span>
 
         <span class="c1"># Use specified MD_steps if supplied, else calculate</span>
         <span class="c1"># cont_slicing produces small sub-trajectories, so calculation is unnecessary</span>
@@ -558,11 +565,17 @@
             <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
             <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">verbose_steps</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
             <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">n_steps</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
+                <span class="n">bad_param_location</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">MDEngineError</span><span class="p">:</span>
+                        <span class="n">bad_param_location</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># assuming params are bad and moving on</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">resetting_engine</span><span class="p">()</span>
 
                 <span class="n">verbose_manager</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Step </span><span class="si">{</span><span class="n">count</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># advance the refinement by one step</span>
+                <span class="c1"># advance the refinement by one step</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">bad_param_location</span><span class="o">=</span><span class="n">bad_param_location</span><span class="p">)</span>
                 <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># if progress bar is there, ensure data is on new line</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
@@ -570,9 +583,15 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">n_steps</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
+                <span class="n">bad_param_location</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># advance the refinement by one step</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">equilibration_steps</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">MDEngineError</span><span class="p">:</span>
+                        <span class="n">bad_param_location</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># assuming params are bad and moving on</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">resetting_engine</span><span class="p">()</span>
+                <span class="c1"># advance the refinement by one step</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">bad_param_location</span><span class="o">=</span><span class="n">bad_param_location</span><span class="p">)</span>
                 <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="c1"># Try/except accounts for n_steps &lt;= -1</span>
@@ -652,9 +671,12 @@
 <span class="sd">                Maximum number of force evaluations to perform. Default depends</span>
 <span class="sd">                on engine used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span><span class="n">minimize_every</span><span class="p">,</span><span class="n">verbose</span><span class="p">,</span>
+                                        <span class="n">output_log</span><span class="p">,</span><span class="n">work_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Minimization failed, please check the parameter values.&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span></div>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span><span class="n">minimize_every</span><span class="p">,</span><span class="n">verbose</span><span class="p">,</span>
-                                 <span class="n">output_log</span><span class="p">,</span><span class="n">work_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Control.equilibrate">
@@ -664,6 +686,9 @@
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run molecular dynamics to equilibrate the ``Universe``.</span>
+
+<span class="sd">        If the equilibration fails, a method to reduce the time_step and re-try, is called.</span>
+<span class="sd">        If this re-try also fails, then an MDEngineError is raised.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -677,28 +702,51 @@
 <span class="sd">        work_dir: str, optional</span>
 <span class="sd">            Working directory for the MD engine to write to. Default is `None`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">n_steps</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">auto_equilibrate</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">output_log</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">,</span><span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MD engine failed to perform an equilibration for these parameter values.&#39;</span>
+                <span class="s1">&#39;Likely, because they are bad parameter values.&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">n_steps</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">auto_equilibrate</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">output_log</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">,</span><span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">MDEngineError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">engine_recovery_from_equil</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                                                <span class="n">output_log</span><span class="o">=</span><span class="n">output_log</span><span class="p">,</span><span class="n">work_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span><span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">MDEngineError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">MDEngineError</span> <span class="kn">from</span> <span class="nn">exc</span></div>
+
 
 
 <div class="viewcode-block" id="Control.step">
 <a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bad_param_location</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Do a full step: generate and run MD to calculate FoM for existing</span>
 <span class="sd">        parameters, iterate parameters a step forward and reset MD (phasespace)</span>
 <span class="sd">        if previous step was rejected and reset_config = true</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        bad_param_location : bool</span>
+<span class="sd">            Represents whether the equilibration at these parameter value failed or not.</span>
+<span class="sd">            If equilibration failed, value is True.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
-        <span class="c1"># Generate FoM by running MD for this step and then calculate FoM</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_loaded_step</span><span class="p">:</span>
             <span class="n">fom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">FoM_old</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">first_loaded_step</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">bad_param_location</span><span class="p">:</span>
+            <span class="c1"># Generate FoM by running MD for this step and then calculate FoM</span>
             <span class="n">fom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_FoM</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># assuming params are bad so use max FoM available</span>
+            <span class="n">fom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_FoM</span>
 
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="s2">&quot;Selecting new parameters and updating engine&quot;</span><span class="p">)</span>
         <span class="c1"># Select new parameters to consider</span>
@@ -768,11 +816,17 @@
 <span class="sd">        `float`</span>
 <span class="sd">            Non-negative `float` FoM</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_run_MD</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_trim_dependent_variables</span><span class="p">()</span>
+        <span class="n">used_max_FoM</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_run_MD</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">MDEngineError</span><span class="p">:</span>
+            <span class="n">FoM_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_FoM</span>
+            <span class="n">used_max_FoM</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="n">FoM_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">used_max_FoM</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trim_dependent_variables</span><span class="p">()</span>
+            <span class="n">FoM_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">FoM_value</span>
 
@@ -1189,7 +1243,118 @@
                     <span class="n">exp_obs</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> \
                     <span class="p">[</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">num</span><span class="p">]</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">recreated_independent_vars</span><span class="p">]</span>
                     <span class="n">exp_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> \
-                    <span class="p">[</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">num</span><span class="p">]</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">recreated_independent_vars</span><span class="p">]</span></div>
+                    <span class="p">[</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">obs</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">num</span><span class="p">]</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">recreated_independent_vars</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Control.engine_recovery_from_equil">
+<a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.engine_recovery_from_equil">[docs]</a>
+    <span class="k">def</span> <span class="nf">engine_recovery_from_equil</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+            <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handles an MDEngineError thrown by the MD engine. Currently this error is only raised by</span>
+<span class="sd">        LAMMPS.</span>
+
+<span class="sd">        The time_step is reduced, and the engine cleared, and then an equilibration is performed.</span>
+<span class="sd">        If the equilibration is unsuccessful when the attempt limit is reached, an MDEngineError is</span>
+<span class="sd">        raised.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_steps : int</span>
+<span class="sd">            Number of simulation steps to run.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            Whether to print statements upon starting and completing the run.</span>
+<span class="sd">        output_log: str, optional</span>
+<span class="sd">            Log file for the MD engine to write to.</span>
+<span class="sd">        work_dir: str, optional</span>
+<span class="sd">            Working directory for the MD engine to write to.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">equil_works</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">attempt_limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;time_step_reductions&#39;</span><span class="p">]</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">equil_works</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">attempt_limit</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trial_reduce_time_step</span><span class="p">(</span><span class="n">reduction_factor</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resetting_engine</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">n_steps</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">auto_equilibrate</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">output_log</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">,</span><span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+                <span class="n">equil_works</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="n">MDEngineError</span><span class="p">:</span>
+                <span class="n">equil_works</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># if time_step was altered during equil, revert back to original value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">production_time_step</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">equil_works</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MDEngineError</span></div>
+
+
+<div class="viewcode-block" id="Control.resetting_engine">
+<a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.resetting_engine">[docs]</a>
+    <span class="k">def</span> <span class="nf">resetting_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clears and resets the MD engine when there is an error thrown by the</span>
+<span class="sd">        equilibration or production methods. Currently this is only applicable to LAMMPS.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="c1"># pylint: disable=protected-access</span>
+        <span class="c1"># it is necessary to reset and setup the MD engine again</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">_setup</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Control.trial_reduce_time_step">
+<a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.trial_reduce_time_step">[docs]</a>
+    <span class="k">def</span> <span class="nf">trial_reduce_time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">reduction_factor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduces the time_step by the reduction factor specified.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        reduction_factor : float</span>
+<span class="sd">            represents the value which will be multiplied with the time_step in order to reduce it</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*=</span> <span class="n">reduction_factor</span></div>
+
+
+<div class="viewcode-block" id="Control.calculating_max_FoM">
+<a class="viewcode-back" href="../../../pages/modules/control/control.html#MDMC.control.control.Control.calculating_max_FoM">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculating_max_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates a maximum Figure of Merit value by comparing a set of experimental observable</span>
+<span class="sd">        data, to arrays consisting of numbers close to zero. For use when the MD Engine fails with</span>
+<span class="sd">        a set of parameter values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        max_FoM : int</span>
+<span class="sd">            value of maximum FoM</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># pylint: disable=protected-access</span>
+        <span class="c1"># the purpose of method is to create this empty observable so accessing is necessary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">_dependent_variables</span><span class="p">[</span><span class="s1">&#39;SQw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">**-</span><span class="mi">9</span>
+
+        <span class="n">max_FoM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">max_FoM</span></div>
+</div>
 
 </pre></div>
 

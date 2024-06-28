@@ -162,7 +162,7 @@
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">unit_decorator_getter</span><span class="p">,</span> \
     <span class="n">repr_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="kn">import</span> <span class="n">Universe</span><span class="p">,</span> <span class="n">KSpaceSolver</span><span class="p">,</span> <span class="n">ConstraintAlgorithm</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngine</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngine</span><span class="p">,</span> <span class="n">MDEngineError</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">BondedInteraction</span><span class="p">,</span> <span class="n">Interaction</span><span class="p">,</span> \
     <span class="n">NonBondedInteraction</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span>
@@ -589,7 +589,10 @@
                     <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
                     <span class="n">n_steps</span><span class="p">,</span>
                     <span class="n">equilibration</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MDEngineError</span><span class="p">(</span><span class="s2">&quot;There has been an error running the LAMMPS simulation.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
 
         <span class="k">if</span> <span class="n">equilibration</span> <span class="ow">and</span> <span class="n">reset_to_nve</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">=</span> <span class="kc">None</span></div>
@@ -815,6 +818,16 @@
     <span class="k">def</span> <span class="nf">update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lmp_universe</span><span class="o">.</span><span class="n">update_parameters</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="LAMMPSEngine.clear">
+<a class="viewcode-back" href="../../../../pages/modules/md/engine_facades/lammps_engine.html#MDMC.MD.engine_facades.lammps_engine.LAMMPSEngine.clear">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deletes all atoms of the MD engine, restores all settings to their default values,</span>
+<span class="sd">        and frees all memory in LAMMPS.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="LAMMPSEngine.save_config">

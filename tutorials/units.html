@@ -750,7 +750,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          of not converging.
  |      solvent : str, optional
  |          A `str` specifying an inbuilt ``Solvent`` from the following:
- |          SPCE, TIP3P, TIP3PFB, SPC.
+ |          SPCE, TIP3PFB, SPC, TIP3P.
  |          The default is &#39;SPCE&#39;.
  |      max_iterations: int, optional
  |          The maximum number of times to try to solvate the universe to
@@ -1346,6 +1346,9 @@ class Control(builtins.object)
  |      data_printer: str, default &#39;plaintext&#39;
  |          How to display the data during minimisation. Current options are &#39;plaintext&#39; (default,
  |          plaintext printing) or &#39;ipython&#39; (prettier HTML printing via iPython)
+ |      time_step_reductions : int, optional
+ |          The number of attempts to reduce the time_step of the simulation in order to fix an
+ |          equilibration that keeps failing. Defaults to a value of 2.
  |
  |  Example
  |  -------
@@ -1392,8 +1395,44 @@ class Control(builtins.object)
  |  __str__(self) -&gt; str
  |      Return str(self).
  |
+ |  calculating_max_FoM(self)
+ |      Calculates a maximum Figure of Merit value by comparing a set of experimental observable
+ |      data, to arrays consisting of numbers close to zero. For use when the MD Engine fails with
+ |      a set of parameter values.
+ |
+ |      Returns
+ |      -------
+ |      max_FoM : int
+ |          value of maximum FoM
+ |
+ |  engine_recovery_from_equil(self, n_steps: int, verbose: bool, output_log: str, work_dir: str, **settings: dict) -&gt; None
+ |      Handles an MDEngineError thrown by the MD engine. Currently this error is only raised by
+ |      LAMMPS.
+ |
+ |      The time_step is reduced, and the engine cleared, and then an equilibration is performed.
+ |      If the equilibration is unsuccessful when the attempt limit is reached, an MDEngineError is
+ |      raised.
+ |
+ |      Parameters
+ |      ----------
+ |      n_steps : int
+ |          Number of simulation steps to run.
+ |      verbose: bool, optional
+ |          Whether to print statements upon starting and completing the run.
+ |      output_log: str, optional
+ |          Log file for the MD engine to write to.
+ |      work_dir: str, optional
+ |          Working directory for the MD engine to write to.
+ |
+ |      Returns
+ |      -------
+ |      None
+ |
  |  equilibrate(self, n_steps: int = None, verbose: bool = False, output_log: str = None, work_dir: str = None, **settings: dict) -&gt; None
  |      Run molecular dynamics to equilibrate the ``Universe``.
+ |
+ |      If the equilibration fails, a method to reduce the time_step and re-try, is called.
+ |      If this re-try also fails, then an MDEngineError is raised.
  |
  |      Parameters
  |      ----------
@@ -1481,10 +1520,32 @@ class Control(builtins.object)
  |
  |          control.refine(100)
  |
- |  step(self) -&gt; None
+ |  resetting_engine(self) -&gt; None
+ |      Clears and resets the MD engine when there is an error thrown by the
+ |      equilibration or production methods. Currently this is only applicable to LAMMPS.
+ |
+ |  step(self, bad_param_location: bool = False) -&gt; None
  |      Do a full step: generate and run MD to calculate FoM for existing
  |      parameters, iterate parameters a step forward and reset MD (phasespace)
  |      if previous step was rejected and reset_config = true
+ |
+ |      Parameters
+ |      ---------
+ |      bad_param_location : bool
+ |          Represents whether the equilibration at these parameter value failed or not.
+ |          If equilibration failed, value is True.
+ |
+ |  trial_reduce_time_step(self, reduction_factor) -&gt; None
+ |      Reduces the time_step by the reduction factor specified.
+ |
+ |      Parameters
+ |      ----------
+ |      reduction_factor : float
+ |          represents the value which will be multiplied with the time_step in order to reduce it
+ |
+ |      Returns
+ |      -------
+ |      None
  |
  |  ----------------------------------------------------------------------
  |  Data descriptors defined here:
