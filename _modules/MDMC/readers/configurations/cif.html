@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MDMC.readers.configurations.cif &mdash; MDMC 0.2 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -25,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../../index.html" class="icon icon-home"> MDMC
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MDMC
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -94,9 +101,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../../index.html">Module code</a> &raquo;</li>
-      <li>MDMC.readers.configurations.cif</li>
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.readers.configurations.cif</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -106,63 +113,62 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.readers.configurations.cif</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module for reading cif files</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Reads a .cif file into an MDMC molecule, optionally ignoring symmetry data.</span>
+<span class="sd">Adapted from https://wiki.fysik.dtu.dk/ase/_modules/ase/io/cif.html#read_cif.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">set_docstring</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.ase.cif</span> <span class="kn">import</span> <span class="n">ase_read_cif</span>
+<span class="kn">from</span> <span class="nn">ase.io.cif</span> <span class="kn">import</span> <span class="n">parse_cif</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.MD.ase.convert</span> <span class="kn">import</span> <span class="n">ASE_to_MDMC</span>
 <span class="kn">from</span> <span class="nn">MDMC.readers.configurations.conf_reader</span> <span class="kn">import</span> <span class="n">ConfigurationReader</span>
+<span class="kn">from</span> <span class="nn">MDMC.readers.configurations.ase</span> <span class="kn">import</span> <span class="n">ASEReader</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span>
 
-
-<div class="viewcode-block" id="CIF"><a class="viewcode-back" href="../../../../pages/modules/readers/configurations/cif.html#MDMC.readers.configurations.cif.CIF">[docs]</a><span class="k">class</span> <span class="nc">CIF</span><span class="p">(</span><span class="n">ConfigurationReader</span><span class="p">):</span>
-
+<div class="viewcode-block" id="CIFReader">
+<a class="viewcode-back" href="../../../../pages/modules/readers/configurations/cif.html#MDMC.readers.configurations.cif.CIFReader">[docs]</a>
+<span class="k">class</span> <span class="nc">CIFReader</span><span class="p">(</span><span class="n">ConfigurationReader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for reading CIF configuration files</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-<span class="sd">    To use a CIF reader to read a file called &#39;paracetamol.cif&#39; and create a</span>
-<span class="sd">    ``Molecule`` from it (assuming ``Molecule`` has been imported from</span>
-<span class="sd">    ``MDMC.MD``):</span>
-
-<span class="sd">    .. highlight:: python</span>
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        file = &#39;paracetamol.cif&#39;</span>
-<span class="sd">        cif = CIF()</span>
-<span class="sd">        cif.open(file)</span>
-<span class="sd">        # See parse docstring for description of ``names`` parameter</span>
-<span class="sd">        # Lines are oxygen, nitrogen, carbon and hydrogen atoms</span>
-<span class="sd">        cif.parse(names=[&#39;109&#39;, &#39;177&#39;, # Oxygens</span>
-<span class="sd">                         &#39;207&#39;, # Nitrogen</span>
-<span class="sd">                         &#39;208&#39;, &#39;108&#39;, &#39;90&#39;, &#39;178&#39;, &#39;90&#39;, &#39;90&#39;, &#39;90&#39;, &#39;185&#39;,</span>
-<span class="sd">                         &#39;85&#39;, &#39;85&#39;, &#39;85&#39;, &#39;91&#39;, &#39;91&#39;, &#39;91&#39;, &#39;91&#39;, &#39;183&#39;, &#39;110&#39;]</span>
-<span class="sd">                 ) # Hydrogens)</span>
-<span class="sd">        paracetamol = Molecule(atoms=cif.atoms)</span>
+<span class="sd">    Reads a .cif file into a list of MDMC Atoms.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">extension</span> <span class="o">=</span> <span class="s1">&#39;cif&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="c1"># Dynamically set docstring</span>
-    <span class="c1">#pylint: disable=missing-docstring</span>
-<div class="viewcode-block" id="CIF.parse"><a class="viewcode-back" href="../../../../pages/modules/readers/configurations/cif.html#MDMC.readers.configurations.cif.CIF.parse">[docs]</a>    <span class="nd">@set_docstring</span><span class="p">(</span><span class="n">ase_read_cif</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+<div class="viewcode-block" id="CIFReader.parse">
+<a class="viewcode-back" href="../../../../pages/modules/readers/configurations/cif.html#MDMC.readers.configurations.cif.CIFReader.parse">[docs]</a>
     <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse a .cif file into a list of MDMC Atoms,</span>
+<span class="sd">        optionally ignoring symmetry data.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span> <span class="o">=</span> <span class="n">ase_read_cif</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        settings:</span>
+<span class="sd">            ignore_symmetry: bool, default True</span>
+<span class="sd">                Whether to read or ignore symmetry data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ignore_symmetry&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">parse_cif</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">block</span><span class="o">.</span><span class="n">has_structure</span><span class="p">():</span>
+                    <span class="k">continue</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Atom]&#39;</span><span class="p">:</span>
+                <span class="c1"># this is the only place where we differ from ase.io.cif.read_cif:</span>
+                <span class="c1"># just get the unsymmetrised structure rather than symmetrising it</span>
+                <span class="n">atoms</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get_unsymmetrized_structure</span><span class="p">()</span>
+                <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span></div>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">images</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span> <span class="o">=</span> <span class="n">ASE_to_MDMC</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># else, this is just the standard ASE cif parsing</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">ASEReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="n">reader</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">atoms</span></div>
+</div>
+
 </pre></div>
 
            </div>

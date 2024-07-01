@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MDMC.gui.__init__ &mdash; MDMC 0.2 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -25,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> MDMC
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -94,9 +101,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>MDMC.gui.__init__</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.gui.__init__</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -106,41 +113,53 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.gui.__init__</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Contains the GUI elements of MDMC</span>
+<span></span><span class="sd">&quot;&quot;&quot;Functions for viewing MDMC configurations via ASE.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
-<span class="sd">Contents</span>
-<span class="sd">--------</span>
-<span class="sd">view</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">ase.visualize</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
 
-<span class="kn">from</span> <span class="nn">MDMC</span> <span class="kn">import</span> <span class="n">MD</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">Universe</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.ase.convert</span> <span class="kn">import</span> <span class="n">MDMC_to_ASE</span>
 
-
-<div class="viewcode-block" id="view"><a class="viewcode-back" href="../../../pages/modules/gui.html#MDMC.gui.__init__.view">[docs]</a><span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="n">atom_container</span><span class="p">:</span> <span class="s1">&#39;list[MD.Atom, MD.AtomContainer]&#39;</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="s1">&#39;X3DOM&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="view">
+<a class="viewcode-back" href="../../../pages/modules/gui.html#MDMC.gui.__init__.view">[docs]</a>
+<span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Structure</span><span class="p">,</span> <span class="n">Universe</span><span class="p">],</span>
+         <span class="n">viewer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;X3D&#39;</span><span class="p">,</span>
+         <span class="n">max_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">HTML</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Launches a GUI for viewing collections of ``Atom`` objects</span>
+<span class="sd">    View an MDMC Structure or Universe.</span>
+<span class="sd">    Wrapper around the ASE viewer.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    atom_container : list of Atom, AtomContainer</span>
-<span class="sd">        An object which contains some ``Atom`` objects. This can either be in</span>
-<span class="sd">        the sense that it is a list of `Atom` objects, or it could be an object</span>
-<span class="sd">        which has the ``atoms`` attribute (e.g. an ``AtomContainer``). If</span>
-<span class="sd">        ``atom_collection`` also has a ``dimensions`` attribute (such as</span>
-<span class="sd">        ``Universe``), then this is used to set the volume displayed; otherwise</span>
-<span class="sd">        the volume is determined by the extents of the ``Atom`` objects.</span>
+<span class="sd">    obj: Structure or AtomContainer</span>
+<span class="sd">        The MDMC molecular object to be viewed.</span>
+<span class="sd">    viewer: str</span>
+<span class="sd">        The viewer.</span>
+<span class="sd">    max_atoms: int, default 2000</span>
+<span class="sd">        The maximum number of atoms to be displayed.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    HTML or None</span>
+<span class="sd">        Either opens the relevant GUI, or returns a HTML object</span>
+<span class="sd">        (in the case of HTML viewers like X3D).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">atom_container</span><span class="o">.</span><span class="n">dimensions</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Universe</span><span class="p">):</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">dimensions</span>
+    <span class="k">else</span><span class="p">:</span>
         <span class="n">dimensions</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">atoms</span> <span class="o">=</span> <span class="n">atom_container</span><span class="o">.</span><span class="n">atoms</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="n">atoms</span> <span class="o">=</span> <span class="n">atom_container</span>
 
-    <span class="k">return</span> <span class="n">MD</span><span class="o">.</span><span class="n">ase</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="n">viewer</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">dimensions</span><span class="p">)</span></div>
+    <span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">MDMC_to_ASE</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">dimensions</span><span class="p">)[:</span><span class="n">max_atoms</span><span class="p">]</span>  <span class="c1"># take first max_atoms atoms</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">visualize</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="n">viewer</span><span class="p">)</span>
+    <span class="c1"># running the view command will open the window for most viewers, but</span>
+    <span class="c1"># for HTML viewers like X3D it needs to be returned</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">HTML</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">output</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
 </pre></div>
 
            </div>
