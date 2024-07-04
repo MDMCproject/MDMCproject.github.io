@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.trajectory_analysis.compact_trajectory &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.trajectory_analysis.compact_trajectory</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.trajectory_analysis.compact_trajectory</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module for memory-efficient MD trajectory handling.</span>
+<span class="sd">Seeing how the current (as of August 2022) trajectory implementation</span>
+<span class="sd">consumes a lot of memory, an attempt is being made to build an object</span>
+<span class="sd">that will contain the bare minimum of functionality, to show the</span>
+<span class="sd">limits of performance that we can achieve within Python.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># The main idea is that, ultimately, we need to store</span>
+<span class="c1"># 3 * n_atoms * n_steps</span>
+<span class="c1"># floating point numbers if we want to process a trajectory.</span>
+<span class="c1"># Independent of the programming language we use, we can expect</span>
+<span class="c1"># that each coordinate will be at least a 32-bit float, or</span>
+<span class="c1"># a 64-bit float if we use the default value normally picked</span>
+<span class="c1"># by numpy.</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span>
+<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">TemporalConfiguration</span>
+
+<div class="viewcode-block" id="CompactTrajectory">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory">[docs]</a>
+<span class="k">class</span> <span class="nc">CompactTrajectory</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stores an MD trajectory in numpy arrays.</span>
+<span class="sd">    The units are system units.</span>
+
+<span class="sd">    The normal workflow for a CompactTrajectory is:</span>
+
+<span class="sd">    1. Create and allocate memory.</span>
+<span class="sd">    traj = CompactTrajectory(n_step, n_atoms, useVelocity)</span>
+<span class="sd">    or</span>
+<span class="sd">    traj = CompactTrajectory()</span>
+<span class="sd">    traj.preAllocate(n_step, n_atoms, useVelocity)</span>
+
+<span class="sd">    2. Write values into arrays.</span>
+<span class="sd">    for n in frame_numbers:</span>
+<span class="sd">        if not traj.validateTypes(atom_types):</span>
+<span class="sd">            traj.WriteOneStep(step_number = n, time = time_value, positions = pos_values)</span>
+<span class="sd">            traj.setDimensions(box_dimensions, step_number = n)</span>
+
+<span class="sd">    3. Add chemical element information</span>
+<span class="sd">    traj.labelAtoms(atom_symbols, atom_masses)</span>
+<span class="sd">    traj.setCharges(atom_charges)</span>
+
+<span class="sd">    4. Check internal consistency, trim arrays</span>
+<span class="sd">    traj.postProcess()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="n">n_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">useVelocity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">bits_per_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is a bare constructor which initialises all the fields of</span>
+<span class="sd">        a basic trajectory.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            n_steps (int, optional):</span>
+<span class="sd">              Number of simulation steps in the</span>
+<span class="sd">              trajectory. Defaults to 0.</span>
+<span class="sd">              n_steps = 0 means that preAllocate will have to be run</span>
+<span class="sd">              separately after the CompactTrajectory has been created.</span>
+<span class="sd">              n_steps &gt; 0 means that preAllocate will be run immediately</span>
+<span class="sd">              in the __init__ function.</span>
+<span class="sd">            n_atoms (int, optional): Number of atoms in the system.</span>
+<span class="sd">              Defaults to 1.</span>
+<span class="sd">            useVelocity (bool, optional): If the trajectory contains</span>
+<span class="sd">              velocities, set to True to allocate an additional array</span>
+<span class="sd">              for the velocity values. Defaults to False.&quot;&quot;&quot;</span>
+
+        <span class="c1"># The development plan is to use the units defined here to calculate conversion factors,</span>
+        <span class="c1"># and use these factors when writing the numbers into the arrays.</span>
+        <span class="c1"># For now, we define the units here:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">[</span><span class="s1">&#39;LENGTH&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">[</span><span class="s1">&#39;TIME&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">velocity_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">[</span><span class="s1">&#39;LENGTH&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">[</span><span class="s1">&#39;TIME&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dtype</span><span class="p">(</span><span class="n">bits_per_number</span><span class="p">)</span>  <span class="c1"># this sets the data type to np.float64</span>
+        <span class="c1"># The underlying assumption is that the number of atoms,</span>
+        <span class="c1"># and the atom types, stay CONSTANT within the trajectory,</span>
+        <span class="c1"># and so we define them as header data, and not separately for every frame:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="n">n_atoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># atom types defined as numbers, following the MD engine definition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_masses</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># atom masses, floating point numbers, one for each atom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_charges</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># atom charges, floating point numbers, one for each atom</span>
+        <span class="c1"># The initial value of self.dimensions is set to a number too low to be physical,</span>
+        <span class="c1"># but different from 0. This way if an observable tried to calculate the Q vectors</span>
+        <span class="c1"># or, more precisely, reciprocal space vectors</span>
+        <span class="c1"># from an unpopulated CompactTrajectory, it would not divide by zero.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># avoids divide-by-zero errors, explained above.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># chemical element (str) defined for each atom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># set of chemical elements (str) present in the trajectory</span>
+        <span class="c1"># key point: the data!</span>
+        <span class="c1"># this is where we will keep the numpy arrays</span>
+        <span class="c1"># vvvvvvvvvvvvvvvvvv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># now some state indicators:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_allocated</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># preAllocate has been run, numpy arrays exist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_populated</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># numpy arrays are not empty; some data have been written</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fixedbox</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># the dimensions of the simulation box are fixed;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_velocity</span> <span class="o">=</span> <span class="n">useVelocity</span>
+        <span class="c1"># ^^^^^^^^^^^^^^</span>
+        <span class="c1"># the self.is_fixedbox could potentially be False for an NPT ensemble</span>
+        <span class="c1"># in that case self.changing_dimensions will contain the box dimensions for each step.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_index</span> <span class="o">=</span> <span class="mf">1e5</span>  <span class="c1"># the first array index at which we have written data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_index</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># the last array index at which we have written data</span>
+        <span class="c1"># ^^^^^^^^^^^^^</span>
+        <span class="c1"># since we use np.empty, the elements of the array are _not_ initialised to any value,</span>
+        <span class="c1"># so it is a precaution to slice the arrays at the end to cut off the empty parts.</span>
+        <span class="c1"># -------------</span>
+        <span class="c1"># now we allocate the arrays</span>
+        <span class="c1"># vvvvvvvvvvvvv</span>
+        <span class="k">if</span> <span class="n">n_steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">preAllocate</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">useVelocity</span><span class="o">=</span><span class="n">useVelocity</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;universe&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_dtype</span><span class="p">(</span><span class="n">bpn</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">bpn</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float128</span>
+        <span class="k">if</span> <span class="n">bpn</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="k">if</span> <span class="n">bpn</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float16</span>
+
+<div class="viewcode-block" id="CompactTrajectory.setBytesPerNumber">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setBytesPerNumber">[docs]</a>
+    <span class="k">def</span> <span class="nf">setBytesPerNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bytes_per_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Changes the number of bytes per number in the arrays storing atom positions,</span>
+<span class="sd">        velocities, the frame timestamps and simulation box dimensions.</span>
+<span class="sd">        The best approach is to set the correct value before populating the arrays,</span>
+<span class="sd">        but it is still possible to change the data type using this function</span>
+<span class="sd">        when the CompactTrajectory already contains some numbers.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            bytes_per_number (int, optional):</span>
+<span class="sd">              If 8, the arrays will use np.float64 to</span>
+<span class="sd">              store the positions, velocities and time at each step. Will always be rounded</span>
+<span class="sd">              up to the nearest multiple of 2.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dtype</span><span class="p">(</span><span class="n">bytes_per_number</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="c1"># Since it is not guaranteed that the postProcess method has been run,</span>
+        <span class="c1"># we explicitly limit the indices to those which have been written into.</span>
+        <span class="c1"># The length corresponds to the number of simulation steps.</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">first_index</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">last_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">]):</span>
+        <span class="c1"># different behaviour:</span>
+        <span class="c1"># a single index extracts a subrtajectory</span>
+        <span class="c1"># with length 1,</span>
+        <span class="c1"># while a slice with produce a subtrajectory,</span>
+        <span class="c1"># which is another CompactTrajectory.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">step</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__len__</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Trying to access a nonexistent time&quot;</span>
+                                 <span class="s2">&quot; frame in the CompactTrajectory.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtrajectory</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtrajectory</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">&#39;CompactTrajectory&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_allocated</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">is_allocated</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_populated</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">is_populated</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fixedbox</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">is_fixedbox</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_velocity</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">has_velocity</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">are_the_same</span> <span class="o">=</span> <span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">position_unit</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_unit</span> <span class="ow">and</span>
+                        <span class="n">other</span><span class="o">.</span><span class="n">time_unit</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_unit</span> <span class="ow">and</span>
+                        <span class="n">other</span><span class="o">.</span><span class="n">velocity_unit</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity_unit</span> <span class="ow">and</span>
+                        <span class="n">other</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">are_the_same</span><span class="p">:</span>
+            <span class="n">are_the_same</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_index</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">first_index</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">last_index</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">last_index</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed header comparison&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">are_the_same</span><span class="p">:</span>
+            <span class="n">are_the_same</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="o">.</span><span class="n">shape</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed index comparison&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">are_the_same</span><span class="p">:</span>
+            <span class="n">are_the_same</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">universe</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed shape comparison&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimensions  other: </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, self: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Position    other: </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, self: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time        other: </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, self: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CDim        other: </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+                  <span class="sa">f</span><span class="s2">&quot;self: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">are_the_same</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fixedbox</span><span class="p">:</span>
+                <span class="n">are_the_same</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">are_the_same</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed universe comparison&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">are_the_same</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">velocity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">are_the_same</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed array comparison&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">are_the_same</span><span class="p">:</span>
+            <span class="n">are_the_same</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">),</span>
+                <span class="n">other</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">atom_charges</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_charges</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">atom_masses</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_masses</span><span class="p">),</span>
+                <span class="n">other</span><span class="o">.</span><span class="n">element_list</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_list</span><span class="p">,</span>
+                <span class="n">other</span><span class="o">.</span><span class="n">element_set</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_set</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed velocity comparison&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">are_the_same</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;atom_types: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">atom_types</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;n_atoms: </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">n_atoms</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;atom_charges: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">atom_charges</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">atom_charges</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;atom_masses: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">atom_masses</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">atom_masses</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;element_list: </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">element_list</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">element_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;element_set: </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">element_set</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">element_set</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">are_the_same</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">velocities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the velocity array.</span>
+<span class="sd">        Added for those parts of code that use the plural form</span>
+<span class="sd">        instead of singular.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the time array.</span>
+<span class="sd">        Added for those parts of code that use the plural form</span>
+<span class="sd">        instead of singular.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">positions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the position array.</span>
+<span class="sd">        Added for those parts of code that use the plural form</span>
+<span class="sd">        instead of singular.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the step numbers and time steps</span>
+<span class="sd">        in a single array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+            <span class="c1"># there used to be a TemporalConfiguration here as well.</span>
+        <span class="p">])</span>
+
+<div class="viewcode-block" id="CompactTrajectory.preAllocate">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.preAllocate">[docs]</a>
+    <span class="k">def</span> <span class="nf">preAllocate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">useVelocity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates empty arrays for storing atom positions, velocities,</span>
+<span class="sd">        time values of the simulation frames, and the simulation</span>
+<span class="sd">        box dimensions.</span>
+
+<span class="sd">        The numpy empty object do not initialise elements until they</span>
+<span class="sd">        have been accessed by a read or write operation. This means</span>
+<span class="sd">        that allocating too many steps is generally safe and harmless,</span>
+<span class="sd">        as the unused steps will be removed when the postProcess</span>
+<span class="sd">        method is called.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            n_steps (int, optional):</span>
+<span class="sd">              Number of simulation steps in the</span>
+<span class="sd">              trajectory. Defaults to 1.</span>
+<span class="sd">            n_atoms (int, optional): Number of atoms in the system.</span>
+<span class="sd">              Defaults to 1.</span>
+<span class="sd">            useVelocity (bool, optional): If the trajectory contains</span>
+<span class="sd">              velocities, set to True to allocate an additional array</span>
+<span class="sd">              for the velocity values. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_allocated</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: preAllocate has already been run on this CompactTrajectory.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="n">n_atoms</span>  <span class="c1"># from now on we decide that each step will have n_atoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>  <span class="c1"># and there will be n_steps in this trajectory.</span>
+        <span class="c1"># time steps are the first dimension of the arrays.</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">useVelocity</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="c1"># First change of state: the arrays have been allocated.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_allocated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_steps</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
+
+        <span class="c1"># ^^^^^^^^^^^^^^^^^^^^^^</span>
+        <span class="c1"># We are fairly confident that the dimensions of the simulation box will NOT change</span>
+        <span class="c1"># during the simulation, but allocating this array does not really cost us anything,</span>
+        <span class="c1"># and, if it turns out that the dimensions do change, we will be prepared.</span>
+
+<div class="viewcode-block" id="CompactTrajectory.setCharge">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setCharge">[docs]</a>
+    <span class="k">def</span> <span class="nf">setCharge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charge_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the values of partial charge for each atom.</span>
+<span class="sd">        It assumes that the charges are constant within</span>
+<span class="sd">        the simulation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            charge_list : list[float]</span>
+<span class="sd">                Fractional electrical charge of each atom,</span>
+<span class="sd">                given in a list with one floating point number</span>
+<span class="sd">                per atom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If need be, we can modify it to work the same</span>
+        <span class="c1"># as setDimensions, so it populates a time-dependent</span>
+        <span class="c1"># array if it turns out that the charge values</span>
+        <span class="c1"># change between the time frames.</span>
+        <span class="k">if</span> <span class="n">charge_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">charge_list</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong number of charges in setCharge.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_charges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">charge_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="CompactTrajectory.setDimensions">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setDimensions">[docs]</a>
+    <span class="k">def</span> <span class="nf">setDimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_dimensions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">step_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes the simulation box dimensions into the object header.</span>
+<span class="sd">        Additionally, if the simulation box dimensions change with time,</span>
+<span class="sd">        it will keep track of the new dimensions at each step in the</span>
+<span class="sd">        self.changing_dimensions object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">            frame_dimensions : np.array</span>
+<span class="sd">                3 float numbers defining the size</span>
+<span class="sd">                of the simulation box along x, y and z.</span>
+
+<span class="sd">            step_num : int</span>
+<span class="sd">                The number of the simulation frame at which</span>
+<span class="sd">                the frame_dimensions array was read.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The initial self.dimensions is set to 0.1 Angstrom.</span>
+        <span class="c1"># This is too small to ever be used in a simulation, and at the same time</span>
+        <span class="c1"># it is not 0.</span>
+        <span class="c1"># Here we check if the initial values has already been overwritten with</span>
+        <span class="c1"># a physical value of dimensions.</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">frame_dimensions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_dimensions</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">frame_dimensions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+            <span class="c1"># If the new dimensions are the same as the current ones, we do nothing.</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_fixedbox</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># the dimensions of the box DO change in this trajectory!</span>
+            <span class="c1"># we save the dimensions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="p">[</span><span class="n">step_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_dimensions</span>
+            <span class="c1"># per simulation step now.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">first_index</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">last_index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+                <span class="mi">0</span><span class="p">)</span></div>
+
+            <span class="c1"># ^^^^^^^^^^^^^</span>
+            <span class="c1"># now that we have discovered that the dimensions change,</span>
+            <span class="c1"># we use the mean value over time as the dimensions parameter.</span>
+
+<div class="viewcode-block" id="CompactTrajectory.writeOneStep">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.writeOneStep">[docs]</a>
+    <span class="k">def</span> <span class="nf">writeOneStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+                     <span class="n">positions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">velocities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes the atom positions (and, optionally, velocities) of a single</span>
+<span class="sd">        simulation frame into the trajectory arrays.</span>
+<span class="sd">        This function assumes that we have allocated the memory already,</span>
+<span class="sd">        and that we have sorted the atoms according to their IDs.</span>
+<span class="sd">        It will then put the numbers into the arrays at the correct frame,</span>
+<span class="sd">        given by the step_num parameter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            step_num : int, optional</span>
+<span class="sd">                the index at which the numbers will be written.</span>
+<span class="sd">                Defaults to -1.</span>
+<span class="sd">            time : float</span>
+<span class="sd">                the time stamp of the simulation step, in the</span>
+<span class="sd">                correct time units (femtoseconds). Defaults to -1.0.</span>
+<span class="sd">            positions : np.array</span>
+<span class="sd">                the array of the atom positions, shaped</span>
+<span class="sd">                (n_atoms, 3). Defaults to None.</span>
+<span class="sd">            velocities : np.array, optional</span>
+<span class="sd">                the array of the atom velocities, shaped</span>
+<span class="sd">                (n_atoms, 3). If we don&#39;t use velocities, it can be skipped.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_allocated</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Writing outside of the reserved array range.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">step_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">step_num</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">positions</span>
+        <span class="k">if</span> <span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">step_num</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">velocities</span>
+        <span class="c1"># some housekeeping:</span>
+        <span class="c1"># we take note of the indices that have been written to.</span>
+        <span class="c1"># In case we allocated more memory than needed,</span>
+        <span class="c1"># we keep track of the indices where the data has been written,</span>
+        <span class="c1"># so we can discard the unused part later,</span>
+        <span class="c1"># as the uninitalised part of the array will contain random numbers.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_index</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">step_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_index</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">step_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompactTrajectory.writeEmptyStep">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.writeEmptyStep">[docs]</a>
+    <span class="k">def</span> <span class="nf">writeEmptyStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function advances the iterators without writing any data.</span>
+<span class="sd">        It is basically a reduced version of the writeOneStep method.</span>
+<span class="sd">        This was added since the tests/trajectory_analysis/test_PDF.py</span>
+<span class="sd">        use a trajectory made of 1000 _empty_ configurations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            step_num : int, optional</span>
+<span class="sd">                the index at which the numbers will be written.</span>
+<span class="sd">                Defaults to -1.</span>
+<span class="sd">            time : float, optional</span>
+<span class="sd">                the time stamp of the simulation step, in the</span>
+<span class="sd">                correct time units (femtoseconds). Defaults to -1.0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_allocated</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Writing outside of the reserved array range.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">step_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_index</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">step_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_index</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">step_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_index</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_create_types_from_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_types</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Some engines (e.g. LAMMPS) like using numbers at atom types,</span>
+<span class="sd">        while others use letters. CompactTrajectory was written for</span>
+<span class="sd">        LAMMPS initially, and likes having numbers for types.</span>
+<span class="sd">        This function will check if the types are numbers,</span>
+<span class="sd">        and replace them with consitent positive numbers if it</span>
+<span class="sd">        turns out that they were not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atom_types</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">atom_types</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">all_types</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">atom_types</span><span class="p">)</span>
+            <span class="n">compare_types</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atom_types</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+            <span class="n">number_types</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atom_types</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">at_type</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">all_types</span><span class="p">):</span>
+                <span class="n">number_types</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">compare_types</span> <span class="o">==</span> <span class="n">at_type</span><span class="p">)]</span> <span class="o">=</span> <span class="n">number</span> <span class="o">+</span><span class="mi">1</span>
+            <span class="k">return</span> <span class="n">number_types</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atom_types</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CompactTrajectory.validateTypes">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.validateTypes">[docs]</a>
+    <span class="k">def</span> <span class="nf">validateTypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_atom_types</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function either sets the array of atom types</span>
+<span class="sd">        (if it had not been set before), or checks if the</span>
+<span class="sd">        array of atom types from the new frame is the same</span>
+<span class="sd">        as the original array of atom types.</span>
+
+<span class="sd">        If the atom types have changed during the simulation,</span>
+<span class="sd">        we cannot process the results using the CompactTrajectory</span>
+<span class="sd">        object, and the validation will return False.</span>
+<span class="sd">        It is up to the engine facade to decide what to do</span>
+<span class="sd">        if valideTypes returns False.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            atom_types : np.array</span>
+<span class="sd">                an array of all the atom types, sorted by the atom ID.</span>
+<span class="sd">                If these are numbers, like in a LAMMPS simulation,</span>
+<span class="sd">                then they will be stored directly.</span>
+<span class="sd">                If raw_atom_types are strings, an internal method</span>
+<span class="sd">                called _create_types_from_elements will create</span>
+<span class="sd">                numbers that correspond to the strings, so that</span>
+<span class="sd">                every atom type has its own number.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            bool</span>
+<span class="sd">                True if the atom types are the same as in</span>
+<span class="sd">                the beginning, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># codes like LAMMPS make it possible to generate or destroy atoms/particles</span>
+        <span class="c1"># in a simulation to simulate flow. It is unlikely to happen in an MDMC run.</span>
+        <span class="c1"># Since we cannot handle such a case,</span>
+        <span class="c1"># we will return False to indicate that this trajectory is not suitable for MDMC.</span>
+        <span class="n">atom_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_types_from_elements</span><span class="p">(</span><span class="n">raw_atom_types</span><span class="p">)</span>
+        <span class="c1"># ^^^^^^^^</span>
+        <span class="c1"># This ensures that the atom types are numers.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># case 1: atom_types have not been set</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atom_types</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">=</span> <span class="n">atom_types</span>  <span class="c1"># and now they are set.</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">==</span> <span class="n">atom_types</span><span class="p">):</span>  <span class="c1"># case 2: atom_types have been set</span>
+            <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># and have not changed</span>
+        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># case 3: atom_types have been set and have changed.</span></div>
+
+
+<div class="viewcode-block" id="CompactTrajectory.labelAtoms">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.labelAtoms">[docs]</a>
+    <span class="k">def</span> <span class="nf">labelAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_symbols</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">atom_masses</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a list of chemical elements of all the atoms in a trajectory frame,</span>
+<span class="sd">        a set of all the chemical elements present in a trajectory, and a</span>
+<span class="sd">        list of atom masses of all the atoms in a trajectory frame.</span>
+<span class="sd">        It is up to the engine facade to construct the input dictionaries containing</span>
+<span class="sd">        the correct information about the chemical elements and masses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            atom_symbols : dict</span>
+<span class="sd">                a dictionary which returns a &#39;str&#39;</span>
+<span class="sd">                chemical element symbol for every &#39;int&#39; atom_ID from</span>
+<span class="sd">                the trajectory.</span>
+
+<span class="sd">            atom_masses : dict</span>
+<span class="sd">                a dictionary of &#39;float&#39; atom masses,</span>
+<span class="sd">                using as keys the &#39;int&#39; atom_ID values.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># tests/trajectory_analysis/test_PDF.py use empty Configurations</span>
+            <span class="c1"># so we accept a case of no atoms in the CompactTrajectory.</span>
+            <span class="c1"># We just return False in case we wanted to check in real code if</span>
+            <span class="c1"># we are trying to set labels on a CompactTrajectory with no atoms.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">atom_symbols</span><span class="p">[</span><span class="n">atom_id</span><span class="p">])</span> <span class="k">for</span> <span class="n">atom_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_masses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">atom_masses</span><span class="p">[</span><span class="n">atom_id</span><span class="p">]</span> <span class="k">for</span> <span class="n">atom_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">])</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="CompactTrajectory.postProcess">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.postProcess">[docs]</a>
+    <span class="k">def</span> <span class="nf">postProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function should be called after the all the trajectory steps have</span>
+<span class="sd">        been read. It will discard the unnecessary rows of the arrays,</span>
+<span class="sd">        in case we had allocated too many due to some rounding error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_populated</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">first_index</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">last_index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">first_index</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">last_index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">first_index</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">last_index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">first_index</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">last_index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first_index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_populated</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="CompactTrajectory.subtrajectory">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.subtrajectory">[docs]</a>
+    <span class="k">def</span> <span class="nf">subtrajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="n">atom_filter</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns another CompactTrajectory instance, which contains the</span>
+<span class="sd">        same header information, and a subset of the original trajectory</span>
+<span class="sd">        steps. The arrays in the original trajectory will be sliced</span>
+<span class="sd">        following the pattern: new = old[start:stop:step].</span>
+
+<span class="sd">        Optionally, atom_filter can be specified to choose only</span>
+<span class="sd">        specific atoms from the trajectory. It is recommended not to</span>
+<span class="sd">        use subtrajectory directly in this case, but to use the</span>
+<span class="sd">        filter_by_element or filter_by_type methods, which will</span>
+<span class="sd">        create the element_filter themselves.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            start : int</span>
+<span class="sd">                number defining the beginning of the slicing range.</span>
+
+<span class="sd">            stop : int</span>
+<span class="sd">                number defining the end of the slicing range.</span>
+
+<span class="sd">            step : int</span>
+<span class="sd">                step size of the slicing operation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            CompactTrajectory: a trajectory containing the same header</span>
+<span class="sd">            and the same or less steps than the original.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">CompactTrajectory</span><span class="p">()</span>
+        <span class="c1"># copy over all the transferable parts</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">position_unit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_unit</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">time_unit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_unit</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">velocity_unit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity_unit</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span>
+        <span class="k">if</span> <span class="n">atom_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">:</span><span class="n">step</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">:</span><span class="n">step</span><span class="p">]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">changing_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">:</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">temp</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">:</span><span class="n">step</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">atom_masses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_masses</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">atom_charges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_charges</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">element_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_list</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">element_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_set</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">:</span><span class="n">step</span><span class="p">,</span> <span class="n">atom_filter</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">:</span><span class="n">step</span><span class="p">]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">changing_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">:</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">temp</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">:</span><span class="n">step</span><span class="p">,</span> <span class="n">atom_filter</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">[</span><span class="n">atom_filter</span><span class="p">]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">atom_types</span><span class="p">)</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">atom_charges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_charges</span><span class="p">[</span><span class="n">atom_filter</span><span class="p">]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">atom_masses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_masses</span><span class="p">[</span><span class="n">atom_filter</span><span class="p">]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">element_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">element_list</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atom_filter</span><span class="p">]</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">element_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">element_list</span><span class="p">)</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">is_allocated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">is_populated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">has_velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_velocity</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">is_fixedbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fixedbox</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">first_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">last_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">position</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">temp</span></div>
+
+
+<div class="viewcode-block" id="CompactTrajectory.filter_by_time">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter_by_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create another CompactTrajectory, containing only the frames</span>
+<span class="sd">        with the time values equal to or larger than the start parameter,</span>
+<span class="sd">        and smaller than the end parameter.</span>
+<span class="sd">        If only one time value is given, the function will create a</span>
+<span class="sd">        CompactTrajectory with a single time step equal to start,</span>
+<span class="sd">        or raise and error if start is not an element of the time array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start : float</span>
+<span class="sd">            The start time for filtering the ``Trajectory``</span>
+<span class="sd">        end : , optional</span>
+<span class="sd">            The end time for filtering the ``Trajectory``.  The default is</span>
+<span class="sd">            `None`, which means the new returned ``Trajectory`` has a single</span>
+<span class="sd">            time, defined by the ``start``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        CompactTrajectory</span>
+<span class="sd">            A ``CompactTrajectory`` with ``times`` in half open interval defined by</span>
+<span class="sd">            ``start`` and ``end``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="n">start</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Start is not in self.time&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtrajectory</span><span class="p">(</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">total</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The specified time range contains no MD frames&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtrajectory</span><span class="p">(</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">total</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="CompactTrajectory.filter_by_element">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_element">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter_by_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a subtrajectory out of the original CompactTrajectory,</span>
+<span class="sd">        containing only the chemical elements specified in the input</span>
+<span class="sd">        element list.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        elements : list(str)</span>
+<span class="sd">            List of chemical elements given as string.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        CompactTrajectory</span>
+<span class="sd">            A ``CompactTrajectory`` containing only the atoms of</span>
+<span class="sd">            the specified chemical elements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_list</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_list</span><span class="p">)</span> <span class="o">==</span> <span class="n">element</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+                <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtrajectory</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">atom_filter</span> <span class="o">=</span> <span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompactTrajectory.filter_by_type">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_type">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter_by_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a subtrajectory out of the original CompactTrajectory,</span>
+<span class="sd">        containing only the atoms with the atom_type specified in the input</span>
+<span class="sd">        types list.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        types : List(int)</span>
+<span class="sd">            A list of atom_type numbers.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        CompactTrajectory</span>
+<span class="sd">            A ``CompactTrajectory`` containing only the atoms of</span>
+<span class="sd">            the specified type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">atom_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">atom_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">==</span> <span class="n">atom_type</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+                <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtrajectory</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">atom_filter</span> <span class="o">=</span> <span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompactTrajectory.exportAtom">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.exportAtom">[docs]</a>
+    <span class="k">def</span> <span class="nf">exportAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atom_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For compatibility with ``Trajectory``, creates an ``Atom`` object</span>
+<span class="sd">        for a chosen time step of the simulation and atom number.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        step_number : int</span>
+<span class="sd">            number of the simulation step at which the atom</span>
+<span class="sd">            position should be read</span>
+<span class="sd">        atom_number : int</span>
+<span class="sd">            number of the atom in the trajectory that will</span>
+<span class="sd">            be created as an ``Atom`` object</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Atom</span>
+<span class="sd">            a single ``Atom`` object, for whatever purpose the user</span>
+<span class="sd">            may need it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_list</span><span class="p">[</span><span class="n">atom_number</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="n">step_number</span><span class="p">,</span> <span class="n">atom_number</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">velocity</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_charges</span><span class="p">[</span><span class="n">atom_number</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">charge</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="n">Atom</span><span class="p">(</span><span class="n">element</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">step_number</span><span class="p">,</span> <span class="n">atom_number</span><span class="p">,</span> <span class="p">:],</span>
+                    <span class="n">velocity</span><span class="p">,</span>
+                    <span class="n">charge</span><span class="o">=</span><span class="n">charge</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="configurations_as_compact_trajectory">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.configurations_as_compact_trajectory">[docs]</a>
+<span class="k">def</span> <span class="nf">configurations_as_compact_trajectory</span><span class="p">(</span><span class="o">*</span><span class="n">configs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">TemporalConfiguration</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">CompactTrajectory</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Populate the arrays of the CompactTrajectory using the input list</span>
+<span class="sd">    of ``TemporalConfiguration`` objects.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        configs -- A list of TemporalConfiguration objects,</span>
+<span class="sd">                   most likely containing atoms</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        A CompactTrajectory with atom types and positions matching those in the</span>
+<span class="sd">        input configurations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;At least one Configuration is needed&quot;</span>
+                        <span class="s2">&quot; for the CompactTrajectory.fromConfigs()&quot;</span><span class="p">)</span>
+
+    <span class="n">traj</span> <span class="o">=</span> <span class="n">CompactTrajectory</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">),</span>
+                        <span class="n">n_atoms</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">atoms</span><span class="p">),</span>
+                        <span class="n">useVelocity</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">atom_velocities</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="n">universe</span> <span class="o">=</span> <span class="n">configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">universe</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">step_number</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">configs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">time</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">atpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">row_stack</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">atom_positions</span><span class="p">)</span>
+            <span class="n">atvel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">row_stack</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">atom_velocities</span><span class="p">)</span>
+            <span class="n">traj</span><span class="o">.</span><span class="n">writeOneStep</span><span class="p">(</span><span class="n">step_num</span><span class="o">=</span><span class="n">step_number</span><span class="p">,</span>
+                                <span class="n">time</span><span class="o">=</span><span class="n">current_time</span><span class="p">,</span>
+                                <span class="n">positions</span><span class="o">=</span><span class="n">atpos</span><span class="p">,</span>
+                                <span class="n">velocities</span><span class="o">=</span><span class="n">atvel</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">traj</span><span class="o">.</span><span class="n">writeEmptyStep</span><span class="p">(</span><span class="n">step_num</span><span class="o">=</span><span class="n">step_number</span><span class="p">,</span>
+                                <span class="n">time</span><span class="o">=</span><span class="n">current_time</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dim</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">traj</span><span class="o">.</span><span class="n">setDimensions</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">step_num</span><span class="o">=</span><span class="n">step_number</span><span class="p">)</span>
+    <span class="c1"># here we extract as much header information as possible</span>
+    <span class="c1"># from the TemporalConfiguration</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of &#39;chemical_element_symbol&#39;, 1 per atom</span>
+    <span class="c1"># dictionary of &#39;chemical_element_symbol&#39; : mass (float) in a.m.u.</span>
+    <span class="n">masses</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># dictionary of &#39;atom_type&#39; : mass (float) in a.m.u.</span>
+    <span class="n">mass_per_type</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">element_per_type</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary of &#39;atom_type&#39; : &#39;chemical_element_symbol&#39;</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># a list of &#39;atom_type&#39;, 1 entry for each atom</span>
+    <span class="n">id_values</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># a list of &#39;atom_ID&#39;, 1 entry for each atom</span>
+    <span class="n">atom_charge</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># we assume -for now- that the Trajectory stores atom_type.</span>
+    <span class="n">has_types</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">atom_counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># we just iterate over Atom objects</span>
+    <span class="k">for</span> <span class="n">nat</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">atoms</span><span class="p">):</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="n">mass</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">mass</span>
+        <span class="n">charge</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span>
+        <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="n">atom_charge</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">charge</span><span class="p">)</span>
+        <span class="n">masses</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">mass</span>
+        <span class="k">if</span> <span class="n">has_types</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">has_types</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">id_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+        <span class="n">atom_counter</span> <span class="o">=</span> <span class="n">nat</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_types</span><span class="p">:</span>
+        <span class="n">all_elements</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">elements</span><span class="p">)))</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">all_elements</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">atom_counter</span><span class="p">):</span>
+        <span class="n">mass_per_type</span><span class="p">[</span><span class="n">types</span><span class="p">[</span><span class="n">x</span><span class="p">]]</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[</span><span class="n">elements</span><span class="p">[</span><span class="n">x</span><span class="p">]]</span>
+        <span class="n">element_per_type</span><span class="p">[</span><span class="n">types</span><span class="p">[</span><span class="n">x</span><span class="p">]]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+    <span class="n">traj</span><span class="o">.</span><span class="n">validateTypes</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">types</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">id_values</span><span class="p">)])</span>
+    <span class="n">traj</span><span class="o">.</span><span class="n">labelAtoms</span><span class="p">(</span><span class="n">element_per_type</span><span class="p">,</span> <span class="n">mass_per_type</span><span class="p">)</span>
+    <span class="n">traj</span><span class="o">.</span><span class="n">setCharge</span><span class="p">(</span><span class="n">atom_charge</span><span class="p">)</span>
+    <span class="n">traj</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">traj</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

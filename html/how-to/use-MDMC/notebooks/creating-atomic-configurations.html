@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creating an atomic configuration &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Defining molecule interactions" href="defining-molecule-interactions.html" />
+    <link rel="prev" title="Simulations" href="../simulations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../use-MDMC.html">How to use MDMC</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../simulations.html">Simulations</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../simulations.html#creating-a-universe">Creating a Universe</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Creating an atomic configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="defining-molecule-interactions.html">Defining molecule interactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="molecular-visualization.html">Visualising a Universe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="applying-a-forcefield.html">Applying a force field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filling-with-packmol.html">Filling With Packmol</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../simulations.html#creating-a-simulation">Creating a Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Creating an atomic configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Create-an-atomic-configuration">Create an atomic configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Create-bonded-interactions">Create bonded interactions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Bond"><code class="docutils literal notranslate"><span class="pre">Bond</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#BondAngle"><code class="docutils literal notranslate"><span class="pre">BondAngle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#DihedralAngle"><code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Copying-bonded-atoms">Copying bonded atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Create-a-molecule">Create a molecule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Add-structures-to-a-universe">Add structures to a universe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Solving-bond-constraints">Solving bond constraints</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="defining-molecule-interactions.html">Defining molecule interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molecular-visualization.html">Visualising a Universe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="applying-a-forcefield.html">Applying a force field</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../parameter-refinement.html">Parameter Refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="selecting-fitting-parameters.html">Selecting which parameters to fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../use-MDMC.html">How to use MDMC</a></li>
+          <li class="breadcrumb-item"><a href="../simulations.html">Simulations</a></li>
+      <li class="breadcrumb-item active">Creating an atomic configuration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/how-to/use-MDMC/notebooks/creating-atomic-configurations.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Creating-an-atomic-configuration">
+<h1>Creating an atomic configuration<a class="headerlink" href="#Creating-an-atomic-configuration" title="Link to this heading"></a></h1>
+<p>An MDMC simulation requires a configuration and a topology defined within a <code class="docutils literal notranslate"><span class="pre">Universe</span></code> object. These are orthorhombic (cubic or cuboid) boxes containing a configuration of atoms and molecules. This how-to guide will explain how to create a <code class="docutils literal notranslate"><span class="pre">Universe</span></code> object and an atomic configuration inside it.</p>
+<p>In addition to creating molecules manually, it is also possible to create them from atomic configuration files (e.g CIF files). Please see the guide on <a class="reference internal" href="read-configurations.html"><span class="doc">Reading atoms from configuration files</span></a> for a detailed description on how to do this.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Universe</span>
+</pre></div>
+</div>
+</div>
+<p>Creating the actual box that contains the atoms is trivial; specify a list or tuple of 3 floats, representing the x, y, and z lengths of the box respectively; these lengths are taken to be in angstroms (Å).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">box_universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">((</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Universe created with:
+Dimensions [10. 15. 20.]
+</pre></div></div>
+</div>
+<p>To create a cubic <code class="docutils literal notranslate"><span class="pre">Universe</span></code>, only a single float needs to be specified for the <code class="docutils literal notranslate"><span class="pre">dimensions</span></code>; MDMC will infer that this is a cube of side length 10Å. This cube will be used as our base universe for the rest of the guide.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Universe created with:
+Dimensions [10. 10. 10.]
+</pre></div></div>
+</div>
+<section id="Create-an-atomic-configuration">
+<h2>Create an atomic configuration<a class="headerlink" href="#Create-an-atomic-configuration" title="Link to this heading"></a></h2>
+<p>Each atom is specified using an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> object. At a minimum these can be specified just from an element symbol.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span>
+
+<span class="c1"># Create some atoms!</span>
+<span class="n">H1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+<span class="n">O1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">O2</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">9.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">),</span> <span class="n">velocity</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span> <span class="n">charge</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Atom</span></code>s have a few parameters here! Let’s break down some of the particularly important ones: - <code class="docutils literal notranslate"><span class="pre">element</span></code>: the first parameter gives the element of the atom. If atom <code class="docutils literal notranslate"><span class="pre">mass</span></code> is not given, it will be determined from an elemental lookup table. - <code class="docutils literal notranslate"><span class="pre">position</span></code>: the (x,y,z) coordinates of the atom. If not given, defaults to the origin. - <code class="docutils literal notranslate"><span class="pre">velocity</span></code>: the velocity of the atom along the (x,y,z) axes. Defaults to (0,0,0). - <code class="docutils literal notranslate"><span class="pre">charge</span></code>: the atomic charge of the atom. Defaults to None (no charge).
+- <code class="docutils literal notranslate"><span class="pre">atom_type</span></code>: an ID for the type of atom; if not given, is inferred based on the element and interactions of the atom, such that all atoms with the same element and interactions will have the same atom types. This is used to keep track of atom interactions.</p>
+<p>It’s recommended you either define no atom types (and let MDMC do it) or define all atom types. Mixing the two may create unexpected behaviour.</p>
+<p>Note that if set, the <code class="docutils literal notranslate"><span class="pre">velocity</span></code> of atoms will be scaled when creating a <code class="docutils literal notranslate"><span class="pre">Simulation</span></code> in order to ensure the temperature is accurate. Otherwise, if the velocities of all <code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects in a <code class="docutils literal notranslate"><span class="pre">Simulation</span></code> are 0, then the velocities of the atoms in the MD engine will be randomly chosen in order to provide an accurate temperature. For more details see <a class="reference internal" href="running-a-simulation.html"><span class="doc">Running a Simulation</span></a>.</p>
+<p>Atoms can also be created by copying another atom and providing the position of the new atom:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">H2</span> <span class="o">=</span> <span class="n">H1</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>The copied atom will have identical properties to the original attribute, except for a different <code class="docutils literal notranslate"><span class="pre">position</span></code>. This includes interactions, which will apply to the copied atom in the same way as the original atom e.g. if H1 is bonded to an atom O, H2 will also be bonded to atom O. An example of this is shown in the section <strong>‘Create bonded interactions’</strong>.</p>
+</section>
+<section id="Create-bonded-interactions">
+<h2>Create bonded interactions<a class="headerlink" href="#Create-bonded-interactions" title="Link to this heading"></a></h2>
+<p>There are three bonded interaction types within MDMC: <code class="docutils literal notranslate"><span class="pre">Bond</span></code>, <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code> and <code class="docutils literal notranslate"><span class="pre">Dihedral</span></code>. Each <code class="docutils literal notranslate"><span class="pre">Interaction</span></code> must have an <code class="docutils literal notranslate"><span class="pre">InteractionFunction</span></code> which describes the <code class="docutils literal notranslate"><span class="pre">Interaction</span></code>.</p>
+<section id="Bond">
+<h3><code class="docutils literal notranslate"><span class="pre">Bond</span></code><a class="headerlink" href="#Bond" title="Link to this heading"></a></h3>
+<p>This interaction represents a bond between two atoms. Below this is demonstrated where a <code class="docutils literal notranslate"><span class="pre">Bond</span></code> with a <code class="docutils literal notranslate"><span class="pre">HarmonicPotential</span></code> function is created.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import Bond and HarmonicPotential</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Bond</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">HarmonicPotential</span>
+<span class="c1"># Create a Bond with a HarmonicPotential</span>
+<span class="c1"># The first argument in the HarmonicPotential is the equilibrium state and the second is the potential strength</span>
+<span class="n">HH_bond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">H1</span><span class="p">,</span> <span class="n">H2</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">HarmonicPotential</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="n">interaction_type</span><span class="o">=</span><span class="s1">&#39;bond&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>To see which units are supported:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.common.units</span> <span class="kn">import</span> <span class="n">SYSTEM</span>
+<span class="n">SYSTEM</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;LENGTH&#39;: &#39;Ang&#39;,
+ &#39;TIME&#39;: &#39;fs&#39;,
+ &#39;MASS&#39;: &#39;amu&#39;,
+ &#39;CHARGE&#39;: &#39;e&#39;,
+ &#39;ANGLE&#39;: &#39;deg&#39;,
+ &#39;TEMPERATURE&#39;: &#39;K&#39;,
+ &#39;ENERGY&#39;: &#39;kJ / mol&#39;,
+ &#39;FORCE&#39;: &#39;kJ / Ang mol&#39;,
+ &#39;PRESSURE&#39;: &#39;Pa&#39;,
+ &#39;ENERGY_TRANSFER&#39;: &#39;meV&#39;,
+ &#39;ARBITRARY&#39;: &#39;arb&#39;}
+</pre></div></div>
+</div>
+</section>
+<section id="BondAngle">
+<h3><code class="docutils literal notranslate"><span class="pre">BondAngle</span></code><a class="headerlink" href="#BondAngle" title="Link to this heading"></a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code> represents bonds at a rotation around a central atom, and is created in the same manner except it requires a minimum of three atoms. The central atom should be the 2nd atom. For example, a water molecule would have:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">BondAngle</span>
+
+<span class="n">H1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+<span class="n">H2</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.63298</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+<span class="n">O</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.81649</span><span class="p">,</span> <span class="mf">0.57736</span><span class="p">])</span>
+<span class="n">HOH_angle</span> <span class="o">=</span> <span class="n">BondAngle</span><span class="p">(</span><span class="n">H1</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">H2</span><span class="p">)</span>
+
+<span class="c1"># The following is equivalent</span>
+<span class="n">HOH_angle</span> <span class="o">=</span> <span class="n">BondAngle</span><span class="p">(</span><span class="n">H2</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">H1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Currently <code class="docutils literal notranslate"><span class="pre">HarmonicPotential</span></code> is the only <code class="docutils literal notranslate"><span class="pre">InteractionFunction</span></code> that can be applied to either <code class="docutils literal notranslate"><span class="pre">Bond</span></code> or <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code>.</p>
+<p>All <code class="docutils literal notranslate"><span class="pre">Bond</span></code> and <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code> interactions can have <a class="reference external" href="https://en.wikipedia.org/wiki/Constraint_(computational_chemistry)">constraints</a> imposed on them; this can either be set when creating the <code class="docutils literal notranslate"><span class="pre">Bond</span></code> (or <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code>) or afterwards:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">HH_bond</span><span class="o">.</span><span class="n">constrained</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">HOH_angle</span> <span class="o">=</span> <span class="n">BondAngle</span><span class="p">(</span><span class="n">H1</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">H2</span><span class="p">,</span> <span class="n">constrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>For a constraint to be applied during a simulation, the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> must have a <code class="docutils literal notranslate"><span class="pre">ConstraintAlgorithm</span></code>; these are described at the end of this guide.</p>
+<p><em>NB: “Constraining” the ability of the bonds to oscillate during MD in this way should not be confused with constraining the value of an MDMC ``Parameter`` to a certain numerical range during refinement, as described in</em><a class="reference internal" href="../../../tutorials/running-a-refinement.html"><span class="doc">Running a Refinement</span></a><em>. It is entirely possible to have a rigid bond but allow the length of that bond to change between refinement steps, or conversely have a bond that is free to oscillate during MD but the equilibrium
+length is not altered as part of the refinement.</em></p>
+</section>
+<section id="DihedralAngle">
+<h3><code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code><a class="headerlink" href="#DihedralAngle" title="Link to this heading"></a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code> is also created in the same manner, except it requires four atoms. A <code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code> can be proper or improper, as specified by <code class="docutils literal notranslate"><span class="pre">DihedralAngle.improper</span></code>. By default a <code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code> is proper.</p>
+<p>The atoms in a proper <code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code> must be specified so that the 2nd and 3rd atoms are the central two atoms:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">DihedralAngle</span>
+
+<span class="n">C1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">5.12033922</span><span class="p">,</span> <span class="mf">4.63847287</span><span class="p">,</span> <span class="mf">4.94075943</span><span class="p">])</span>
+<span class="n">N</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">5.12991894</span><span class="p">,</span> <span class="mf">3.78609704</span><span class="p">,</span> <span class="mf">3.79996577</span><span class="p">])</span>
+<span class="n">C2</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">4.91462725</span><span class="p">,</span> <span class="mf">4.08992816</span><span class="p">,</span> <span class="mf">2.5091264</span><span class="p">])</span>
+<span class="n">O</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">4.67405373</span><span class="p">,</span> <span class="mf">5.24130678</span><span class="p">,</span> <span class="mf">2.1180462</span><span class="p">])</span>
+<span class="n">proper</span> <span class="o">=</span> <span class="n">DihedralAngle</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">C1</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">C2</span><span class="p">,</span> <span class="n">O</span><span class="p">])</span>
+
+<span class="c1"># For a proper DihedralAngle, the equivalent atom order is:</span>
+<span class="n">proper</span> <span class="o">=</span> <span class="n">DihedralAngle</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">O</span><span class="p">,</span> <span class="n">C2</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">C1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>The atoms in an improper <code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code> must be specific so that the 1st atom is the central atom.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">N</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">4.97080909</span><span class="p">,</span> <span class="mf">2.91075722</span><span class="p">,</span> <span class="mf">1.57280005</span><span class="p">])</span>
+<span class="n">C1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">5.12033922</span><span class="p">,</span> <span class="mf">4.63847287</span><span class="p">,</span> <span class="mf">4.94075943</span><span class="p">])</span>
+<span class="n">C2</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">5.12991894</span><span class="p">,</span> <span class="mf">3.78609704</span><span class="p">,</span> <span class="mf">3.79996577</span><span class="p">])</span>
+<span class="n">C3</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">4.91462725</span><span class="p">,</span> <span class="mf">4.08992816</span><span class="p">,</span> <span class="mf">2.5091264</span> <span class="p">])</span>
+<span class="n">improper</span> <span class="o">=</span> <span class="n">DihedralAngle</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">C1</span><span class="p">,</span> <span class="n">C2</span><span class="p">,</span> <span class="n">C3</span><span class="p">],</span> <span class="n">improper</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># The following are some of the equivalent permutations</span>
+<span class="c1"># The only unique atom location is the first location (central atom)</span>
+<span class="n">improper</span> <span class="o">=</span> <span class="n">DihedralAngle</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">C2</span><span class="p">,</span> <span class="n">C1</span><span class="p">,</span> <span class="n">C3</span><span class="p">],</span> <span class="n">improper</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">improper</span> <span class="o">=</span> <span class="n">DihedralAngle</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">C3</span><span class="p">,</span> <span class="n">C1</span><span class="p">,</span> <span class="n">C2</span><span class="p">],</span> <span class="n">improper</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">improper</span> <span class="o">=</span> <span class="n">DihedralAngle</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">C1</span><span class="p">,</span> <span class="n">C3</span><span class="p">,</span> <span class="n">C2</span><span class="p">],</span> <span class="n">improper</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Currently <code class="docutils literal notranslate"><span class="pre">Periodic</span></code> is the only <code class="docutils literal notranslate"><span class="pre">InteractionFunction</span></code> that can be applied to <code class="docutils literal notranslate"><span class="pre">DihedralAngle</span></code> interactions.</p>
+</section>
+<section id="Copying-bonded-atoms">
+<h3>Copying bonded atoms<a class="headerlink" href="#Copying-bonded-atoms" title="Link to this heading"></a></h3>
+<p>As mentioned above in the <strong>‘Create an atom’</strong> section, if an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> with a <code class="docutils literal notranslate"><span class="pre">BondedInteraction</span></code> is copied, the new atom will also have the same <code class="docutils literal notranslate"><span class="pre">BondedInteraction</span></code> (and be bonded to the same atom or atoms as the original). For example:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wH1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">))</span>
+<span class="n">wO</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">6.63298</span><span class="p">,</span> <span class="mf">5.</span><span class="p">))</span>
+<span class="n">wBond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">((</span><span class="n">wH1</span><span class="p">,</span> <span class="n">wO</span><span class="p">),</span> <span class="n">function</span><span class="o">=</span><span class="n">HarmonicPotential</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="n">interaction_type</span><span class="o">=</span><span class="s1">&#39;bond&#39;</span><span class="p">))</span>
+<span class="n">wH2</span> <span class="o">=</span> <span class="n">wH1</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.81649</span><span class="p">,</span> <span class="mf">0.57736</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Both atoms <code class="docutils literal notranslate"><span class="pre">wH1</span></code> and <code class="docutils literal notranslate"><span class="pre">wH2</span></code> are bonded to <code class="docutils literal notranslate"><span class="pre">wO</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wBond</span><span class="o">.</span><span class="n">atoms</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[(&lt;Atom
+   {name: &#39;H&#39;,
+    ID: 16,
+    element: H,
+    position: UnitNDArray([5., 5., 5.]) Ang,
+    velocity: UnitNDArray([0., 0., 0.]) Ang / fs}&gt;,
+  &lt;Atom
+   {name: &#39;O&#39;,
+    ID: 17,
+    element: O,
+    position: UnitNDArray([5.     , 6.63298, 5.     ]) Ang,
+    velocity: UnitNDArray([0., 0., 0.]) Ang / fs}&gt;),
+ (&lt;Atom
+   {name: &#39;H&#39;,
+    ID: 18,
+    element: H,
+    position: UnitNDArray([0.     , 0.81649, 0.57736]) Ang,
+    velocity: UnitNDArray([0., 0., 0.]) Ang / fs}&gt;,
+  &lt;Atom
+   {name: &#39;O&#39;,
+    ID: 17,
+    element: O,
+    position: UnitNDArray([5.     , 6.63298, 5.     ]) Ang,
+    velocity: UnitNDArray([0., 0., 0.]) Ang / fs}&gt;)]
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Create-a-molecule">
+<h2>Create a molecule<a class="headerlink" href="#Create-a-molecule" title="Link to this heading"></a></h2>
+<p>Bonded atoms can be combined into a <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> object, which keeps track of the atoms in the molecule and the bonds between them.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">BondAngle</span>
+<span class="c1"># Create a H2 molecule</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]</span>
+<span class="n">H2</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]</span>
+<span class="n">H_mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">H1</span><span class="p">,</span> <span class="n">H2</span><span class="p">],</span> <span class="n">interactions</span><span class="o">=</span><span class="p">[</span><span class="n">HH_bond</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>When a <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> is created, the position of the atoms relative to one another is fixed. The atoms are then moved so that the position of the molecular centre of mass is what was passed when creating the molecule. In the example above, the atoms were at <code class="docutils literal notranslate"><span class="pre">[0.,</span> <span class="pre">0.,</span> <span class="pre">0.]</span></code> and <code class="docutils literal notranslate"><span class="pre">[1.,</span> <span class="pre">1.,</span> <span class="pre">1.]</span></code> before <code class="docutils literal notranslate"><span class="pre">H_mol</span></code> was created; therefore they will always be separated by <code class="docutils literal notranslate"><span class="pre">1.0</span> <span class="pre">Ang</span></code> in each dimension, no matter where the molecule is moved to. The molecular centre of mass is set to <code class="docutils literal notranslate"><span class="pre">[2.,</span> <span class="pre">1.5,</span> <span class="pre">1.]</span></code>,
+so the atom positions are changed to <code class="docutils literal notranslate"><span class="pre">[2.,</span> <span class="pre">1.5,</span> <span class="pre">1.]</span></code> and <code class="docutils literal notranslate"><span class="pre">[3.,</span> <span class="pre">2.5,</span> <span class="pre">2.]</span></code> respectively. It is also possible to <code class="docutils literal notranslate"><span class="pre">copy</span></code> molecules:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">H_mol2</span> <span class="o">=</span> <span class="n">H_mol</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>When a <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> is copied, each <code class="docutils literal notranslate"><span class="pre">Atom</span></code> is copied, as are all of the bonded interactions between these atoms (and all of the non-bonded interactions).</p>
+<p>One method for building molecules is to copy atoms, as the interactions are also copied. For example, to build methane:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m_C</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+<span class="c1"># Define the H atom positions relative to a C at [0,0,0]</span>
+<span class="n">d</span> <span class="o">=</span> <span class="mf">0.629118</span>
+<span class="n">H_pos</span> <span class="o">=</span> <span class="p">[[</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="p">]]</span>
+<span class="n">m_H</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">H_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="c1"># Add a bond between</span>
+<span class="n">CH_bonds</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">m_C</span><span class="p">,</span> <span class="n">m_H</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">HarmonicPotential</span><span class="p">(</span><span class="mf">1.09</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="n">interaction_type</span><span class="o">=</span><span class="s1">&#39;bond&#39;</span><span class="p">))</span>
+<span class="c1"># Make three H atom copies (which are therefore all bonded to m_C)</span>
+<span class="n">H_atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">m_H</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">H_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+    <span class="n">H_atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_H</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
+<span class="c1"># The next two lines simply create a list of unique HCH triplets</span>
+<span class="c1"># e.g. [(m_H1, m_C, m_H2), (m_H1, m_C, m_H3), ..., (m_H3, m_C, m_H4)].</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+<span class="n">HCH_triplets</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m_C</span><span class="p">,</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">H_atoms</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+<span class="c1"># Unpack the list of triplets with * notation i.e. [(...), (...), (...)] becomes (...), (...), (...)</span>
+<span class="n">HCH_angles</span> <span class="o">=</span> <span class="n">BondAngle</span><span class="p">(</span><span class="o">*</span><span class="n">HCH_triplets</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">HarmonicPotential</span><span class="p">(</span><span class="mf">109.5</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="n">interaction_type</span><span class="o">=</span><span class="s1">&#39;angle&#39;</span><span class="p">))</span>
+<span class="c1"># Create a methane molecule by adding C atom to list of H atoms</span>
+<span class="n">methane</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">m_C</span><span class="p">]</span><span class="o">+</span><span class="n">H_atoms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Add-structures-to-a-universe">
+<h2>Add structures to a universe<a class="headerlink" href="#Add-structures-to-a-universe" title="Link to this heading"></a></h2>
+<p>Now we have created our structure objects, we need to add them to our universe box. There are two methods for adding a structure to a universe; either <code class="docutils literal notranslate"><span class="pre">add_structure</span></code>, which adds an individual structure to the universe, or <code class="docutils literal notranslate"><span class="pre">fill</span></code>, which fills the universe with copies of the structure. To <code class="docutils literal notranslate"><span class="pre">fill</span></code>, either specify a desired density of the structure with <code class="docutils literal notranslate"><span class="pre">num_density</span></code> or a desired number of structures with <code class="docutils literal notranslate"><span class="pre">num_struc_units</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add an individual structural unit to the universe</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">H_mol</span><span class="p">)</span>
+<span class="c1"># Fill the universe with the structural unit repeated on a cubic lattice with a specific number density</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">H_mol</span><span class="p">,</span> <span class="n">num_density</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Currently the <code class="docutils literal notranslate"><span class="pre">fill</span></code> command cannot be used in conjunction with <code class="docutils literal notranslate"><span class="pre">add_structure</span></code>. When using it with a cubic universe the density will be isotropic, however the exact number of structural units added by <code class="docutils literal notranslate"><span class="pre">fill</span></code> may be lower than expected as it will always add a cube number. Using <code class="docutils literal notranslate"><span class="pre">fill</span></code> with a non-cubic universe is not recommended as the density may or may not be isotropic depending on the dimensions of the universe and the number of units. A list of all structures in the universe can be
+viewed with <code class="docutils literal notranslate"><span class="pre">universe.structure_list</span></code> (try it!).</p>
+</section>
+<section id="Solving-bond-constraints">
+<h2>Solving bond constraints<a class="headerlink" href="#Solving-bond-constraints" title="Link to this heading"></a></h2>
+<p>When constraining bonds, <a class="reference external" href="https://en.wikipedia.org/wiki/Constraint_(computational_chemistry)">constraint algorithms</a> such as SHAKE or RATTLE can also be passed to a universe to solve constraints imposed on bonded interactions. A constraint algorithm is required if any of the bonded interactions are constrained.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import Shake and Rattle</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Shake</span><span class="p">,</span> <span class="n">Rattle</span>
+<span class="c1"># Initialise a universe with the Shake algorithm</span>
+<span class="c1"># The first Shake parameter is the accuracy and the second is the maximum number of iterations used for any constraint calculation</span>
+<span class="n">shake</span> <span class="o">=</span> <span class="n">Shake</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">uni4</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">constraint_algorithm</span><span class="o">=</span><span class="n">shake</span><span class="p">)</span>
+<span class="c1"># Add Rattle after universe initialisation</span>
+<span class="n">rattle</span> <span class="o">=</span> <span class="n">Rattle</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">uni5</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">uni5</span><span class="o">.</span><span class="n">constraint_algorithm</span> <span class="o">=</span> <span class="n">rattle</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Universe created with:
+Dimensions [10. 10. 10.]
+Universe created with:
+Dimensions [10. 10. 10.]
+</pre></div></div>
+</div>
+<p>Not all constraint algorithms are implemented for all MD engines, and they may also required different parameters to be specified - see the MD engine documentation for more information.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../simulations.html" class="btn btn-neutral float-left" title="Simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="defining-molecule-interactions.html" class="btn btn-neutral float-right" title="Defining molecule interactions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

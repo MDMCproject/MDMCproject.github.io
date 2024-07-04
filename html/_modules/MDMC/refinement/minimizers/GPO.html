@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.refinement.minimizers.GPO &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.refinement.minimizers.GPO</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.refinement.minimizers.GPO</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The Gaussian-Process-Optimizer minimizer class&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">skopt</span> <span class="kn">import</span> <span class="n">Optimizer</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.refinement.minimizers.minimizer_abs</span> <span class="kn">import</span> <span class="n">Minimizer</span>
+<span class="kn">from</span> <span class="nn">MDMC.refinement.minimizers.GPR</span> <span class="kn">import</span> <span class="n">GPR</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
+    <span class="kn">from</span> <span class="nn">MDMC.control</span> <span class="kn">import</span> <span class="n">Control</span>
+
+
+<div class="viewcode-block" id="GPO">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO">[docs]</a>
+<span class="k">class</span> <span class="nc">GPO</span><span class="p">(</span><span class="n">Minimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``Minimizer`` which uses Gaussian process optimisation to find the global minimum</span>
+<span class="sd">    figure of merit.</span>
+
+<span class="sd">    The optimizer comes from scikit-optimize</span>
+<span class="sd">    https://scikit-optimize.github.io/stable/modules/generated/skopt.optimizer.Optimizer.html</span>
+<span class="sd">    It acts in an ask/tell architecture, where the optimizer is &quot;asked&quot; for the best</span>
+<span class="sd">    parameter values to measure at, then when the measurement is complete, we &quot;tell&quot;</span>
+<span class="sd">    the optimizer what the result was and it updates its model. The optimizer</span>
+<span class="sd">    is configured to cycle between prioritising exploration of the space and</span>
+<span class="sd">    exploitation of the minima, in order to find the global minimum without becoming</span>
+<span class="sd">    stuck in a local minimum.</span>
+
+<span class="sd">    The first ``n_initial`` points will be spaced according to a latin</span>
+<span class="sd">    hypercube, to cover the available space, subsequent points will then be chosen according</span>
+<span class="sd">    to the acquisition function and the measured values.</span>
+<span class="sd">    Due to the potential large jumps between the points, a reasonable amount of equlibration</span>
+<span class="sd">    of the MD simulation is likely required.</span>
+<span class="sd">    This optimizer is likely to be the fastest converging (fewest MD steps) option for MDMC.</span>
+
+<span class="sd">    Please see the documentation page explanation/minimizers for more information.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    control: Control</span>
+<span class="sd">        The ``Control`` object which uses this Minimizer.</span>
+<span class="sd">    parameters: Parameters</span>
+<span class="sd">        The parameters in the simulation Universe to be optimized.</span>
+<span class="sd">    previous_history : Path</span>
+<span class="sd">        The Path to a results file containing previous refinement data.</span>
+
+<span class="sd">    Settings</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_initial: int, optional</span>
+<span class="sd">        The number of points used for the initial latin hypercube coverage of the parameter</span>
+<span class="sd">        space. Optional. If no value is given it defaults to 20. Note that if the</span>
+<span class="sd">        associated ``Control`` objects has a maximum number of refinement steps (defined in</span>
+<span class="sd">        ``Control.n_steps``) which is smaller than ``n_initial`` then that value will be</span>
+<span class="sd">        used instead.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    history_columns: list[str]</span>
+<span class="sd">        list of the column titles, and parameter names in the minimizer history</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="s1">&#39;Control&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;Parameters&#39;</span><span class="p">,</span> \
+        <span class="n">previous_history</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">previous_history</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_initial</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n_initial&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_history</span> <span class="o">=</span> <span class="n">previous_history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_changed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">n_steps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_initial</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">n_steps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_initial</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predicted_FoM</span> <span class="o">=</span> <span class="mf">1e9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predicted_min_pos</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Ensure all parameters have bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameter_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">GPR</span><span class="o">.</span><span class="n">create_bounds</span><span class="p">(</span><span class="n">parameter</span><span class="p">))</span> \
+                                <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="c1"># This should mean results are reproducible in tests</span>
+
+        <span class="c1"># Initialise the optimizer, use Gaussian process estimator, an acquisition function which</span>
+        <span class="c1"># switches between exploration and exploitation, a sampling acquisition optimizer, and</span>
+        <span class="c1"># a latin hypercube for determining the positions of the inital 20 points (before points</span>
+        <span class="c1"># are decided based on the best position as determined by the Gaussian process).</span>
+        <span class="n">initial_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_initial</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_initial</span><span class="p">:</span>
+            <span class="n">initial_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_initial</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">initial_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">Optimizer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameter_bounds</span><span class="p">,</span> <span class="s2">&quot;GP&quot;</span><span class="p">,</span> <span class="n">acq_func</span><span class="o">=</span><span class="s2">&quot;gp_hedge&quot;</span><span class="p">,</span>
+            <span class="n">acq_optimizer</span><span class="o">=</span><span class="s2">&quot;sampling&quot;</span><span class="p">,</span> <span class="n">initial_point_generator</span><span class="o">=</span> <span class="s2">&quot;lhs&quot;</span><span class="p">,</span>
+            <span class="n">n_initial_points</span><span class="o">=</span><span class="n">initial_points</span><span class="p">,</span> <span class="n">model_queue_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">history_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns column labels of the history</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[str]</span>
+<span class="sd">            A ``list`` of ``str`` containing all the column labels in the history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;FoM&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GPO.has_converged">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.has_converged">[docs]</a>
+    <span class="k">def</span> <span class="nf">has_converged</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the refinement process has finished, i.e. if the number of points is</span>
+<span class="sd">        equal to or greater than the number of maximum refinement points of the associated</span>
+<span class="sd">        ``Control`` object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Whether or not the minimizer has converged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_steps</span></div>
+
+
+<div class="viewcode-block" id="GPO.set_parameter_values">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.set_parameter_values">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_parameter_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_names</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="s1">&#39;list[float]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assigns a new value to each parameter (specified by the parameter.name)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parameter_names : list[str]</span>
+<span class="sd">            A list of the names of the parameters whose values are to be set</span>
+<span class="sd">        values : list[float]</span>
+<span class="sd">            A list of the values to be set for each parameter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">parameter_names</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="GPO.change_parameters">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.change_parameters">[docs]</a>
+    <span class="k">def</span> <span class="nf">change_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects a new value for each parameter from the array of parameter values to interrogate</span>
+<span class="sd">        from the parameter_point_array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
+            <span class="n">coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">ask</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_parameter_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GPO.reset_parameters">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.reset_parameters">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Not necessary for this minimizer&quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=unnecessary-pass</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GPO.step">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.step">[docs]</a>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FoM</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Increments the minimization by a step, tells the optimizer the most recent measured point</span>
+<span class="sd">        asks for the coordinates of the next point, updates the history, checks for convergance</span>
+<span class="sd">        and then changes parameters if an additional step is required.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        FoM : float</span>
+<span class="sd">            The current figure of merit value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">FoM</span> <span class="o">=</span> <span class="n">FoM</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">tell</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FoM</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">predicted_FoM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">get_result</span><span class="p">()[</span><span class="s1">&#39;fun&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predicted_min_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">get_result</span><span class="p">()[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">FoM</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">history</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">change_parameters</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GPO.extract_result">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.extract_result">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_result</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the measured &amp; predicted FoM and point(s)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list_of_outputs: list</span>
+<span class="sd">            A list of: coordinates of lowest FoM, Minimum FoM, Coordinate of best predicted FoM,</span>
+<span class="sd">            Minimum predicted FoM</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">FoMs</span> <span class="o">=</span> <span class="p">[</span><span class="n">FoM</span><span class="p">[:][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">FoM</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">]</span>
+        <span class="n">min_FoM_measured</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">FoMs</span><span class="p">)</span>
+        <span class="n">min_parameters_measured</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">FoMs</span> <span class="o">==</span> <span class="n">min_FoM_measured</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="c1"># the [0][0][4:] is just to get the parameters from the _history</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">min_parameters_measured</span><span class="p">),</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">min_FoM_measured</span><span class="p">),</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predicted_min_pos</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predicted_FoM</span>
+        <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="GPO.format_result_string">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.format_result_string">[docs]</a>
+    <span class="k">def</span> <span class="nf">format_result_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimizer_output</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minimizer_output: list</span>
+<span class="sd">            A list of: coordinates of lowest FoM, Minimum FoM, Coordinate of best predicted FoM,</span>
+<span class="sd">            Minimum predicted FoM</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        output_string: str</span>
+<span class="sd">            An output string, formatted with the appropriate information about measured</span>
+<span class="sd">            and predicted points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
+            <span class="n">converged_message</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">The refinement has finished.&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">converged_message</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The refinement has not finished.&quot;</span>
+
+        <span class="n">output_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">converged_message</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
+                         <span class="sa">f</span><span class="s1">&#39;Minimum measured point is: </span><span class="se">\n</span><span class="s1">&#39;</span>
+                         <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> with an &#39;</span>
+                         <span class="sa">f</span><span class="s1">&#39;FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">. </span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
+                         <span class="sa">f</span><span class="s1">&#39;Minimum point predicted is: </span><span class="se">\n</span><span class="s1">&#39;</span>
+                         <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1"> for an &#39;</span>
+                         <span class="sa">f</span><span class="s1">&#39;FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s1">.</span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1"> &#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output_string</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running a Simulation in MDMC &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Creating an Observable from a Simulation" href="creating-an-observable.html" />
+    <link rel="prev" title="Filling With Packmol" href="filling-with-packmol.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../use-MDMC.html">How to use MDMC</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../simulations.html">Simulations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../simulations.html#creating-a-universe">Creating a Universe</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../simulations.html#creating-a-simulation">Creating a Simulation</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Running a Simulation in MDMC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="creating-an-observable.html">Creating an Observable from a Simulation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="creating-atomic-configurations.html">Creating an atomic configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="defining-molecule-interactions.html">Defining molecule interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molecular-visualization.html">Visualising a Universe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="applying-a-forcefield.html">Applying a force field</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../parameter-refinement.html">Parameter Refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="selecting-fitting-parameters.html">Selecting which parameters to fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../use-MDMC.html">How to use MDMC</a></li>
+          <li class="breadcrumb-item"><a href="../simulations.html">Simulations</a></li>
+      <li class="breadcrumb-item active">Running a Simulation in MDMC</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/how-to/use-MDMC/notebooks/running-a-simulation.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Running-a-Simulation-in-MDMC">
+<h1>Running a Simulation in MDMC<a class="headerlink" href="#Running-a-Simulation-in-MDMC" title="Link to this heading"></a></h1>
+<p>We first create an example universe, filled with water with an SPCE forcefield. If you’d like to learn more about any of this, please read the following:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="creating-atomic-configurations.html"><span class="doc">Creating Atomic Configurations</span></a></p></li>
+<li><p><a class="reference internal" href="defining-molecule-interactions.html"><span class="doc">Defining Molecule Interactions</span></a></p></li>
+<li><p><a class="reference internal" href="applying-a-forcefield.html"><span class="doc">Applying a Forcefield</span></a></p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="mf">21.75</span><span class="p">,</span> <span class="n">constraint_algorithm</span><span class="o">=</span><span class="n">Shake</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">electrostatic_solver</span><span class="o">=</span><span class="n">PPPM</span><span class="p">(</span><span class="n">accuracy</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
+<span class="n">H1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+<span class="n">H2</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.63298</span><span class="p">,</span> <span class="mf">0.</span><span class="p">))</span>
+<span class="n">O</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.81649</span><span class="p">,</span> <span class="mf">0.57736</span><span class="p">))</span>
+<span class="n">H_coulombic</span> <span class="o">=</span> <span class="n">Coulombic</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">H1</span><span class="p">,</span> <span class="n">H2</span><span class="p">],</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">O_coulombic</span> <span class="o">=</span> <span class="n">Coulombic</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">O</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">water_mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                     <span class="n">velocity</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                     <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">H1</span><span class="p">,</span> <span class="n">H2</span><span class="p">,</span> <span class="n">O</span><span class="p">],</span>
+                     <span class="n">interactions</span><span class="o">=</span><span class="p">[</span><span class="n">Bond</span><span class="p">((</span><span class="n">H1</span><span class="p">,</span> <span class="n">O</span><span class="p">),</span> <span class="p">(</span><span class="n">H2</span><span class="p">,</span> <span class="n">O</span><span class="p">),</span> <span class="n">constrained</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                                   <span class="n">BondAngle</span><span class="p">(</span><span class="n">H1</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">H2</span><span class="p">,</span> <span class="n">constrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;water&#39;</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">water_mol</span><span class="p">,</span> <span class="n">num_density</span><span class="o">=</span><span class="mf">0.03356718472021752</span><span class="p">)</span>
+<span class="n">O_dispersion</span> <span class="o">=</span> <span class="n">Dispersion</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="p">[</span><span class="n">O</span><span class="o">.</span><span class="n">atom_type</span><span class="p">,</span> <span class="n">O</span><span class="o">.</span><span class="n">atom_type</span><span class="p">],</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">10.</span><span class="p">,</span> <span class="n">vdw_tail_correction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="s1">&#39;SPCE&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Universe created with:
+Dimensions [21.75 21.75 21.75]
+</pre></div></div>
+</div>
+<section id="Creating-a-Simulation-object">
+<h2>Creating a Simulation object<a class="headerlink" href="#Creating-a-Simulation-object" title="Link to this heading"></a></h2>
+<p>Simulations in MDMC are run using external MD engines (e.g. LAMMPS). First create a universe, as above. This universe object must then be passed when creating a Simulation object, along with simulation properties:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the Simulation class</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Simulation</span>
+
+<span class="c1"># Create an NPT simulation</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;lammps&#39;</span><span class="p">,</span> <span class="n">time_step</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">300.</span><span class="p">,</span>
+                        <span class="n">pressure</span><span class="o">=</span><span class="mf">101325.</span><span class="p">,</span> <span class="n">traj_step</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">thermostat</span><span class="o">=</span><span class="s1">&#39;nose&#39;</span><span class="p">,</span>
+                        <span class="n">barostat</span><span class="o">=</span><span class="s1">&#39;nose&#39;</span><span class="p">,</span> <span class="n">t_damp</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">p_damp</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+LAMMPS (29 Sep 2021 - Update 3)
+LAMMPS output is captured by PyLammps wrapper
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+LAMMPS (29 Sep 2021 - Update 3)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
+Total wall time: 0:00:00
+Simulation created with lammps engine and settings:
+temperature: 300.0 K
+pressure: 101325.0 Pa
+thermostat: nose
+barostat: nose
+t_damp: 100
+p_damp: 1000
+
+
+</pre></div></div>
+</div>
+<p>The NPT simulation is created with a Nose-Hoover thermostat and a Berendsen barostat, with a temperature of 300 K, a pressure of 101325 Pa, and a time_step of 1.0 fs. The trajectory is recorded every 10 simulation steps. The number of steps over which the temperature and pressure are damped for the thermostat and barostats is 100 and 1000 respectively.</p>
+<p>NVE and NVT simulations can be created in a similar manner by omitting one or both of the thermostat and barostat. If both are omitted the temperature must still be specified as this initialises the atomic velocities.</p>
+<p>MDMC allows detailed control of the atomic velocities when creating the <code class="docutils literal notranslate"><span class="pre">Universe</span></code>. In the case where no velocities were provided (i.e. all <code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects have the default velocity of 0) then the starting velocities are determined by the MD engine (randomly chosen from a uniform distribution, and then scaled so that the velocities are consistent with the temperature provided to the <code class="docutils literal notranslate"><span class="pre">Simulation</span></code>). If some or all of the atoms have been set with MDMC then these velocities will be scaled to
+the correct temperature by the MD engine. In both cases, only the velocities of atoms within the MD engine are affected, and the state of the original <code class="docutils literal notranslate"><span class="pre">Universe</span></code> is unchanged:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check the simulation object, which was created from an input Universe where all atom velocities were equal to zero</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Velocity of first atom in MDMC universe is </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">velocity</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Velocity of first atom in MD engine is </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">velocity</span><span class="p">))</span>
+
+<span class="c1"># In comparision, create a new simulation object where (artifcially and for demonstration purposes) one atom has non-zero velocity</span>
+<span class="n">velocity</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Changing the velocity of the first atom to </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">velocity</span><span class="p">))</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">velocity</span>
+<span class="n">simulation_2</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;lammps&#39;</span><span class="p">,</span> <span class="n">time_step</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">300.</span><span class="p">,</span>
+                          <span class="n">pressure</span><span class="o">=</span><span class="mf">101325.</span><span class="p">,</span> <span class="n">traj_step</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">thermostat</span><span class="o">=</span><span class="s1">&#39;nose&#39;</span><span class="p">,</span>
+                          <span class="n">barostat</span><span class="o">=</span><span class="s1">&#39;nose&#39;</span><span class="p">,</span> <span class="n">t_damp</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">p_damp</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Velocity of first atom in MDMC universe is </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">velocity</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Velocity of first atom in MD engine is </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">simulation_2</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">velocity</span><span class="p">))</span>
+
+<span class="c1"># Reset atom velocity back to zero</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Velocity of first atom in MDMC universe is [0. 0. 0.] Ang / fs
+Velocity of first atom in MD engine is (-0.01976065683471447, -0.0010753281101632158, 0.015225243565678054)
+
+Changing the velocity of the first atom to (1, 0, -1)
+
+LAMMPS (29 Sep 2021 - Update 3)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
+LAMMPS (29 Sep 2021 - Update 3)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
+Total wall time: 0:00:00
+Some but not all atom velocities set. Atoms with non-zero velocity will be re-scaled to match target temperature, atoms with zero velocity will remain stationary.
+Simulation created with lammps engine and settings:
+temperature: 300.0 K
+pressure: 101325.0 Pa
+thermostat: nose
+barostat: nose
+t_damp: 100
+p_damp: 1000
+
+
+Velocity of first atom in MDMC universe is [ 1  0 -1] Ang / fs
+Velocity of first atom in MD engine is (0.5042565657111322, 0.0, -0.5042565657111322)
+</pre></div></div>
+</div>
+</section>
+<section id="Energy-minimisation-and-running-a-simulation">
+<h2>Energy minimisation and running a simulation<a class="headerlink" href="#Energy-minimisation-and-running-a-simulation" title="Link to this heading"></a></h2>
+<p>The universe energy can be minimised by:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Minimise the system during a 100-step MD run, minimising every 10 steps</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">minimize_every</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The simulation can be equilibrated by (this will take ~30s):</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>During the equilibration phase, statistics and trajectories are not captured. If you have not explicitly specified a thermostat or barostat in your calculation, a Berendsen thermostat will be used for the duration of the equilibration. This Berendsen thermostat will not be used during the production run.</p>
+<p>The simulation can be run like so. (this will take ~60s):</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run the simulation for 2000 steps</span>
+<span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">2000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Trajectory">
+<h2>Trajectory<a class="headerlink" href="#Trajectory" title="Link to this heading"></a></h2>
+<p>An MDMC CompactTrajectory object can be created following a simulation run using:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trajectory</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">trajectory</span>
+</pre></div>
+</div>
+</div>
+<p>The times of all of the steps of trajectory can be accessed with the trajectory.times attribute:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trajectory</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+10.0
+</pre></div></div>
+</div>
+</section>
+<section id="Variation-between-MD-engines">
+<h2>Variation between MD engines<a class="headerlink" href="#Variation-between-MD-engines" title="Link to this heading"></a></h2>
+<p>In theory, all simulations on a MDMC Universe should be able to use any MD engine, although in practice this is limited by whether a particular MD engine supports a specific feature and if it has been implemented in the MD engine interface. If a feature is not supported by or implemented for a specific MD engine, MDMC will raise a NotImplementedError.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="filling-with-packmol.html" class="btn btn-neutral float-left" title="Filling With Packmol" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="creating-an-observable.html" class="btn btn-neutral float-right" title="Creating an Observable from a Simulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

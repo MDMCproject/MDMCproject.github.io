@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.MD.simulation &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.MD.simulation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.MD.simulation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module for setting up and running the simulation</span>
+
+<span class="sd"> Classes for the simulation box, minimizer and integrator.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span><span class="p">,</span> <span class="n">filterfalse</span><span class="p">,</span> <span class="n">product</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">kpss</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">verbosemanager</span> <span class="kn">import</span> <span class="n">VerboseManager</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator_getter</span><span class="p">,</span> \
+    <span class="n">mod_docstring</span><span class="p">,</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span>
+<span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.container</span> <span class="kn">import</span> <span class="n">AtomContainer</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade_factory</span> <span class="kn">import</span> <span class="n">MDEngineFacadeFactory</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.force_fields.force_field_factory</span> <span class="kn">import</span> <span class="n">ForceFieldFactory</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.solvents.solvents</span> <span class="kn">import</span> <span class="n">get_solvent_names</span><span class="p">,</span> <span class="n">get_solvent_config</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">Coulombic</span>
+<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">Configuration</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Atom</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Interaction</span>
+    <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
+
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">_FF_DOCSTRING</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;DYNAMIC_FORCE_FIELD_LIST&#39;</span><span class="p">:</span>
+                 <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ForceFieldFactory</span><span class="o">.</span><span class="n">get_force_field_names</span><span class="p">())}</span>
+
+<span class="c1"># pylint: disable=too-few-public-methods</span>
+<span class="c1"># as many classes here are small MD engine compatibility</span>
+
+
+<div class="viewcode-block" id="Universe">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Universe">[docs]</a>
+<span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;dimensions&#39;</span><span class="p">,</span> <span class="s1">&#39;kspace_solver&#39;</span><span class="p">,</span> <span class="s1">&#39;electrostatic_solver&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;dispersive_solver&#39;</span><span class="p">,</span> <span class="s1">&#39;constraint_algorithm&#39;</span><span class="p">,</span> <span class="s1">&#39;parameters&#39;</span><span class="p">)</span>
+<span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Universe</span><span class="p">(</span><span class="n">AtomContainer</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class where the configuration and topology are defined</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dimensions : numpy.ndarray, list, float</span>
+<span class="sd">        Dimensions of the ``Universe``, in units of ``Ang``. A `float` can be</span>
+<span class="sd">        used for a cubic universe.</span>
+<span class="sd">    force_fields : ForceField, optional</span>
+<span class="sd">        A force field to apply to the Universe. The force fields available are:</span>
+<span class="sd">        DYNAMIC_FORCE_FIELD_LIST. Default is None.</span>
+<span class="sd">    structures : list, optional</span>
+<span class="sd">        ``Structure`` objects contained in the ``Universe``. Default is None.</span>
+<span class="sd">    **settings</span>
+<span class="sd">        ``kspace_solver`` (`KSpaceSolver`)</span>
+<span class="sd">            The k-space solver to be used for both electrostatic and dispersive</span>
+<span class="sd">            interactions. If this is passed then no ``electrostatic_solver`` or</span>
+<span class="sd">            ``dispersive_solver`` may be passed.</span>
+<span class="sd">        ``electrostatic_solver`` (`KSpaceSolver`)</span>
+<span class="sd">            The k-space solver to be used for electrostatic interactions.</span>
+<span class="sd">        ``dispersive_solver`` (`KSpaceSolver`)</span>
+<span class="sd">            The k-space solver to be used for dispersive interactions.</span>
+<span class="sd">        ``constraint_algorithm`` (`ConstraintAlgorithm`)</span>
+<span class="sd">            The constraint algorithm which will be applied to constrained</span>
+<span class="sd">            ``BondedInteractions``.</span>
+<span class="sd">        ``verbose`` (`str`)</span>
+<span class="sd">            If the output of the class instantiation should be reported, default to True.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dimensions : numpy.ndarray, list, float</span>
+<span class="sd">        Dimensions of the ``Universe`` in units of ``Ang``.</span>
+<span class="sd">    configuration : Configuration</span>
+<span class="sd">        Stores the content, i.e. configuration of atoms etc within the universe</span>
+<span class="sd">    force_fields : ForceField or None</span>
+<span class="sd">        Force field applied to apply to the Universe</span>
+<span class="sd">    kspace_solver : KSpaceSolver</span>
+<span class="sd">        The k-space solver to be used for both electrostatic and dispersive</span>
+<span class="sd">        interactions.</span>
+<span class="sd">    electrostatic_solver : KSpaceSolver</span>
+<span class="sd">        The k-space solver to be used for electrostatic interactions.</span>
+<span class="sd">    dispersive_solver : KSpaceSolver</span>
+<span class="sd">        The k-space solver to be used for dispersive interactions.</span>
+<span class="sd">    constraint_algorithm : ConstraintAlgorithm</span>
+<span class="sd">        The constraint algorithm which will be applied to constrained</span>
+<span class="sd">        ``BondedInteractions``.</span>
+<span class="sd">    interactions</span>
+<span class="sd">    bonded_interactions</span>
+<span class="sd">    nonbonded_interactions</span>
+<span class="sd">    bonded_interaction_pairs</span>
+<span class="sd">    n_bonded</span>
+<span class="sd">    n_nonbonded</span>
+<span class="sd">    n_interactions</span>
+<span class="sd">    parameters</span>
+<span class="sd">    volume</span>
+<span class="sd">    element_list</span>
+<span class="sd">    element_dict</span>
+<span class="sd">    element_lookup</span>
+<span class="sd">    atoms</span>
+<span class="sd">    n_atoms</span>
+<span class="sd">    molecule_list</span>
+<span class="sd">    n_molecules</span>
+<span class="sd">    structure_list</span>
+<span class="sd">    top_level_structure_list</span>
+<span class="sd">    equivalent_top_level_structures_dict</span>
+<span class="sd">    force_fields</span>
+<span class="sd">    atom_types</span>
+<span class="sd">    atom_type_interactions</span>
+<span class="sd">    density</span>
+<span class="sd">    solvent_density</span>
+<span class="sd">    nbis_by_atom_type_pairs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">force_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structures</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atom_types</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atom_type_interactions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">structures</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span> <span class="o">=</span> <span class="n">Configuration</span><span class="p">(</span><span class="n">structures</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span> <span class="o">=</span> <span class="n">Configuration</span><span class="p">(</span><span class="n">universe</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solvent_density</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bonded_interaction_pairs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nonbonded_interactions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">force_field</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_force_fields</span> <span class="o">=</span> <span class="n">ForceFieldFactory</span><span class="o">.</span><span class="n">create_force_field</span><span class="p">(</span>
+                <span class="n">force_field</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_force_fields</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kspace_solver</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kspace_solver&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">electrostatic_solver</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;electrostatic_solver&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dispersive_solver</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dispersive_solver&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># kspace_solver is mutually exclusive with the other two solver</span>
+        <span class="c1"># attributes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kspace_solver</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">electrostatic_solver</span> <span class="ow">or</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">dispersive_solver</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;No other solver may be passed if kspace_solver is passed.&#39;</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> has kspace_solver and </span><span class="si">%s</span><span class="s1">. </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                         <span class="s1">&#39;electrostatic_solver&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrostatic_solver</span>
+                         <span class="k">else</span> <span class="s1">&#39;dispersive_solver&#39;</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraint_algorithm</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;constraint_algorithm&#39;</span><span class="p">)</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> created: {dimensions:</span><span class="si">%s</span><span class="s1">}&#39;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">setup_frame</span> <span class="o">=</span> <span class="s2">&quot;Universe created with:&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">setup_frame</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dimensions </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="n">force_field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">setup_frame</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Force field    </span><span class="si">{</span><span class="n">force_field</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">setup_frame</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Number of atoms    </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">setup_frame</span><span class="p">)</span>
+
+
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Universe with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="si">}</span><span class="s1"> atoms, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bonded</span><span class="si">}</span><span class="s1"> bonded interactions, &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_nonbonded</span><span class="si">}</span><span class="s1"> nonbonded interactions, and dimensions of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="nb">iter</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">v</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">k</span><span class="p">)):</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+                <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Unit decorator on getter due to operations in setter</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the dimensions of the ``Universe``</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If a `float`, `list`, or ``array`` are not passed</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If a `list` or ``array`` is not 1d with 3 elements</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            The dimensions of the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimensions</span>
+
+    <span class="nd">@dimensions</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">dimensions</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Only positive values for the Universe dimensions are currently supported.&#39;</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: {dimensions: </span><span class="si">%s</span><span class="s1">} </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                             <span class="n">dimensions</span><span class="p">,</span>
+                             <span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dimensions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dimensions</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">dim</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)):</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Only positive values for the Universe dimensions &#39;</span>
+                           <span class="s1">&#39;are currently supported.&#39;</span><span class="p">)</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: {dimensions: </span><span class="si">%s</span><span class="s1">} </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                                 <span class="n">dimensions</span><span class="p">,</span>
+                                 <span class="n">msg</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dimensions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;3 dimensions must be specified&#39;</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: {dimensions: </span><span class="si">%s</span><span class="s1">} </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                             <span class="n">dimensions</span><span class="p">,</span>
+                             <span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;dimensions must be a float or 3 element list of floats.&#39;</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: {dimensions: </span><span class="si">%s</span><span class="s1">} </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                         <span class="n">dimensions</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the interactions in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The interactions in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonded_interactions</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonbonded_interactions</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the bonded interactions in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The bonded interactions in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonded_interaction_pairs</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nonbonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the nonbonded interactions in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The nonbonded interactions in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nonbonded_interactions</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bonded_interaction_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the bonded interactions and the atoms they apply to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The (``interaction``, ``atoms``) pairs in the ``Universe``, where</span>
+<span class="sd">            ``atoms`` is a `tuple` of all ``Atom`` objects for that specific</span>
+<span class="sd">            ``interaction``</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        For an O Atom with two bonds, one to H1 and one to H2::</span>
+
+<span class="sd">            &gt;&gt;&gt; print(O.bonded_interaction_pairs)</span>
+<span class="sd">            [(Bond, (H1, O)), (Bond, (H2, O))]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># bonded_interaction_pairs is a set to avoid double counting of</span>
+        <span class="c1"># interactions</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bonded_interaction_pairs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_bonded</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the number of bonded interactions in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of bonded interactions in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bonded_interactions</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_nonbonded</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the number of nonbonded interactions in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of nonbonded interactions in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonbonded_interactions</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the number of interactions in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of interactions in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bonded</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_nonbonded</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the parameters of the interactions that exist within the</span>
+<span class="sd">        ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">            The ``Parameters`` objects defined within ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Parameters</span><span class="p">([</span><span class="n">parameter</span> <span class="k">for</span> <span class="n">interaction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactions</span>
+                           <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">interaction</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">as_array</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the volume of the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Volume in ``Ang^3``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">element_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The elements of the atoms in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The elements in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">element_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Atom]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the elements in the ``Universe`` and example ``Atom`` objects for</span>
+<span class="sd">        each element</span>
+
+<span class="sd">        This is required for MD engines which assign the same potential</span>
+<span class="sd">        parameters for all identical element types.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            ``element:atom pairs``, where ``atom`` is a single ``Atom`` of the</span>
+<span class="sd">            specified ``element``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span> <span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">element_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Atom]&#39;</span><span class="p">:</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the elements by ID in the ``Universe``</span>
+
+<span class="sd">        This is required for MD engines which assign the same potential</span>
+<span class="sd">        parameters for all identical element names.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            ``element:atom pairs``, where ``atom`` is a single ``Atom`` of the</span>
+<span class="sd">            specified ``element``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span><span class="p">:</span> <span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Atom]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a list of the atoms in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The atoms in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">atoms</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the number of atoms in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of atoms in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">molecule_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Molecule]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a list of the ``Molecule`` objects in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The ``Molecule`` objects in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">molecule_list</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the number of molecules in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of molecules in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule_list</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">structure_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a `list` of all ``Structure`` objects that exist in the</span>
+<span class="sd">        ``Universe``.  This includes all ``Structure`` that are a subunit</span>
+<span class="sd">        of another structure belonging to the ``Universe``.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The ``Structure`` objects in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">add_all_parents</span><span class="p">(</span><span class="n">unit</span><span class="p">):</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">unit</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">unit</span><span class="o">.</span><span class="n">parent</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">parent</span><span class="p">]</span>
+            <span class="k">while</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">parent</span><span class="o">.</span><span class="n">top_level_structure</span><span class="p">:</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">parent</span>
+                <span class="n">parents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+                <span class="n">current</span> <span class="o">=</span> <span class="n">parent</span>
+            <span class="k">return</span> <span class="n">parents</span>
+
+        <span class="n">structures</span> <span class="o">=</span> <span class="p">{</span><span class="n">parent</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">add_all_parents</span><span class="p">(</span><span class="n">atom</span><span class="p">)}</span>
+        <span class="n">structures</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">structures</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">top_level_structure_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Structure]&#39;</span><span class="p">:</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a `list` of the top level ``Structure`` objects that exist in the</span>
+<span class="sd">        ``Universe``. This does not include any ``Structure`` that are a subunit</span>
+<span class="sd">        of another structure belonging to the ``Universe``.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The top level ``Structure`` objects in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Remove duplicate entries from multiple atoms belonging to the same molecule</span>
+        <span class="n">structures</span> <span class="o">=</span> <span class="p">{</span><span class="n">atom</span><span class="o">.</span><span class="n">top_level_structure</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">}</span>
+
+        <span class="c1"># and sort by ID for consistency</span>
+        <span class="c1"># Sorted converts to list</span>
+        <span class="n">top_level_structures</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">top_level_structures</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">equivalent_top_level_structures_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[Structure, int]&#39;</span><span class="p">:</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a `dict` of equivalent top level ``Structure`` objects that</span>
+<span class="sd">        exist in the ``Universe`` as keys, and the number of ``Structure``</span>
+<span class="sd">        that are equivalent to the key as a value. This does not include any</span>
+<span class="sd">        ``Structure`` that are a subunit of another structure belonging</span>
+<span class="sd">        to the ``Universe``.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            The top level ``Structure`` objects in the ``Universe`` as</span>
+<span class="sd">            keys, and the number of each as a value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">equivalent_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_level_structure_list</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">equivalent_dict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">structure</span><span class="o">.</span><span class="n">is_equivalent</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                    <span class="n">equivalent_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">match</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">equivalent_dict</span><span class="p">[</span><span class="n">structure</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">equivalent_dict</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">force_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the ``ForceField`` acting on the ``Universe``</span>
+
+<span class="sd">        The available force fields are:</span>
+<span class="sd">        DYNAMIC_FORCE_FIELD_LIST</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            ``ForceField`` that applies to the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_force_fields</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atom_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Atom]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the atom types of atoms in the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            The atom types in the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_types</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atom_type_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[int, list[Interaction]]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the atom types and the interactions for each atom type</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            ``atom_type:interactions`` pairs where ``atom_type`` is a `int`</span>
+<span class="sd">            specifying the atom type and ``interactions`` is a `list` of</span>
+<span class="sd">            ``Interaction`` objects acting on that ``atom_type``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_type_interactions</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">MASS</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the mass density of the ``Universe``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The mass density of all of the atoms of the ``Universe``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">mass</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">MASS</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">solvent_density</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the mass density of a solvent added using ``solvate()``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The mass density of a solvent added using sovlate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solvent_density</span>
+
+    <span class="k">def</span> <span class="nf">_update_atom_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">:</span> <span class="s1">&#39;Atom&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds the atom to ``atom_types`` `dict`</span>
+
+<span class="sd">        ``atom_type`` is decided on the following criteria:</span>
+
+<span class="sd">          - If an ``Atom`` has the same name and element as an ``Atom`` already</span>
+<span class="sd">            in the ``Universe``, it will be assigned the same ``atom_type``.</span>
+<span class="sd">          - If an ``Atom`` does not have a name (e.g. ``Atom.name == None``),</span>
+<span class="sd">            but has the same element and the same ``Interaction`` objects as an</span>
+<span class="sd">            ``Atom`` already in the ``Universe``, it will be assigned the same</span>
+<span class="sd">            ``atom_type``.</span>
+<span class="sd">          - If an ``Atom`` does not fulfil either of the other criteria, it will</span>
+<span class="sd">            be assigned the lowest integer which is not already an ``atom_type``</span>
+<span class="sd">            in the ``Universe``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atom : Atom</span>
+<span class="sd">            An ``Atom`` to add to the ``atom_types`` `dict`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">inter_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Sorting is just to ensure consistent order. As interactions will have</span>
+            <span class="c1"># different types, sort by id</span>
+            <span class="n">inter_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">interactions</span><span class="p">,</span>
+                                                        <span class="n">k</span><span class="o">=</span><span class="nb">id</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span><span class="p">:</span>
+            <span class="n">atom_type</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span>
+            <span class="k">if</span> <span class="n">atom_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_atom_type_interactions</span><span class="p">(</span><span class="n">inter_key</span><span class="p">,</span> <span class="n">atom_type</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">atom_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_type_interactions</span><span class="p">[</span><span class="n">inter_key</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c1"># Get lowest missing interger in self.atom_type_interactions</span>
+                <span class="n">atom_type</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">filterfalse</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">atom_type_interactions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">,</span>
+                    <span class="n">count</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_atom_type_interactions</span><span class="p">(</span><span class="n">inter_key</span><span class="p">,</span> <span class="n">atom_type</span><span class="p">)</span>
+            <span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span> <span class="o">=</span> <span class="n">atom_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atom_types</span><span class="p">[</span><span class="n">atom_type</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_atom_type_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">atom_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a new ``key:atom_type`` to ``atom_type_interactions``, if the</span>
+<span class="sd">        ``key`` does not already exist</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key : tuple</span>
+<span class="sd">            ``(element, *interactions)``, where ``element`` is a `str`</span>
+<span class="sd">            specifying the atomic element, and ``*interactions`` is one or more</span>
+<span class="sd">            ``Interaction`` objects</span>
+<span class="sd">        atom_type : int</span>
+<span class="sd">            The atom type</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If an assignment is made to an ``atom_type`` which already has</span>
+<span class="sd">            associated interactions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_type_interactions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atom_type_interactions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom_type</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;assignments cannot be made to atom_type_interactions keys&#39;</span>
+                   <span class="s1">&#39;which already possess values.&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: {key: </span><span class="si">%s</span><span class="s1">, atom_type_interactions: </span><span class="si">%s</span><span class="s1">} </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                         <span class="n">key</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">atom_type_interactions</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Universe.add_structure">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Universe.add_structure">[docs]</a>
+    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">add_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Structure</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+                      <span class="n">force_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">center</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a single ``Structure`` to the ``Universe``, with optional</span>
+<span class="sd">        ``ForceField`` applying only to that ``Structure``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structure : Structure or int</span>
+<span class="sd">            The ``Structure`` (or its ``ID`` as an `int`) to be added to the ``Universe``</span>
+<span class="sd">        force_field : str, optional</span>
+<span class="sd">            The force field to be applied to the structure. The available</span>
+<span class="sd">            ``ForceField`` are:</span>
+<span class="sd">            DYNAMIC_FORCE_FIELD_LIST</span>
+<span class="sd">        center : bool, optional</span>
+<span class="sd">            Whether to center `structure` within the Universe as it is</span>
+<span class="sd">            added</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">structure</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_bonded_interaction_pairs</span><span class="p">(</span><span class="o">*</span><span class="n">atom</span><span class="o">.</span><span class="n">bonded_interaction_pairs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_nonbonded_interaction</span><span class="p">(</span><span class="o">*</span><span class="n">atom</span><span class="o">.</span><span class="n">nonbonded_interactions</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_atom_types</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">force_field</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="n">force_field</span><span class="p">,</span> <span class="o">*</span><span class="n">structure</span><span class="o">.</span><span class="n">interactions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Universe.fill">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Universe.fill">[docs]</a>
+    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">force_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">num_density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">num_struc_units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A liquid-like filling of the ``Universe`` independent of existing atoms</span>
+
+<span class="sd">        Adds copies of ``structures`` to existing configuration until</span>
+<span class="sd">        ``Universe`` is full.  As exclusion region is defined by the size of a</span>
+<span class="sd">        bounding sphere, this method is most suitable for atoms or molecules</span>
+<span class="sd">        with approximately equal dimensions.</span>
+
+<span class="sd">        .. note:: CURRENT APPROACH RESULTS IN NUMBER DENSITY DIFFERENT TO WHAT</span>
+<span class="sd">                  IS SPECIFIED DEPENDING ON HOW CLOSE CUBE ROOT OF N_MOLECULES</span>
+<span class="sd">                  IS TO AN `int`.</span>
+
+<span class="sd">        .. note:: CURRENT IMPLEMENTATION SHOULD NOT BE USED WITH NON-CUBIC</span>
+<span class="sd">                  UNIVERSES AS THE DENSITY MAY OR MAY NOT BE ISOTROPIC</span>
+<span class="sd">                  DEPENDING ON THE DIMENSIONS AND NUMBER OF UNITS.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structures : Structure or int</span>
+<span class="sd">            The ``Structure`` with which to fill the ``Universe``</span>
+<span class="sd">        force_field : str</span>
+<span class="sd">            Applies a ``ForceField`` to the ``Universe``. The available</span>
+<span class="sd">            ``ForceField`` are:</span>
+<span class="sd">            DYNAMIC_FORCE_FIELD_LIST</span>
+<span class="sd">        num_density: float</span>
+<span class="sd">            Non-negative `float` specifying the number density of the</span>
+<span class="sd">            ``Structure``, in units of ``Structure / Ang ^ -3``</span>
+<span class="sd">        num_struc_units: int</span>
+<span class="sd">            Non-negative `int` specifying the number of passed</span>
+<span class="sd">            ``Structure`` objects that the universe should be filled</span>
+<span class="sd">            with, regardless of ``Universe.dimensions``.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If both ``num_density`` and ``num_struc_units`` are passed</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If neither ``num_density`` or ``num_struc_units`` are passed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">num_density</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_struc_units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_density</span> <span class="o">=</span> <span class="n">num_struc_units</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">num_density</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_struc_units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Cannot pass both num_density and num_struc_units to&#39;</span>
+                   <span class="s1">&#39; fill the universe with.&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: {num_density: </span><span class="si">%s</span><span class="s1">, num_struc_units: </span><span class="si">%s</span><span class="s1">}&#39;</span>
+                         <span class="s1">&#39; </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                         <span class="n">num_density</span><span class="p">,</span>
+                         <span class="n">num_struc_units</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">num_density</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_struc_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;The fill method takes either num_density or&#39;</span>
+                   <span class="s1">&#39; num_struc_units as a parameter.&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">n_units_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_density</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">))</span>
+        <span class="n">n_units_xyz</span> <span class="o">=</span> <span class="n">n_units_xyz</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># Determine the upper and lower bounds for structural unit with its</span>
+        <span class="c1"># position (CoM) and its bounding box</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">structures</span><span class="o">.</span><span class="n">bounding_box</span>
+        <span class="n">mn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">min</span> <span class="o">-</span> <span class="n">structures</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+        <span class="n">mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">-</span> <span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">min</span> <span class="o">-</span> <span class="n">structures</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">mi</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">n_units</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">mi</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">n_units</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mn</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">n_units_xyz</span><span class="p">)]</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">positions</span><span class="p">))</span>
+
+        <span class="c1"># Add the first structural unit and force field (if specified) before</span>
+        <span class="c1"># copying the structural unit to fill the universe</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">force_field</span><span class="p">)</span>
+        <span class="n">structures</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+            <span class="n">new_unit</span> <span class="o">=</span> <span class="n">structures</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">new_unit</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Universe.add_force_field">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Universe.add_force_field">[docs]</a>
+    <span class="nd">@mod_docstring</span><span class="p">(</span><span class="n">_FF_DOCSTRING</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">add_force_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="o">*</span><span class="n">interactions</span><span class="p">:</span> <span class="s1">&#39;Interaction&#39;</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a force field to the specified ``interactions``.  If no</span>
+<span class="sd">        ``interactions`` are passed, the force field is applied to all</span>
+<span class="sd">        interactions in the ``Universe``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        force_field : str</span>
+<span class="sd">            The ``ForceField`` to parameterize ``interactions`` (if provided),</span>
+<span class="sd">            or all the ``interactions`` in the ``Universe``. The available</span>
+<span class="sd">            ``ForceField`` are:</span>
+<span class="sd">            DYNAMIC_FORCE_FIELD_LIST</span>
+<span class="sd">        *interactions</span>
+<span class="sd">            ``Interaction`` objects to parameterize with the ``ForceField``</span>
+<span class="sd">        **settings</span>
+<span class="sd">            ``add_dispersions`` (`bool` or `list` of ``Atoms``)</span>
+<span class="sd">                If `True`, a ``Dispersion`` interaction will be added to all</span>
+<span class="sd">                atoms in the ``Universe``. If a list of ``Atom`` objects is</span>
+<span class="sd">                provided, the ``Dispersion`` will be added to these instead. Any</span>
+<span class="sd">                added ``Dispersion`` interactions (and any previously defined)</span>
+<span class="sd">                will then be parametrized by the ``ForceField``. The</span>
+<span class="sd">                ``Dispersion`` interactions added will only be like-like. By</span>
+<span class="sd">                default, no ``Dispersion`` interactions are added.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_force_fields</span> <span class="o">=</span> <span class="n">ForceFieldFactory</span><span class="o">.</span><span class="n">create_force_field</span><span class="p">(</span><span class="n">force_field</span><span class="p">)</span>
+        <span class="n">add_dispersions</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;add_dispersions&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">add_dispersions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_dispersions</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">atoms</span> <span class="o">=</span> <span class="n">add_dispersions</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_dispersions</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;add_dispersions parameter of add_force_field method&#39;</span>
+                       <span class="s1">&#39;must be a list of Atoms or a bool.&#39;</span><span class="p">)</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: {add_dispersions: </span><span class="si">%s</span><span class="s1">}&#39;</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                             <span class="n">add_dispersions</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="c1"># Get unique atom types and add dispersions for each of these</span>
+            <span class="n">atom_types</span> <span class="o">=</span> <span class="p">{</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_type</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">}</span>
+            <span class="n">dispersions</span> <span class="o">=</span> <span class="p">[</span><span class="n">Dispersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">atom_type</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom_type</span> <span class="ow">in</span> <span class="n">atom_types</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">interactions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">force_fields</span><span class="o">.</span><span class="n">parameterize_interactions</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interactions</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">add_dispersions</span><span class="p">:</span>
+                <span class="n">interactions</span> <span class="o">=</span> <span class="n">interactions</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dispersions</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">force_fields</span><span class="o">.</span><span class="n">parameterize_interactions</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">interactions</span><span class="p">))</span>
+
+        <span class="c1"># FileForceFields also contain mass definitions for atoms, so set these</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">force_fields</span><span class="o">.</span><span class="n">set_atom_mass</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Universe.add_bonded_interaction_pairs">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Universe.add_bonded_interaction_pairs">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_bonded_interaction_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                     <span class="o">*</span><span class="n">bonded_interaction_pairs</span><span class="p">:</span> <span class="s1">&#39;tuple[Interaction, Atom]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds one or more interaction pairs to the ``Universe``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        *bonded_interaction_pairs</span>
+<span class="sd">            one or more (``interaction``, ``atoms``) pairs, where ``atoms`` is a</span>
+<span class="sd">            `tuple` of all atoms for that specific bonded ``interaction``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bonded_interaction_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bonded_interaction_pairs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Universe.add_nonbonded_interaction">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Universe.add_nonbonded_interaction">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_nonbonded_interaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                  <span class="o">*</span><span class="n">nonbonded_interactions</span><span class="p">:</span> <span class="s1">&#39;tuple[Interaction, Atom]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># ignore line too long linting as it is necessary for URL formatting</span>
+        <span class="c1"># pylint: disable=line-too-long</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds one or more nonbonded interactions to the ``Universe``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        *nonbonded_interactions</span>
+<span class="sd">            Nonbonded interactions to be added to the ``Universe``.</span>
+<span class="sd">            Can take any number of non-bonded interactions:</span>
+<span class="sd">                ``Dispersion()``:</span>
+<span class="sd">                    either Lennard-Jones or Buckingham dispersion</span>
+<span class="sd">                ``Coulombic()``:</span>
+<span class="sd">                    normal or modified Coulomb interaction</span>
+<span class="sd">            with appropriate parameters for the interaction.</span>
+<span class="sd">            See http://mdmcproject.org/how-to/use-MDMC/notebooks/defining-molecule-interactions.ipynb</span>
+<span class="sd">            for more details on non-bonded interactions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Since self._nonbonded_interactions is a set the update method only adds new interactions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nonbonded_interactions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nonbonded_interactions</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nbis_by_atom_type_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[tuple[int], list[Interaction]]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a `dict` of all nonbonded interactions possessed by all</span>
+<span class="sd">        combinations of ``atom_type`` pairs in the ``Universe``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            A `dict` of ``{pair: interactions}`` pairs, where:</span>
+<span class="sd">                - ``pair`` is a `tuple` for a pair of ``atom_types`` in the</span>
+<span class="sd">                  ``Universe``</span>
+<span class="sd">                - ``interactions`` is a list of nonbonded interactions that</span>
+<span class="sd">                  exist for this ``pair`` of ``atom_types``</span>
+
+<span class="sd">            Any ``Dispersions`` in ``interactions`` are ones that exist</span>
+<span class="sd">            explicity for this ``pair``, whereas any ``Coulombics`` in</span>
+<span class="sd">            ``interactions`` are ones that exist for either of the</span>
+<span class="sd">            ``atom_types`` in ``pair``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">pairs_interactions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Find pairwise combinations of N atom_types in the universe</span>
+        <span class="c1"># Where each pair (i, j) has 0 &lt; i, j &lt;= N   and    i &lt;= j</span>
+        <span class="n">atom_type_pairs</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="p">,</span>
+                                                      <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                           <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">j</span><span class="p">)</span>
+        <span class="c1"># Create dict of interactions for each atom type pair</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">atom_type_pairs</span><span class="p">:</span>
+            <span class="n">pairs_interactions</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">inter</span> <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactions</span>
+                                        <span class="k">if</span> <span class="p">((</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">)</span>
+                                             <span class="ow">and</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">atom_types</span><span class="p">))</span> <span class="ow">or</span>
+                                            <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="n">Coulombic</span><span class="p">)</span>
+                                             <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">elem</span> <span class="ow">in</span> <span class="n">inter</span><span class="o">.</span><span class="n">atom_types</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">))]</span>
+
+        <span class="k">return</span> <span class="n">pairs_interactions</span>
+
+    <span class="k">def</span> <span class="nf">_check_out_of_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks whether a ``position`` lies outside the bounds of the</span>
+<span class="sd">        ``Universe``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        position : list, array</span>
+<span class="sd">            The position to be checked against bounds of the ``Universe``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            `True` if the ``position`` passed falls outside the ``Universe``,</span>
+<span class="sd">            `False` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">position</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">position</span> <span class="o">&lt;</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<div class="viewcode-block" id="Universe.solvate">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Universe.solvate">[docs]</a>
+    <span class="nd">@mod_docstring</span><span class="p">({</span><span class="s1">&#39;DYNAMIC_SOLVENT_LIST&#39;</span><span class="p">:</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_solvent_names</span><span class="p">())})</span>
+    <span class="k">def</span> <span class="nf">solvate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">solvent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;SPCE&#39;</span><span class="p">,</span>
+                <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fills the ``Universe`` with solvent molecules according to pre-defined</span>
+<span class="sd">        coordinates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        density : float</span>
+<span class="sd">            The desired density of the ``Solvent`` that solvates the</span>
+<span class="sd">            ``Universe``, in units of ``amu Ang ^ -3``</span>
+<span class="sd">        tolerance : float, optional</span>
+<span class="sd">            The +/- percentage tolerance of the density to be achieved.</span>
+<span class="sd">            The default is 1 %. Tolerances of less than 1 % are at risk</span>
+<span class="sd">            of not converging.</span>
+<span class="sd">        solvent : str, optional</span>
+<span class="sd">            A `str` specifying an inbuilt ``Solvent`` from the following:</span>
+<span class="sd">            DYNAMIC_SOLVENT_LIST.</span>
+<span class="sd">            The default is &#39;SPCE&#39;.</span>
+<span class="sd">        max_iterations: int, optional</span>
+<span class="sd">            The maximum number of times to try to solvate the universe to</span>
+<span class="sd">            within the required density before stopping. Defaults to 100.</span>
+<span class="sd">        **settings</span>
+<span class="sd">            ``constraint_algorithm`` (`ConstraintAlgorithm`)</span>
+<span class="sd">                A ``ConstraintAlgorithm`` which is applied to the ``Universe``.</span>
+<span class="sd">                If an inbuilt ``Solvent`` is selected (e.g. &#39;SPCE&#39;) and</span>
+<span class="sd">                ``constraint_algorithm`` is not passed, the</span>
+<span class="sd">                ``ConstraintAlgorithm`` will default to ``Shake(1e-4, 100)``.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the ``Universe`` has already been solvated with a different</span>
+<span class="sd">            density.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">solvent_config</span> <span class="o">=</span> <span class="n">get_solvent_config</span><span class="p">(</span><span class="n">solvent</span><span class="p">)</span>
+
+        <span class="c1"># Calculate useful properties from the original box</span>
+        <span class="n">solvent_mass</span> <span class="o">=</span> <span class="n">solvent_config</span><span class="o">.</span><span class="n">mass</span>
+        <span class="n">orig_box_dimensions</span> <span class="o">=</span> <span class="n">solvent_config</span><span class="o">.</span><span class="n">box_dimensions</span>
+        <span class="c1"># density is adjusted to account for density of solvent already in box</span>
+        <span class="n">density</span> <span class="o">=</span> <span class="p">(</span><span class="n">density</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">solvent_density</span><span class="p">)</span>
+        <span class="c1"># If this is already within the specified tolerance then return, as</span>
+        <span class="c1"># calling solvate is redundant. Otherwise, raise an error, as solvate is</span>
+        <span class="c1"># not designed to be applied multiple times to change the</span>
+        <span class="c1"># solvent_density of a Universe.</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">density</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">tolerance</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solvent_density</span> <span class="o">!=</span> <span class="mf">0.</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;The universe has already been solvated. The density of a&#39;</span>
+                   <span class="s1">&#39; previously added solvent cannot be changed.&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: {solvent_density: </span><span class="si">%s</span><span class="s1">, density: </span><span class="si">%s</span><span class="s1">}. </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">solvent_density</span><span class="p">,</span>
+                         <span class="n">density</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="c1"># Get the prelim scaling of the orig box required to achieve density</span>
+        <span class="n">dim_scaling</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">solvent_config</span><span class="o">.</span><span class="n">density</span> <span class="o">/</span> <span class="n">density</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)]</span>
+                               <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">scale_factor</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Offset the atom_types of the solvent_config by the maximum atom_type</span>
+        <span class="c1"># in the Universe.</span>
+        <span class="n">max_atom_type</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">solvent_config</span><span class="o">.</span><span class="n">offset_atom_types</span><span class="p">(</span><span class="n">max_atom_type</span><span class="p">)</span>
+        <span class="n">difference</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">difference</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">tolerance</span><span class="p">):</span>
+
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">dim_scaling</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">scale_factor</span>
+            <span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">orig_box_dimensions</span> <span class="o">*</span> <span class="n">dim_scaling</span>
+            <span class="n">num_tiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">/</span> <span class="n">box_dimensions</span><span class="p">)</span>
+            <span class="c1"># Binary list for axes along which whole num of tiles are used.</span>
+            <span class="n">wrap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="nb">dir</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span>
+                             <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">num_tiles</span><span class="p">])</span>
+            <span class="n">num_tiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_tiles</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="n">mols</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">trans_vect</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_tiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                      <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_tiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                      <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_tiles</span><span class="p">[</span><span class="mi">2</span><span class="p">])):</span>
+
+                <span class="n">solvent_config</span><span class="o">.</span><span class="n">reset_molecules</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">mol_key</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">solvent_config</span><span class="o">.</span><span class="n">molecules</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+
+                    <span class="n">atom_positions</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                    <span class="n">CoM</span> <span class="o">=</span> <span class="n">solvent_config</span><span class="o">.</span><span class="n">molec_from_dict</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span><span class="o">.</span><span class="n">position</span>
+
+                    <span class="n">remove</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">atom_positions</span><span class="p">:</span>
+
+                        <span class="n">pos</span> <span class="o">+=</span> <span class="p">(</span><span class="n">dim_scaling</span>
+                                <span class="o">*</span> <span class="p">(</span><span class="n">CoM</span> <span class="o">+</span> <span class="n">trans_vect</span> <span class="o">*</span> <span class="n">orig_box_dimensions</span><span class="p">)</span>
+                                <span class="o">-</span> <span class="n">CoM</span><span class="p">)</span>
+                        <span class="c1"># Create binary list indicating the axes along</span>
+                        <span class="c1"># which the atom is out of bounds.</span>
+                        <span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">j</span> <span class="k">else</span> <span class="mi">0</span>
+                                         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)])</span>
+                        <span class="c1"># Translates position if wrapping required.</span>
+                        <span class="n">pos</span> <span class="o">-=</span> <span class="n">wrap</span> <span class="o">*</span> <span class="n">axes</span> <span class="o">*</span> <span class="n">num_tiles</span> <span class="o">*</span> <span class="n">box_dimensions</span>
+                        <span class="n">remove</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_out_of_bounds</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+                        <span class="c1"># Check for overlap with solute molecules.</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">remove</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">solute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule_list</span><span class="p">:</span>
+                                <span class="n">cond1</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">pos</span> <span class="o">&gt;</span> <span class="n">solute</span><span class="o">.</span><span class="n">bounding_box</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+                                <span class="n">cond2</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">pos</span> <span class="o">&lt;</span> <span class="n">solute</span><span class="o">.</span><span class="n">bounding_box</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">cond1</span> <span class="ow">and</span> <span class="n">cond2</span><span class="p">:</span>
+                                    <span class="n">remove</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">remove</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">solvent_config</span><span class="o">.</span><span class="n">molecules</span><span class="p">[</span><span class="n">mol_key</span><span class="p">]</span>
+                <span class="n">mols</span> <span class="o">+=</span> <span class="n">solvent_config</span><span class="o">.</span><span class="n">molecules_from_coords</span><span class="p">(</span>
+                    <span class="n">solvent_config</span><span class="o">.</span><span class="n">molecules</span><span class="p">,</span>
+                    <span class="n">universe</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+            <span class="c1"># Check the density</span>
+            <span class="n">actual</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">)</span> <span class="o">*</span> <span class="n">solvent_mass</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span>
+            <span class="n">difference</span> <span class="o">=</span> <span class="p">(</span><span class="n">actual</span> <span class="o">-</span> <span class="n">density</span><span class="p">)</span> <span class="o">/</span> <span class="n">density</span>
+            <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">difference</span> <span class="o">/</span> <span class="n">counter</span>
+            <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="n">max_iterations</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;100 Iterations have been tried but the universe is not solvated&#39;</span>
+                   <span class="s1">&#39; to within tolerance. Try increasing the tolerance or Universe size&#39;</span><span class="p">)</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1"># Once the correct density is achieved, add molecules to universe</span>
+        <span class="c1"># and get all bonded interactions</span>
+        <span class="c1"># Also determine the total density of the solvent</span>
+        <span class="n">bonded_interactions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">mols</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+            <span class="n">bonded_interactions</span> <span class="o">+=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">interactions</span>
+
+        <span class="c1"># Get nonbonded interactions from atom types</span>
+        <span class="c1"># Add interaction if any of its atom types are in atom_types</span>
+        <span class="n">nonbonded_interactions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">interaction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonbonded_interactions</span><span class="p">:</span>
+            <span class="n">inter_atom_types</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interaction</span><span class="o">.</span><span class="n">atom_types</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">inter_atom_types</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span>
+                    <span class="n">solvent_config</span><span class="o">.</span><span class="n">atom_types</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">nonbonded_interactions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interaction</span><span class="p">)</span>
+
+        <span class="c1"># Apply the force field of the solvent to the Universe</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="n">solvent</span><span class="p">,</span> <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">bonded_interactions</span>
+                                               <span class="o">+</span> <span class="n">nonbonded_interactions</span><span class="p">))</span>
+            <span class="c1"># If BondedInteractions are constrained, apply a constrain algorithm</span>
+            <span class="k">if</span> <span class="n">solvent_config</span><span class="o">.</span><span class="n">constrained</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraint_algorithm</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;constraint_algorithm&#39;</span><span class="p">,</span>
+                                                         <span class="n">Shake</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Force field created by solvent </span><span class="si">{</span><span class="n">solvent</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solvent_density</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">)</span> <span class="o">*</span> <span class="n">solvent_mass</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="KSpaceSolver">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.KSpaceSolver">[docs]</a>
+<span class="k">class</span> <span class="nc">KSpaceSolver</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class describing the k-space solver that is applied to electrostatic and/or</span>
+<span class="sd">    dispersion interactions</span>
+
+<span class="sd">    Different ``MDEngine`` require different parameters to be specified for a</span>
+<span class="sd">    k-space solver to be used. These parameters are specified in settings.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    **settings</span>
+<span class="sd">        ``accuracy`` (`float`)</span>
+<span class="sd">            The relative RMS error in per-atom forces</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    accuracy : float</span>
+<span class="sd">        The relative RMS error in per-atom forces</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the name of the class</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The name of the class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span></div>
+
+
+
+<div class="viewcode-block" id="Ewald">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Ewald">[docs]</a>
+<span class="k">class</span> <span class="nc">Ewald</span><span class="p">(</span><span class="n">KSpaceSolver</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Holds the parameters that are required for the Ewald solver to be applied to</span>
+<span class="sd">    both/either the electrostatic and/or dispersion interactions</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    **settings</span>
+<span class="sd">        ``accuracy`` (`float`)</span>
+<span class="sd">            The relative RMS error in per-atom forces</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="PPPM">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.PPPM">[docs]</a>
+<span class="k">class</span> <span class="nc">PPPM</span><span class="p">(</span><span class="n">KSpaceSolver</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Holds the parameters that are required for the PPPM solver to be applied to</span>
+<span class="sd">    both/either the electrostatic and/or dispersion interactions</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    **settings</span>
+<span class="sd">        ``accuracy`` (`float`)</span>
+<span class="sd">            The relative RMS error in per-atom forces</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Two KSpaceSolvers are equal if their __dict__ are equal</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ConstraintAlgorithm">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.ConstraintAlgorithm">[docs]</a>
+<span class="k">class</span> <span class="nc">ConstraintAlgorithm</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class describing the algorithm and parameters which are applied to</span>
+<span class="sd">    constrain ``BondedInteraction`` objects</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    accuracy : float</span>
+<span class="sd">        The accuracy (tolerance) of the applied constraints</span>
+<span class="sd">    max_iterations : int</span>
+<span class="sd">        The maximum number of iterations that can be used when calculating the</span>
+<span class="sd">        additional force that is required to constrain the atoms to satisfy the</span>
+<span class="sd">        constraints on the bonded interactions</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    accuracy : float</span>
+<span class="sd">        The accuracy (tolerance) of the applied constraints</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accuracy</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_iterations</span> <span class="o">=</span> <span class="n">max_iterations</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the name of the class</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The name of the class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the maximum number of iterations that can be used when</span>
+<span class="sd">        calculating the additional force that is required to constrain the atoms</span>
+<span class="sd">        to satisfy the constraints on the bonded interactions</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The maximum number of iterations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_iterations</span>
+
+    <span class="nd">@max_iterations</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_iterations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Shake">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Shake">[docs]</a>
+<span class="k">class</span> <span class="nc">Shake</span><span class="p">(</span><span class="n">ConstraintAlgorithm</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Holds the parameters which are required for the SHAKE algorithm to be</span>
+<span class="sd">    applied to the constrained interactions</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    accuracy : float</span>
+<span class="sd">        The accuracy (tolerance) of the applied constraints</span>
+<span class="sd">    max_iterations : int</span>
+<span class="sd">        The maximum number of iterations that can be used when calculating the</span>
+<span class="sd">        additional force that is required to constrain the atoms to satisfy the</span>
+<span class="sd">        constraints on the bonded interactions</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Rattle">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Rattle">[docs]</a>
+<span class="k">class</span> <span class="nc">Rattle</span><span class="p">(</span><span class="n">ConstraintAlgorithm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Holds the parameters which are required for the RATTLE algorithm to be</span>
+<span class="sd">    applied to the constrained interactions</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    accuracy : float</span>
+<span class="sd">        The accuracy (tolerance) of the applied constraints</span>
+<span class="sd">    max_iterations : int</span>
+<span class="sd">        The maximum number of iterations that can be used when calculating the</span>
+<span class="sd">        additional force that is required to constrain the atoms to satisfy the</span>
+<span class="sd">        constraints on the bonded interactions</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Simulation">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Simulation">[docs]</a>
+<span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;universe&#39;</span><span class="p">,</span> <span class="s1">&#39;engine&#39;</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Simulation</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets up the molecular dynamics engine and parameters for how it should run</span>
+
+<span class="sd">    An ensemble is defined by whether a thermostat or barostat are present</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    universe : Universe</span>
+<span class="sd">        The ``Universe`` on which the simulation is performed.</span>
+<span class="sd">    traj_step : int</span>
+<span class="sd">        How many steps the simulation should take between dumping each</span>
+<span class="sd">        ``CompactTrajectory`` frame. Along with ``time_step`` determines</span>
+<span class="sd">        the time separation of calculated variables such as energy.</span>
+<span class="sd">    time_step : float, optional</span>
+<span class="sd">        Simulation timestep in ``fs``. Default is 1.</span>
+<span class="sd">    engine : str, optional</span>
+<span class="sd">        The ``MDEngine`` used for the simulation. Default is ``&#39;lammps&#39;``.</span>
+<span class="sd">    **settings</span>
+<span class="sd">        ``temperature`` (`float`)</span>
+<span class="sd">            Simulation temperature in ``K``. Note that velocities of atoms in</span>
+<span class="sd">            the MD engine are set based on the ``temperature``. If all atoms in</span>
+<span class="sd">            the ``universe`` have 0 velocity, then velocities for the MD engine</span>
+<span class="sd">            will be randomly chosen from a uniform distribution and then scaled</span>
+<span class="sd">            to give the correct temperature. If one or more velocities are set,</span>
+<span class="sd">            then these will be scaled to give the correct temperature. In</span>
+<span class="sd">            either case, only the velocities on the ``engine``, not the</span>
+<span class="sd">            ``universe``, are affected.</span>
+<span class="sd">        ``integrator`` (`str`)</span>
+<span class="sd">            Simulation time integrator.</span>
+<span class="sd">        ``lj_options`` (`dict`)</span>
+<span class="sd">            ``option:value`` pairs for Lennard-Jones interactions.</span>
+<span class="sd">        ``es_options`` (`dict`)</span>
+<span class="sd">            ``option:value`` pairs for electrostatic interactions.</span>
+<span class="sd">        ``thermostat`` (`str`)</span>
+<span class="sd">            The name of the thermostat e.g. Nose-Hoover.</span>
+<span class="sd">        ``barostat`` (`str`)</span>
+<span class="sd">            The name of the barostat e.g. Nose-Hoover.</span>
+<span class="sd">        ``pressure`` (`float`)</span>
+<span class="sd">            Simulation pressure in ``Pa``. This is required if a barostat is</span>
+<span class="sd">            passed.</span>
+<span class="sd">        ``verbose`` (`str`)</span>
+<span class="sd">            If the output of the class instantiation should be reported, default to True.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    universe : Universe</span>
+<span class="sd">        The ``Universe`` on which the simulation is performed.</span>
+<span class="sd">    traj_step : int</span>
+<span class="sd">        How many steps the simulation should take between dumping each</span>
+<span class="sd">        ``CompactTrajectory`` frame. Along with ``time_step`` determines</span>
+<span class="sd">        the time separation of calculated variables such as energy.</span>
+<span class="sd">    engine : MDEngine, optional</span>
+<span class="sd">        A subclass of ``MDEngine`` which provides the interface to the MD</span>
+<span class="sd">        library. Default is ``&#39;lammps&#39;``.</span>
+<span class="sd">    settings : dict</span>
+<span class="sd">        The settings passed to the ``Simulation``.  See the Parameters section</span>
+<span class="sd">        for details.</span>
+<span class="sd">    time_step</span>
+<span class="sd">    trajectory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: Potentially separate out universe and simulation setup</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">universe</span><span class="p">:</span> <span class="n">Universe</span><span class="p">,</span> <span class="n">traj_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lammps&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">universe</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traj_step</span> <span class="o">=</span> <span class="n">traj_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="n">time_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="n">MDEngineFacadeFactory</span><span class="o">.</span><span class="n">create_facade</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">parent_simulation</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Simulation created with </span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s1"> engine&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+            <span class="n">settings_strings</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
+                                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; and settings:</span><span class="se">\n</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">settings_strings</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_msg</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the simulation time step in ``fs``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `float`</span>
+<span class="sd">            Simulation time step in ``fs``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span>
+
+    <span class="nd">@time_step</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TIME</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the number of simulation steps between saving the</span>
+<span class="sd">        ``CompactTrajectory``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `int`</span>
+<span class="sd">            Number of simulation steps that elapse between the</span>
+<span class="sd">            ``CompactTrajectory`` being stored</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traj_step</span>
+
+    <span class="nd">@traj_step</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">traj_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_traj_step</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a universe within the ``MDEngine`` with the equivalent</span>
+<span class="sd">        configuration and topology to ``self.universe`` and defines the</span>
+<span class="sd">        simulation conditions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">setup_universe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">setup_simulation</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Simulation.minimize">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Simulation.minimize">[docs]</a>
+    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">minimize_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs an MD run intertwined with periodic structure relaxation.</span>
+<span class="sd">        This way after a local minimum is found, the system is taken</span>
+<span class="sd">        out of the minimum to explore a larger volume of the parameter</span>
+<span class="sd">        space.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_steps : int</span>
+<span class="sd">            Total number of the MD run steps</span>
+<span class="sd">        minimize_every: int, optional</span>
+<span class="sd">            Number of MD steps between two consecutive minimizations</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            Whether to print statements when the minimization has been started and completed</span>
+<span class="sd">            (including the number of minimization steps and time taken). Default is `False`.</span>
+<span class="sd">        output_log: str, optional</span>
+<span class="sd">            Log file for the MD engine to write to. Default is `None`.</span>
+<span class="sd">        work_dir: str, optional</span>
+<span class="sd">            Working directory for the MD engine to write to. Default is `None`.</span>
+<span class="sd">        **settings</span>
+<span class="sd">            ``etol`` (`float`)</span>
+<span class="sd">                If the energy change between iterations is less than ``etol``,</span>
+<span class="sd">                minimization is stopped. Default depends on engine used.</span>
+<span class="sd">            ``ftol`` (`float`)</span>
+<span class="sd">                If the magnitude of the global force is less than ``ftol``,</span>
+<span class="sd">                minimization is stopped. Default depends on engine used.</span>
+<span class="sd">            ``maxiter`` (`int`)</span>
+<span class="sd">                Maximum number of iterations of a single structure</span>
+<span class="sd">                relaxation procedure. Default depends on engine used.</span>
+<span class="sd">            ``maxeval`` (`int`)</span>
+<span class="sd">                Maximum number of force evaluations to perform. Default depends</span>
+<span class="sd">                on engine used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="c1"># to match legacy use of verbose on this function (where verbose was bool) we use bool</span>
+        <span class="c1"># and convert to int, corresponding to verbose levels 0 or 1; there is only one verbose</span>
+        <span class="c1"># step in this function so verbose levels 2 or 3 would not provide extra information</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">verbose</span><span class="p">))</span>
+
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running minimization every </span><span class="si">{</span><span class="n">minimize_every</span><span class="si">}</span><span class="s2"> steps &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;in an MD run with </span><span class="si">{</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">minimize_every</span><span class="p">,</span> <span class="n">output_log</span><span class="o">=</span><span class="n">output_log</span><span class="p">,</span> <span class="n">work_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span>
+                             <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="s2">&quot;Minimization&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.run">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Simulation.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">equilibration</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs the MD simulation for the specified number of steps. Trajectories</span>
+<span class="sd">        for the simulation are only saved when ``equilibration`` is `False`.</span>
+<span class="sd">        Additionally running equilibration for an NVE system (neither barostat</span>
+<span class="sd">        nor thermostat set) will temporarily apply a Berendsen thermostat (it</span>
+<span class="sd">        is removed from the simulation after the run is completed).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_steps : int</span>
+<span class="sd">            Number of simulation steps to run</span>
+<span class="sd">        equilibration : bool, optional</span>
+<span class="sd">            If the run is for equilibration (`True`) or production (`False`).</span>
+<span class="sd">            Default is `False`.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            Whether to print statements upon starting and completing the run.</span>
+<span class="sd">            Default is `False`.</span>
+<span class="sd">        output_log: str, optional</span>
+<span class="sd">            Log file for the MD engine to write to. Default is `None`.</span>
+<span class="sd">        work_dir: str, optional</span>
+<span class="sd">            Working directory for the MD engine to write to. Default is `None`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">equilibration</span><span class="p">:</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="s1">&#39;equilibration&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="s1">&#39;simulation&#39;</span>
+
+        <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="c1"># to match legacy use of verbose on this function (where verbose was bool) we use bool</span>
+        <span class="c1"># and convert to int, corresponding to verbose levels 0 or 1; there is only one verbose</span>
+        <span class="c1"># step in this function so verbose levels 2 or 3 would not provide extra information</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">verbose</span><span class="p">))</span>
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="n">equilibration</span><span class="p">,</span> <span class="n">output_log</span><span class="o">=</span><span class="n">output_log</span><span class="p">,</span>
+                        <span class="n">work_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+
+        <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">process</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># pylint: disable=dangerous-default-value</span>
+    <span class="c1"># this is flagged up by variables having a list as default value</span>
+    <span class="c1"># but we don&#39;t mutate the list anywhere in the function, so</span>
+    <span class="c1"># this is safe and has better readability</span>
+<div class="viewcode-block" id="Simulation.auto_equilibrate">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Simulation.auto_equilibrate">[docs]</a>
+    <span class="k">def</span> <span class="nf">auto_equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                         <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="s1">&#39;pe&#39;</span><span class="p">],</span>
+                         <span class="n">eq_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                         <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                         <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Equilibrate until the specified list of variables have stabilised.</span>
+<span class="sd">        Uses the KPSS stationarity test to determine</span>
+<span class="sd">        whether the variables are stationary in a given window.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        variables: list[str], default [&#39;temp&#39;, &#39;pe&#39;]</span>
+<span class="sd">            The MD engine variables we use to monitor stability.</span>
+<span class="sd">        eq_step: int, default 10</span>
+<span class="sd">            The number of equilibration steps between each stability check.</span>
+<span class="sd">        window_size: int, default 100</span>
+<span class="sd">            The size of the rolling window of stability checks. The simulation</span>
+<span class="sd">            is considered stable if it has been stationary for eq_step*window_size</span>
+<span class="sd">            equilibration steps.</span>
+<span class="sd">        tolerance: float, 0.01</span>
+<span class="sd">            The p-value used for the KPSS test.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of equilibration steps performed.</span>
+<span class="sd">        vals_dict</span>
+<span class="sd">            The value of each variable per step, for graphing if desired.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vals_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">}</span>
+
+        <span class="k">def</span> <span class="nf">auto_step</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Performs one step of an equilibration and records variable values.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">eq_step</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">vals_dict</span><span class="p">:</span>
+                <span class="n">vals_dict</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">window_is_stationary</span><span class="p">(</span><span class="n">var</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Checks stability for a variable by running the KPSS test on a window.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">variable_values</span> <span class="o">=</span> <span class="n">vals_dict</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">variable_values</span><span class="p">[</span><span class="o">-</span><span class="n">window_size</span><span class="p">:]</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">kpss</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+            <span class="c1"># results[1] is the p-value from the test</span>
+            <span class="c1"># we base our tolerance on the p-value, where the altenrative hypothesis</span>
+            <span class="c1"># for KPSS is &quot;NOT stationary&quot; - statsmodels also never gives a p above</span>
+            <span class="c1"># 0.1 as it doesn&#39;t hold critical values above that point. so for 0.05</span>
+            <span class="c1"># tolerance, we are asking that p be greater than 0.95</span>
+            <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.1</span> <span class="o">-</span> <span class="n">tolerance</span>
+
+        <span class="c1"># we perform an initial run of window_size*eq_step steps to create a window.</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">window_size</span><span class="p">):</span>
+            <span class="n">auto_step</span><span class="p">()</span>
+
+        <span class="c1"># we consider the simulation stable if the rolling window</span>
+        <span class="c1"># is stationary for all variables (by KPSS)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">window_is_stationary</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">vals_dict</span><span class="p">):</span>
+            <span class="n">auto_step</span><span class="p">()</span>
+
+        <span class="n">total_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">vals_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">eq_step</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Auto-equilibration has detected stability &quot;</span>
+             <span class="sa">f</span><span class="s2">&quot;after </span><span class="si">{</span><span class="n">total_steps</span><span class="si">}</span><span class="s2"> equilibration steps.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total_steps</span><span class="p">,</span> <span class="n">vals_dict</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s1">&#39;CompactTrajectory&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The ``CompactTrajectory`` produced by the most recent production run of the</span>
+<span class="sd">        ``Simulation``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        CompactTrajectory</span>
+<span class="sd">            Most recent production run ``CompactTrajectory``, or `None` if no</span>
+<span class="sd">            production run has been performed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">convert_trajectory</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

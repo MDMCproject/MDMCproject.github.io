@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.MD.interaction_functions &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.MD.interaction_functions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.MD.interaction_functions</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A module for storing atomic interaction functions</span>
+
+<span class="sd">Contains class InteractionFunction from which all interaction function classes</span>
+<span class="sd">must derive.  All functions describing atomic interactions must be added to this</span>
+<span class="sd">module in order to be called by a universe.  If needed, the interaction function</span>
+<span class="sd">classes can be extended to contain actual function definitions.</span>
+
+<span class="sd">Contains class Parameter, which defines the name and value of each</span>
+<span class="sd">parameter which belongs to an InteractionFunction, and whether the parameter is</span>
+<span class="sd">fixed, has constraints or is tied.</span>
+
+<span class="sd">Contains filters for filtering list of parameters based on a predicate.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
+<span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Interaction</span>
+
+
+<div class="viewcode-block" id="InteractionFunction">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.interaction_functions.InteractionFunction">[docs]</a>
+<span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;parameters&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">InteractionFunction</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for interaction functions, which can be user supplied</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ---------</span>
+<span class="sd">    val_dict : dict</span>
+<span class="sd">        ``name:value`` pairs. Currently this must be ordered alphabetically.</span>
+<span class="sd">        ``value`` must either be an object with a ``value`` and a ``unit`` (e.g.</span>
+<span class="sd">        a ``UnitFloat`` object), or a (`float`, `str`) `tuple`, where `float` is</span>
+<span class="sd">        the value and `str` is the unit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+
+        <span class="c1"># locals which are excluded from Parameter creation</span>
+        <span class="n">excluded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="s1">&#39;__class__&#39;</span><span class="p">]</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">val_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded</span><span class="p">:</span>
+                <span class="n">parameter</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+                <span class="c1"># Create an attribute with the same name as the Parameter</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">parameter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="n">parameters</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span>
+                               <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">parameters</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="nb">all</span><span class="p">([(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)),</span>
+                    <span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span> <span class="o">==</span>
+                     <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()]),</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters_values</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">parameters_values</span><span class="p">)]))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the interaction function&#39;s parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">            A Parameters object containing each ``Parameter``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span>
+
+    <span class="nd">@parameters</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the values for all ``Parameters`` objects</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            A NumPy ``array`` of values for all ``Parameter``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the name of the class of the ``InteractionFunction``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The class name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+<div class="viewcode-block" id="InteractionFunction.set_parameters_interactions">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.interaction_functions.InteractionFunction.set_parameters_interactions">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_parameters_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interaction</span><span class="p">:</span> <span class="s1">&#39;Interaction&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the ``parent`` ``Interaction`` for all ``Parameters`` objects</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        interaction : Interaction</span>
+<span class="sd">            An ``Interaction`` to set as the ``parent`` of all the</span>
+<span class="sd">            ``Parameters``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">parameter</span><span class="p">]</span><span class="o">.</span><span class="n">interactions</span> <span class="o">=</span> <span class="n">interaction</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="inter_func_decorator">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.interaction_functions.inter_func_decorator">[docs]</a>
+<span class="k">def</span> <span class="nf">inter_func_decorator</span><span class="p">(</span><span class="o">*</span><span class="n">parameter_units</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorates a method to add units to all positional and any relevant keyword</span>
+<span class="sd">    arguments</span>
+
+<span class="sd">    Designed for adding units to parameters of ``__init__`` method for</span>
+<span class="sd">    subclasses of ``InteractionFunction``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    *parameter_units : tuple</span>
+<span class="sd">        One or more `tuple` where the first element is a `str` giving the</span>
+<span class="sd">        keyword name of an expected parameter. The second element is a</span>
+<span class="sd">        `str` or ``Unit``, where each `str` (or ``Unit``) is a unit</span>
+<span class="sd">        which is applied to the corresponding value passed to the decorated</span>
+<span class="sd">        method. If one of the values is unitless, pass `None` at the</span>
+<span class="sd">        corresponding index in ``parameter_units``.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following adds units of ``&#39;Ang&#39;`` to parameter ``alpha``, units of</span>
+<span class="sd">    ``&#39;s&#39;`` to the parameter ``beta``, and units of ``&#39;atm&#39;`` to the parameter</span>
+<span class="sd">    ``gamma``:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            @inter_func_decorator((&#39;alpha&#39;, &#39;Ang&#39;), (&#39;beta&#39;, &#39;s&#39;), (&#39;gamma&#39;, &#39;Pa&#39;))</span>
+<span class="sd">            def __init__(self, alpha, beta, gamma):</span>
+<span class="sd">                ...</span>
+
+<span class="sd">    If one of the parameters is unitless, this can be set with `None` (in which</span>
+<span class="sd">    case the returned type will be the same as the original value i.e. a</span>
+<span class="sd">    ``UnitFloat`` or ``UnitNDArray`` will not be created). So to set ``epsilon``</span>
+<span class="sd">    as unitless:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            @inter_func_decorator((&#39;delta&#39;, &#39;arb&#39;), (&#39;epsilon&#39;, None), (&#39;gamma&#39;, &#39;deg&#39;))</span>
+<span class="sd">            def __init__(self, delta, epsilon, gamma):</span>
+<span class="sd">                ...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Ignore pylint warning for decorator inner function docstrings</span>
+    <span class="c1">#pylint: disable=missing-docstring</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">unit_creator</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+            <span class="c1"># If no unit is provided, assume unitless and just return value</span>
+            <span class="k">if</span> <span class="n">unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">value</span>
+            <span class="c1"># try/except to determine whether value is float or array</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">units</span><span class="o">.</span><span class="n">UnitFloat</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">units</span><span class="o">.</span><span class="n">unit_array</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+            <span class="c1"># If the name associated with a unit in parameter_units matches a</span>
+            <span class="c1"># keyword argument (in **settings), then associate that parameter</span>
+            <span class="c1"># with its unit. If not, then the parameter has been passed as a</span>
+            <span class="c1"># positional argument (in *values) and so we associate the next</span>
+            <span class="c1"># entry in *values with that unit (as we can rely on the order of</span>
+            <span class="c1"># the arguments being the same as the order of units in the</span>
+            <span class="c1"># decorator)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">parameter_units</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
+                    <span class="n">settings</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit_creator</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">unit</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">settings</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit_creator</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">unit</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+
+<div class="viewcode-block" id="Buckingham">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.interaction_functions.Buckingham">[docs]</a>
+<span class="k">class</span> <span class="nc">Buckingham</span><span class="p">(</span><span class="n">InteractionFunction</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Buckingham potential (in units of ``kJ mol^-1``) for the interaction of</span>
+<span class="sd">    2 atoms at distance r (in ``Ang``) has the form:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        {\Phi _{12}(r)=A\exp \left(-Br\right)-{\frac {C}{r^{6}}}}</span>
+
+<span class="sd">    The first and second terms represent a repulsion and attraction</span>
+<span class="sd">    respectively, and so all parameters :math:`A`, :math:`B` and :math:`C`</span>
+<span class="sd">    should be positive in order to be physically valid.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : float</span>
+<span class="sd">        The Buckingham parameter A in units of ``kJ mol^-1``</span>
+<span class="sd">    B : float</span>
+<span class="sd">        The Buckingham parameter B in units of ``Ang^-1``</span>
+<span class="sd">    C : float</span>
+<span class="sd">        The Buckingham parameter C in units of ``Ang^6 kJ mol^-1``</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following creates a ``Dispersion`` interaction with a ``Buckingham``</span>
+<span class="sd">    functional form:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        buck = Buckingham(3.65e-18, 6.71, 6.94e-22)</span>
+<span class="sd">        O_disp = Dispersion(universe, (O.atom_type, O.atom_type), function=buck)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@inter_func_decorator</span><span class="p">((</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">ENERGY</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                          <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">ENERGY</span><span class="p">))</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">C</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="Coulomb">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.interaction_functions.Coulomb">[docs]</a>
+<span class="k">class</span> <span class="nc">Coulomb</span><span class="p">(</span><span class="n">InteractionFunction</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coulomb interaction for charged particles:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        E = \frac{Cq_{i}q_{j}}{r}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    charge : float</span>
+<span class="sd">        The charge in units of ``e``</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following creates a ``Coulombic`` interaction with a ``Coulomb``</span>
+<span class="sd">    functional form:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        O = Atom(&#39;O&#39;)</span>
+<span class="sd">        coul = Coulomb(-0.8476)</span>
+<span class="sd">        O_coulombic = Coulombic(atoms=O, cutoff=10., function=coul)</span>
+
+<span class="sd">    As ``Coulomb`` is the default functional form of ``Coulombic`` interactions</span>
+<span class="sd">    when an ``Atom`` is created, this is equivalent to setting the ``charge``</span>
+<span class="sd">    on an ``Atom``:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        O = Atom(&#39;O&#39;, charge=-0.8476)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@inter_func_decorator</span><span class="p">((</span><span class="s1">&#39;charge&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">CHARGE</span><span class="p">))</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charge</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="HarmonicPotential">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.interaction_functions.HarmonicPotential">[docs]</a>
+<span class="k">class</span> <span class="nc">HarmonicPotential</span><span class="p">(</span><span class="n">InteractionFunction</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Harmonic potential for bond stretching, and angular and improper dihedral</span>
+<span class="sd">    vibration, with the form:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        E = K(r-r_0)^2</span>
+
+<span class="sd">    As ``HarmonicPotential`` can be used with several different ``Interaction``</span>
+<span class="sd">    types, the ``Interaction`` type must be specified, so that the correct units</span>
+<span class="sd">    can be assigned to the ``equilibrium_state`` and ``potential_strength``</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    equilibrium_state : float</span>
+<span class="sd">        The equilibrium state of the object in either ``Ang`` or ``degrees``,</span>
+<span class="sd">        depending on the ``interaction_type`` passed.</span>
+<span class="sd">    potential_strength : float</span>
+<span class="sd">        The potential strength in units of ``kJ mol^-1 Ang^-2`` (linear) or</span>
+<span class="sd">        ``kJ mol^-1 rad^-2`` (angular/improper), depending on the</span>
+<span class="sd">        ``interaction_type`` passed.</span>
+<span class="sd">    **settings</span>
+<span class="sd">        interaction_type : str</span>
+<span class="sd">            A `str` specifying either ``&#39;bond&#39;``, ``&#39;angle&#39;`` or ``&#39;improper&#39;``.</span>
+<span class="sd">            This assigns the correct units to ``equilibrium_state`` and</span>
+<span class="sd">            ``potential_strength``. This keyword must be passed.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        The ``interaction_type`` must be ``&#39;bond&#39;``, ``&#39;angle&#39;``, or</span>
+<span class="sd">        ``&#39;improper&#39;``</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        An ``interaction_type`` of ``&#39;bond&#39;``, ``&#39;angle&#39;``, or ``&#39;improper&#39;``</span>
+<span class="sd">        must be passed</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following creates a ``HarmonicPotential`` for a ``Bond`` interaction:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        hp = HarmonicPotential(1., 4637., interaction_type=&#39;bond&#39;)</span>
+
+<span class="sd">    The following creates a ``HarmonicPotential`` for a ``BondAngle``</span>
+<span class="sd">    interaction:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        hp = HarmonicPotential(109.47, 383., interaction_type=&#39;angle&#39;)</span>
+
+<span class="sd">    The following creates a ``HarmonicPotential`` for a ``DihedralAngle``</span>
+<span class="sd">    interaction with ``improper==True`` (i.e. an improper dihedral):</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        hp = HarmonicPotential(180., 20.92, interaction_type=&#39;improper&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">equilibrium_state</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">potential_strength</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+
+        <span class="c1"># interaction_type is a required keyword, but has to be passed through</span>
+        <span class="c1"># settings so that it can be correctly passed in inter_func_decorator</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;interaction_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;bond&#39;</span><span class="p">:</span>
+                <span class="n">eq_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span>
+                <span class="n">pot_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">ENERGY</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="k">elif</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;interaction_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;angle&#39;</span><span class="p">,</span> <span class="s1">&#39;bondangle&#39;</span><span class="p">,</span>
+                                                          <span class="s1">&#39;improper&#39;</span><span class="p">):</span>
+                <span class="n">eq_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">ANGLE</span>
+                <span class="c1"># Use radians rather than system angle units (degrees)</span>
+                <span class="n">pot_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">ENERGY</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The interaction_type must be &quot;bond&quot;, &quot;angle&quot;,&#39;</span>
+                                 <span class="s1">&#39; or &quot;improper&quot;&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;An interaction_type of &quot;bond&quot;, &quot;angle&quot; or improper&quot;&#39;</span>
+                            <span class="s1">&#39; must be passed&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+        <span class="c1"># Create a new (uninitialized) HarmonicPotential</span>
+        <span class="n">h_pot</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="c1"># Decorate __init__ with inter_func_decorator to apply to correct units</span>
+        <span class="c1"># (which are dependent on the interaction_type) to the equilibrium_state</span>
+        <span class="c1"># and potential_strength parameters. This decoration has to be done in</span>
+        <span class="c1"># new rather than directly on __init__ as it requires the dynamically</span>
+        <span class="c1"># defined interaction_type to determine the units. cls_init (which is a</span>
+        <span class="c1"># copy of the original cls.__init__) is required (rather than just</span>
+        <span class="c1"># applying the decorator directly to cls.__init__) because after the</span>
+        <span class="c1"># first HarmonicPotential is called, the cls.__init__ will be decorated.</span>
+        <span class="c1"># Therefore, after this if cls.__init__ is decorated again, it will be</span>
+        <span class="c1"># irrelevant, as the original decorator will be the last called. So</span>
+        <span class="c1"># cls._init is used as it will always be equivalent to the undecorated</span>
+        <span class="c1"># __init__ visible below.</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">inter_func_decorator</span><span class="p">((</span><span class="s1">&#39;equilibrium_state&#39;</span><span class="p">,</span> <span class="n">eq_unit</span><span class="p">),</span>
+                                            <span class="p">(</span><span class="s1">&#39;potential_strength&#39;</span><span class="p">,</span> <span class="n">pot_unit</span><span class="p">))(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_init</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">h_pot</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equilibrium_state</span><span class="p">,</span> <span class="n">potential_strength</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
+
+    <span class="c1"># Declare a class method equal to the __init__ method</span>
+    <span class="n">_init</span> <span class="o">=</span> <span class="fm">__init__</span></div>
+
+
+
+<div class="viewcode-block" id="Periodic">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.interaction_functions.Periodic">[docs]</a>
+<span class="k">class</span> <span class="nc">Periodic</span><span class="p">(</span><span class="n">InteractionFunction</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Periodic potential for proper and improper dihedral interactions, with the</span>
+<span class="sd">    form:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        E = \sum_{i=1,m}K_i[1.0+\cos(n_i\phi-d_i)]</span>
+
+<span class="sd">    where \phi is angle between the ijk and jkl planes (where i, j, k, and l are</span>
+<span class="sd">    the four atoms of the dihedral).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    K1 : float</span>
+<span class="sd">        The K parameter (energy) of the first order term, in units of</span>
+<span class="sd">        ``kJ mol^-1``</span>
+<span class="sd">    n1 : int</span>
+<span class="sd">        The n parameter of the first order term, which is unitless. This must be</span>
+<span class="sd">        a non-negative `int`.</span>
+<span class="sd">    d1 : float</span>
+<span class="sd">        The d parameter (angle) of the first order term, in units of ``deg``</span>
+<span class="sd">    *parameters</span>
+<span class="sd">        K, n, and d parameters for higher order terms. These must be ordered K2,</span>
+<span class="sd">        n2, d2, K3, n3, d3, K4, n4, d4 etc. The types and units of these</span>
+<span class="sd">        parameters are the same as the corresponding first order parameters</span>
+<span class="sd">        listed above.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following creates a first order ``Periodic`` for a ``DihedralAngle``</span>
+<span class="sd">    interaction with ``improper==True`` (i.e. an improper dihedral):</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        periodic = Periodic(87.864, 2, 180.)</span>
+<span class="sd">        improper = DihedralAngle(atoms=[C, H1, H2, O], improper=True,</span>
+<span class="sd">                                 function=periodic)</span>
+
+<span class="sd">    The following creates a third order ``Periodic`` for a ``DihedralAngle``</span>
+<span class="sd">    interaction with ``improper==False`` (i.e. a proper dihedral), with</span>
+<span class="sd">    ``K1=3.53548``, ``K2=-4.02501`` and ``K3=2.98319``:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        periodic = Periodic(3.53548, 1, 0., -4.02501, 2, 180., 2.98319, 3, 0.)</span>
+<span class="sd">        proper = DihedralAngle(atoms=[N, C1, C2, C3], improper=False,</span>
+<span class="sd">                               function=periodic)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">d1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">parameters</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+
+        <span class="c1"># Check that total number of parameters is divisible by 3</span>
+        <span class="c1"># Check that all n values are non-negative ints</span>
+        <span class="n">val_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">all_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="nb">iter</span><span class="p">((</span><span class="n">K1</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">d1</span><span class="p">)</span> <span class="o">+</span> <span class="n">parameters</span><span class="p">)]</span> <span class="o">*</span> <span class="mi">3</span>
+        <span class="c1"># Assign attributes K$, n$, d$, where $ is the order (e.g. K1, n1, d1</span>
+        <span class="c1"># for the first order etc.)</span>
+        <span class="k">for</span> <span class="n">order</span><span class="p">,</span> <span class="n">order_parameters</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">zip_longest</span><span class="p">(</span><span class="o">*</span><span class="n">all_parameters</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># If *parameters is not divisible by three, one or two indexes of</span>
+            <span class="c1"># order_parameters will be None</span>
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">order_parameters</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;*parameters must contain a K, n, and d value for&#39;</span>
+                                <span class="s1">&#39; each order &gt;2 (i.e. it should contain a&#39;</span>
+                                <span class="s1">&#39; number of values exactly divisible by 3)&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">order_parameters</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;All n values must be of type int&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">order_parameters</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;All n values must be non-negative ints&#39;</span><span class="p">)</span>
+            <span class="n">val_dict</span><span class="p">[</span><span class="s1">&#39;K</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">order</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">UnitFloat</span><span class="p">(</span><span class="n">order_parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                              <span class="n">units</span><span class="o">.</span><span class="n">ENERGY</span><span class="p">))</span>
+            <span class="n">val_dict</span><span class="p">[</span><span class="s1">&#39;n</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">order</span><span class="p">)]</span> <span class="o">=</span> <span class="n">order_parameters</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">val_dict</span><span class="p">[</span><span class="s1">&#39;d</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">order</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">UnitFloat</span><span class="p">(</span><span class="n">order_parameters</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                                              <span class="n">units</span><span class="o">.</span><span class="n">ANGLE</span><span class="p">))</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">val_dict</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="LennardJones">
+<a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.interaction_functions.LennardJones">[docs]</a>
+<span class="k">class</span> <span class="nc">LennardJones</span><span class="p">(</span><span class="n">InteractionFunction</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dispersive Lennard-Jones interaction with the form:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        E = 4{\epsilon}[(\frac{\sigma}{r})^{12} - (\frac{\sigma}{r})^6)]</span>
+<span class="sd">        \qquad r &lt; r_c</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    epsilon : float</span>
+<span class="sd">        The LJ epsilon value in units of ``kJ mol^-1``</span>
+<span class="sd">    sigma : float</span>
+<span class="sd">        The LJ sigma value in units of ``Ang``</span>
+<span class="sd">    **settings</span>
+<span class="sd">        cutoff : float</span>
+<span class="sd">            The distance in ``Ang`` at which the potential is cutoff</span>
+<span class="sd">        long_range_solver : str</span>
+<span class="sd">            The long range solver, either ``&#39;PPPM&#39;``, ``&#39;PME&#39;``, or ``&#39;E&#39;`` for</span>
+<span class="sd">            Particle-Particle Particle-Mesh, Particle Mesh Ewald, or Ewald</span>
+<span class="sd">            solvers</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following creates a ``Dispersion`` interaction with a ``LennardJones``</span>
+<span class="sd">    functional form:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        lj = LennardJones(0.6502, 3.166)</span>
+<span class="sd">        O_disp = Disperion(universe, (O.atom_type, O.atom_type), function=lj)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@inter_func_decorator</span><span class="p">((</span><span class="s1">&#39;epsilon&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">ENERGY</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;sigma&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span><span class="p">))</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span><span class="s1">&#39;epsilon&#39;</span><span class="p">:</span> <span class="n">epsilon</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="n">sigma</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cutoff&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;long_range_solver&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

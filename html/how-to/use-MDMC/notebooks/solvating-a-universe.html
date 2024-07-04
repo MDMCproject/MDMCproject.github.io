@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solvating an MDMC Universe &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Reading atoms from configuration files" href="read-configurations.html" />
+    <link rel="prev" title="Defining molecule interactions" href="defining-molecule-interactions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../use-MDMC.html">How to use MDMC</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../simulations.html">Simulations</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../simulations.html#creating-a-universe">Creating a Universe</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="creating-atomic-configurations.html">Creating an atomic configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="defining-molecule-interactions.html">Defining molecule interactions</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Solvating an MDMC Universe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="molecular-visualization.html">Visualising a Universe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="applying-a-forcefield.html">Applying a force field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filling-with-packmol.html">Filling With Packmol</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../simulations.html#creating-a-simulation">Creating a Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="creating-atomic-configurations.html">Creating an atomic configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="defining-molecule-interactions.html">Defining molecule interactions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Solvating an MDMC Universe</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Solvating-the-Universe">Solvating the Universe</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Parameters">Parameters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molecular-visualization.html">Visualising a Universe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="applying-a-forcefield.html">Applying a force field</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../parameter-refinement.html">Parameter Refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="selecting-fitting-parameters.html">Selecting which parameters to fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../use-MDMC.html">How to use MDMC</a></li>
+          <li class="breadcrumb-item"><a href="../simulations.html">Simulations</a></li>
+      <li class="breadcrumb-item active">Solvating an MDMC Universe</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/how-to/use-MDMC/notebooks/solvating-a-universe.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Solvating-an-MDMC-Universe">
+<h1>Solvating an MDMC Universe<a class="headerlink" href="#Solvating-an-MDMC-Universe" title="Link to this heading"></a></h1>
+<p>For simulating systems in solution, MDMC’s inbuilt <code class="docutils literal notranslate"><span class="pre">solvate</span></code> method can be used to add solvent molecules of a desired density to your universe.</p>
+<p>For this tutorial, we will create a simple universe containing just 4 hydrogen atoms, and then dissolve them in water. See the <a class="reference external" href="building-a-universe.ipynb">Building a Universe</a> guide for details on how to create a Universe of your own specifications.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the Atom, Molecule, and Universe classes</span>
+<span class="c1"># Import the HarmonicPotential class (needed to create a Bond)</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">HarmonicPotential</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Universe</span>
+
+<span class="c1"># Initialise a Universe with dimensions in Ang</span>
+<span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">([</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">])</span>
+
+<span class="c1"># Create a pair of Hydrogen Atoms</span>
+<span class="n">H1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+<span class="n">H2</span> <span class="o">=</span> <span class="n">H1</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+
+<span class="c1"># Initialise a H-H Bond</span>
+<span class="n">HH_bond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">H1</span><span class="p">,</span> <span class="n">H2</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">HarmonicPotential</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="n">interaction_type</span><span class="o">=</span><span class="s1">&#39;bond&#39;</span><span class="p">))</span>
+
+<span class="c1"># Make a H2 Molecule</span>
+<span class="n">H2_mol_1</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">H1</span><span class="p">,</span> <span class="n">H2</span><span class="p">],</span> <span class="n">interactions</span><span class="o">=</span><span class="p">[</span><span class="n">HH_bond</span><span class="p">])</span>
+
+<span class="c1"># Create 3 copies of the Molecule at different positions</span>
+<span class="n">H2_mol_2</span> <span class="o">=</span> <span class="n">H2_mol_1</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">])</span>
+<span class="n">H2_mol_3</span> <span class="o">=</span> <span class="n">H2_mol_1</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">])</span>
+<span class="n">H2_mol_4</span> <span class="o">=</span> <span class="n">H2_mol_1</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">9.5</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">])</span>
+
+<span class="c1"># Add the 4 Hydrogen Molecules to the Universe</span>
+<span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="p">[</span><span class="n">H2_mol_1</span><span class="p">,</span> <span class="n">H2_mol_2</span><span class="p">,</span> <span class="n">H2_mol_3</span><span class="p">,</span> <span class="n">H2_mol_4</span><span class="p">]:</span>
+    <span class="n">universe</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Universe created with:
+Dimensions [10. 15. 20.]
+</pre></div></div>
+</div>
+<section id="Solvating-the-Universe">
+<h2>Solvating the Universe<a class="headerlink" href="#Solvating-the-Universe" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">solvate</span></code> method accepts 3 main parameters; <code class="docutils literal notranslate"><span class="pre">density</span></code>, <code class="docutils literal notranslate"><span class="pre">tolerance</span></code>, and <code class="docutils literal notranslate"><span class="pre">solvent</span></code> (as well as some <code class="docutils literal notranslate"><span class="pre">**settings</span></code>) - all of these are explained below. An example call to <code class="docutils literal notranslate"><span class="pre">solvate</span></code> the Universe created above would therefore be:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">universe</span><span class="o">.</span><span class="n">solvate</span><span class="p">(</span><span class="n">density</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">solvent</span><span class="o">=</span><span class="s1">&#39;SPCE&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Force field created by solvent SPCE
+</pre></div></div>
+</div>
+<section id="Parameters">
+<h3>Parameters<a class="headerlink" href="#Parameters" title="Link to this heading"></a></h3>
+<p>Explanations of each parameter passed to <code class="docutils literal notranslate"><span class="pre">solvate</span></code> can be found below.</p>
+<section id="1.-density">
+<h4>1. <code class="docutils literal notranslate"><span class="pre">density</span></code><a class="headerlink" href="#1.-density" title="Link to this heading"></a></h4>
+<p>The desired density of the bulk solvent in your universe, in MDMC units of <strong>amu / Ang ^ 3</strong>. See <a class="reference external" href="units.ipynb">Units in MDMC</a> for instructions on how to convert your density into MDMC units.</p>
+<p><strong>Note</strong>: with this parameter you are specifying the <strong>bulk density of the solvent</strong>. If you have any solute molecules already present in your universe, the total density of your universe after solvation will be higher than the desired density you pass to <code class="docutils literal notranslate"><span class="pre">solvate</span></code> (plus or minus the tolerance you pass, see below).</p>
+<p>In the above example, passing the density as <code class="docutils literal notranslate"><span class="pre">0.6</span></code> means that the universe will be solvated with SPCE water with a bulk density of 0.6 amu / Ang ^ 3 (+/- the tolerance). The density of the universe <strong>in total will be greater</strong> than 0.6 amu / Ang ^ 3, because of the 4 Hydrogen molecules.</p>
+</section>
+<section id="2.-tolerance">
+<h4>2. <code class="docutils literal notranslate"><span class="pre">tolerance</span></code><a class="headerlink" href="#2.-tolerance" title="Link to this heading"></a></h4>
+<p>With this parameter you can specify the percentage tolerance of the <code class="docutils literal notranslate"><span class="pre">density</span></code> that you would like to be achieved for the bulk density of the solvent.</p>
+<p>For the above example, passing a density of <code class="docutils literal notranslate"><span class="pre">0.6</span></code> and setting <code class="docutils literal notranslate"><span class="pre">tolerance=1</span></code> will achieve a bulk solvent density of:</p>
+<ul class="simple">
+<li><p>(0.6 amu / Ang ^ 3) +/- 1 %</p></li>
+<li><p>equivalent to (0.6 +/- 0.006) amu / Ang ^ 3</p></li>
+</ul>
+<p><strong>Note</strong>: the tolerance has a default value of 1 %. Setting the tolerance to anything lower than increases the risk of <code class="docutils literal notranslate"><span class="pre">solvate</span></code> not converging to within the specified tolerance.</p>
+</section>
+<section id="3.-solvent">
+<h4>3. <code class="docutils literal notranslate"><span class="pre">solvent</span></code><a class="headerlink" href="#3.-solvent" title="Link to this heading"></a></h4>
+<p>Using a solvent with pre-defined coordinates.</p>
+<p>MDMC has a few in-built solvents that can be used to solvate your Universe. These have pre-defined atomic coordinates and interactions.</p>
+<p>The in-built solvents are listed in the help method for solvate:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">solvate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on method solvate in module MDMC.MD.simulation:
+
+solvate(density: float, tolerance: float = 1.0, solvent: str = &#39;SPCE&#39;, max_iterations: int = 100, **settings: dict) -&gt; None method of MDMC.MD.simulation.Universe instance
+    Fills the ``Universe`` with solvent molecules according to pre-defined
+    coordinates.
+
+    Parameters
+    ----------
+    density : float
+        The desired density of the ``Solvent`` that solvates the
+        ``Universe``, in units of ``amu Ang ^ -3``
+    tolerance : float, optional
+        The +/- percentage tolerance of the density to be achieved.
+        The default is 1 %. Tolerances of less than 1 % are at risk
+        of not converging.
+    solvent : str, optional
+        A `str` specifying an inbuilt ``Solvent`` from the following:
+        SPCE, TIP3PFB, SPC, TIP3P.
+        The default is &#39;SPCE&#39;.
+    max_iterations: int, optional
+        The maximum number of times to try to solvate the universe to
+        within the required density before stopping. Defaults to 100.
+    **settings
+        ``constraint_algorithm`` (`ConstraintAlgorithm`)
+            A ``ConstraintAlgorithm`` which is applied to the ``Universe``.
+            If an inbuilt ``Solvent`` is selected (e.g. &#39;SPCE&#39;) and
+            ``constraint_algorithm`` is not passed, the
+            ``ConstraintAlgorithm`` will default to ``Shake(1e-4, 100)``.
+
+    Raises
+    ------
+    ValueError
+        If the ``Universe`` has already been solvated with a different
+        density.
+
+</pre></div></div>
+</div>
+</section>
+<section id="4.-**settings">
+<h4>4. <code class="docutils literal notranslate"><span class="pre">**settings</span></code><a class="headerlink" href="#4.-**settings" title="Link to this heading"></a></h4>
+<section id="constraint_algorithm">
+<h5><code class="docutils literal notranslate"><span class="pre">constraint_algorithm</span></code><a class="headerlink" href="#constraint_algorithm" title="Link to this heading"></a></h5>
+<p>You can specify a <code class="docutils literal notranslate"><span class="pre">ConstraintAlgorithm</span></code> (explained in more detail in <a class="reference external" href="building-a-universe.ipynb">building a universe</a>, see the subsection “Solving bond constraints”) which is applied to the Universe. If specifying <code class="docutils literal notranslate"><span class="pre">solvent</span></code> as a string representing one of the in-built solvents (i.e. ‘SPCE’), then a <code class="docutils literal notranslate"><span class="pre">Shake(1e-4,</span> <span class="pre">100)</span></code> constraint algorithm is applied by default.</p>
+</section>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="defining-molecule-interactions.html" class="btn btn-neutral float-left" title="Defining molecule interactions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="read-configurations.html" class="btn btn-neutral float-right" title="Reading atoms from configuration files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

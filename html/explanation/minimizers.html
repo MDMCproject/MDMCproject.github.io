@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minimizers &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Developer Documentation" href="../developer/overview.html" />
+    <link rel="prev" title="Figure of Merit (FoM)" href="figure-of-merit.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="explanation.html">Explanation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="figure-of-merit.html">Figure of Merit (FoM)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Minimizers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-is-a-minimizer">What is a minimizer?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-gradient-descent">Example: Gradient Descent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-does-mdmc-use-minimization">How does MDMC use minimization?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#derivative-free-optimisation">Derivative-free optimisation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metropolis-hastings-algorithm">Metropolis-Hastings algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gaussian-process-regression">Gaussian Process Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gaussian-process-optimisation">Gaussian Process Optimisation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="explanation.html">Explanation</a></li>
+      <li class="breadcrumb-item active">Minimizers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/explanation/minimizers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="minimizers">
+<span id="minimizer-explanation-label"></span><h1>Minimizers<a class="headerlink" href="#minimizers" title="Link to this heading"></a></h1>
+<section id="what-is-a-minimizer">
+<h2>What is a minimizer?<a class="headerlink" href="#what-is-a-minimizer" title="Link to this heading"></a></h2>
+<p>A minimizer is an <a class="reference external" href="https://en.wikipedia.org/wiki/Mathematical_optimization">optimisation algorithm or heuristic</a>
+which takes a set of input parameters and a function of the inputs, and aims to find which
+combination of inputs makes the result of the function the smallest (minimal).</p>
+</section>
+<section id="example-gradient-descent">
+<h2>Example: Gradient Descent<a class="headerlink" href="#example-gradient-descent" title="Link to this heading"></a></h2>
+<p>To visualise a minimizer, picture a hilly terrain.
+The minimizer is trying to find the lowest valley in this terrain (the global minimum).
+For this example, our initial parameters can be pictured as the position of a ball on this terrain.
+Gradient descent does this by rolling the ball down the steepest path it can find, stopping and reassessing (i.e. without momentum) at regular intervals.
+(note here, that the valley we start in may not be the deepest valley in the landscape and we may only find the bottom of the valley we started in, the local minimum, initial parameters are key)
+Other minimizers might be pictured as an (or many) automata moving around trying to find the lowest valley;
+many minimizers are based on a concept of a ‘walk’.</p>
+<p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Gradient_descent">gradient descent</a> algorithm
+proceeds as follows:</p>
+<ol class="arabic simple">
+<li><p>Start at some position.</p></li>
+<li><p>Calculate the gradient, or slope, of the current location.</p></li>
+<li><p>Take a step (of some fixed size) in the direction where the slope goes
+downhill the steepest.</p></li>
+<li><p>Repeat from to step 2 until reaching a equilibrium point (a point where the gradient
+is zero in all directions).</p></li>
+</ol>
+<p>Through this, the minimizer is guaranteed to end up at the bottom of <em>some</em> valley.
+However, if it ends up at the bottom of a valley, it has no way of knowing whether
+it’s the deepest in all the land, and it is stuck down there. More complicated algorithms
+have ways of dealing with this (in fact, the Metropolis-Hastings algorithm -
+explained below - solves this problem!).</p>
+<p>Nonetheless, this is an example of minimization; our inputs are the x and y coordinates of the minimizer’s
+current position, and the output is their altitude at that location.
+We call the space of all possible combinations of inputs the “parameter space”,
+and the output function the “objective function” (objective as in ‘goal’ or ‘target’).</p>
+<p>Minimization is a huge field of mathematics, and many more sophisticated algorithms exist.
+Popular, ubiquitous minimization algorithms include the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm">Levenberg-Marquardt algorithm</a>
+or the <a class="reference external" href="https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm">BFGS algorithm</a>.</p>
+</section>
+<section id="how-does-mdmc-use-minimization">
+<h2>How does MDMC use minimization?<a class="headerlink" href="#how-does-mdmc-use-minimization" title="Link to this heading"></a></h2>
+<p>MDMC’s parameter space for minimization are the parameters governing the interactions between
+molecules in a given simulation. It aims to minimize the <a class="reference internal" href="figure-of-merit.html#fom-explanation-label"><span class="std std-ref">Figure of Merit (FoM)</span></a>
+between a simulation using those parameters and experimental data. Through this, it finds
+the parameters which create a simulation that most closely reproduces the experimental data.</p>
+</section>
+<section id="derivative-free-optimisation">
+<h2>Derivative-free optimisation<a class="headerlink" href="#derivative-free-optimisation" title="Link to this heading"></a></h2>
+<p>Many fast minimization algorithms, such as the ones above, rely on being able to calculate the slope or gradient
+of the objective function. However, MDMC’s objective function (the figure of merit) is based on
+the difference between experimental and simulated data. Both experimental data and molecular dynamics
+simulations are noisy, which makes the figure of merit ‘not <a class="reference external" href="https://en.wikipedia.org/wiki/Smoothness">smooth enough</a>’
+to use many of these algorithms; the idea of a ‘slope’ does not make sense!</p>
+<p>We thus turn to <a class="reference external" href="https://en.wikipedia.org/wiki/Derivative-free_optimization">‘derivative-free optimisation’</a>,
+which is a subfield of optimisation that avoids needing gradient information. Derivative-free optimisation
+is also known as ‘black-box optimisation’; the objective function is a ‘black-box’, where we do not
+have some mathematical formula for it.</p>
+<p>We will now detail the minimizers available in MDMC.</p>
+</section>
+<section id="metropolis-hastings-algorithm">
+<h2>Metropolis-Hastings algorithm<a class="headerlink" href="#metropolis-hastings-algorithm" title="Link to this heading"></a></h2>
+<p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm">Metropolis-Hastings algorithm</a>
+(in MDMC, this is called <cite>MMC</cite>, for ‘Metropolis Monte Carlo’)  is a ‘random walk’ Monte Carlo algorithm;
+essentially, a more complicated method of the gradient descent example, but using randomness
+and ‘backtracking’ to avoid needing to know slope data, as well as avoiding getting
+stuck in small, ‘local’ valleys.</p>
+<p>MMC starts at an initial point in parameter space and proposes a random direction to take a step in;
+this proposed point to step to is called the “candidate”.  If the candidate has a better figure of merit
+than the current position then it is accepted and moved to. However if the candidate
+has a worse figure of merit it may also be accepted. The probability of acceptance is determined by an
+exponential factor of how much worse it is than the current value. This means that unlike gradient descent,
+this algorithm is willing to ‘walk uphill’, particularly up shallow hills.</p>
+<p>MMC is a robust algorithm - it is guaranteed to eventually find the minimum point in the entire space.
+However, it is quite slow as it can reject steps; when a step is rejected, the time used to simulate
+the function and calculate the figure of merit is essentially wasted. Furthermore,
+if it starts very far away from the minimum, it can only take finite-sized steps.
+This means it might take a long time to randomly wander over to the vague region
+of the minimum if the initial ‘guess’ of the parameters is not very good.</p>
+</section>
+<section id="gaussian-process-regression">
+<h2>Gaussian Process Regression<a class="headerlink" href="#gaussian-process-regression" title="Link to this heading"></a></h2>
+<p>The <a class="reference external" href="https://scikit-learn.org/stable/modules/gaussian_process.html">Gaussian Process Regression</a> (GPR)
+algorithm aims not to minimize, but to ‘map out’ parameter space. It first creates a grid of values
+in parameter space and calculates the objective function at each of these points.
+It uses these values to ‘fit’ an approximate topography to the space, and then predicts the values
+between by interpolation via a defined kernel function to find where the lowest point is.</p>
+<p>The MDMC GPR algorithm creates the grid of values via <a class="reference external" href="https://en.wikipedia.org/wiki/Latin_hypercube">‘Latin hypercube sampling’</a>.
+If we wanted to take a sample size of 4 from a 2D space, a ‘Latin square sample’ would
+divide the space into a grid of 4 rows and 4 columns, and then take 4 samples
+such that none of the samples are on the same row or column; see the diagram below.
+This ensures our samples are random, but still more-or-less evenly distributed. A <em>hypercube</em> is
+the term for the equivalent of a cube in any number of dimensions (e.g. 2D hypercube is a square,
+3D hypercube is a cube, so on), so a <em>Latin</em> hypercube is the same concept in any number of dimensions
+(for MDMC, as many dimensions as there are parameters).</p>
+<figure class="align-default" id="id5">
+<img alt="../_images/latinsquare.png" src="../_images/latinsquare.png" />
+<figcaption>
+<p><span class="caption-text">An example of a 4-by-4 Latin square sample.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>This method can be extremely effective, as it quickly produces an accurate prediction without needing an initial ‘guess’,
+only parameter bounds. It is more computationally expensive than Metropolis-Hastings for choosing points as it
+maps out the whole space - but this is very small compared to the time for the MD simulation.
+Since it is not strictly a minimizer, we intentionally explore all of the parameter space,
+giving us a much better idea of where the global minimum lies, at the expense of the accuracy
+of the minimum position. One of the benefits of using Gaussian processes is that as well as
+interpolating between points, the algorithm has an estimation of the uncertainty of every point
+in the space too. We can build intrinsic uncertainty into the MD simulated points, essentially meaning
+that our interpolation does not need to exactly “fit” the point. As well as this uncertainty,
+we have uncertainty related to how close we are to a measured point,
+i.e. the further we have to interpolate, the greater our uncertainty about that value.</p>
+</section>
+<section id="gaussian-process-optimisation">
+<h2>Gaussian Process Optimisation<a class="headerlink" href="#gaussian-process-optimisation" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://scikit-optimize.github.io/stable/auto_examples/bayesian-optimization.html#bayesian-optimization-with-skopt">Gaussian Process Optimisation</a> (GPO)
+combines the ‘exploration’ of the space from the Gaussian Process Regression algorithm with
+the ‘exploitation’ of Metropolis-Hastings.</p>
+<p>It starts by defining a Latin hypercube in the same way as GPR, to get an initial model
+of the figure of merit ‘surface’ on the parameter space.</p>
+<p>It then proceeds via an ‘ask/tell architecture’ with an acquisition function.
+The acquisition function is ‘asked’ to determine what the next best point to measure at is, generally
+to both minimize uncertainty over the entire space as well as trying to determine the exact
+position of the global minimum. It is then ‘told’ what the result was, updating the model of the
+entire figure of merit surface.</p>
+<p>The updating of this model adds to the computational cost of figure of merit calculation; furthermore,
+due to the potential large jumps between the points, a reasonable amount of equlibration
+of the MD simulation is likely required. That said, for noisy data where the gradient is not obtainable
+and the cost of obtaining the data points is large, this approach is likely to be the most efficient possible.
+<a class="reference external" href="https://scikit-optimize.github.io/stable/auto_examples/bayesian-optimization.html#bayesian-optimization-with-skopt">This link to the relevant scikit docs page has more information (and some nice graphs!) on this method.</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="figure-of-merit.html" class="btn btn-neutral float-left" title="Figure of Merit (FoM)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../developer/overview.html" class="btn btn-neutral float-right" title="Developer Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

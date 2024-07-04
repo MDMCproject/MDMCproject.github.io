@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applying a force field &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Filling With Packmol" href="filling-with-packmol.html" />
+    <link rel="prev" title="Visualising a Universe" href="molecular-visualization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../use-MDMC.html">How to use MDMC</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../simulations.html">Simulations</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../simulations.html#creating-a-universe">Creating a Universe</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="creating-atomic-configurations.html">Creating an atomic configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="defining-molecule-interactions.html">Defining molecule interactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="molecular-visualization.html">Visualising a Universe</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Applying a force field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filling-with-packmol.html">Filling With Packmol</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../simulations.html#creating-a-simulation">Creating a Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="creating-atomic-configurations.html">Creating an atomic configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="defining-molecule-interactions.html">Defining molecule interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molecular-visualization.html">Visualising a Universe</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Applying a force field</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Determining-the-ForceField-atom_type-or-atom-name">Determining the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> <code class="docutils literal notranslate"><span class="pre">atom_type</span></code> or atom <code class="docutils literal notranslate"><span class="pre">name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../parameter-refinement.html">Parameter Refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="selecting-fitting-parameters.html">Selecting which parameters to fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../use-MDMC.html">How to use MDMC</a></li>
+          <li class="breadcrumb-item"><a href="../simulations.html">Simulations</a></li>
+      <li class="breadcrumb-item active">Applying a force field</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/how-to/use-MDMC/notebooks/applying-a-forcefield.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Applying-a-force-field">
+<h1>Applying a force field<a class="headerlink" href="#Applying-a-force-field" title="Link to this heading"></a></h1>
+<p>As well as defining interactions by parameters (e.g. the Lennard-Jones potential), it is also possible to define atomic interaction via a <a class="reference external" href="https://en.wikipedia.org/wiki/Force_field_(chemistry)">force field</a>. These define the interactions between atoms based on existing experimental or calculated data rather than calculating them during the simulation, and are an attractive choice for accurate simulation.</p>
+<p>To apply a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code>, it is necessary to specify the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code>’s <code class="docutils literal notranslate"><span class="pre">atom_type</span></code>. It is important to note that this is different from the <code class="docutils literal notranslate"><span class="pre">Atom</span></code>’s <code class="docutils literal notranslate"><span class="pre">atom_type</span></code> which every atom possesses, regardless of whether or not a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> is used.</p>
+<p>This can be done by either passing the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> <code class="docutils literal notranslate"><span class="pre">atom_type</span></code> or the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> atom <code class="docutils literal notranslate"><span class="pre">name</span></code> as the <code class="docutils literal notranslate"><span class="pre">Atom.name</span></code>.</p>
+<p>It is also important to note that if you require the charge to be set from the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code>, you should pass this when creating each <code class="docutils literal notranslate"><span class="pre">Atom</span></code>. Any float can be passed as this will be changed when the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> is applied.</p>
+<p>Below is an example using methanol and the <a class="reference external" href="https://en.wikipedia.org/wiki/OPLS">OPLSAA</a> <code class="docutils literal notranslate"><span class="pre">ForceField</span></code>. Any other force field has an analogous procedure.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span><span class="p">,</span> <span class="n">DihedralAngle</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Universe</span>
+</pre></div>
+</div>
+</div>
+<p>We first create our methanol molecule. All bonded and nonbonded interactions need to be specified as normal, except the <code class="docutils literal notranslate"><span class="pre">function</span></code> for the <code class="docutils literal notranslate"><span class="pre">Dispersion</span></code> should not be passed as a parameter. This is because the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> provides the interaction function as well as the parameter values.</p>
+<p>Note that we are setting the <code class="docutils literal notranslate"><span class="pre">name</span></code> parameter of the atoms to match the ‘atom type’ IDs used in OPLSAA for the same atoms. This is important, as MDMC will use these names to define the force field interactions.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the atoms</span>
+<span class="n">HC1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.7006</span><span class="p">,</span>  <span class="mf">0.3636</span><span class="p">,</span>  <span class="mf">0.8900</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;98&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.3366</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1504</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;99&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">O</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span> <span class="mf">1.0849</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1713</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;96&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">HO</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span> <span class="mf">1.3606</span><span class="p">,</span>  <span class="mf">0.7699</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;97&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Create the bonds with harmonic potentials</span>
+<span class="n">CH_bond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">HC1</span><span class="p">)</span>
+<span class="n">CO_bond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">O</span><span class="p">)</span>
+<span class="n">OH_bond</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">O</span><span class="p">,</span> <span class="n">HO</span><span class="p">)</span>
+
+<span class="c1"># Create the H-C-O and H-O-C bond angles</span>
+<span class="n">HCO_angle</span> <span class="o">=</span> <span class="n">BondAngle</span><span class="p">((</span><span class="n">HC1</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">O</span><span class="p">))</span>
+<span class="n">HOC_angle</span> <span class="o">=</span> <span class="n">BondAngle</span><span class="p">((</span><span class="n">HO</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">C</span><span class="p">))</span>
+
+<span class="c1"># Create the H-C-O-H dihedral</span>
+<span class="n">HCOH_dihedral</span> <span class="o">=</span> <span class="n">DihedralAngle</span><span class="p">((</span><span class="n">HC1</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">HO</span><span class="p">))</span>
+
+<span class="c1"># Duplicate the HC1 atom</span>
+<span class="n">HC2</span> <span class="o">=</span> <span class="n">HC1</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.7006</span><span class="p">,</span>  <span class="mf">0.3636</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.8900</span><span class="p">])</span>
+
+<span class="c1"># Create an HCH bond angle</span>
+<span class="n">HCH_angle</span> <span class="o">=</span> <span class="n">BondAngle</span><span class="p">((</span><span class="n">HC1</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">HC2</span><span class="p">))</span>
+
+<span class="c1"># Duplicate the HC1 atom again</span>
+<span class="c1"># This atom will have all existing bond (CH_bond) and bond angles (HCO_angle and HCH_angle) defined</span>
+<span class="n">HC3</span> <span class="o">=</span> <span class="n">HC1</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.7076</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1754</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">])</span>
+
+<span class="c1"># remember to add a H1-C-H3 angle! as HC3 is a copy of HC1, it only has HCH_angle</span>
+<span class="c1"># defined between itself and HC2</span>
+<span class="n">H2CH3_angle</span> <span class="o">=</span> <span class="n">BondAngle</span><span class="p">((</span><span class="n">HC1</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">HC3</span><span class="p">))</span>
+
+<span class="c1"># Create the methanol Molecule</span>
+<span class="n">methanol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">HC1</span><span class="p">,</span> <span class="n">HC2</span><span class="p">,</span> <span class="n">HC3</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">HO</span><span class="p">])</span>
+
+<span class="c1"># Create a universe and add the methanol</span>
+<span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">methanol</span><span class="p">)</span>
+
+<span class="c1"># Add dispersion interactions (no dispersion for HO)</span>
+<span class="n">HC_disp</span> <span class="o">=</span> <span class="n">Dispersion</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">C_disp</span> <span class="o">=</span> <span class="n">Dispersion</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">O_disp</span> <span class="o">=</span> <span class="n">Dispersion</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Universe created with:
+Dimensions [10. 10. 10.]
+</pre></div></div>
+</div>
+<p>Now that all of the interactions have been defined and the methanol has been added to a <code class="docutils literal notranslate"><span class="pre">Universe</span></code>, a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> can be applied to the <code class="docutils literal notranslate"><span class="pre">Universe</span></code>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">universe</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="s1">&#39;OPLSAA&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>This sets all of the <code class="docutils literal notranslate"><span class="pre">InteractionFunction</span></code> and <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> values for each <code class="docutils literal notranslate"><span class="pre">Interaction</span></code>. For example, the charges of all atoms are set:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> </span><span class="si">{1}</span><span class="s1"> charge = </span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">methanol</span><span class="o">.</span><span class="n">atoms</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+H Methanol CH3- charge = 0.04 e
+H Methanol CH3- charge = 0.04 e
+H Methanol CH3- charge = 0.04 e
+C Alcohol CH3OH &amp; RCH2OH charge = 0.145 e
+O Alcohol -OH charge = -0.683 e
+H Alcohol -OH charge = 0.418 e
+</pre></div></div>
+</div>
+<p>Similarly, the <code class="docutils literal notranslate"><span class="pre">InteractionFunction</span></code> and <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> values are set for <code class="docutils literal notranslate"><span class="pre">BondedInteraction</span></code>. The <code class="docutils literal notranslate"><span class="pre">HCO_angle</span></code> now has a <code class="docutils literal notranslate"><span class="pre">HarmonicPotential</span></code> <code class="docutils literal notranslate"><span class="pre">function</span></code>, which has two <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> values, <code class="docutils literal notranslate"><span class="pre">equilibrium,_state</span></code> set to <code class="docutils literal notranslate"><span class="pre">109.5</span> <span class="pre">deg</span></code>, and <code class="docutils literal notranslate"><span class="pre">potential_strength</span></code> set to <code class="docutils literal notranslate"><span class="pre">146.44</span> <span class="pre">kJ</span> <span class="pre">/</span> <span class="pre">mol</span> <span class="pre">deg</span> <span class="pre">^</span> <span class="pre">2</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">HCO_angle</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;BondAngle
+ {function: &lt;HarmonicPotential
+ {parameters: {&#39;equilibrium_state (#7)&#39;: &lt;Parameter
+ {ID: 7,
+  type: &#39;equilibrium_state&#39;,
+  value: 109.5 deg,
+  unit: &#39;deg&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;BondAngle&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;potential_strength (#8)&#39;: &lt;Parameter
+ {ID: 8,
+  type: &#39;potential_strength&#39;,
+  value: 146.44 kJ / mol rad ^ 2,
+  unit: &#39;kJ / mol rad ^ 2&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;BondAngle&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;}}&gt;,
+  constrained: False}&gt;
+</pre></div></div>
+</div>
+<p>It is worth noting that applying a <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> changes each <code class="docutils literal notranslate"><span class="pre">Atom.name</span></code> from the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> <code class="docutils literal notranslate"><span class="pre">atom_type</span></code> to the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> atom <code class="docutils literal notranslate"><span class="pre">name</span></code>. This can be seen when the charges are printed above, but to emphasize the point:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">H_atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.7006</span><span class="p">,</span>  <span class="mf">0.3636</span><span class="p">,</span>  <span class="mf">0.8900</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;98&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Before OPLSAA applied, H_atom name is: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">H_atom</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+<span class="n">uni</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">uni</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">H_atom</span><span class="p">)</span>
+<span class="n">uni</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="s1">&#39;OPLSAA&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;After OPLSAA applied, H_atom name is: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">H_atom</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Before OPLSAA applied, H_atom name is: 98
+Universe created with:
+Dimensions [10. 10. 10.]
+After OPLSAA applied, H_atom name is: Methanol CH3-
+</pre></div></div>
+</div>
+<p>If these <code class="docutils literal notranslate"><span class="pre">Atom.name</span></code> were originally set to the <code class="docutils literal notranslate"><span class="pre">Forcefield</span></code> atom <code class="docutils literal notranslate"><span class="pre">name</span></code> there is no effect:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">H_atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.7006</span><span class="p">,</span>  <span class="mf">0.3636</span><span class="p">,</span>  <span class="mf">0.8900</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Methanol CH3-&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">atom_type</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Before OPLSAA applied, H_atom name is: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">H_atom</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+<span class="n">uni</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">uni</span><span class="o">.</span><span class="n">add_structure</span><span class="p">(</span><span class="n">H_atom</span><span class="p">)</span>
+<span class="n">uni</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="s1">&#39;OPLSAA&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;After OPLSAA applied, H_atom name is: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">H_atom</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Before OPLSAA applied, H_atom name is: Methanol CH3-
+Universe created with:
+Dimensions [10. 10. 10.]
+After OPLSAA applied, H_atom name is: Methanol CH3-
+</pre></div></div>
+</div>
+<section id="Determining-the-ForceField-atom_type-or-atom-name">
+<h2>Determining the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> <code class="docutils literal notranslate"><span class="pre">atom_type</span></code> or atom <code class="docutils literal notranslate"><span class="pre">name</span></code><a class="headerlink" href="#Determining-the-ForceField-atom_type-or-atom-name" title="Link to this heading"></a></h2>
+<p>To determine the correct <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> <code class="docutils literal notranslate"><span class="pre">atom_type</span></code> or <code class="docutils literal notranslate"><span class="pre">name</span></code> for each <code class="docutils literal notranslate"><span class="pre">Atom</span></code>, there are two methods:</p>
+<ul class="simple">
+<li><p>Search through the .dat file for the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> (MDMC/MD/force_fields/data/oplsaa.dat)</p></li>
+<li><p>Import the <code class="docutils literal notranslate"><span class="pre">ForceField</span></code> and use <code class="docutils literal notranslate"><span class="pre">ForceField.filter_element</span></code></p></li>
+</ul>
+<p>The latter of these methods is shown below:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">OPLSAA</span>
+<span class="n">oplsaa</span> <span class="o">=</span> <span class="n">OPLSAA</span><span class="p">()</span>
+
+<span class="c1"># If we wanted to determine the correct type of a Chlorine atom</span>
+<span class="n">chlorines</span> <span class="o">=</span> <span class="n">oplsaa</span><span class="o">.</span><span class="n">filter_element</span><span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">chlorines</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+     atom_type  atom_group                     name  charge element    mass  nbonds
+44          45          21  Methylene Chloride (UA)  -0.250      Cl  35.453       1
+46          47          21    Chloroform CHCl3 (UA)  -0.140      Cl  35.453       1
+48          49          21     Carbon Tetrachloride  -0.062      Cl  35.453       1
+167        168          21      Chloroalkene Cl-CH=  -0.120      Cl  35.453       1
+205        206          21       Chlorobenzene C-Cl  -0.180      Cl  35.453       1
+340        341          21      Chloroalkene Cl2-C=  -0.060      Cl  35.453       1
+343        344          21         Chloride Ion Cl-  -1.000      Cl  35.453       0
+649        650          21      Cl..CH3..Cl- Sn2 TS  -0.628      Cl  35.453       1
+799        800          21      Alkyl Chloride C-Cl  -0.200      Cl  35.453       1
+810        811          21     Acyl Chloride Cl-C=O  -0.080      Cl  35.453       1
+875        876          21      Chloride Ion (GBSA)  -1.000      Cl  35.453       0
+</pre></div></div>
+</div>
+<p>So if the Cl atom is part of a chloroalkene, the correct atom could be created with either of the following:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Specifying the ForceField atom_type:</span>
+<span class="n">Cl</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;168&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+
+<span class="c1"># Is equivalent to specifying the ForceField atom name</span>
+<span class="n">Cl</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Chloroalkene Cl-CH=&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="molecular-visualization.html" class="btn btn-neutral float-left" title="Visualising a Universe" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="filling-with-packmol.html" class="btn btn-neutral float-right" title="Filling With Packmol" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

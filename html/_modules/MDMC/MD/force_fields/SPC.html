@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.MD.force_fields.SPC &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.MD.force_fields.SPC</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.MD.force_fields.SPC</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A module for defining the SPC forcefield</span>
+
+<span class="sd">This definition of the SPC forcefield includes bond and bond angle strengths</span>
+<span class="sd">as these are needed for to create the required HarmonicPotentials. As a result,</span>
+<span class="sd">they can be used for simulating a flexible water molecule. However, SPC</span>
+<span class="sd">itself is a rigid model, and in order to replicate this a constraint algorithm</span>
+<span class="sd">should be used for all Bond and BondAngle objects.</span>
+
+<span class="sd">Parameters are from:</span>
+<span class="sd">    A molecular dynamics simulation of a water model with intramolecular degrees of freedom</span>
+<span class="sd">    O. Teleman, B. Jonsson, S. Engstrom</span>
+<span class="sd">    Mol. Phys. 60(1), 193-203 (1987)</span>
+
+<span class="sd">Note that different values for bond strengths are given in the OPLSAA data</span>
+<span class="sd">file, namely 2510.4 and 313.8 respectively.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.MD.force_fields.ff</span> <span class="kn">import</span> <span class="n">WaterModel</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.interaction_functions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Coulomb</span><span class="p">,</span> <span class="n">HarmonicPotential</span><span class="p">,</span>
+                                           <span class="n">LennardJones</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">Coulombic</span>
+
+
+<div class="viewcode-block" id="SPC">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.force_fields.html#MDMC.MD.force_fields.SPC.SPC">[docs]</a>
+<span class="k">class</span> <span class="nc">SPC</span><span class="p">(</span><span class="n">WaterModel</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SPC force field - LJ, Coulombic, fixed bond lengths and angles</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">n_body</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interaction_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Charge Parameters</span>
+        <span class="n">q_O</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.82</span>         <span class="c1"># e</span>
+        <span class="n">q_H</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">q_O</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>    <span class="c1"># e</span>
+
+        <span class="c1"># LJ Parameters</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mf">3.166</span>      <span class="c1"># Ang</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.6502</span>   <span class="c1"># kJ mol^-1</span>
+
+        <span class="c1"># Bond Parameters</span>
+        <span class="n">r_OH</span> <span class="o">=</span> <span class="mf">1.000</span>       <span class="c1"># Ang</span>
+        <span class="n">f_OH</span> <span class="o">=</span> <span class="mf">4637.</span>       <span class="c1"># kJ mol^-1 Ang^-2</span>
+
+        <span class="c1"># Bond Angle Parameters</span>
+        <span class="n">a_HOH</span> <span class="o">=</span> <span class="mf">109.47</span>     <span class="c1"># deg</span>
+        <span class="n">f_HOH</span> <span class="o">=</span> <span class="mf">383.</span>       <span class="c1"># kJ mol^-1 rad^-2</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="p">(</span><span class="n">Coulombic</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,)):</span> <span class="n">Coulomb</span><span class="p">(</span><span class="n">q_O</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Coulombic</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,)):</span> <span class="n">Coulomb</span><span class="p">(</span><span class="n">q_H</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Dispersion</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">)):</span> <span class="n">LennardJones</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Bond</span><span class="p">,</span>
+             <span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">)):</span> <span class="n">HarmonicPotential</span><span class="p">(</span><span class="n">r_OH</span><span class="p">,</span> <span class="n">f_OH</span><span class="p">,</span> <span class="n">interaction_type</span><span class="o">=</span><span class="s1">&#39;bond&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">BondAngle</span><span class="p">,</span>
+             <span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">)):</span> <span class="n">HarmonicPotential</span><span class="p">(</span><span class="n">a_HOH</span><span class="p">,</span> <span class="n">f_HOH</span><span class="p">,</span>
+                                                 <span class="n">interaction_type</span><span class="o">=</span><span class="s1">&#39;angle&#39;</span><span class="p">)}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

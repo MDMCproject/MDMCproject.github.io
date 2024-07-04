@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Understanding scientific units in MDMC &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to use MDMC" href="../how-to/use-MDMC.html" />
+    <link rel="prev" title="Running a Refinement (in detail)" href="running-a-refinement.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Understanding scientific units in MDMC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#SYSTEM-Units">SYSTEM Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Exceptional-Cases">Exceptional Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Converting-Units">Converting Units</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Understanding scientific units in MDMC</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/understanding-units.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Understanding-scientific-units-in-MDMC">
+<h1>Understanding scientific units in MDMC<a class="headerlink" href="#Understanding-scientific-units-in-MDMC" title="Link to this heading"></a></h1>
+<p>This tutorial explains the way in which MDMC uses scientific units, and what some of these units are.</p>
+<section id="SYSTEM-Units">
+<h2>SYSTEM Units<a class="headerlink" href="#SYSTEM-Units" title="Link to this heading"></a></h2>
+<p>All quantities passed as arguments and returned as outputs in MDMC have units associated with them. These units have been chosen based on convention within molecular dynamics.</p>
+<p>In general, these units are consistent across all functions and are referred to as the <code class="docutils literal notranslate"><span class="pre">SYSTEM</span></code> units associated with a physical property:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;LENGTH&#39;: &#39;Ang&#39;, &#39;TIME&#39;: &#39;fs&#39;, &#39;MASS&#39;: &#39;amu&#39;, &#39;CHARGE&#39;: &#39;e&#39;, &#39;ANGLE&#39;: &#39;deg&#39;, &#39;TEMPERATURE&#39;: &#39;K&#39;, &#39;ENERGY&#39;: &#39;kJ / mol&#39;, &#39;FORCE&#39;: &#39;kJ / Ang mol&#39;, &#39;PRESSURE&#39;: &#39;Pa&#39;, &#39;ENERGY_TRANSFER&#39;: &#39;meV&#39;, &#39;ARBITRARY&#39;: &#39;arb&#39;}
+</pre></div></div>
+</div>
+<p>For example, both the <code class="docutils literal notranslate"><span class="pre">Atom</span></code> and <code class="docutils literal notranslate"><span class="pre">Universe</span></code> expect units of <code class="docutils literal notranslate"><span class="pre">Ang</span></code> for <code class="docutils literal notranslate"><span class="pre">LENGTH</span></code> properties (the <code class="docutils literal notranslate"><span class="pre">position</span></code> and <code class="docutils literal notranslate"><span class="pre">dimensions</span></code> arguments respectively):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Universe</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">help</span><span class="p">(</span><span class="n">Atom</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">help</span><span class="p">(</span><span class="n">Universe</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on class Atom in module MDMC.MD.structures:
+
+class Atom(Structure)
+ |  Atom(element: &#39;str&#39;, position: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = (0.0, 0.0, 0.0), velocity: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = (0.0, 0.0, 0.0), charge: &#39;float&#39; = None, **settings: &#39;dict&#39;)
+ |
+ |  A single atom
+ |
+ |  Parameters
+ |  ----------
+ |  element : periodictable.core.Element
+ |      The periodictable atomic element instance
+ |  position : list, tuple, numpy.ndarray, optional
+ |      A 3 element `list`, `tuple` or ``array`` with the position in units of
+ |      ``Ang``. The default is ``(0., 0., 0.)``.
+ |  velocity : list, tuple, numpy.ndarray, optional
+ |      A 3 element `list`, `tuple` or ``array`` with the velocity in units of
+ |      ``Ang / fs``. Note that if set, the velocity of atoms in the MD engine will
+ |      be scaled when creating a `Simulation` in order to ensure the
+ |      temperature is accurate. Otherwise, if the velocities of all `Atom`
+ |      objects in a `Simulation` are 0, then the velocities of the atoms in
+ |      the MD engine will be randomly chosen in order to provide an accurate
+ |      temperature. The default is ``(0., 0., 0.)``.
+ |  charge : float
+ |      The charge of the ``Atom`` in units of elementary charge (``e``). The
+ |      default is `None`, meaning that a ``Coulomb`` interaction is not applied
+ |      to the ``Atom``.
+ |  **settings
+ |      ``mass`` (`float`)
+ |          The atomic mass in ``amu``. If not provided a lookup table will be
+ |          used.
+ |      ``atom_type`` (`int`)
+ |          All atoms with the same atom_type will have the same non-bonded interactions
+ |          applied to them. If not provided, MDMC will automatically infer/assign atom types.
+ |          All atoms with the same element and interactions will have the same atom type.
+ |      ``name`` (`str`)
+ |          A name to uniquely identify the atom. Used by ForceFields (e.g. OPLSAA). Atoms
+ |          should only have the same names if they are equivalent. Defaults to the element
+ |          of the atom.
+ |      ``cutoff`` (`float`)
+ |          Sets the cutoff radius in ``Ang``, beyond which this atom does not interact
+ |          with other atoms. Must be set if a charge is being added to the atom.
+ |  Attributes
+ |  ----------
+ |  element : periodictable.core.Element
+ |      The periodictable atomic element instance
+ |
+ |  Method resolution order:
+ |      Atom
+ |      Structure
+ |      abc.ABC
+ |      builtins.object
+ |
+ |  Methods defined here:
+ |
+ |  __deepcopy__(self, memo: &#39;dict&#39;) -&gt; &#39;Atom&#39;
+ |      Copies the Atom and all attributes, except ``ID`` which is generated
+ |
+ |      Interactions are copied but the copied ``Atom`` is substituted for the
+ |      original ``Atom``.  For ``BondedInteractions`` this means that the
+ |      copied ``Atom`` will be bonded to all atoms to which the original
+ |      ``Atom`` is bonded.
+ |
+ |      Arguments
+ |      ---------
+ |      memo : dict
+ |          The memoization `dict`
+ |
+ |  __init__(self, element: &#39;str&#39;, position: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = (0.0, 0.0, 0.0), velocity: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = (0.0, 0.0, 0.0), charge: &#39;float&#39; = None, **settings: &#39;dict&#39;)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |
+ |  __repr__(self)
+ |
+ |  __str__(self) -&gt; &#39;str&#39;
+ |      Returns
+ |      -------
+ |      str
+ |          The ``element``, ``charge`` and ``position`` of the ``Atom``
+ |
+ |  add_interaction(self, interaction: &#39;Interaction&#39;, from_interaction: &#39;bool&#39; = False) -&gt; &#39;None&#39;
+ |      Adds an interaction to the ``Atom``
+ |
+ |      Parameters
+ |      ----------
+ |      interaction : MDMC.MD.interactions.Interaction
+ |          Any class dervied from ``Interaction``, or any object with base
+ |          class ``Interaction``.  If an ``Interaction`` class is passed then
+ |          it must be a ``NonBondedInteraction`` i.e. only takes a single
+ |          ``Atom`` as an argument. If an ``Interaction`` object is passed then
+ |          this ``Atom`` must be in the ``interaction.atoms``.
+ |      from_interaction : bool, optional
+ |          Specifies if this method has been called from an ``Interaction``.
+ |          Default is `False`.
+ |
+ |  copy(self, position: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34;) -&gt; &#39;Atom&#39;
+ |      Copies the ``Atom`` and all attributes, except ``ID`` which is generated
+ |
+ |      Copying an ``Atom`` creates an exact duplicate at the specified
+ |      ``position``.  The copied ``Atom`` will have identical bonded and
+ |      nonbonded interactions as the original. For ``BondedInteractions`` this
+ |      means that the copied atom will be bonded to all atoms to which the
+ |      original atom is bonded. The ``ID`` of the copied atom will differ from
+ |      the original, as they are sequentially generated.
+ |
+ |      Parameters
+ |      ----------
+ |      position : list, tuple, numpy.ndarray
+ |          A 3 element `list`, `tuple` or ``array`` with the ``position`` of
+ |          the new ``Atom``
+ |
+ |      Returns
+ |      -------
+ |      Atom
+ |          A copy of the ``Atom`` with the specified ``position``
+ |
+ |      Examples
+ |      --------
+ |      If the following ``Atom`` is copied:
+ |
+ |      .. highlight:: python
+ |      .. code-block:: python
+ |
+ |          H1 = Atom(&#39;H&#39;, position=(0., 0., 0.), charge=0.4238)
+ |          H2 = H1.copy(position=(1., 1., 1.))
+ |
+ |      then the new ``Atom`` (``H2``) will have no ``BondedInteractions``, but
+ |      will have a ``Coulombic`` interaction, with a ``charge`` of ``0.4238 e``
+ |
+ |      If ``H1`` and ``H2`` are then bonded together and a copy is made:
+ |
+ |      .. highlight:: python
+ |      .. code-block:: python
+ |
+ |          HHbond = Bond((H1, H2))
+ |          H3 = H1.copy(position=(2., 2., 2.))
+ |
+ |      then the newest ``Atom`` (``H3``) will have a ``Coulombic`` interaction
+ |      (also with a ``charge`` of ``0.4238 e``), and it will also have a
+ |      ``Bond`` interaction with ``H2`` (as ``H1`` had a ``Bond`` interaction
+ |      with ``H2``).
+ |
+ |  copy_interactions(self, atom: &#39;Atom&#39;, memo: &#39;dict&#39; = None) -&gt; &#39;None&#39;
+ |      This replicates the interactions from ``self`` for ``Atom``, but with
+ |      ``self`` substituted by ``atom`` in the ``Interaction.atoms``. These
+ |      interactions are added to any that already exist for the ``Atom``.
+ |
+ |      Passing the ``memo`` `dict` enables specific interactions to be excluded
+ |      from being copied, duplicating the behaviour of ``__deepcopy__``
+ |
+ |      Parameters
+ |      ----------
+ |      atom : Atom
+ |          The ``Atom`` for which ``self.interactions`` are being replicated
+ |      memo : dict, optional
+ |          The memoization `dict`
+ |
+ |  is_equivalent(self, structure: &#39;Structure&#39;) -&gt; &#39;bool&#39;
+ |      Checks the passed ``Structure`` against `self` for equivalence in
+ |      terms of the force field application, namely that the following are the
+ |      same:
+ |        - Element or chemical formula
+ |        - Mass
+ |        - Charge
+ |        - Bonded interactions
+ |        - Non bonded interactions
+ |
+ |
+ |      Returns
+ |      -------
+ |      bool
+ |          Whether the two are equivalent
+ |
+ |  ----------------------------------------------------------------------
+ |  Readonly properties defined here:
+ |
+ |  atoms
+ |      Get a `list` of the atoms, just consisting of the ``Atom``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          A `list` with a single item, the ``Atom``
+ |
+ |  bonded_interaction_pairs
+ |      Get bonded interactions acting on the ``Atom`` and the other atoms
+ |      to which the ``Atom`` is bonded
+ |
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          (``interaction``, ``atoms``) pairs acting on the ``Atom``, where
+ |          ``atoms`` is a `tuple` of all `Atom` objects for that specific
+ |          bonded ``interaction``.
+ |
+ |      Example
+ |      -------
+ |      For an O ``Atom`` with two bonds, one to H1 and one to H2::
+ |
+ |          &gt;&gt;&gt; print(O.bonded_interaction_pairs)
+ |          [(Bond, (H1, O)), (Bond, (H2, O))]
+ |
+ |  nonbonded_interactions
+ |      Get a `list` of the nonbonded interactions acting on the ``Atom``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          ``NonBondedInteractions`` acting on the ``Atom``
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |
+ |  atom_type
+ |      Get or set the atom type of the ``Atom``
+ |
+ |      Returns
+ |      -------
+ |      int
+ |          The atom type
+ |
+ |      Raises
+ |      ------
+ |      AttributeError
+ |          The ``atom_type`` cannot be changed once it has been set
+ |
+ |  charge
+ |      Get or set the charge in ``e`` if one has been applied to the ``Atom``
+ |
+ |      If the ``Atom`` does not have a ``Coulombic`` interaction, setting a
+ |      value of the ``charge`` will create one, and a default ``cutoff`` of
+ |      ``10. Ang`` will be applied
+ |
+ |      Returns
+ |      -------
+ |      float
+ |          The charge in units of ``e``, or `None` if no charge has been set
+ |
+ |      Raises
+ |      ------
+ |      ValueError
+ |          When the ``Atom`` has more than one ``Coulombic`` interaction
+ |      ValueError
+ |          When the ``Atom`` has more than one parameter; i.e. should only
+ |          have charge as a parameter
+ |      ValueError
+ |          When setting charge to `None` when a ``Coulombic`` interaction
+ |          already exists.
+ |
+ |  mass
+ |      Get or set the atomic mass in ``amu``
+ |
+ |      Returns
+ |      -------
+ |      float
+ |          the atomic mass in ``amu``
+ |
+ |  universe
+ |      Get the ``Universe`` to which the ``Atomm`` belongs
+ |
+ |      Returns
+ |      -------
+ |      Universe
+ |          The ``Universe`` to which the ``Atom`` belongs or `None`
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |
+ |  __abstractmethods__ = frozenset()
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from Structure:
+ |
+ |  translate(self, displacement: &#39;Union[tuple, np.ndarray]&#39;) -&gt; &#39;None&#39;
+ |      Translate the structural unit by the specified displacement
+ |
+ |      Parameters
+ |      ----------
+ |      Displacement : tuple, numpy.ndarray
+ |          A three element tuple or ``array`` of `float`
+ |
+ |  valid_position(self, position: &#34;Union[&#39;list[float]&#39;, &#39;tuple[float]&#39;, np.ndarray]&#34; = None) -&gt; &#39;bool&#39;
+ |      Checks if the specified ``position`` is within the bounds of the
+ |      ``Structure.universe``, if it has one
+ |
+ |      Parameters
+ |      ----------
+ |      position : list, tuple, numpy.ndarray
+ |          3 element `list`, `tuple` or ``array`` with units of ``Ang`` or
+ |          `None`. If `None` then the ``position`` of the ``Structure`` is
+ |          used.
+ |
+ |      Returns
+ |      -------
+ |      bool
+ |          `True` if ``position`` is within ``Universe`` or there is no
+ |          associated ``Universe``. `False` if ``Structure`` has an
+ |          associated ``Universe`` but the ``position`` is not within its
+ |          bounds.
+ |
+ |      Raises
+ |      ------
+ |      ValueError
+ |          If ``position`` if undefined
+ |
+ |  ----------------------------------------------------------------------
+ |  Readonly properties inherited from Structure:
+ |
+ |  bonded_interactions
+ |      Get a list of the bonded interactions acting on the ``Structure``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          ``BondedInteractions`` acting on the ``Structure``
+ |
+ |  bounding_box
+ |      Returns
+ |      -------
+ |      BoundingBox
+ |          Contains the lower and upper extents of the ``Molecule``
+ |
+ |  interactions
+ |      Get a list of the interactions acting on the ``Structure``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          Interactions acting on the ``Structure``
+ |
+ |  structure_type
+ |      Get the class of the ``Structure``.
+ |
+ |      Returns
+ |      -------
+ |      str
+ |          The name of the class
+ |
+ |  top_level_structure
+ |      Get the top level structure (i.e. ``Structure`` which has no
+ |      ``parent``) of the ``Structure``
+ |
+ |      Returns
+ |      -------
+ |      Structure
+ |          Highest level ``Structure`` of which it is a member
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from Structure:
+ |
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+ |
+ |  position
+ |      Get or set the position of the center of mass of the ``Structure``
+ |      in ``Ang``
+ |
+ |      Returns
+ |      -------
+ |      numpy.ndarray
+ |
+ |  velocity
+ |      Get or set the velocity of the ``Structure`` in ``Ang/fs``
+ |
+ |      Returns
+ |      -------
+ |      numpy.ndarray
+
+None
+Help on class Universe in module MDMC.MD.simulation:
+
+class Universe(MDMC.MD.container.AtomContainer)
+ |  Universe(dimensions, force_field=None, structures=None, **settings)
+ |
+ |  Class where the configuration and topology are defined
+ |
+ |  Parameters
+ |  ----------
+ |  dimensions : numpy.ndarray, list, float
+ |      Dimensions of the ``Universe``, in units of ``Ang``. A `float` can be
+ |      used for a cubic universe.
+ |  force_fields : ForceField, optional
+ |      A force field to apply to the Universe. The force fields available are:
+ |      TIP3P, SPC, OPLSAA, TIP3PFB, SPCE. Default is None.
+ |  structures : list, optional
+ |      ``Structure`` objects contained in the ``Universe``. Default is None.
+ |  **settings
+ |      ``kspace_solver`` (`KSpaceSolver`)
+ |          The k-space solver to be used for both electrostatic and dispersive
+ |          interactions. If this is passed then no ``electrostatic_solver`` or
+ |          ``dispersive_solver`` may be passed.
+ |      ``electrostatic_solver`` (`KSpaceSolver`)
+ |          The k-space solver to be used for electrostatic interactions.
+ |      ``dispersive_solver`` (`KSpaceSolver`)
+ |          The k-space solver to be used for dispersive interactions.
+ |      ``constraint_algorithm`` (`ConstraintAlgorithm`)
+ |          The constraint algorithm which will be applied to constrained
+ |          ``BondedInteractions``.
+ |      ``verbose`` (`str`)
+ |          If the output of the class instantiation should be reported, default
+ |          to True.
+ |
+ |  Attributes
+ |  ----------
+ |  dimensions : numpy.ndarray, list, float
+ |      Dimensions of the ``Universe`` in units of ``Ang``.
+ |  configuration : Configuration
+ |      Stores the content, i.e. configuration of atoms etc within the universe
+ |  force_fields : ForceField or None
+ |      Force field applied to apply to the Universe
+ |  kspace_solver : KSpaceSolver
+ |      The k-space solver to be used for both electrostatic and dispersive
+ |      interactions.
+ |  electrostatic_solver : KSpaceSolver
+ |      The k-space solver to be used for electrostatic interactions.
+ |  dispersive_solver : KSpaceSolver
+ |      The k-space solver to be used for dispersive interactions.
+ |  constraint_algorithm : ConstraintAlgorithm
+ |      The constraint algorithm which will be applied to constrained
+ |      ``BondedInteractions``.
+ |  interactions
+ |  bonded_interactions
+ |  nonbonded_interactions
+ |  bonded_interaction_pairs
+ |  n_bonded
+ |  n_nonbonded
+ |  n_interactions
+ |  parameters
+ |  volume
+ |  element_list
+ |  element_dict
+ |  element_lookup
+ |  atoms
+ |  n_atoms
+ |  molecule_list
+ |  n_molecules
+ |  structure_list
+ |  top_level_structure_list
+ |  equivalent_top_level_structures_dict
+ |  force_fields
+ |  atom_types
+ |  atom_type_interactions
+ |  density
+ |  solvent_density
+ |  nbis_by_atom_type_pairs
+ |
+ |  Method resolution order:
+ |      Universe
+ |      MDMC.MD.container.AtomContainer
+ |      abc.ABC
+ |      builtins.object
+ |
+ |  Methods defined here:
+ |
+ |  __eq__(self, other) -&gt; bool
+ |      Return self==value.
+ |
+ |  __init__(self, dimensions, force_field=None, structures=None, **settings)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |
+ |  __repr__(self)
+ |
+ |  __str__(self) -&gt; str
+ |      Return str(self).
+ |
+ |  add_bonded_interaction_pairs(self, *bonded_interaction_pairs: &#39;tuple[Interaction, Atom]&#39;) -&gt; None
+ |      Adds one or more interaction pairs to the ``Universe``
+ |
+ |      Parameters
+ |      ----------
+ |      *bonded_interaction_pairs
+ |          one or more (``interaction``, ``atoms``) pairs, where ``atoms`` is a
+ |          `tuple` of all atoms for that specific bonded ``interaction``
+ |
+ |  add_force_field(self, force_field: str, *interactions: &#39;Interaction&#39;, **settings: dict) -&gt; None
+ |      Adds a force field to the specified ``interactions``.  If no
+ |      ``interactions`` are passed, the force field is applied to all
+ |      interactions in the ``Universe``.
+ |
+ |      Parameters
+ |      ----------
+ |      force_field : str
+ |          The ``ForceField`` to parameterize ``interactions`` (if provided),
+ |          or all the ``interactions`` in the ``Universe``. The available
+ |          ``ForceField`` are:
+ |          TIP3P, SPC, OPLSAA, TIP3PFB, SPCE
+ |      *interactions
+ |          ``Interaction`` objects to parameterize with the ``ForceField``
+ |      **settings
+ |          ``add_dispersions`` (`bool` or `list` of ``Atoms``)
+ |              If `True`, a ``Dispersion`` interaction will be added to all
+ |              atoms in the ``Universe``. If a list of ``Atom`` objects is
+ |              provided, the ``Dispersion`` will be added to these instead. Any
+ |              added ``Dispersion`` interactions (and any previously defined)
+ |              will then be parametrized by the ``ForceField``. The
+ |              ``Dispersion`` interactions added will only be like-like. By
+ |              default, no ``Dispersion`` interactions are added.
+ |
+ |  add_nonbonded_interaction(self, *nonbonded_interactions: &#39;tuple[Interaction, Atom]&#39;) -&gt; None
+ |      Adds one or more nonbonded interactions to the ``Universe``
+ |
+ |      Parameters
+ |      ----------
+ |      *nonbonded_interactions
+ |          Nonbonded interactions to be added to the ``Universe``.
+ |          Can take any number of non-bonded interactions:
+ |              ``Dispersion()``:
+ |                  either Lennard-Jones or Buckingham dispersion
+ |              ``Coulombic()``:
+ |                  normal or modified Coulomb interaction
+ |          with appropriate parameters for the interaction.
+ |          See http://mdmcproject.org/how-to/use-MDMC/notebooks/defining-molecule-interactions.ipynb
+ |          for more details on non-bonded interactions.
+ |
+ |  add_structure(self, structure: Union[MDMC.MD.structures.Structure, int], force_field: str = None, center: bool = False) -&gt; None
+ |      Adds a single ``Structure`` to the ``Universe``, with optional
+ |      ``ForceField`` applying only to that ``Structure``
+ |
+ |      Parameters
+ |      ----------
+ |      structure : Structure or int
+ |          The ``Structure`` (or its ``ID`` as an `int`) to be added to the
+ |          ``Universe``
+ |      force_field : str, optional
+ |          The force field to be applied to the structure. The available
+ |          ``ForceField`` are:
+ |          TIP3P, SPC, OPLSAA, TIP3PFB, SPCE
+ |      center : bool, optional
+ |          Whether to center `structure` within the Universe as it is
+ |          added
+ |
+ |  fill(self, structures: MDMC.MD.structures.Structure, force_field: str = None, num_density: float = None, num_struc_units: int = None) -&gt; None
+ |      A liquid-like filling of the ``Universe`` independent of existing atoms
+ |
+ |      Adds copies of ``structures`` to existing configuration until
+ |      ``Universe`` is full.  As exclusion region is defined by the size of a
+ |      bounding sphere, this method is most suitable for atoms or molecules
+ |      with approximately equal dimensions.
+ |
+ |      .. note:: CURRENT APPROACH RESULTS IN NUMBER DENSITY DIFFERENT TO WHAT
+ |                IS SPECIFIED DEPENDING ON HOW CLOSE CUBE ROOT OF N_MOLECULES
+ |                IS TO AN `int`.
+ |
+ |      .. note:: CURRENT IMPLEMENTATION SHOULD NOT BE USED WITH NON-CUBIC
+ |                UNIVERSES AS THE DENSITY MAY OR MAY NOT BE ISOTROPIC
+ |                DEPENDING ON THE DIMENSIONS AND NUMBER OF UNITS.
+ |
+ |      Parameters
+ |      ----------
+ |      structures : Structure or int
+ |          The ``Structure`` with which to fill the ``Universe``
+ |      force_field : str
+ |          Applies a ``ForceField`` to the ``Universe``. The available
+ |          ``ForceField`` are:
+ |          TIP3P, SPC, OPLSAA, TIP3PFB, SPCE
+ |      num_density: float
+ |          Non-negative `float` specifying the number density of the
+ |          ``Structure``, in units of ``Structure / Ang ^ -3``
+ |      num_struc_units: int
+ |          Non-negative `int` specifying the number of passed
+ |          ``Structure`` objects that the universe should be filled
+ |          with, regardless of ``Universe.dimensions``.
+ |
+ |      Raises
+ |      ------
+ |      ValueError
+ |          If both ``num_density`` and ``num_struc_units`` are passed
+ |      ValueError
+ |          If neither ``num_density`` or ``num_struc_units`` are passed
+ |
+ |  solvate(self, density: float, tolerance: float = 1.0, solvent: str = &#39;SPCE&#39;, max_iterations: int = 100, **settings: dict) -&gt; None
+ |      Fills the ``Universe`` with solvent molecules according to pre-defined
+ |      coordinates.
+ |
+ |      Parameters
+ |      ----------
+ |      density : float
+ |          The desired density of the ``Solvent`` that solvates the
+ |          ``Universe``, in units of ``amu Ang ^ -3``
+ |      tolerance : float, optional
+ |          The +/- percentage tolerance of the density to be achieved.
+ |          The default is 1 %. Tolerances of less than 1 % are at risk
+ |          of not converging.
+ |      solvent : str, optional
+ |          A `str` specifying an inbuilt ``Solvent`` from the following:
+ |          SPC, TIP3PFB, TIP3P, SPCE.
+ |          The default is &#39;SPCE&#39;.
+ |      max_iterations: int, optional
+ |          The maximum number of times to try to solvate the universe to
+ |          within the required density before stopping. Defaults to 100.
+ |      **settings
+ |          ``constraint_algorithm`` (`ConstraintAlgorithm`)
+ |              A ``ConstraintAlgorithm`` which is applied to the ``Universe``.
+ |              If an inbuilt ``Solvent`` is selected (e.g. &#39;SPCE&#39;) and
+ |              ``constraint_algorithm`` is not passed, the
+ |              ``ConstraintAlgorithm`` will default to ``Shake(1e-4, 100)``.
+ |
+ |      Raises
+ |      ------
+ |      ValueError
+ |          If the ``Universe`` has already been solvated with a different
+ |          density.
+ |
+ |  ----------------------------------------------------------------------
+ |  Readonly properties defined here:
+ |
+ |  atom_type_interactions
+ |      Get the atom types and the interactions for each atom type
+ |
+ |      Returns
+ |      -------
+ |      dict
+ |          ``atom_type:interactions`` pairs where ``atom_type`` is a `int`
+ |          specifying the atom type and ``interactions`` is a `list` of
+ |          ``Interaction`` objects acting on that ``atom_type``
+ |
+ |  atom_types
+ |      Get the atom types of atoms in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The atom types in the ``Universe``
+ |
+ |  atoms
+ |      Get a list of the atoms in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The atoms in the ``Universe``
+ |
+ |  bonded_interaction_pairs
+ |      Get the bonded interactions and the atoms they apply to
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The (``interaction``, ``atoms``) pairs in the ``Universe``, where
+ |          ``atoms`` is a `tuple` of all ``Atom`` objects for that specific
+ |          ``interaction``
+ |
+ |      Example
+ |      -------
+ |      For an O Atom with two bonds, one to H1 and one to H2::
+ |
+ |          &gt;&gt;&gt; print(O.bonded_interaction_pairs)
+ |          [(Bond, (H1, O)), (Bond, (H2, O))]
+ |
+ |  bonded_interactions
+ |      Get the bonded interactions in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The bonded interactions in the ``Universe``
+ |
+ |  density
+ |
+ |  element_dict
+ |      Get the elements in the ``Universe`` and example ``Atom`` objects for
+ |      each element
+ |
+ |      This is required for MD engines which assign the same potential
+ |      parameters for all identical element types.
+ |
+ |      Returns
+ |      -------
+ |      dict
+ |          ``element:atom pairs``, where ``atom`` is a single ``Atom`` of the
+ |          specified ``element``.
+ |
+ |  element_list
+ |      The elements of the atoms in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The elements in the ``Universe``
+ |
+ |  element_lookup
+ |      Get the elements by ID in the ``Universe``
+ |
+ |      This is required for MD engines which assign the same potential
+ |      parameters for all identical element names.
+ |
+ |      Returns
+ |      -------
+ |      dict
+ |          ``element:atom pairs``, where ``atom`` is a single ``Atom`` of the
+ |          specified ``element``.
+ |
+ |  equivalent_top_level_structures_dict
+ |      Get a `dict` of equivalent top level ``Structure`` objects that
+ |      exist in the ``Universe`` as keys, and the number of ``Structure``
+ |      that are equivalent to the key as a value. This does not include any
+ |      ``Structure`` that are a subunit of another structure belonging
+ |      to the ``Universe``.
+ |
+ |
+ |      Returns
+ |      -------
+ |      dict
+ |          The top level ``Structure`` objects in the ``Universe`` as
+ |          keys, and the number of each as a value
+ |
+ |  force_fields
+ |      Get the ``ForceField`` acting on the ``Universe``
+ |
+ |      The available force fields are:
+ |      TIP3P, SPC, OPLSAA, TIP3PFB, SPCE
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          ``ForceField`` that applies to the ``Universe``
+ |
+ |  interactions
+ |      Get the interactions in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The interactions in the ``Universe``
+ |
+ |  molecule_list
+ |      Get a list of the ``Molecule`` objects in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The ``Molecule`` objects in the ``Universe``
+ |
+ |  n_atoms
+ |      Get the number of atoms in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      int
+ |          The number of atoms in the ``Universe``
+ |
+ |  n_bonded
+ |      Get the number of bonded interactions in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      int
+ |          The number of bonded interactions in the ``Universe``
+ |
+ |  n_interactions
+ |      Get the number of interactions in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      int
+ |          The number of interactions in the ``Universe``
+ |
+ |  n_molecules
+ |      Get the number of molecules in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      int
+ |          The number of molecules in the ``Universe``
+ |
+ |  n_nonbonded
+ |      Get the number of nonbonded interactions in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      int
+ |          The number of nonbonded interactions in the ``Universe``
+ |
+ |  nbis_by_atom_type_pairs
+ |      Generates a `dict` of all nonbonded interactions possessed by all
+ |      combinations of ``atom_type`` pairs in the ``Universe``.
+ |
+ |      Returns
+ |      -------
+ |      dict
+ |          A `dict` of ``{pair: interactions}`` pairs, where:
+ |              - ``pair`` is a `tuple` for a pair of ``atom_types`` in the
+ |                ``Universe``
+ |              - ``interactions`` is a list of nonbonded interactions that
+ |                exist for this ``pair`` of ``atom_types``
+ |
+ |          Any ``Dispersions`` in ``interactions`` are ones that exist
+ |          explicity for this ``pair``, whereas any ``Coulombics`` in
+ |          ``interactions`` are ones that exist for either of the
+ |          ``atom_types`` in ``pair``.
+ |
+ |  nonbonded_interactions
+ |      Get the nonbonded interactions in the ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The nonbonded interactions in the ``Universe``
+ |
+ |  parameters
+ |      Get the parameters of the interactions that exist within the
+ |      ``Universe``
+ |
+ |      Returns
+ |      -------
+ |      Parameters
+ |          The ``Parameters`` objects defined within ``Universe``
+ |
+ |  solvent_density
+ |
+ |  structure_list
+ |      Get a `list` of all ``Structure`` objects that exist in the
+ |      ``Universe``.  This includes all ``Structure`` that are a subunit
+ |      of another structure belonging to the ``Universe``.
+ |
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The ``Structure`` objects in the ``Universe``
+ |
+ |  top_level_structure_list
+ |      Get a `list` of the top level ``Structure`` objects that exist in the
+ |      ``Universe``. This does not include any ``Structure`` that are a subunit
+ |      of another structure belonging to the ``Universe``.
+ |
+ |
+ |      Returns
+ |      -------
+ |      list
+ |          The top level ``Structure`` objects in the ``Universe``
+ |
+ |  volume
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |
+ |  dimensions
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |
+ |  __abstractmethods__ = frozenset()
+ |
+ |  __hash__ = None
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from MDMC.MD.container.AtomContainer:
+ |
+ |  __getitem__(self, index: Union[int, slice]) -&gt; Union[ForwardRef(&#39;Atom&#39;), ForwardRef(&#39;list[Atom]&#39;)]
+ |      Returns
+ |      -------
+ |      Atom, list
+ |          The atom (or atoms) for the specified index (or slice)
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from MDMC.MD.container.AtomContainer:
+ |
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+
+None
+</pre></div></div>
+</div>
+<p>Similarly, attributes returned also have the units documented. In this case, the unit for <code class="docutils literal notranslate"><span class="pre">velocity</span></code> is a compound unit for the properties <code class="docutils literal notranslate"><span class="pre">LENGTH</span></code> and <code class="docutils literal notranslate"><span class="pre">TIME</span></code> (<code class="docutils literal notranslate"><span class="pre">Ang</span></code> and <code class="docutils literal notranslate"><span class="pre">fs</span></code>):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[0. 0. 0.] Ang / fs
+</pre></div></div>
+</div>
+</section>
+<section id="Exceptional-Cases">
+<h2>Exceptional Cases<a class="headerlink" href="#Exceptional-Cases" title="Link to this heading"></a></h2>
+<p>There are some cases where the units expected by an MDMC object are not <code class="docutils literal notranslate"><span class="pre">SYSTEM</span></code> due to external conventions. For example, the <code class="docutils literal notranslate"><span class="pre">SYSTEM</span></code> unit for <code class="docutils literal notranslate"><span class="pre">ANGLE</span></code> is <code class="docutils literal notranslate"><span class="pre">deg</span></code>, but <code class="docutils literal notranslate"><span class="pre">HarmonicPotential</span></code> expects units of <code class="docutils literal notranslate"><span class="pre">kJ</span> <span class="pre">mol^-1</span> <span class="pre">rad^-2</span></code> when used for a <code class="docutils literal notranslate"><span class="pre">BondAngle</span></code>. As before, this information is available from the help function:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">HarmonicPotential</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">help</span><span class="p">(</span><span class="n">HarmonicPotential</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on class HarmonicPotential in module MDMC.MD.interaction_functions:
+
+class HarmonicPotential(InteractionFunction)
+ |  HarmonicPotential(equilibrium_state: float, potential_strength: float, **settings: dict)
+ |
+ |  Harmonic potential for bond stretching, and angular and improper dihedral
+ |  vibration, with the form:
+ |
+ |  .. math::
+ |
+ |      E = K(r-r_0)^2
+ |
+ |  As ``HarmonicPotential`` can be used with several different ``Interaction``
+ |  types, the ``Interaction`` type must be specified, so that the correct units
+ |  can be assigned to the ``equilibrium_state`` and ``potential_strength``
+ |  parameters.
+ |
+ |  Parameters
+ |  ----------
+ |  equilibrium_state : float
+ |      The equilibrium state of the object in either ``Ang`` or ``degrees``,
+ |      depending on the ``interaction_type`` passed.
+ |  potential_strength : float
+ |      The potential strength in units of ``kJ mol^-1 Ang^-2`` (linear) or
+ |      ``kJ mol^-1 rad^-2`` (angular/improper), depending on the
+ |      ``interaction_type`` passed.
+ |  **settings
+ |      interaction_type : str
+ |          A `str` specifying either ``&#39;bond&#39;``, ``&#39;angle&#39;`` or ``&#39;improper&#39;``.
+ |          This assigns the correct units to ``equilibrium_state`` and
+ |          ``potential_strength``. This keyword must be passed.
+ |
+ |  Raises
+ |  ------
+ |  ValueError
+ |      The ``interaction_type`` must be ``&#39;bond&#39;``, ``&#39;angle&#39;``, or
+ |      ``&#39;improper&#39;``
+ |  TypeError
+ |      An ``interaction_type`` of ``&#39;bond&#39;``, ``&#39;angle&#39;``, or ``&#39;improper&#39;``
+ |      must be passed
+ |
+ |  Examples
+ |  --------
+ |  The following creates a ``HarmonicPotential`` for a ``Bond`` interaction:
+ |
+ |  .. highlight:: python
+ |  .. code-block:: python
+ |
+ |      hp = HarmonicPotential(1., 4637., interaction_type=&#39;bond&#39;)
+ |
+ |  The following creates a ``HarmonicPotential`` for a ``BondAngle``
+ |  interaction:
+ |
+ |  .. highlight:: python
+ |  .. code-block:: python
+ |
+ |      hp = HarmonicPotential(109.47, 383., interaction_type=&#39;angle&#39;)
+ |
+ |  The following creates a ``HarmonicPotential`` for a ``DihedralAngle``
+ |  interaction with ``improper==True`` (i.e. an improper dihedral):
+ |
+ |  .. highlight:: python
+ |  .. code-block:: python
+ |
+ |      hp = HarmonicPotential(180., 20.92, interaction_type=&#39;improper&#39;)
+ |
+ |  Method resolution order:
+ |      HarmonicPotential
+ |      InteractionFunction
+ |      builtins.object
+ |
+ |  Methods defined here:
+ |
+ |  __init__(self, equilibrium_state, potential_strength, **settings)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |
+ |  ----------------------------------------------------------------------
+ |  Static methods defined here:
+ |
+ |  __new__(cls, equilibrium_state: float, potential_strength: float, **settings: dict)
+ |      Create and return a new object.  See help(type) for accurate signature.
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from InteractionFunction:
+ |
+ |  __eq__(self, other)
+ |      Return self==value.
+ |
+ |  __repr__(self)
+ |
+ |  __str__(self) -&gt; str
+ |      Return str(self).
+ |
+ |  set_parameters_interactions(self, interaction: &#39;Interaction&#39;) -&gt; None
+ |      Sets the ``parent`` ``Interaction`` for all ``Parameters`` objects
+ |
+ |      Parameters
+ |      ----------
+ |      interaction : Interaction
+ |          An ``Interaction`` to set as the ``parent`` of all the
+ |          ``Parameters``
+ |
+ |  ----------------------------------------------------------------------
+ |  Readonly properties inherited from InteractionFunction:
+ |
+ |  name
+ |      Get the name of the class of the ``InteractionFunction``
+ |
+ |      Returns
+ |      -------
+ |      str
+ |          The class name
+ |
+ |  parameters_values
+ |      Get the values for all ``Parameters`` objects
+ |
+ |      Returns
+ |      -------
+ |      numpy.ndarray
+ |          A NumPy ``array`` of values for all ``Parameter``
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from InteractionFunction:
+ |
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+ |
+ |  parameters
+ |      Get or set the interaction function&#39;s parameters
+ |
+ |      Returns
+ |      -------
+ |      Parameters
+ |          A Parameters object containing each ``Parameter``
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes inherited from InteractionFunction:
+ |
+ |  __hash__ = None
+
+None
+</pre></div></div>
+</div>
+<p>Another example is <code class="docutils literal notranslate"><span class="pre">energy_resolution</span></code> being expected in units of <code class="docutils literal notranslate"><span class="pre">ueV</span></code> rather than the <code class="docutils literal notranslate"><span class="pre">meV</span></code> used for <code class="docutils literal notranslate"><span class="pre">ENERGY_TRANSFER</span></code> elsewhere:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.control</span> <span class="kn">import</span> <span class="n">Control</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">help</span><span class="p">(</span><span class="n">Control</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on class Control in module MDMC.control.control:
+
+class Control(builtins.object)
+ |  Control(simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;MMC&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, **settings: dict)
+ |
+ |  Controls the MDMC refinement
+ |
+ |  Parameters
+ |  ----------
+ |  simulation : Simulation
+ |      Performs a simulation for a given set of potential ``Parameter``
+ |      objects.
+ |  exp_datasets : list of dicts
+ |      Each `dict` represents an experimental dataset, containing the
+ |      following keys:
+ |        - ``file_name`` (`str`) the file name
+ |        - ``type`` (`str`) the type of observable
+ |        - ``reader`` (`str`) the reader required for the file
+ |        - ``weighting`` (`float`) the weighting of the dataset to be used in
+ |          the Figure of Merit calculation
+ |        - ``resolution`` : (`dict`, but can be `str`, `float`, or None)
+ |          Should be a one-line dict of format {&#39;file&#39; : str} or {key : float}
+ |          if {&#39;file&#39; : str}, the str should be a file in
+ |          the same format as ``file_name`` containing results of a vanadium
+ |          sample which is used to determine instrument energy resolution for
+ |          this dataset.
+ |          If {key : float}, the key should be the type of resolution function.
+ |          allowed types are &#39;gaussian&#39; and &#39;lorentzian&#39;
+ |          Can also be &#39;lazily&#39; given as just a `str` or `float`.
+ |          If just a string is given, it is assumed to be a filename.
+ |          If just a float is given, it is assumed to be Gaussian.
+ |          The float should be the instrument energy resolution as the FWHM in ``ueV`` (micro eV).
+ |          If you have already accounted for instrument resolution in your dataset,
+ |          this field can be set to None, and resolution application will be skipped.
+ |          This must be done explicitly.
+ |        - ``rescale_factor`` (`float`, optional, defaults to `1.`) applied to
+ |          the experimental data when calculating the FoM to ensure it is on
+ |          the same scale as the calculated observable
+ |        - ``auto_scale`` (`bool`, optional, defaults to `False`) set the
+ |          ``rescale_factor`` automatically to minimise the FoM, if both
+ |          ``rescale_factor`` and ``auto_scale`` are provided then a warning
+ |          is printed and ``auto_scale`` takes precedence
+ |        - ``use_FFT`` (`bool`, optional, defaults to `True`) whether to use
+ |          Fast Fourier Transforms in the calculation of dependent variables.
+ |          FFT speeds up calculation but places restrictions on spacing in the
+ |          independent variable domain(s). This option may not be supported
+ |          for all ``Observable``s
+ |      Note that the default (and preferred) behaviour of the scaling settings requires that the
+ |      dataset provided has been properly scaled and normalised for the refinement process.
+ |      Arbitrary or automatic rescaling should be undertaken with care, as it does not take into
+ |      account any physical aspects of scaling the data, such as the presence or absence of
+ |      background events from peaks outside its range.
+ |  fit_parameters : Parameters, list of Parameter
+ |      All parameters which will be refined. Note that any ``Parameter`` that is ``fixed``,
+ |      ``tied`` or equal to 0 will not be passed to the minimizer as these cannot be refined.
+ |      Those with ``constraints`` set are still passed.
+ |  minimizer_type : str, optional
+ |      The ``Minimizer`` type. Default is &#39;MMC&#39;.
+ |  FoM_options : dict of {str : str}, optional
+ |      Defines the details of the ``FigureOfMeritCalculator`` to use. Default is `None`, in which
+ |      case the first option for each of the following keys is used:
+ |        - ``errors`` {&#39;exp&#39;, &#39;none&#39;} Whether to weight the differences between MD and
+ |          experimental data with the experimental error or not (errors from MD are not currently
+ |          supported).
+ |        - ``norm`` {&#39;data_points&#39;, &#39;dof&#39;, &#39;none&#39;} How to normalise the FoM, either by the total
+ |          number of data_points (n), the degrees of freedom (n - m, where m is the number of
+ |          parameters being varied), or not at all.
+ |  reset_config : bool, optional
+ |      Determines if the configuration is reset to the end of the last accepted
+ |      state. Default is `True`.
+ |  MD_steps : int, optional
+ |          Number of molecular dynamics steps for each step of the refinement.
+ |          When not provided, the minimum number of steps needed for successful
+ |          calculation of the observables is used. If provided, the actual number
+ |          of steps may be reduced to prevent running MD that won&#39;t be used when
+ |          calculating dependent variables. Default is `None`.
+ |  equilibration_steps : int, optional
+ |          Number of molecular dynamics steps used to equilibrate the ``Universe``
+ |          in between each refinement step. When changes to the ``Parameters`` are small,
+ |          this equilibration can be much shorter than the equilibration needed before
+ |          starting the refinement process, but in general will vary depending on
+ |          the details of the ``Universe`` and ``Parameters``. Default is 0.
+ |  verbose: int, optional
+ |          The level of verbosity:
+ |          Verbose level -1 hides all outputs for tests.
+ |          Verbose level 0 gives no information.
+ |          Verbose level 1 gives final time for the whole method.
+ |          Verbose level 2 gives final time and also a progress bar.
+ |          Verbose level 3 gives final time, a progress bar, and time per step.
+ |  print_full_settings: bool, optional
+ |      Whether to print all settings/attributes/parameters passed to this object,
+ |      defaults to False.
+ |  **settings: dict, optional
+ |      n_steps: int
+ |          The maximum number of refinement steps to be. An optional parameter that,
+ |          if specified, will be used in the ``refine`` method unless a different value
+ |          of ``n_steps`` is explicitly passed when running ``refine``.
+ |      cont_slicing : bool, optional
+ |          Flag to decide between two possible behaviours when the number of ``MD_steps`` is
+ |          larger than the minimum required to calculate the observables. If ``False`` (default)
+ |          then the ``CompactTrajectory`` is sliced into non-overlapping sub-``CompactTrajectory``
+ |          blocks for each of which the observable is calculated. If ``True``, then the
+ |          ``CompactTrajectory`` is sliced into as many non-identical sub-``CompactTrajectory``
+ |          blocks as possible (with overlap allowed).
+ |      results_filename: str
+ |          The name of the file in which the results of the MDMC run will be stored
+ |      MC_norm: int
+ |          1 if the MMC minimiser is to be used for parameter optimisation.
+ |      use_average : bool, optional
+ |          Optional parameter relevant in case ``MD_steps`` is larger than the minimum required
+ |          and the MD ``CompactTrajectory`` is sliced into sub-``CompactTrajectory`` blocks.
+ |          If ``True`` (default) the observables are averaged over the sub-``CompactTrajectory``
+ |          blocks. If ``False`` they are not averaged.
+ |      data_printer: str, default &#39;plaintext&#39;
+ |          How to display the data during minimisation. Current options are &#39;plaintext&#39; (default,
+ |          plaintext printing) or &#39;ipython&#39; (prettier HTML printing via iPython)
+ |      time_step_reductions : int, optional
+ |          The number of attempts to reduce the time_step of the simulation in order to fix an
+ |          equilibration that keeps failing. Defaults to a value of 2.
+ |
+ |  Example
+ |  -------
+ |  An example of an exp_dataset list is::
+ |
+ |      [{&#39;file_name&#39;:data.LAMP_SQW_FILE,
+ |        &#39;type&#39;:&#39;SQw&#39;,
+ |        &#39;reader&#39;:&#39;LAMPSQw&#39;,
+ |        &#39;weight&#39;:1.,
+ |        &#39;resolution&#39;:{&#39;file&#39;:data.LAMP_SQW_VAN_FILE}
+ |        &#39;rescale_factor&#39;:0.5},
+ |       {&#39;file_name:data.ANOTHER_FILE&#39;,
+ |        &#39;type&#39;:&#39;FQt&#39;,
+ |        &#39;reader&#39;:&#39;GENERIC_READER&#39;,
+ |        &#39;weight&#39;:0.5,
+ |        &#39;resolution&#39;:{&#39;gaussian&#39;:2.35}
+ |        &#39;auto_scale&#39;:True}]
+ |
+ |  Attributes
+ |  ----------
+ |  simulation : Simulation
+ |      The ``Simulation`` on which is used to perform the refinement
+ |  exp_datasets : `list of dicts`
+ |      One `dict` per experimental dataset used for the refinement
+ |  fit_parameters : Parameters
+ |      All ``Parameter`` objects which will be refined
+ |  minimizer : Minimizer
+ |      Refines the potential parameters.
+ |  observable_pairs : `list` of ``ObservablePairs``
+ |      Experimental observable/MD observable pairs which are used to calculate
+ |      the Figure of Merit
+ |  FoM_calculator : FigureOfMeritCalculator
+ |      Calculates the FoM `float` from the ``observable_pairs``.
+ |  MD_steps : `int`
+ |      Number of molecular dynamics steps for each step of the refinement
+ |
+ |  Methods defined here:
+ |
+ |  __init__(self, simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;MMC&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, **settings: dict)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |
+ |  __repr__(self)
+ |
+ |  __str__(self) -&gt; str
+ |      Return str(self).
+ |
+ |  calculating_max_FoM(self)
+ |      Calculates a maximum Figure of Merit value by comparing a set of experimental observable
+ |      data, to arrays consisting of numbers close to zero. For use when the MD Engine fails with
+ |      a set of parameter values.
+ |
+ |      Returns
+ |      -------
+ |      max_FoM : int
+ |          value of maximum FoM
+ |
+ |  engine_recovery_from_equil(self, n_steps: int, verbose: bool, output_log: str, work_dir: str, **settings: dict) -&gt; None
+ |      Handles an MDEngineError thrown by the MD engine. Currently this error is only raised by
+ |      LAMMPS.
+ |
+ |      The time_step is reduced, and the engine cleared, and then an equilibration is performed.
+ |      If the equilibration is unsuccessful when the attempt limit is reached, an MDEngineError is
+ |      raised.
+ |
+ |      Parameters
+ |      ----------
+ |      n_steps : int
+ |          Number of simulation steps to run.
+ |      verbose: bool, optional
+ |          Whether to print statements upon starting and completing the run.
+ |      output_log: str, optional
+ |          Log file for the MD engine to write to.
+ |      work_dir: str, optional
+ |          Working directory for the MD engine to write to.
+ |
+ |      Returns
+ |      -------
+ |      None
+ |
+ |  equilibrate(self, n_steps: int = None, verbose: bool = False, output_log: str = None, work_dir: str = None, **settings: dict) -&gt; None
+ |      Run molecular dynamics to equilibrate the ``Universe``.
+ |
+ |      If the equilibration fails, a method to reduce the time_step and re-try, is called.
+ |      If this re-try also fails, then an MDEngineError is raised.
+ |
+ |      Parameters
+ |      ----------
+ |      n_steps : int
+ |          Number of simulation steps to run.
+ |      verbose: bool, optional
+ |          Whether to print statements upon starting and completing the run.
+ |          Default is `False`.
+ |      output_log: str, optional
+ |          Log file for the MD engine to write to. Default is `None`.
+ |      work_dir: str, optional
+ |          Working directory for the MD engine to write to. Default is `None`.
+ |
+ |  minimize(self, n_steps: int, minimize_every: int = 10, verbose: bool = False, output_log: str = None, work_dir: str = None, **settings: dict) -&gt; None
+ |      Performs an MD run intertwined with periodic structure relaxation.
+ |      This way after a local minimum is found, the system is taken
+ |      out of the minimum to explore a larger volume of the parameter
+ |      space.
+ |
+ |      Parameters
+ |      ----------
+ |      n_steps : int
+ |          Total number of the MD run steps
+ |      minimize_every: int, optional
+ |          Number of MD steps between two consecutive minimizations
+ |      verbose: bool, optional
+ |          Whether to print statements when the minimization has been started and completed
+ |          (including the number of minimization steps and time taken). Default is `False`.
+ |      output_log: str, optional
+ |          Log file for the MD engine to write to. Default is `None`.
+ |      work_dir: str, optional
+ |          Working directory for the MD engine to write to. Default is `None`.
+ |      **settings
+ |          ``etol`` (`float`)
+ |              If the energy change between iterations is less than ``etol``,
+ |              minimization is stopped. Default depends on engine used.
+ |          ``ftol`` (`float`)
+ |              If the magnitude of the global force is less than ``ftol``,
+ |              minimization is stopped. Default depends on engine used.
+ |          ``maxiter`` (`int`)
+ |              Maximum number of iterations of a single structure
+ |              relaxation procedure. Default depends on engine used.
+ |          ``maxeval`` (`int`)
+ |              Maximum number of force evaluations to perform. Default depends
+ |              on engine used.
+ |
+ |  plot_results(self, filename: str = None, points: int = 100000, MH_norm: float = 20.0) -&gt; None
+ |      Instantiates an insstance of the PlotResults class and generates a cornerplot
+ |      from the data in self.results_filename
+ |
+ |      Parameters
+ |      ----------
+ |      filename : str, optional
+ |          The filename and path to the history file. Defaults to None which
+ |          then uses self.results_filename
+ |      points : int, optional
+ |          The number of samples to initially generate, defaults to 100,000
+ |      MH_norm : float, optional
+ |          The denominator of the exponent, controlling how likley points are to be kept,
+ |          defaults to 20.0
+ |
+ |      Returns
+ |      -------
+ |      corner plot : Matplotlib.figure.Figure
+ |          A plot displaying every parameter combination with their variances and covariances
+ |
+ |  refine(self, n_steps: int = None) -&gt; None
+ |      Refines the specified potential parameters
+ |
+ |      Parameters
+ |      ----------
+ |      n_steps : int
+ |          Maximum number of steps for the refinement. Must be specified either when creating
+ |          the ``Control`` object or when calling this method. The value specified to this
+ |          method supersedes the value passed (if any) when the ``Control`` object was created.
+ |          If nothing is passed, the method will check if a number was specified when the
+ |          ``Control`` object was created and use that value.
+ |
+ |      Examples
+ |      --------
+ |      Perform a refinement with a maximum of 100 steps:
+ |
+ |          .. highlight:: python
+ |          .. code-block:: python
+ |
+ |          control.refine(100)
+ |
+ |  resetting_engine(self) -&gt; None
+ |      Clears and resets the MD engine when there is an error thrown by the
+ |      equilibration or production methods. Currently this is only applicable to LAMMPS.
+ |
+ |  step(self, bad_param_location: bool = False) -&gt; None
+ |      Do a full step: generate and run MD to calculate FoM for existing
+ |      parameters, iterate parameters a step forward and reset MD (phasespace)
+ |      if previous step was rejected and reset_config = true
+ |
+ |      Parameters
+ |      ---------
+ |      bad_param_location : bool
+ |          Represents whether the equilibration at these parameter value failed or not.
+ |          If equilibration failed, value is True.
+ |
+ |  trial_reduce_time_step(self, reduction_factor) -&gt; None
+ |      Reduces the time_step by the reduction factor specified.
+ |
+ |      Parameters
+ |      ----------
+ |      reduction_factor : float
+ |          represents the value which will be multiplied with the time_step in order to reduce it
+ |
+ |      Returns
+ |      -------
+ |      None
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+
+None
+</pre></div></div>
+</div>
+</section>
+<section id="Converting-Units">
+<h2>Converting Units<a class="headerlink" href="#Converting-Units" title="Link to this heading"></a></h2>
+<p>The conversion factor required to get to MDMC <code class="docutils literal notranslate"><span class="pre">SYSTEM</span></code> units from a general unit can be accessed by creating a new <code class="docutils literal notranslate"><span class="pre">Unit</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">general_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;kcal / Ang mol&#39;</span><span class="p">)</span>
+<span class="n">SYSTEM_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">[</span><span class="n">general_unit</span><span class="o">.</span><span class="n">physical_property</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;To convert from `</span><span class="si">{0}</span><span class="s1">` to `</span><span class="si">{1}</span><span class="s1">`, multiply by a factor of </span><span class="si">{2}</span><span class="s1">&#39;</span>
+      <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">general_unit</span><span class="p">,</span> <span class="n">SYSTEM_unit</span><span class="p">,</span> <span class="n">general_unit</span><span class="o">.</span><span class="n">conversion_factor</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;To convert from `</span><span class="si">{1}</span><span class="s1">` to `</span><span class="si">{0}</span><span class="s1">`, divide by a factor of </span><span class="si">{2}</span><span class="s1">&#39;</span>
+      <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">general_unit</span><span class="p">,</span> <span class="n">SYSTEM_unit</span><span class="p">,</span> <span class="n">general_unit</span><span class="o">.</span><span class="n">conversion_factor</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+To convert from `kcal / Ang mol` to `kJ / Ang mol`, multiply by a factor of 4.184
+To convert from `kJ / Ang mol` to `kcal / Ang mol`, divide by a factor of 4.184
+</pre></div></div>
+</div>
+<p>For example, to create an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> with a position in <code class="docutils literal notranslate"><span class="pre">nm</span></code> rather <code class="docutils literal notranslate"><span class="pre">Ang</span></code>, then access that value in <code class="docutils literal notranslate"><span class="pre">m</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">position_nm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,])</span>
+<span class="n">position_ang</span> <span class="o">=</span> <span class="n">position_nm</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;nm&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">conversion_factor</span>
+<span class="n">atom</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position_ang</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Atom position in `m` is </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">)</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">conversion_factor</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Atom position in `m` is [1.e-09 1.e-09 1.e-09]
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="running-a-refinement.html" class="btn btn-neutral float-left" title="Running a Refinement (in detail)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../how-to/use-MDMC.html" class="btn btn-neutral float-right" title="How to use MDMC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equilibrating simulations &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Running a Refinement (in detail)" href="running-a-refinement.html" />
+    <link rel="prev" title="Argon A-to-Z" href="Argon-a-to-z.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Equilibrating simulations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#What-is-equilibration?">What is equilibration?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Avoiding-under--or-over--equilibrating">Avoiding under- or over- equilibrating</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Equilibrating simulations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/equilibrating-a-simulation.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Equilibrating-simulations">
+<h1>Equilibrating simulations<a class="headerlink" href="#Equilibrating-simulations" title="Link to this heading"></a></h1>
+<p>In this tutorial we will explain what equilibration of a simulation is and how MDMC can ensure enough equilibration has been done before running the simulation.</p>
+<section id="What-is-equilibration?">
+<h2>What is equilibration?<a class="headerlink" href="#What-is-equilibration?" title="Link to this heading"></a></h2>
+<p>Equilibration of a simulation involves running the simulation for a short period of time to make it ready for a ‘production run’ (i.e. one in which we record trajectories).</p>
+<p>When the simulation is first set up, it has usually been configured in a certain way such as having atoms spaced in a grid at certain densities. We don’t want this to affect our trajectories, and we also want properties like kinetic and potential energies to be distributed around the simulation so that it better reflects the ‘real-life’ behaviour of molecules.</p>
+<p>First, let us create and minimize an MDMC <code class="docutils literal notranslate"><span class="pre">Simulation</span></code>. Minimization, like equilibration, is a short run of the MD simulation which resolves issues like atoms overlapping (which would affect energy readings for the simulation).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Universe</span><span class="p">,</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">LennardJones</span>
+
+<span class="c1"># create the topology</span>
+<span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="mf">23.0668</span><span class="p">)</span>
+<span class="n">Ar</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;Ar&#39;</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="mf">36.0</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">Ar</span><span class="p">,</span> <span class="n">num_density</span><span class="o">=</span><span class="mf">0.0176</span><span class="p">)</span>
+
+<span class="c1"># define intermolecular forces</span>
+<span class="n">Ar_dispersion</span> <span class="o">=</span> <span class="n">Dispersion</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span>
+                           <span class="p">(</span><span class="n">Ar</span><span class="o">.</span><span class="n">atom_type</span><span class="p">,</span> <span class="n">Ar</span><span class="o">.</span><span class="n">atom_type</span><span class="p">),</span>
+                           <span class="n">cutoff</span><span class="o">=</span><span class="mf">8.</span><span class="p">,</span>
+                           <span class="n">function</span><span class="o">=</span><span class="n">LennardJones</span><span class="p">(</span><span class="n">epsilon</span><span class="o">=</span><span class="mf">1.0243</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">3.36</span><span class="p">))</span>
+
+<span class="c1"># MD Engine setup</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span>
+                        <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;lammps&quot;</span><span class="p">,</span>
+                        <span class="n">time_step</span><span class="o">=</span><span class="mf">10.18893</span><span class="p">,</span>
+                        <span class="n">temperature</span><span class="o">=</span><span class="mf">120.</span><span class="p">,</span>
+                        <span class="n">traj_step</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+<span class="n">simulation</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Universe created with:
+Dimensions [23.07 23.07 23.07]
+LAMMPS (29 Sep 2021 - Update 3)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
+LAMMPS (29 Sep 2021 - Update 3)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
+Total wall time: 0:00:00
+Simulation created with lammps engine and settings:
+temperature: 120.0 K
+
+
+</pre></div></div>
+</div>
+<p>We can then equilibrate the simulation. This is done by calling <code class="docutils literal notranslate"><span class="pre">simulation.run</span></code> with <code class="docutils literal notranslate"><span class="pre">equilibration=True</span></code>. Normally, to run for, say, 5000 steps, call <code class="docutils literal notranslate"><span class="pre">simulation.run(n_steps=5000,</span> <span class="pre">equilibration=True)</span></code>, but here we will put it in a <code class="docutils literal notranslate"><span class="pre">for</span></code> loop that will record how the temperature and potential energy of the simulation changes over time and run the equilibration in smaller chunks.</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">engine.eval()</span></code> evaluates variables in the simulation’s MD engine; <code class="docutils literal notranslate"><span class="pre">temp</span></code> and <code class="docutils literal notranslate"><span class="pre">pe</span></code> are the LAMMPS names for temperature and potential energy. It may vary in other MD engines.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">temperatures</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">potentials</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">500</span><span class="p">):</span>
+    <span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">temperatures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;temp&#39;</span><span class="p">))</span>
+    <span class="n">potentials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;pe&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>This can then be plotted as graphs of how these properties change over time with matplotlib. We create a plot function so we can use it later.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">plot_vars</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="n">potentials</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temperatures</span><span class="p">))</span><span class="o">*</span><span class="mi">10</span><span class="p">,</span> <span class="n">temperatures</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Temperature (K)&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;lime&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">potentials</span><span class="p">))</span><span class="o">*</span><span class="mi">10</span><span class="p">,</span> <span class="n">potentials</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time (steps)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Potential energy (kcal/mol)&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;lime&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">plot_vars</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="n">potentials</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_equilibrating-a-simulation_6_0.png" src="../_images/tutorials_equilibrating-a-simulation_6_0.png" />
+</div>
+</div>
+<p>We can see that at first there is a lot of change, and around 2000 steps both quantities cease to increase or decrease in any meaningful way; there is, of course, slight oscillation and uncertainty in the readings (which is unavoidable in molecular dynamics simulation), but ultimately it is stationary. Once this stationary behaviour has been reached, we would consider the simulation to have equilibrated successfully.</p>
+</section>
+<section id="Avoiding-under--or-over--equilibrating">
+<h2>Avoiding under- or over- equilibrating<a class="headerlink" href="#Avoiding-under--or-over--equilibrating" title="Link to this heading"></a></h2>
+<p>Indeed, the next question would be ‘how much equilibration is necessary?’. If we under-equilibrate, then it will affect our observed trajectory when we run the simulation. If we over-equilibrate, then we can waste time. How can we detect, on the fly, when our system is equilibrated?</p>
+<p>MDMC features ‘auto-equilibration’, which analyses how variables change as equilibration progresses, and automatically halts the equilibration when it has determined these variables to be stationary. User-defined parameters can determine the sensitivity of this, as well as what is analysed.</p>
+<p>To auto-equilibrate, create a simulation and then run <code class="docutils literal notranslate"><span class="pre">simulation.auto_equilibrate()</span></code>. It returns the number of steps it used to equilibrate as well as data for the tracked variables.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span>
+                        <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;lammps&quot;</span><span class="p">,</span>
+                        <span class="n">time_step</span><span class="o">=</span><span class="mf">10.18893</span><span class="p">,</span>
+                        <span class="n">temperature</span><span class="o">=</span><span class="mf">120.</span><span class="p">,</span>
+                        <span class="n">traj_step</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+<span class="n">simulation</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">total_steps</span><span class="p">,</span> <span class="n">vals_dict</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">auto_equilibrate</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+LAMMPS (29 Sep 2021 - Update 3)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
+LAMMPS (29 Sep 2021 - Update 3)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
+  using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
+Total wall time: 0:00:00
+Simulation created with lammps engine and settings:
+temperature: 120.0 K
+
+
+Auto-equilibration has detected stability after 1210 equilibration steps.
+</pre></div></div>
+</div>
+<p>As before, we can graph these variables. Note that the graph seems a lot less ‘noisy’; this is purely due to the different x-scale as we finish much sooner!</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">auto_temps</span> <span class="o">=</span> <span class="n">vals_dict</span><span class="p">[</span><span class="s1">&#39;temp&#39;</span><span class="p">]</span>
+<span class="n">auto_potentials</span> <span class="o">=</span> <span class="n">vals_dict</span><span class="p">[</span><span class="s1">&#39;pe&#39;</span><span class="p">]</span>
+
+<span class="n">plot_vars</span><span class="p">(</span><span class="n">auto_temps</span><span class="p">,</span> <span class="n">auto_potentials</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_equilibrating-a-simulation_12_0.png" src="../_images/tutorials_equilibrating-a-simulation_12_0.png" />
+</div>
+</div>
+<p>And finally, we can see on the original equilibration graphs where the auto-equilibration considered the graph to be stationary.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_vars</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="n">potentials</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="n">total_steps</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_equilibrating-a-simulation_14_0.png" src="../_images/tutorials_equilibrating-a-simulation_14_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Argon-a-to-z.html" class="btn btn-neutral float-left" title="Argon A-to-Z" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="running-a-refinement.html" class="btn btn-neutral float-right" title="Running a Refinement (in detail)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

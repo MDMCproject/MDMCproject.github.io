@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Figure of Merit (FoM) &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Minimizers" href="minimizers.html" />
+    <link rel="prev" title="Explanation" href="explanation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="explanation.html">Explanation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Figure of Merit (FoM)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-is-the-figure-of-merit">What is the figure of merit?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-does-mdmc-use-the-figure-of-merit">How does MDMC use the figure of merit?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-chi-squared-figure-of-merit-test">The chi-squared figure of merit test</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rescaling">Rescaling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="minimizers.html">Minimizers</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="explanation.html">Explanation</a></li>
+      <li class="breadcrumb-item active">Figure of Merit (FoM)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/explanation/figure-of-merit.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="figure-of-merit-fom">
+<span id="fom-explanation-label"></span><h1>Figure of Merit (FoM)<a class="headerlink" href="#figure-of-merit-fom" title="Link to this heading"></a></h1>
+<section id="what-is-the-figure-of-merit">
+<h2>What is the figure of merit?<a class="headerlink" href="#what-is-the-figure-of-merit" title="Link to this heading"></a></h2>
+<p>When we fit a model to some data, the figure of merit is the value of a <a class="reference external" href="https://mathworld.wolfram.com/MeritFunction.html">merit function</a>,
+which calculates how different the model is from the data. This means we can use it as
+a quantitative assessment of how ‘good’ a model is; the smaller the figure of merit,
+the closer our model is to the data.</p>
+<p>MDMC uses the <a class="reference external" href="https://en.wikipedia.org/wiki/Chi-squared_test">chi-squared test</a> as a merit
+function; this is popular for non-linear optimisation.</p>
+<p>Indeed, from the use of chi-squared one can note overlap between hypothesis testing and
+assessment of merit - in hypothesis testing, our ‘model’ is the result we’d expect
+under the null hypothesis, and our data is the results of our experiment. The
+hypothesis test is a quantitative indicator of how different these are.</p>
+</section>
+<section id="how-does-mdmc-use-the-figure-of-merit">
+<h2>How does MDMC use the figure of merit?<a class="headerlink" href="#how-does-mdmc-use-the-figure-of-merit" title="Link to this heading"></a></h2>
+<p>MDMC uses figure of merit as the basis of refinement. We <a class="reference internal" href="../how-to/use-MDMC/notebooks/running-a-simulation.html"><span class="doc">create a simulation with some
+parameters</span></a>, calculate the
+figure of merit of a <a class="reference internal" href="../how-to/use-MDMC/notebooks/creating-an-observable.html"><span class="doc">dynamical property</span></a>
+between our simulation and experimental data, and use <a class="reference internal" href="minimizers.html#minimizer-explanation-label"><span class="std std-ref">Minimizers</span></a>
+to adjust the simulation parameters in order to minimize the figure of merit.</p>
+</section>
+<section id="the-chi-squared-figure-of-merit-test">
+<h2>The chi-squared figure of merit test<a class="headerlink" href="#the-chi-squared-figure-of-merit-test" title="Link to this heading"></a></h2>
+<p>In MDMC, the dynamical property is called an <cite>Observable</cite>. A number of datasets can be
+given to an optimisation with weights of how important each one is to the refinement.
+MDMC calculates the weighted average of the Figure of Merits:</p>
+<div class="math notranslate nohighlight">
+\[FoM_{total} = \sum_{i}\frac{FoM_{i}}{w_{i}}\]</div>
+<p>Here the weighted Figure of Merit for the <span class="math notranslate nohighlight">\(i\)</span>-th dataset, <span class="math notranslate nohighlight">\(FoM_{i}\)</span>, is given by
+a sum of the square difference between data points for a single pair of observables, normalised
+by the errors and the number of data points, i.e. the reduced chi-squared:</p>
+<div class="math notranslate nohighlight">
+\[FoM_{i} = \frac{w_{i}}{\nu_{i}} \sum\limits_{j} \frac{(D_{j}^{\textrm{exp}} - D_{j}^{\textrm{sim}})^2}{(\sigma_{j}^{\textrm{exp}})^2}\]</div>
+<p>where the sum is over the <span class="math notranslate nohighlight">\(N_{i}\)</span> data points in the pair of observables corresponding to
+the <span class="math notranslate nohighlight">\(i\)</span>-th dataset, and the normalisation factor <span class="math notranslate nohighlight">\(\nu_{i}\)</span> is either <span class="math notranslate nohighlight">\(N_{i}\)</span>,
+<span class="math notranslate nohighlight">\(N_{i} - M\)</span> where <span class="math notranslate nohighlight">\(M\)</span> is the number of fitting parameters, or <span class="math notranslate nohighlight">\(1\)</span>.
+<span class="math notranslate nohighlight">\(w_{i}\)</span> is an importance weighting assigned to the <span class="math notranslate nohighlight">\(i\)</span>-th dataset.</p>
+<p>The sets <span class="math notranslate nohighlight">\(D_{j}^{\textrm{sim}}\)</span> and <span class="math notranslate nohighlight">\(D_{j}^{\textrm{exp}}\)</span> are the individual data points of the
+experimental and simulated <code class="docutils literal notranslate"><span class="pre">Observable</span></code> respectively, and <span class="math notranslate nohighlight">\(\sigma_{j}^{\textrm{exp}}\)</span> corresponds
+to the error of the <span class="math notranslate nohighlight">\(j\)</span>-th data point. Note that the subtraction and division over
+the arrays are element-wise.</p>
+<section id="rescaling">
+<h3>Rescaling<a class="headerlink" href="#rescaling" title="Link to this heading"></a></h3>
+<p>Note also that if the experimental <code class="docutils literal notranslate"><span class="pre">Observable</span></code> is not on an absolute scale,
+an additional <code class="docutils literal notranslate"><span class="pre">rescale_factor</span></code> can be specified (or automatically determined) in the code
+to scale the experimental data points and errors by a simple linear scaling.</p>
+<p>If automatically determined, this rescaling is done to the value which minimizes the FoM. If we label
+the rescale factor <span class="math notranslate nohighlight">\(\lambda\)</span> then the minimum of the FoM is obtained as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}FoM_{i}(\lambda) &amp;=&amp; w_{i} \sum\limits_{j} \left(\frac{\lambda*D_{j}^{\textrm{exp}} - \\\\
+D_{j}^{\textrm{sim}}}{\lambda*\sigma_{j}^{\textrm{exp}}\right)^2 \\\\
+\left. \frac{dFoM_{i}}{d\lambda}\right|_{\lambda=\lambda_{\textrm{min}}} &amp;=&amp; 0 \\\\
+\lambda_{\textrm{min}} &amp;=&amp; \frac{A}{B} \\\\\end{split}\]</div>
+<p>where we have:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}A &amp;=&amp; \sum\limits_{j}\left(\frac{D_{j}^{\textrm{sim}}}{\sigma_{j}^{\textrm{exp}}}\right)^2 \\\\
+B &amp;=&amp; \sum\limits_{j} \frac{D_{j}^{\textrm{exp}}*D_{j}^{\textrm{sim}}}{(\sigma_{j}^{\textrm{exp}})^2}\end{split}\]</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="explanation.html" class="btn btn-neutral float-left" title="Explanation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="minimizers.html" class="btn btn-neutral float-right" title="Minimizers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

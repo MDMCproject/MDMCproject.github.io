@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.refinement.FoM.FoM_abs &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.refinement.FoM.FoM_abs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.refinement.FoM.FoM_abs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A module for Figure of Merits&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
+<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> <span class="n">Observable</span>
+
+
+<div class="viewcode-block" id="ObservablePair">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair">[docs]</a>
+<span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="s1">&#39;exp_obs&#39;</span><span class="p">,</span> <span class="s1">&#39;MD_obs&#39;</span><span class="p">,</span> <span class="s1">&#39;rescale_factor&#39;</span><span class="p">,</span> <span class="s1">&#39;auto_scale&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ObservablePair</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Contains a pair of observables for calculating the FoM</span>
+
+<span class="sd">    Checks the validity of observables</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    exp_obs : Observable</span>
+<span class="sd">        An ``Observable`` with ``Observable.origin == &#39;experiment&#39;``</span>
+<span class="sd">    MD_obs : Observable</span>
+<span class="sd">        An ``Observable`` with ``Observable.origin == &#39;MD&#39;``</span>
+<span class="sd">    weight : float</span>
+<span class="sd">        The relative weight of this pair on a total FoM</span>
+<span class="sd">    rescale_factor: float, optional</span>
+<span class="sd">        Factor applied to ``exp_obs`` when calculating the FoM to ensure it is</span>
+<span class="sd">        on the same scale as ``MD_obs``. Default is `1.`.</span>
+<span class="sd">    auto_scale: bool, optional</span>
+<span class="sd">        If `True`, ``rescale_factor`` is set automatically to minimise the FoM</span>
+<span class="sd">        for each step of the refinement, overriding a user specified value if</span>
+<span class="sd">        set. Note that this process is purely statistical and does not account</span>
+<span class="sd">        for physical effects that might impact the scaling. Default is `False`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp_obs</span><span class="p">:</span> <span class="n">Observable</span><span class="p">,</span> <span class="n">MD_obs</span><span class="p">:</span> <span class="n">Observable</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">rescale_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">auto_scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">exp_obs</span> <span class="o">=</span> <span class="n">exp_obs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">MD_obs</span> <span class="o">=</span> <span class="n">MD_obs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rescale_factor</span> <span class="o">=</span> <span class="n">rescale_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_scale</span> <span class="o">=</span> <span class="n">auto_scale</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exp_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Observable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the experimental ``Observable``</span>
+
+<span class="sd">        Setting the ``Observable`` checks its validity</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Observable</span>
+<span class="sd">            The experimental ``Observable``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exp_obs</span>
+
+    <span class="nd">@exp_obs</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">exp_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp_obs</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_obs</span><span class="p">(</span><span class="n">exp_obs</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exp_obs</span> <span class="o">=</span> <span class="n">exp_obs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">MD_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Observable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the MD ``Observable``</span>
+
+<span class="sd">        Setting the ``Observable`` checks its validity</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Observable</span>
+<span class="sd">            The MD ``Observable``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MD_obs</span>
+
+    <span class="nd">@MD_obs</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">MD_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_obs</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_obs</span><span class="p">(</span><span class="n">MD_obs</span><span class="p">,</span> <span class="s1">&#39;MD&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_MD_obs</span> <span class="o">=</span> <span class="n">MD_obs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the relative weight of this pair on a total FoM</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The relative weight</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If ``weight`` is set with a non-numeric</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span>
+
+    <span class="nd">@weight</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;weight must be a float&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_weight</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span> <span class="o">=</span> <span class="n">weight</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_averages</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, int]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The number of separate, complete dependent variable calculations we</span>
+<span class="sd">        have been able to perform for the ``Observable``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Each key represents a dependent variable, and the value is the</span>
+<span class="sd">            number of times we have calculated it</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n_averages</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">n_averages</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">n_averages</span>
+
+<div class="viewcode-block" id="ObservablePair.validate_obs">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.validate_obs">[docs]</a>
+    <span class="k">def</span> <span class="nf">validate_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observable</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs checks to test the validity of an ``Observable``</span>
+
+<span class="sd">        Tests that the ``Observable.origin`` is as expected. If the</span>
+<span class="sd">        ``ObservablePair`` has another ``Observable`` (i.e. the other</span>
+<span class="sd">        ``origin``), then this tests that the ``independent_variables`` are</span>
+<span class="sd">        identical, the ``dependent_variables`` have the same shape,</span>
+<span class="sd">        the ``errors`` have the same shape, and that the ``Observable`` objects</span>
+<span class="sd">        are of the same type.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        obs : Observable</span>
+<span class="sd">            The ``Observable`` to validate</span>
+<span class="sd">        origin : str</span>
+<span class="sd">            The ``Observable.origin`` (``&#39;experiment&#39;`` or ``&#39;MD&#39;``)</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If the ``Observable.origin`` is not the same as the ``origin``</span>
+<span class="sd">            Parameter</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If ``Observable`` does not have identical ``independent_variables``</span>
+<span class="sd">            to any ``Observable`` of the other ``Observable.origin`` that</span>
+<span class="sd">            already exists in the ``ObservablePair``</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If ``Observable`` does not have identical ``dependent_variables`` to</span>
+<span class="sd">            any ``Observable`` of the other ``Observable.origin`` that already</span>
+<span class="sd">            exists in the ``ObservablePair``</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If ``Observable`` does not have identical ``errors`` to any</span>
+<span class="sd">            ``Observable`` of the other ``Observable.origin`` that already</span>
+<span class="sd">            exists in the ``ObservablePair``</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If ``Observable`` does not have identical type to any ``Observable``</span>
+<span class="sd">            of the other ``Observable.origin`` that already exists in the</span>
+<span class="sd">            ``ObservablePair``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check origin is correct</span>
+        <span class="k">assert</span> <span class="n">obs</span><span class="o">.</span><span class="n">origin</span> <span class="o">==</span> <span class="n">origin</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;The observable does not have the correct&#39;</span>
+                                      <span class="s1">&#39; origin&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">obs</span><span class="o">.</span><span class="n">origin</span> <span class="o">==</span> <span class="s1">&#39;MD&#39;</span><span class="p">:</span>
+                <span class="n">other_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_obs</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">other_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MD_obs</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">other_obs</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Check independent variables are identical, check dependent variables</span>
+        <span class="c1"># have the same shapes, check errors have the same shapes, check</span>
+        <span class="c1"># observables have the same type</span>
+        <span class="k">if</span> <span class="n">other_obs</span><span class="p">:</span>
+            <span class="n">indep_e_mess</span> <span class="o">=</span> <span class="s1">&#39;Independent variables must be identical&#39;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">independent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span>
+                    <span class="n">other_obs</span><span class="o">.</span><span class="n">independent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">indep_e_mess</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">independent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span>
+                              <span class="n">other_obs</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span> <span class="n">indep_e_mess</span>
+
+            <span class="c1"># Try/except deals with empty observable case (no dependent</span>
+            <span class="c1"># variables and errors)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dep_e_mess</span> <span class="o">=</span> <span class="s1">&#39;Dependent variables must have the same shape&#39;</span>
+                <span class="k">assert</span> <span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span>
+                        <span class="n">other_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">dep_e_mess</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">other_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="n">k</span><span class="p">])),</span> \
+                        <span class="n">dep_e_mess</span>
+
+                <span class="n">err_e_mess</span> <span class="o">=</span> <span class="s1">&#39;Errors must have the same shape&#39;</span>
+                <span class="k">assert</span> <span class="n">obs</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="n">other_obs</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">err_e_mess</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">other_obs</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">k</span><span class="p">])),</span> <span class="n">err_e_mess</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">other_obs</span><span class="p">)),</span> <span class="p">(</span><span class="s1">&#39;Observables are not of&#39;</span>
+                                                      <span class="s1">&#39; the same type&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ObservablePair.validate_weight">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.validate_weight">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">validate_weight</span><span class="p">(</span><span class="n">weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs checks to test the validity of the ``weight``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        weight : float</span>
+<span class="sd">            The ``weight`` to be validated</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If the ``weight`` is not positive or is infinite</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="n">weight</span> <span class="o">&gt;</span> <span class="mf">0.</span> <span class="ow">and</span> <span class="n">weight</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Weight must be a&#39;</span>
+                                                        <span class="s1">&#39; finite positive&#39;</span>
+                                                        <span class="s1">&#39; float&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ObservablePair.check_types">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.check_types">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks that ``Observable`` objects are of the same type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="ObservablePair.check_indep_var">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.check_indep_var">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_indep_var</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks that ``Observable`` objects have the same</span>
+<span class="sd">        ``independent_variables`` and that are finite</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="ObservablePair.check_dep_var">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.check_dep_var">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_dep_var</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks that ``Observable`` objects have the same ``dependent_variables``</span>
+<span class="sd">        and that are finite</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="ObservablePair.check_errors">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.check_errors">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks that an ``Observable`` has errors on the ``dependent_variable``</span>
+<span class="sd">        and that these are `float` and not `NaN`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="ObservablePair.check_origin">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.check_origin">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks that the ``Observable.origin`` is correct</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -------</span>
+<span class="sd">        origin : str</span>
+<span class="sd">            A string consisting of either ``&#39;experiment&#39;`` or  ``&#39;MD&#39;``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="ObservablePair.calculate_difference">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.calculate_difference">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_difference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assumes a single dependent variable for each ``Observable``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array with the same dimensions as the ``dependent_variables`` of</span>
+<span class="sd">            the ``exp_obs`` and ``MD_obs``. The array contains the difference</span>
+<span class="sd">            between the ``dependent_variables`` taking the ``rescale_factor``</span>
+<span class="sd">            into account.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rescale_factor</span>
+                <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+        <span class="k">return</span> <span class="n">diff</span></div>
+
+
+<div class="viewcode-block" id="ObservablePair.calculate_errors">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.calculate_errors">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assumes a single dependent variable error for each ``Observable``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array with the same dimensions as the ``errors`` of the</span>
+<span class="sd">            ``exp_obs`` and ``MD_obs``. The array contains the combination of</span>
+<span class="sd">            the ``errors`` in quadrature, taking the ``rescale_factor`` into</span>
+<span class="sd">            account.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">errors</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_exp_errors</span><span class="p">()</span> <span class="o">**</span> <span class="mi">2</span>
+                  <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+
+        <span class="k">return</span> <span class="n">errors</span></div>
+
+
+<div class="viewcode-block" id="ObservablePair.calculate_exp_errors">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.ObservablePair.calculate_exp_errors">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_exp_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assumes a single dependent variable error for each ``Observable``.</span>
+<span class="sd">        Calculates only the experimental errors.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            An array with the same dimensions as the ``errors`` of the</span>
+<span class="sd">            ``exp_obs``, taking the ``rescale_factor`` into account.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rescale_factor</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="FigureOfMerit">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.FigureOfMerit">[docs]</a>
+<span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;obs_pairs&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">FigureOfMerit</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract class that defines methods common to all figure of merit</span>
+<span class="sd">    calculators</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    obs_pairs : list</span>
+<span class="sd">        A `list` of ``ObservablePairs``</span>
+<span class="sd">    norm : {&#39;data_points&#39;, &#39;dof&#39;, &#39;none&#39;}, optional</span>
+<span class="sd">        What method of normalisation to use when calculating the FoM for a single dataset.</span>
+<span class="sd">        Default is &#39;data_points&#39;.</span>
+<span class="sd">    n_parameters : int, optional</span>
+<span class="sd">        The number of parameters being refined. Optional if ``norm`` is either &#39;data_points&#39; or</span>
+<span class="sd">        &#39;none&#39;, but required when &#39;dof&#39;. Default is None.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    obs_pairs : list</span>
+<span class="sd">        A `list` of ``ObservablePairs``</span>
+<span class="sd">    value : float</span>
+<span class="sd">        The Figure of Merit for all ``obs_pairs``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">obs_pairs</span><span class="p">:</span> <span class="s1">&#39;list[ObservablePair]&#39;</span><span class="p">,</span>
+                 <span class="n">norm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;data_points&#39;</span><span class="p">,</span>
+                 <span class="n">n_parameters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">obs_pairs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_parameters</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;data_points&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;dof&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`n_parameters` must be provided if using &#39;</span>
+                                 <span class="s1">&#39;degrees of freedom normalisation.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_parameters</span> <span class="o">=</span> <span class="n">n_parameters</span>
+        <span class="k">elif</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unrecognised value for `norm` passed, should be &#39;</span>
+                             <span class="s1">&#39;one of &quot;data_points&quot;, &quot;dof&quot;, &quot;none&quot;, but it was &#39;</span>
+                             <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">norm</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FigureOfMerit.calculate">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.FigureOfMerit.calculate">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the FoM value by calculating the FoM for every</span>
+<span class="sd">        ``ObservablePair``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            A non-negative `float` Figure of Merit</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If calculated value of Figure of Merit is negative</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">total_weight</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">obs_pair</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">obs_pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_pairs</span><span class="p">)</span>
+        <span class="n">value_unreduced</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_single_FoM</span><span class="p">(</span><span class="n">obs_pair</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">obs_pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_pairs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value_unreduced</span> <span class="o">/</span> <span class="n">total_weight</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="mf">0.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="FigureOfMerit.data_norm_factor">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.FigureOfMerit.data_norm_factor">[docs]</a>
+    <span class="k">def</span> <span class="nf">data_norm_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the normalisation factor for ``obs_pair``. If ``self.norm`` is `True`, then</span>
+<span class="sd">        returns the number of data points less the number of refinement parameters if `&#39;dof&#39;`</span>
+<span class="sd">        normalisation was chosen, or just the number of data points for the default `&#39;data_points&#39;`</span>
+<span class="sd">        normalisation. If ``self.norm`` is `False`, then returns `1`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        obs_pair : ObservablePair</span>
+<span class="sd">            An ``ObservablePair`` for which the normalisation factor is calculated</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The normalisation factor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">:</span>
+            <span class="n">norm_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">obs_pair</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">norm_factor</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_parameters</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">norm_factor</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">norm_factor</span></div>
+
+
+<div class="viewcode-block" id="FigureOfMerit.calculate_single_FoM">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_abs.FigureOfMerit.calculate_single_FoM">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">calculate_single_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the FoM calculation specific to each FoM</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        obs_pair : ObservablePair</span>
+<span class="sd">            An ``ObservablePair`` for which the FoM is calculated</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The FoM for the ``obs_pair``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

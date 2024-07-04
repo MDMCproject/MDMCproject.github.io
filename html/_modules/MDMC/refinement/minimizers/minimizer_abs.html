@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.refinement.minimizers.minimizer_abs &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.refinement.minimizers.minimizer_abs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.refinement.minimizers.minimizer_abs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A module for all minimizers which can be iterated to refine the potential</span>
+<span class="sd">parameters&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Parameters</span>
+<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">MDMC.control</span> <span class="kn">import</span> <span class="n">Control</span>
+
+
+<div class="viewcode-block" id="Minimizer">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer">[docs]</a>
+<span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;FoM&#39;</span><span class="p">,</span> <span class="s1">&#39;FoM_old&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;parameters&#39;</span><span class="p">,</span> <span class="s1">&#39;parameters_old_values&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Minimizer</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An abstract class with methods common to all minimizers</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    control : Control</span>
+<span class="sd">        The ``Control`` object which uses this Minimizer.</span>
+<span class="sd">    parameters : Parameters or list of Parameter</span>
+<span class="sd">        A `list` of ``Parameter`` objects which will be fit</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    history : list</span>
+<span class="sd">        A `list` of minimization history, where each element contains the FoM, a</span>
+<span class="sd">        `list` of the ``Parameters`` and a `str` with whether the step was</span>
+<span class="sd">        Accepted or Rejected.</span>
+<span class="sd">    FoM : float</span>
+<span class="sd">        The FoM from the current ``Minimizer`` step</span>
+<span class="sd">    FoM_old : float</span>
+<span class="sd">        The FoM from the previous ``Minimizer`` step</span>
+<span class="sd">    parameters : Parameters</span>
+<span class="sd">        A ``Parameters`` object containing the ``Parameter`` objects being fitted</span>
+<span class="sd">    parameters_old_values : Parameters</span>
+<span class="sd">        A ``Parameters`` object containing the values of</span>
+<span class="sd">        the ``Parameter`` objects from the previous minimizer step</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="s1">&#39;Control&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
+                 <span class="n">previous_history</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">control</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_history</span> <span class="o">=</span> <span class="n">previous_history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FoM</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_history</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">previous_history</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">previous_history</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">previous_history</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_history</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">previous_history</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">FoM_old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compatible</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enforcing_minimizer_compatibility</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history_columns</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_parameters_fit_with_history</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_old_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameters_old_values</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">FoM_old</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters_old_values</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_steps</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Minimizer.step">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.step">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FoM</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Increments the minimization by a step</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        FoM : float</span>
+<span class="sd">            The current figure of merit value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the history of the minimizer, with a single entry for each step of</span>
+<span class="sd">        the minimizer</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            Contains the minimizer variables for each refinement step. The</span>
+<span class="sd">            variables which are included is concrete implementation specific,</span>
+<span class="sd">            and is specified by `history_columns`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">history_columns</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">history_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the column titles for the minimizer history</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            A &#39;list&#39; of &#39;str&#39; specifying the column titles for the minimizer</span>
+<span class="sd">            history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="Minimizer.change_parameters">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.change_parameters">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">change_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Selects a new value for each ``Parameter``.&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="Minimizer.has_converged">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.has_converged">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">has_converged</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the refinement process has converged/finished. The condition</span>
+<span class="sd">        which needs to be met to make this True is optimizer dependent, but</span>
+<span class="sd">        might be that the refinement has repeatedly returned a very similar FoM</span>
+<span class="sd">        which meets some threshold, determining that it is close to the optimal,</span>
+<span class="sd">        or it could be that the minimizer has measured at all the parameter points</span>
+<span class="sd">        that were specified and it should now predict the best position.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Whether or not the minimizer has converged/finished.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks the validity of the parameters on input</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parameters : Parameters</span>
+<span class="sd">            All ``Parameter`` objects to validate</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If any ``Parameter`` is fixed</span>
+<span class="sd">            If any ``Parameter is tied to another parameter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">fixed</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Parameter </span><span class="si">{</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is fixed, and so cannot be refined&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">tied</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Parameter </span><span class="si">{</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is tied to the value of &#39;</span>
+                                 <span class="s1">&#39;another parameter and so cannot be refined&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Minimizer.write_history">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.write_history">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the minimizer history to a csv file</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str</span>
+<span class="sd">            The name of the output file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Minimizer.present_result">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.present_result">[docs]</a>
+    <span class="k">def</span> <span class="nf">present_result</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts and returns the most appropriate output for the</span>
+<span class="sd">        minimiser class, in an appropriate format</span>
+<span class="sd">        e.g. minimum FOM and parameter values</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            A formatted string representing the output of the minimizer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">extracted_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_result</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_result_string</span><span class="p">(</span><span class="n">extracted_results</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Minimizer.reset_parameters">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.reset_parameters">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets the parameters to a previous state&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="Minimizer.extract_result">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.extract_result">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">extract_result</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtains the result of the minimizer to be presented/formatted</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[str]</span>
+<span class="sd">            A list of strings representing the data points</span>
+<span class="sd">            output by the minimizer to be formatted into a string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="Minimizer.format_result_string">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.format_result_string">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">format_result_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimizer_output</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Formats a string output for the results of the minimiser class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minimizer_output: list</span>
+<span class="sd">            A list of printable values representing the data points</span>
+<span class="sd">            output by the minimizer to be formatted into a string</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            A string encompassing the output of the minimizer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+
+<div class="viewcode-block" id="Minimizer.load_history">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.load_history">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Uses the `previous_history` variable to load a file of previous refinement steps.</span>
+<span class="sd">        It then formats this into the column names and the actual parameter values. The loaded data</span>
+<span class="sd">        is stored as numpy arrays.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        history: Path</span>
+<span class="sd">            A file path which contains previous refinement data.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the file with the previous history data can not be found.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            list of columns names, and a list containing a list for each refinement step</span>
+<span class="sd">             from the loaded history file.&quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file_content</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+            <span class="n">file_content</span> <span class="o">=</span> <span class="n">file_content</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">file_content</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">column_names</span> <span class="o">=</span> <span class="n">file_content</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">file_content</span> <span class="o">=</span> <span class="n">file_content</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">file_content</span></div>
+
+
+
+    <span class="k">def</span> <span class="nf">_check_parameters_fit_with_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
+                                           <span class="n">column_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">history</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks that the parameters loaded in from the file of previous refinement steps are</span>
+<span class="sd">         compatible with those already defined in the control object. If the parameters are the same</span>
+<span class="sd">         but with different numbers (arbitrary), then this is changed to be consistent.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        column_names: list</span>
+<span class="sd">            A list of the columns names from a previous refinement file, excluding any step number</span>
+<span class="sd">             column.</span>
+<span class="sd">        history: list of lists</span>
+<span class="sd">            A list, where each element is a subsequent list with parameter values and FoM value</span>
+<span class="sd">             for each step in a previous refinement.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the number of parameters in the history is not consistent with the current set up.</span>
+<span class="sd">            If the names of the parameters in the history are not the same as those in the</span>
+<span class="sd">            current set up.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># using a reduced length for &#39;column_names&#39; because it includes &#39;FoM&#39;</span>
+            <span class="c1"># and we want parameters only.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">column_names</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;A history of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="mi">2</span><span class="si">}</span><span class="s1">&#39;</span>\
+                    <span class="s1">&#39; is incompatible with the current setup.&#39;</span><span class="p">)</span>
+
+            <span class="n">split_param_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameter</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
+            <span class="n">split_column_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+            <span class="k">if</span> <span class="n">split_param_list</span> <span class="o">!=</span> <span class="n">split_column_list</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The parameters in the minimizer history are not </span><span class="se">\</span>
+<span class="s2">                                      the same as those specified for refining in the current</span><span class="se">\</span>
+<span class="s2">                                      universe setup.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FoM&#39;</span><span class="p">,</span> <span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="n">parameters</span><span class="p">)]</span>
+
+
+<div class="viewcode-block" id="Minimizer.get_parameters_old_values">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.get_parameters_old_values">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_parameters_old_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">column_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">history</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieves the last set of parameters from a file containing data of previous</span>
+<span class="sd">        refinement steps.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        column_names: list</span>
+<span class="sd">            A list of the columns names for the past refinement data.</span>
+<span class="sd">        history: list of lists</span>
+<span class="sd">            A list, where each element is a subsequent list with parameter values and FoM value</span>
+<span class="sd">             for each step in a previous refinement.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Exception</span>
+<span class="sd">            If the last parameter values can not be retrieved from history.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        dict (if there is a history file loaded)</span>
+<span class="sd">            dictionary of parameter values from the last step.</span>
+
+<span class="sd">        None (if there is no history file loaded)</span>
+<span class="sd">            None type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">history</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">last_entry</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+                    <span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">last_entry</span><span class="p">[</span><span class="n">column_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">param</span><span class="p">)]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Issue retrieving most recent parameter values </span><span class="se">\</span>
+<span class="s1">                    from given results file.&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+            <span class="k">return</span> <span class="n">parameters</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Minimizer.enforcing_minimizer_compatibility">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_abs.Minimizer.enforcing_minimizer_compatibility">[docs]</a>
+    <span class="k">def</span> <span class="nf">enforcing_minimizer_compatibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">history</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks that the refinement file has the correct set up to be used with the current minimizer</span>
+<span class="sd">        and makes the necessary changes for this compatibility.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        column_names: list</span>
+<span class="sd">            A list of the columns names from a previous refinement file, excluding any step number</span>
+<span class="sd">             column.</span>
+<span class="sd">        history: list of lists</span>
+<span class="sd">            A list, where each element is a subsequent list with parameter values and FoM value</span>
+<span class="sd">             for each step in a previous refinement.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Exception</span>
+<span class="sd">            If changing _history for minimizer compatibility fails.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">history</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">compatible</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;Change state&#39;</span> <span class="ow">in</span> <span class="n">column_names</span> <span class="ow">and</span> \
+                <span class="p">(</span><span class="s1">&#39;Accepted&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="s1">&#39;Rejected&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
+                    <span class="n">pos</span> <span class="o">=</span> <span class="n">column_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Change state&#39;</span><span class="p">)</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="s1">&#39;Accepted&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="s1">&#39;Change state&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">column_names</span> <span class="ow">and</span> \
+                <span class="p">(</span><span class="s1">&#39;Accepted&#39;</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="s1">&#39;Rejected&#39;</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">row</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;Accepted&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">row</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;Rejected&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">compatible</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="n">history</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

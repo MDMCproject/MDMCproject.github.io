@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.MD.packmol.packmol_setup &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.MD.packmol.packmol_setup</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.MD.packmol.packmol_setup</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A module containing a class for storing packmol systems and their metadata&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Structure</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="calculate_volume">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.calculate_volume">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_volume</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">container_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A method to calculate the volume of a container given the dimensions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dimensions</span>
+<span class="sd">        A tuple of floats that define the dimensions of the container.</span>
+<span class="sd">    container_type: str</span>
+<span class="sd">        A string specifying the type of container.</span>
+<span class="sd">        Currently only &quot;cube&quot;, &quot;box&quot; and &quot;sphere&quot; are supported.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    `float`</span>
+<span class="sd">        The volume of the container.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">match</span> <span class="n">container_type</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s2">&quot;cube&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="k">case</span> <span class="s2">&quot;box&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dimensions</span><span class="p">))</span>
+        <span class="k">case</span> <span class="s2">&quot;sphere&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The type of container is unsupported or none.&quot;</span>
+                             <span class="s2">&quot;Currently only </span><span class="se">\&quot;</span><span class="s2">cube</span><span class="se">\&quot;</span><span class="s2">, </span><span class="se">\&quot;</span><span class="s2">box</span><span class="se">\&quot;</span><span class="s2">, and </span><span class="se">\&quot;</span><span class="s2">sphere</span><span class="se">\&quot;</span><span class="s2"> are supported.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup">[docs]</a>
+<span class="k">class</span> <span class="nc">PackmolSetup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class that stores structures and their metadata for use in a packmol generation.</span>
+<span class="sd">    For an explanation of all the settings and constraints see:</span>
+<span class="sd">    https://m3g.github.io/packmol/userguide.shtml#basic</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Structure</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_structure_settings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_system_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_system_settings</span><span class="p">[</span><span class="s2">&quot;tolerance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.0</span>  <span class="c1"># packmol default tolerance</span>
+
+<div class="viewcode-block" id="PackmolSetup.add_fixed_structure">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.add_fixed_structure">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_fixed_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+                           <span class="n">position</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span>
+                           <span class="n">rotation</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span>
+                           <span class="n">centre</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a single structure (atom or molecule) in a fixed position to the setup.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structure: Structure</span>
+<span class="sd">            The `Structure` object (atom or molecule) to be added to the setup.</span>
+<span class="sd">        position: optional, tuple</span>
+<span class="sd">            A 3-tuple containing the xyz coordinates of the structure.</span>
+<span class="sd">            Defaults to the origin (0.,0.,0.)</span>
+<span class="sd">        rotation: optional, tuple</span>
+<span class="sd">            A 3-tuple containing the rotational angles of the structure (in radians).</span>
+<span class="sd">            Defaults to (0.,0.,0.) (0 rotation in any direction). Meaningless if</span>
+<span class="sd">            the structure is not a Molecule.</span>
+<span class="sd">        centre: optional, bool</span>
+<span class="sd">            True if the structure is to be centred around the position or not. Defaults to True.</span>
+<span class="sd">            Meaningless if the structure is not a Molecule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">structure</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_structure_settings</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;structure&quot;</span><span class="p">:</span> <span class="n">structure</span><span class="p">,</span>
+            <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;center&quot;</span><span class="p">:</span> <span class="n">centre</span><span class="p">,</span>
+            <span class="s2">&quot;fixed&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">number</span><span class="p">)</span> <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">position</span><span class="o">+</span><span class="n">rotation</span><span class="p">])</span>
+        <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup.add_container">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.add_container">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+                      <span class="n">dimensions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
+                      <span class="n">origin</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span>
+                      <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                      <span class="n">n_structures</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">container_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a container to the setup</span>
+<span class="sd">        Only density or n_structures need to be provided at one time,</span>
+<span class="sd">        as n_structures can be inferred from the density</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structure: Structure</span>
+<span class="sd">            A `Structure` (atom or molecule) object to be added to the container.</span>
+<span class="sd">        dimensions: tuple</span>
+<span class="sd">            The size of the container either in xyz (3-tuple)</span>
+<span class="sd">            or a single size (1-tuple) depending on the container type.</span>
+<span class="sd">        origin: tuple</span>
+<span class="sd">            A 3-tuple containing the xyz coordinate for the origin of the container.</span>
+<span class="sd">        density: float</span>
+<span class="sd">            A floating point number describing the density of</span>
+<span class="sd">            the structures in the container in Ang^-3.</span>
+<span class="sd">        n_structures: int</span>
+<span class="sd">            An integer number of structures to add to the container.</span>
+<span class="sd">        container_type: str</span>
+<span class="sd">            The type of container to add. Currently only &quot;cube&quot;, &quot;box&quot; and &quot;sphere&quot; are supported.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">structure</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n_structures</span><span class="p">:</span>
+            <span class="c1"># Figure out number of structures</span>
+            <span class="n">dimensions</span><span class="p">,</span> <span class="n">n_structures</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_density</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">container_type</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">container_type</span> <span class="o">==</span> <span class="s2">&quot;box&quot;</span><span class="p">:</span>
+            <span class="n">dimensions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">j</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_structure_settings</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;structure&quot;</span><span class="p">:</span> <span class="n">structure</span><span class="p">,</span>
+            <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">n_structures</span><span class="p">,</span>
+            <span class="c1"># Packmol needs the origin information explicitly</span>
+            <span class="sa">f</span><span class="s2">&quot;inside </span><span class="si">{</span><span class="n">container_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">number</span><span class="p">)</span> <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">origin</span><span class="o">+</span><span class="n">dimensions</span><span class="p">])</span>
+        <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup.add_cube">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.add_cube">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+                 <span class="n">size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span>
+                 <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">n_structures</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a cube of randomly-packed structures.</span>
+<span class="sd">        At least two of &quot;size&quot;, &quot;density&quot; or &quot;number&quot; must be filled in order to</span>
+<span class="sd">        properly create the cube. If &quot;density&quot; is provided, the size of the cube</span>
+<span class="sd">        may change to allow for a whole number of structures.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structure: Structure</span>
+<span class="sd">            The `Structure` (atom or molecule) object to randomly fill the cube with.</span>
+<span class="sd">        size: float</span>
+<span class="sd">            The size (x y and z) of the cube in angstroms.</span>
+<span class="sd">        origin: tuple</span>
+<span class="sd">            A 3-tuple of xyz coordinates indicating the origin of the cube.</span>
+<span class="sd">            Defaults to (0.,0.,0.).</span>
+<span class="sd">        density: optional, float</span>
+<span class="sd">            The density of the structures within the cube in Ang^-3.</span>
+<span class="sd">        n_structures: optional, int</span>
+<span class="sd">            An integer number of structures to fill the cube with.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_container</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                           <span class="n">dimensions</span><span class="o">=</span><span class="p">(</span><span class="n">size</span><span class="p">,),</span>
+                           <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
+                           <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+                           <span class="n">n_structures</span><span class="o">=</span><span class="n">n_structures</span><span class="p">,</span>
+                           <span class="n">container_type</span><span class="o">=</span><span class="s2">&quot;cube&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup.add_box">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.add_box">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+                <span class="n">lengths</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                <span class="n">origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span>
+                <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                <span class="n">n_structures</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a cuboid box of randomly-packed structures.</span>
+<span class="sd">        At least two of &quot;lengths&quot;, &quot;density&quot; or &quot;number&quot; must be filled in order to</span>
+<span class="sd">        properly create the box. If &quot;density&quot; is provided, the size of the box</span>
+<span class="sd">        may change to allow for a whole number of structures.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structure: Structure</span>
+<span class="sd">            The `Structure` (atom or molecule) object to randomly fill the box with.</span>
+<span class="sd">        lengths: tuple</span>
+<span class="sd">            A 3-tuple of xyz lengths for the box in angstroms.</span>
+<span class="sd">        origin: optional, tuple</span>
+<span class="sd">            A 3-tuple of xyz coordinates for the origin of the box. Defaults to (0.,0.,0.).</span>
+<span class="sd">        density: optional, float</span>
+<span class="sd">            The density of the structures within the box.</span>
+<span class="sd">            Defaults to 0.</span>
+<span class="sd">        n_structures: optional, int</span>
+<span class="sd">            An integer number of structures to fill the box with.</span>
+<span class="sd">            Defaults to 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_container</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                           <span class="n">dimensions</span><span class="o">=</span><span class="n">lengths</span><span class="p">,</span>
+                           <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
+                           <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+                           <span class="n">n_structures</span><span class="o">=</span><span class="n">n_structures</span><span class="p">,</span>
+                           <span class="n">container_type</span><span class="o">=</span><span class="s2">&quot;box&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup.add_sphere">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.add_sphere">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_sphere</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+                   <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                   <span class="n">origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span>
+                   <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                   <span class="n">n_structures</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a sphere of randomly-packed structures.</span>
+<span class="sd">        At least two of &quot;size&quot;, &quot;density&quot; or &quot;number&quot; must be filled in order to</span>
+<span class="sd">        properly create the box. If &quot;density&quot; is provided, the size of the box</span>
+<span class="sd">        may change to allow for a whole number of structures.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structure: Structure</span>
+<span class="sd">            The `Structure` (atom or molecule) object to randomly fill the sphere with.</span>
+<span class="sd">        radius: float</span>
+<span class="sd">            The radius of the sphere in angstroms.</span>
+<span class="sd">        origin: optional, tuple</span>
+<span class="sd">            A 3-tuple of xyz coordinates for the centre of the sphere.</span>
+<span class="sd">        density: optional, float</span>
+<span class="sd">            The density of the structures within the box.</span>
+<span class="sd">            Defaults to 0.</span>
+<span class="sd">        n_structures: optional, int</span>
+<span class="sd">            An integer number of structures to fill the box with.</span>
+<span class="sd">            Defaults to 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_container</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                           <span class="n">dimensions</span><span class="o">=</span><span class="p">(</span><span class="n">radius</span><span class="p">,),</span>
+                           <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
+                           <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+                           <span class="n">n_structures</span><span class="o">=</span><span class="n">n_structures</span><span class="p">,</span>
+                           <span class="n">container_type</span><span class="o">=</span><span class="s2">&quot;sphere&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup.remove_structure">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.remove_structure">[docs]</a>
+    <span class="k">def</span> <span class="nf">remove_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a structure and associated setups from the system.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structure</span>
+<span class="sd">            The `Structure` (atom or molecule) object to remove from the setup.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">structure</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The removal of the structure </span><span class="si">{</span><span class="n">structure</span><span class="si">}</span><span class="s2"> was requested,&quot;</span>
+                          <span class="s2">&quot; but no such structure is in the system.&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure_settings</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">setting</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">structure</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">setting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup.validate_setup">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.validate_setup">[docs]</a>
+    <span class="k">def</span> <span class="nf">validate_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensures that the setup is valid - shows errors and warnings for issues with the setup&quot;&quot;&quot;</span>
+        <span class="n">error_messages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_system_settings</span><span class="p">[</span><span class="s2">&quot;tolerance&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tol</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">tol</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="n">error_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;The system tolerance must be set.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_structures</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">error_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;There must be at least one type of structure present.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">settings_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure_settings</span><span class="p">:</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="n">settings_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="n">settings_dict</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;structure&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
+                <span class="n">error_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;There are settings without an associated structure.&quot;</span><span class="p">)</span>
+            <span class="c1"># Each structure needs to have at least one &quot;number&quot; setting</span>
+            <span class="k">if</span> <span class="s2">&quot;number&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
+                <span class="n">error_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The number of </span><span class="si">{</span><span class="n">structure</span><span class="si">}</span><span class="s2">&quot;</span>
+                                      <span class="s2">&quot; structures needs to be specified.&quot;</span><span class="p">)</span>
+            <span class="c1"># Each structure must have at least one constraint</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_constraint</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">]):</span>
+                <span class="n">error_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Structure </span><span class="si">{</span><span class="n">structure</span><span class="si">}</span><span class="s2"> must&quot;</span>
+                                      <span class="s2">&quot; have a spatial constraint attached.&quot;</span><span class="p">)</span>
+            <span class="c1"># Each structure must have values for their respective constraints</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">settings_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">]):</span>
+                <span class="n">error_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Structure </span><span class="si">{</span><span class="n">structure</span><span class="si">}</span><span class="s2"> has unfilled values&quot;</span>
+                                      <span class="s2">&quot; for its settings.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">error_messages</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The packmol setup is invalid for the following reasons:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                               <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">error_messages</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup.get_settings">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.get_settings">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `tuple`</span>
+<span class="sd">            A tuple containing the whole-system and per-structure settings</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_system_settings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure_settings</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup.get_structures">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.get_structures">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Structure</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `list`</span>
+<span class="sd">            The set of `Structure` objects in the setup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span></div>
+
+
+<div class="viewcode-block" id="PackmolSetup.get_max_sizes">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.get_max_sizes">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_max_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `tuple`</span>
+<span class="sd">            A 6-tuple of the minimum and maximum sizes of the setup in the following format:</span>
+<span class="sd">            (x_min, y_min, z_min, x_max, y_max, z_max)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+        <span class="c1"># Extract coordinates for each container</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">mol_dict</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_structure_settings</span><span class="p">):</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="n">mol_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s2">&quot;inside cube&quot;</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">container_dims</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">mol_dict</span><span class="p">[</span><span class="s2">&quot;inside cube&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+                <span class="n">end_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">container_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">container_dims</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">final_dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">container_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">end_coord</span><span class="p">])</span>
+                <span class="n">dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">final_dims</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;inside box&quot;</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">container_dims</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">mol_dict</span><span class="p">[</span><span class="s2">&quot;inside box&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+                <span class="n">dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">container_dims</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;inside sphere&quot;</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">container_dims</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">mol_dict</span><span class="p">[</span><span class="s2">&quot;inside sphere&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+                <span class="n">origin</span> <span class="o">=</span> <span class="n">container_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+                <span class="n">radius</span> <span class="o">=</span> <span class="n">container_dims</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                <span class="c1"># Get min and max coordinates on both sides of the origin</span>
+                <span class="n">origin_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+                <span class="n">origin_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+                <span class="n">dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">origin_min</span><span class="p">,</span> <span class="n">origin_max</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Get max &amp; min of each container</span>
+        <span class="n">minimum</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">dims</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+        <span class="n">maximum</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">dims</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="n">minimum</span><span class="p">)</span></div>
+
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_is_constraint</span><span class="p">(</span><span class="n">setting_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if a setting name is a constraint</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        setting_name: str</span>
+<span class="sd">            The name of the setting</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `bool`</span>
+<span class="sd">            True if the setting is a constraint, False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">setting_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;inside cube&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;inside box&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;inside sphere&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;fixed&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="PackmolSetup.resolve_density">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_setup.PackmolSetup.resolve_density">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">resolve_density</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                        <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                        <span class="n">container_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes a volume of type &quot;box&quot;, &quot;cube&quot;, or &quot;sphere&quot;, with nominal dimensions,</span>
+<span class="sd">        tries to fill that volume to the given density, and changes the dimensions</span>
+<span class="sd">        to ensure an integer number of structures will fit with the desired density.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dimensions: optional, tuple</span>
+<span class="sd">            A tuple of the dimensions that affect the volume of the container.</span>
+<span class="sd">        density: optional, float</span>
+<span class="sd">            A target density to achieve within the system.</span>
+<span class="sd">        container_type: str</span>
+<span class="sd">            A string describing the type of container to use.</span>
+<span class="sd">            Currently only &quot;cube&quot;, &quot;box&quot; and &quot;sphere&quot; are supported.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `tuple`</span>
+<span class="sd">            A tuple containing (in order):</span>
+<span class="sd">            1) A tuple of the (possibly) revised dimensions of the volume</span>
+<span class="sd">            2) The number of structures needed to meet the density</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">density</span> <span class="o">==</span> <span class="mf">0.</span> <span class="ow">or</span> <span class="mf">0.</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Density or dimension(s) is set to 0.&quot;</span><span class="p">)</span>
+
+        <span class="n">volume</span> <span class="o">=</span> <span class="n">calculate_volume</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">container_type</span><span class="p">)</span>
+        <span class="n">integer_num_mol</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">density</span> <span class="o">*</span> <span class="n">volume</span><span class="p">)</span>
+        <span class="n">optimal_volume</span> <span class="o">=</span> <span class="n">integer_num_mol</span> <span class="o">/</span> <span class="n">density</span>
+
+        <span class="n">scale_factor</span> <span class="o">=</span> <span class="p">(</span><span class="n">optimal_volume</span><span class="o">/</span><span class="n">volume</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">container_type</span> <span class="o">==</span> <span class="s2">&quot;box&quot;</span><span class="p">:</span>
+            <span class="n">scaled_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">size</span><span class="o">*</span><span class="n">scale_factor</span> <span class="k">for</span> <span class="n">size</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">scaled_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">dim</span><span class="o">*</span><span class="n">scale_factor</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">scale_factor</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">info_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The dimensions of the container are changed to </span><span class="si">{</span><span class="n">scaled_lengths</span><span class="si">}</span><span class="s2"> &quot;</span>
+                           <span class="sa">f</span><span class="s2">&quot;to achieve the requested density of </span><span class="si">{</span><span class="n">density</span><span class="si">}</span><span class="s2"> &quot;</span>
+                            <span class="s2">&quot;with a whole number of structures&quot;</span><span class="p">)</span>
+            <span class="c1"># TODO: Find a way to silence this to not clog the output during testing</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">info_string</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">info_string</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">scaled_lengths</span><span class="p">),</span> <span class="n">integer_num_mol</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the tolerance of the packmol run (i.e. how far apart each atom must be)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        `float`</span>
+<span class="sd">            The tolerance of the distances between atoms</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_system_settings</span><span class="p">[</span><span class="s2">&quot;tolerance&quot;</span><span class="p">]</span>
+
+    <span class="nd">@tolerance</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">tolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_tolerance</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_system_settings</span><span class="p">[</span><span class="s2">&quot;tolerance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_tolerance</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

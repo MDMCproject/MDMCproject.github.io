@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.utilities.plotting &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.utilities.plotting</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.utilities.plotting</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Plotting related utilities</span>
+
+<span class="sd">These are additional functions which can be used to plot specific MDMC data,</span>
+<span class="sd">e.g. dynamic plotting during a refinement.  All plotting requires matplotlib to</span>
+<span class="sd">be installed, and dynamic plotting requires execution to be performed within a</span>
+<span class="sd">Jupyter notebook in order to display correctly.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">MethodType</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.common.df_operations</span> <span class="kn">import</span> <span class="n">filter_dataframe</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">MDMC.control</span> <span class="kn">import</span> <span class="n">Control</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">MaxNLocator</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span><span class="s1">&#39;MDMC plotting utilities require matplotlib to be&#39;</span>
+                              <span class="s1">&#39; installed.&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+
+
+<span class="c1"># Defaults for text and plot output sizes</span>
+<span class="n">VBOX_HEIGHT</span> <span class="o">=</span> <span class="s1">&#39;73%&#39;</span>
+<span class="n">N_TEXT_LINES</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">PLOT_HEIGHT</span> <span class="o">=</span> <span class="mi">360</span>
+<span class="n">CNVS_WIDTH</span> <span class="o">=</span> <span class="mi">800</span>
+
+
+<span class="c1"># pylint: disable=import-outside-toplevel, protected-access</span>
+<span class="c1"># we are importing things out-of-order and copying variables on purpose here</span>
+<div class="viewcode-block" id="plot_progress">
+<a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.plotting.plot_progress">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_progress</span><span class="p">(</span><span class="n">inst</span><span class="p">:</span> <span class="s2">&quot;Control&quot;</span><span class="p">,</span> <span class="n">ynames</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Control&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modifies an instance of ``MDMC.control.Control`` so that the progress of 1</span>
+<span class="sd">    or more variables is plotted with each step when ``refine`` is called.</span>
+
+<span class="sd">    This takes an instance of ``MDMC.control.Control`` as a parameter and</span>
+<span class="sd">    returns a modified instance, which can be treated exactly as the original</span>
+<span class="sd">    instance.  See the examples section for more details.</span>
+
+<span class="sd">    **This plotting should only be used in a Jupyter notebook and requires</span>
+<span class="sd">    ipywidgets and matplotlib to interactively display the progress. The</span>
+<span class="sd">    matplotlib backend must be set to &#39;notebook&#39; before calling `refine`. This</span>
+<span class="sd">    can be done by executing the following magic call within a Jupyter notebook</span>
+<span class="sd">    cell:**</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            %matplotlib notebook</span>
+
+<span class="sd">    Applying ``plot_progress`` will also change the text output so that only the</span>
+<span class="sd">    more recent five steps are shown.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    inst : MDMC.control.Control</span>
+<span class="sd">        An instance of the ``MDMC.control.Control`` class.</span>
+<span class="sd">    ynames : str, list of str</span>
+<span class="sd">        One or more str with the name of the variable to be displayed with each</span>
+<span class="sd">        step of the refinement. These variables must correspond to the column</span>
+<span class="sd">        names in ``inst.minimizer.history``, for example the names of the</span>
+<span class="sd">        parameters that are being refined. It is recommended that a maximum of</span>
+<span class="sd">        8 names is provided, as otherwise the graph sizes become too small.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    MDMC.control.Control</span>
+<span class="sd">        An instance of the ``MDMC.control.Control`` class, which is</span>
+<span class="sd">        modified so that a plot is displayed when ``inst.refine`` is called.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Modifying a ``Control`` instance to plot the progress of the &#39;FoM&#39; with each</span>
+<span class="sd">    refinement step. This should be executed within a Jupyter notebook:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            %matplotlib notebook</span>
+<span class="sd">            control = Control(...)  # ... represents some parameters</span>
+<span class="sd">            control = plot_progress(control, &#39;FoM&#39;)</span>
+<span class="sd">            control.refine(100)</span>
+
+<span class="sd">    First the matplotlib backend is set to &#39;notebook&#39;, then the ``Control``</span>
+<span class="sd">    instance is modified, and then a refinement is run. With each step of the</span>
+<span class="sd">    refinement a graph of &#39;FoM&#39; against &#39;Steps&#39; will be plotted.</span>
+
+<span class="sd">    Modifying a ``Control`` instance to plot the progress of the &#39;FoM&#39;, &#39;sigma&#39;,</span>
+<span class="sd">    and &#39;epsilon&#39; with each refinement step. This should be executed within a</span>
+<span class="sd">    Jupyter notebook:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            %matplotlib notebook</span>
+<span class="sd">            control = Control(...)  # ... represents some parameters</span>
+<span class="sd">            control = plot_progress(control, [&#39;FoM&#39;, &#39;sigma&#39;, &#39;epsilon&#39;])</span>
+<span class="sd">            control.refine(100)</span>
+
+<span class="sd">    With each step of the refinement a graph of &#39;FoM&#39; against &#39;Steps&#39; will be</span>
+<span class="sd">    plotted, a graph of &#39;sigma&#39; against &#39;Steps&#39; will be plotted, and a graph of</span>
+<span class="sd">    &#39;epsilon&#39; against &#39;Steps&#39; will be plotted.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If required modules are not installed, warn user and return unmodified</span>
+    <span class="c1"># instance</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">IPython</span> <span class="kn">import</span> <span class="n">display</span>
+        <span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="n">Output</span><span class="p">,</span> <span class="n">VBox</span>
+    <span class="k">except</span> <span class="ne">ModuleNotFoundError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;plot_progress requires </span><span class="si">{</span><span class="n">err</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">. No plots will be displayed.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">inst</span>
+
+    <span class="c1"># This font size and linewidth were suitable for OSX dev environment</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span> <span class="s1">&#39;axes.linewidth&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+
+    <span class="c1"># copies of the original instance methods are kept so that they can be</span>
+    <span class="c1"># called within the replacement methods</span>
+    <span class="n">orig_refine</span> <span class="o">=</span> <span class="n">inst</span><span class="o">.</span><span class="n">refine</span>
+    <span class="n">orig_step</span> <span class="o">=</span> <span class="n">inst</span><span class="o">.</span><span class="n">step</span>
+    <span class="n">orig_print_data</span> <span class="o">=</span> <span class="n">inst</span><span class="o">.</span><span class="n">_print_data</span>
+    <span class="n">orig_print_header</span> <span class="o">=</span> <span class="n">inst</span><span class="o">.</span><span class="n">_print_header</span>
+
+    <span class="c1"># Add protected ynames and vbox variables to instance</span>
+    <span class="c1"># Force ynames to be list so that it can be iterated over</span>
+    <span class="n">inst</span><span class="o">.</span><span class="n">_ynames</span> <span class="o">=</span> <span class="p">[</span><span class="n">ynames</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ynames</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">ynames</span>
+
+    <span class="c1"># Create a VBox for the text consisting of N empty outputs. These are then</span>
+    <span class="c1"># dynamically replaced by lines containing text output with each step.</span>
+    <span class="c1"># height layout setting is used to reduce padding between lines of text.</span>
+    <span class="n">inst</span><span class="o">.</span><span class="n">_vbox</span> <span class="o">=</span> <span class="n">VBox</span><span class="p">([</span><span class="n">Output</span><span class="p">()]</span> <span class="o">*</span> <span class="n">N_TEXT_LINES</span><span class="p">,</span>
+                      <span class="n">layout</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="n">VBOX_HEIGHT</span><span class="p">})</span>
+
+    <span class="c1"># Basic validation of user input</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">inst</span><span class="o">.</span><span class="n">_ynames</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;ynames must contain at least one str&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">yname</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">_ynames</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">yname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">history</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">yname</span><span class="si">}</span><span class="s1"> is not a variable in the minimizer history&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Redefined refine so that figure plotting is set, and the vbox containing</span>
+    <span class="c1"># the text is displayed after the header</span>
+    <span class="k">def</span> <span class="nf">refine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">figure</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ynames</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">squeeze</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">inst</span><span class="o">.</span><span class="n">figure</span><span class="p">,</span> <span class="n">inst</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">figure</span><span class="p">,</span> <span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">yname</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ynames</span><span class="p">,</span> <span class="n">inst</span><span class="o">.</span><span class="n">axes</span><span class="p">):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">yname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="n">inst</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Steps&#39;</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                       <span class="n">min_n_ticks</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([])</span>
+        <span class="c1"># This fudge to change the dpi and resize the canvas is required because</span>
+        <span class="c1"># of a bug in matplotlib when canvas.draw is called dynamically within</span>
+        <span class="c1"># a loop (the bug reduces canvas._dpi_ratio to 1 which results in graphs</span>
+        <span class="c1"># being plotted half size until the execution is completed)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">_dpi_ratio</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ynames</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="n">PLOT_HEIGHT</span>
+        <span class="c1"># This try/except allows IPython/Jupyter console to run without error</span>
+        <span class="c1"># (although it does not live plot)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">handle_resize</span><span class="p">({</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="n">CNVS_WIDTH</span><span class="p">,</span>
+                                              <span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="n">height</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+        <span class="n">orig_print_header</span><span class="p">()</span>
+        <span class="n">display</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vbox</span><span class="p">)</span>
+        <span class="n">orig_refine</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="c1"># Redefine step so that history is also plotted</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">orig_step</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_history</span><span class="p">()</span>
+
+    <span class="c1"># Redefine print data so that output is captured and added to vbox rather</span>
+    <span class="c1"># than displayed. This stops Jupyter from autoscrolling after a certain</span>
+    <span class="c1"># number of lines of text are displayed.</span>
+    <span class="k">def</span> <span class="nf">print_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">text_output</span> <span class="o">=</span> <span class="n">Output</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">text_output</span><span class="p">:</span>
+            <span class="n">orig_print_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vbox</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vbox</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="p">(</span><span class="n">text_output</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="c1"># Used to change inst._print_header to pass through as header printing is</span>
+    <span class="c1"># handled in substitute refine instead</span>
+    <span class="k">def</span> <span class="nf">print_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">plot_history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">history</span>
+        <span class="k">for</span> <span class="n">yname</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ynames</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">):</span>
+            <span class="n">acp_rows</span> <span class="o">=</span> <span class="n">filter_dataframe</span><span class="p">([</span><span class="s1">&#39;Accepted&#39;</span><span class="p">],</span> <span class="n">history</span><span class="p">,</span>
+                                        <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Change state&#39;</span><span class="p">])</span>
+            <span class="n">rej_rows</span> <span class="o">=</span> <span class="n">filter_dataframe</span><span class="p">([</span><span class="s1">&#39;Rejected&#39;</span><span class="p">],</span> <span class="n">history</span><span class="p">,</span>
+                                        <span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Change state&#39;</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">acp_rows</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">acp_rows</span><span class="p">[</span><span class="n">yname</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:blue&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rej_rows</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">rej_rows</span><span class="p">[</span><span class="n">yname</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:red&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                    <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+    <span class="c1"># Set new methods for inst (MethodType required because they are bound)</span>
+    <span class="n">inst</span><span class="o">.</span><span class="n">refine</span> <span class="o">=</span> <span class="n">MethodType</span><span class="p">(</span><span class="n">refine</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
+    <span class="n">inst</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">MethodType</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
+    <span class="n">inst</span><span class="o">.</span><span class="n">plot_history</span> <span class="o">=</span> <span class="n">MethodType</span><span class="p">(</span><span class="n">plot_history</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
+    <span class="n">inst</span><span class="o">.</span><span class="n">_print_data</span> <span class="o">=</span> <span class="n">MethodType</span><span class="p">(</span><span class="n">print_data</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
+    <span class="n">inst</span><span class="o">.</span><span class="n">_print_header</span> <span class="o">=</span> <span class="n">MethodType</span><span class="p">(</span><span class="n">print_header</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inst</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

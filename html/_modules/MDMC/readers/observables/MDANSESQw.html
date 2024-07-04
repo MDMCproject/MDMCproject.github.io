@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.readers.observables.MDANSESQw &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.readers.observables.MDANSESQw</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.readers.observables.MDANSESQw</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Readers for dynamic data&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">MDMC.readers.observables.obs_reader</span> <span class="kn">import</span> <span class="n">SQwReader</span>
+<span class="kn">from</span> <span class="nn">MDMC.common.units</span> <span class="kn">import</span> <span class="n">SYSTEM</span><span class="p">,</span> <span class="n">Unit</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">eV_in_Joules</span> <span class="o">=</span> <span class="mf">1.602176634</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">19</span><span class="p">)</span>
+<span class="n">mole</span> <span class="o">=</span> <span class="mf">6.02214076</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">23</span>
+
+<span class="n">conversion_to_meV</span> <span class="o">=</span><span class="p">{</span>
+    <span class="s1">&#39;J&#39;</span> <span class="p">:</span> <span class="mf">6.2415091e+21</span><span class="p">,</span>
+    <span class="s1">&#39;kJ&#39;</span> <span class="p">:</span> <span class="mf">6.2415091e+24</span><span class="p">,</span>
+    <span class="s1">&#39;kcal&#39;</span> <span class="p">:</span> <span class="mf">2.6114474e+25</span><span class="p">,</span>
+    <span class="s1">&#39;cal&#39;</span> <span class="p">:</span> <span class="mf">2.6114474e+22</span><span class="p">,</span>
+    <span class="s1">&#39;kJ/mol&#39;</span> <span class="p">:</span> <span class="mf">6.2415091e+24</span> <span class="o">/</span> <span class="n">mole</span><span class="p">,</span>
+    <span class="s1">&#39;kcal/mol&#39;</span> <span class="p">:</span>  <span class="mf">2.6114474e+25</span> <span class="o">/</span> <span class="n">mole</span><span class="p">,</span>
+    <span class="s1">&#39;J/mol&#39;</span> <span class="p">:</span> <span class="mf">6.2415091e+21</span> <span class="o">/</span> <span class="n">mole</span><span class="p">,</span>
+    <span class="s1">&#39;cal/mol&#39;</span> <span class="p">:</span>  <span class="mf">2.6114474e+22</span> <span class="o">/</span> <span class="n">mole</span><span class="p">,</span>
+    <span class="s1">&#39;rad/ps&#39;</span> <span class="p">:</span> <span class="mf">0.6582231395941951</span><span class="p">,</span>
+    <span class="s1">&#39;rad/fs&#39;</span> <span class="p">:</span> <span class="mf">0.6582231395941951</span> <span class="o">*</span><span class="mf">1e3</span><span class="p">,</span>
+    <span class="s1">&#39;rad/ns&#39;</span> <span class="p">:</span> <span class="mf">0.6582231395941951</span> <span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span>
+    <span class="s1">&#39;1/ps&#39;</span> <span class="p">:</span> <span class="mf">0.6582231395941951</span> <span class="o">*</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+    <span class="s1">&#39;1/fs&#39;</span> <span class="p">:</span> <span class="mf">0.6582231395941951</span> <span class="o">*</span><span class="mf">1e3</span> <span class="o">*</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+    <span class="s1">&#39;1/ns&#39;</span> <span class="p">:</span> <span class="mf">0.6582231395941951</span> <span class="o">*</span><span class="mf">1e-3</span> <span class="o">*</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+    <span class="s1">&#39;meV&#39;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="s1">&#39;eV&#39;</span> <span class="p">:</span> <span class="mf">1e3</span><span class="p">,</span>
+    <span class="s1">&#39;keV&#39;</span> <span class="p">:</span> <span class="mf">1e6</span><span class="p">,</span>
+    <span class="s1">&#39;ueV&#39;</span> <span class="p">:</span> <span class="mf">1e-3</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="MDANSESQw">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.readers.observables.html#MDMC.readers.observables.MDANSESQw.MDANSESQw">[docs]</a>
+<span class="k">class</span> <span class="nc">MDANSESQw</span><span class="p">(</span><span class="n">SQwReader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for reading SQw files from MDANSE&#39;s trajectory analysis</span>
+
+<span class="sd">    The output from MDANSE analysis of trajectories is a .csv file with some lines</span>
+<span class="sd">    of comments describing the dataset and columns/rows, followed by an array</span>
+<span class="sd">    of numbers. The first row and column of the array define the axes of the data,</span>
+<span class="sd">    where the role and physical unit of each axis is described in the comment lines</span>
+<span class="sd">    preceding the data. The [0,0] element of the array is always 0.0 and is not used,</span>
+<span class="sd">    while all the remaining points are the S(Q,w) at each corresponding Q and w.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_variables : ndarray</span>
+<span class="sd">        numpy array containing all the data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_row</span> <span class="o">=</span> <span class="s1">&#39;Q&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_column</span> <span class="o">=</span> <span class="s1">&#39;E&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_unit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_unit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transpose_data</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Open the files for variables and detector momenta&quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=consider-using-with</span>
+        <span class="c1"># as this is an abstracted open method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Does nothing since numpy closes the file after reading anyway&quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=unnecessary-pass</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="MDANSESQw.parse_header">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.readers.observables.html#MDMC.readers.observables.MDANSESQw.MDANSESQw.parse_header">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads the header part of the file to get the labels of</span>
+<span class="sd">        the data axes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># This loop will only read the header of the file,</span>
+        <span class="c1"># and stop as soon as it reaches the data</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+                <span class="n">tokens</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;#&#39;</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+        <span class="c1"># This part will find the relevant part of the header</span>
+        <span class="c1"># and extract the information about the axes.</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;1st&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> <span class="s1">&#39;First&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">axis_signature</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">variable</span> <span class="o">=</span> <span class="n">axis_signature</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">unit</span> <span class="o">=</span> <span class="n">axis_signature</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;()&quot;</span><span class="p">)</span>
+                <span class="n">unit</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;ang&#39;</span><span class="p">,</span> <span class="s1">&#39;Ang&#39;</span><span class="p">)</span>  <span class="c1"># we need this since Unit cannot handle &#39;ang&#39;</span>
+                <span class="k">if</span> <span class="n">variable</span> <span class="o">==</span> <span class="s1">&#39;q&#39;</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;Q&#39;</span>
+                    <span class="n">q_unit</span> <span class="o">=</span> <span class="n">Unit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">q_unit</span><span class="o">.</span><span class="n">conversion_factor</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unit </span><span class="si">%s</span><span class="s1"> not recognised, replaced with 1/Ang&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">))</span>
+                        <span class="n">q_unit</span> <span class="o">=</span> <span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span><span class="o">/</span><span class="n">SYSTEM</span><span class="p">[</span><span class="s2">&quot;LENGTH&quot;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">q_unit</span> <span class="o">=</span> <span class="n">q_unit</span>
+                <span class="k">elif</span> <span class="n">variable</span> <span class="o">==</span> <span class="s1">&#39;omega&#39;</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;E&#39;</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">conversion_to_meV</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">e_unit</span> <span class="o">=</span> <span class="s1">&#39;arb. u.&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">e_unit</span> <span class="o">=</span> <span class="n">unit</span>
+            <span class="k">if</span> <span class="s2">&quot;row:&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_row</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="s2">&quot;column:&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_column</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_row</span> <span class="o">==</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transpose_data</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="MDANSESQw.parse">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.readers.observables.html#MDMC.readers.observables.MDANSESQw.MDANSESQw.parse">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse into SQw format, creates an error on SQw 1% of the value of SQw,</span>
+<span class="sd">        since MDANSE does not yet output an error. This should be changed once</span>
+<span class="sd">        it is possible to read an error.</span>
+
+<span class="sd">        E is the energy transfer (in meV)</span>
+<span class="sd">        Q is wavevector transfer (in Ang^-1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_header</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_row</span> <span class="o">==</span> <span class="s1">&#39;Q&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_column</span> <span class="o">==</span> <span class="s1">&#39;E&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span> <span class="c1"># Entry at [0,0] is always zero</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_row</span> <span class="o">==</span> <span class="s1">&#39;E&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_column</span> <span class="o">==</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_unit</span><span class="o">.</span><span class="n">conversion_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">*=</span> <span class="n">conversion_to_meV</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">e_unit</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transpose_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SQw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SQw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_variables</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="o">*</span><span class="mf">0.01</span>  <span class="c1"># TODO: When MDANSE outputs an error, read it in</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SQw</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="c1"># Change and zero errors into inf so that error calculations can still be performed on them.</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SQw_err</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;We have set the error bar to infinity for any zero error values, this allows</span><span class="se">\</span>
+<span class="s2">                us to calculate chi-squared but effectively ignores these points, this may not</span><span class="se">\</span>
+<span class="s2">                be what you want to do, consider using a FoM which doesn&#39;t need errors if</span><span class="se">\</span>
+<span class="s2">                this is an issue&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

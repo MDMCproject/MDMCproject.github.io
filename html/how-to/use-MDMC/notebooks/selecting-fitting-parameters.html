@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Selecting which parameters to fit &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Installation" href="../../installation.html" />
+    <link rel="prev" title="Parameter Refinement" href="../parameter-refinement.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../use-MDMC.html">How to use MDMC</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../simulations.html">Simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating-atomic-configurations.html">Creating an atomic configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="defining-molecule-interactions.html">Defining molecule interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvating-a-universe.html">Solvating an MDMC Universe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read-configurations.html">Reading atoms from configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="molecular-visualization.html">Visualising a Universe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="applying-a-forcefield.html">Applying a force field</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../parameter-refinement.html">Parameter Refinement</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Selecting which parameters to fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Fixing-a-Parameter">Fixing a Parameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Filtering-parameters">Filtering parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Selecting which parameters to fit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Fixing-a-Parameter">Fixing a Parameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Filtering-parameters">Filtering parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../use-MDMC.html">How to use MDMC</a></li>
+          <li class="breadcrumb-item"><a href="../parameter-refinement.html">Parameter Refinement</a></li>
+      <li class="breadcrumb-item active">Selecting which parameters to fit</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/how-to/use-MDMC/notebooks/selecting-fitting-parameters.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Selecting-which-parameters-to-fit">
+<h1>Selecting which parameters to fit<a class="headerlink" href="#Selecting-which-parameters-to-fit" title="Link to this heading"></a></h1>
+<p>For complex simulations, there may be a lot of parameters; <a class="reference internal" href="../../../tutorials/Argon-a-to-z.html"><span class="doc">a simple argon simulation</span></a> has two parameters, and later on in this guide we will see a water simulation with a total of 8 - this only gets bigger as the molecules and forces become more complex.</p>
+<p>Thus, a user may only want to refine a subset of all their parameters. In MDMC this can be done in two ways:</p>
+<section id="Fixing-a-Parameter">
+<h2>Fixing a Parameter<a class="headerlink" href="#Fixing-a-Parameter" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Parameter</span></code> objects can be fixed. This can either be set when they are initialised (created) or changed for an existing <code class="docutils literal notranslate"><span class="pre">Parameter</span></code>. By default, an initialised <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> is <strong>not</strong> fixed.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameter</span>
+<span class="n">charge</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;charge&#39;</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;e&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Attempting to change a fixed parameter produces a warning and does <strong>not</strong> change the parameter.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">charge</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">12</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The value of the charge parameter is: </span><span class="si">{</span><span class="n">charge</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The value of the charge parameter is: 0.5 e
+</pre></div></div>
+</div>
+<p>For parameters which already exist (for example, a parameter created by a potential), the parameter can be fixed by setting their <code class="docutils literal notranslate"><span class="pre">fixed</span></code> attribute to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sigma</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;sigma&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;Ang&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Is sigma fixed: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sigma</span><span class="o">.</span><span class="n">fixed</span><span class="p">))</span>
+<span class="n">sigma</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Is sigma fixed: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sigma</span><span class="o">.</span><span class="n">fixed</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Is sigma fixed: False
+Is sigma fixed: True
+</pre></div></div>
+</div>
+</section>
+<section id="Filtering-parameters">
+<h2>Filtering parameters<a class="headerlink" href="#Filtering-parameters" title="Link to this heading"></a></h2>
+<p>Only parameters that are passed to <code class="docutils literal notranslate"><span class="pre">Control</span></code> (as <code class="docutils literal notranslate"><span class="pre">fit_parameters</span></code>) will be refined. While it is simplest to pass all parameters in a <code class="docutils literal notranslate"><span class="pre">Universe</span></code> to <code class="docutils literal notranslate"><span class="pre">Control</span></code>, it is also possible to filter out a subset. To demonstrate this, we use a universe filled with water under a SPCE force field, as used in <a class="reference internal" href="running-a-simulation.html"><span class="doc">running a simulation</span></a>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">universe</span> <span class="o">=</span> <span class="n">Universe</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="mf">21.75</span><span class="p">,</span> <span class="n">constraint_algorithm</span><span class="o">=</span><span class="n">Shake</span><span class="p">(</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">electrostatic_solver</span><span class="o">=</span><span class="n">PPPM</span><span class="p">(</span><span class="n">accuracy</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
+<span class="n">H1</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+<span class="n">H2</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.63298</span><span class="p">,</span> <span class="mf">0.</span><span class="p">))</span>
+<span class="n">O</span> <span class="o">=</span> <span class="n">Atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.81649</span><span class="p">,</span> <span class="mf">0.57736</span><span class="p">))</span>
+<span class="n">H_coulombic</span> <span class="o">=</span> <span class="n">Coulombic</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">H1</span><span class="p">,</span> <span class="n">H2</span><span class="p">],</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">O_coulombic</span> <span class="o">=</span> <span class="n">Coulombic</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">O</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">water_mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                     <span class="n">velocity</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                     <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="n">H1</span><span class="p">,</span> <span class="n">H2</span><span class="p">,</span> <span class="n">O</span><span class="p">],</span>
+                     <span class="n">interactions</span><span class="o">=</span><span class="p">[</span><span class="n">Bond</span><span class="p">((</span><span class="n">H1</span><span class="p">,</span> <span class="n">O</span><span class="p">),</span> <span class="p">(</span><span class="n">H2</span><span class="p">,</span> <span class="n">O</span><span class="p">),</span> <span class="n">constrained</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                                   <span class="n">BondAngle</span><span class="p">(</span><span class="n">H1</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">H2</span><span class="p">,</span> <span class="n">constrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;water&#39;</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">water_mol</span><span class="p">,</span> <span class="n">num_density</span><span class="o">=</span><span class="mf">0.03356718472021752</span><span class="p">)</span>
+<span class="n">O_dispersion</span> <span class="o">=</span> <span class="n">Dispersion</span><span class="p">(</span><span class="n">universe</span><span class="p">,</span> <span class="p">[</span><span class="n">O</span><span class="o">.</span><span class="n">atom_type</span><span class="p">,</span> <span class="n">O</span><span class="o">.</span><span class="n">atom_type</span><span class="p">],</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">10.</span><span class="p">,</span> <span class="n">vdw_tail_correction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">universe</span><span class="o">.</span><span class="n">add_force_field</span><span class="p">(</span><span class="s1">&#39;SPCE&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Universe created with:
+Dimensions [21.75 21.75 21.75]
+</pre></div></div>
+</div>
+<p>There are 8 parameters in the universe:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">universe</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;equilibrium_state (#31)&#39;: &lt;Parameter
+ {ID: 31,
+  type: &#39;equilibrium_state&#39;,
+  value: 1.0 Ang,
+  unit: &#39;Ang&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Bond&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;potential_strength (#32)&#39;: &lt;Parameter
+ {ID: 32,
+  type: &#39;potential_strength&#39;,
+  value: 4637.0 kJ / mol Ang ^ 2,
+  unit: &#39;kJ / mol Ang ^ 2&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Bond&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;equilibrium_state (#17)&#39;: &lt;Parameter
+ {ID: 17,
+  type: &#39;equilibrium_state&#39;,
+  value: 109.47 deg,
+  unit: &#39;deg&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;BondAngle&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;potential_strength (#18)&#39;: &lt;Parameter
+ {ID: 18,
+  type: &#39;potential_strength&#39;,
+  value: 383.0 kJ / mol rad ^ 2,
+  unit: &#39;kJ / mol rad ^ 2&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;BondAngle&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;charge (#4)&#39;: &lt;Parameter
+ {ID: 4,
+  type: &#39;charge&#39;,
+  value: 0.4238 e,
+  unit: &#39;e&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Coulombic&#39;,
+  functions_name: &#39;Coulomb&#39;,
+  tied: False}&gt;, &#39;epsilon (#37)&#39;: &lt;Parameter
+ {ID: 37,
+  type: &#39;epsilon&#39;,
+  value: 0.6502 kJ / mol,
+  unit: &#39;kJ / mol&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Dispersion&#39;,
+  functions_name: &#39;LennardJones&#39;,
+  tied: False}&gt;, &#39;sigma (#38)&#39;: &lt;Parameter
+ {ID: 38,
+  type: &#39;sigma&#39;,
+  value: 3.166 Ang,
+  unit: &#39;Ang&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Dispersion&#39;,
+  functions_name: &#39;LennardJones&#39;,
+  tied: False}&gt;, &#39;charge (#19)&#39;: &lt;Parameter
+ {ID: 19,
+  type: &#39;charge&#39;,
+  value: -0.8476 e,
+  unit: &#39;e&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Coulombic&#39;,
+  functions_name: &#39;Coulomb&#39;,
+  tied: False}&gt;}
+</pre></div></div>
+</div>
+<p>So while all 8 parameters can be passed when initiliasing <code class="docutils literal notranslate"><span class="pre">Control</span></code>, they can also be filtered. <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> objects have a number of convenience methods to assist with this:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">parameters</span>
+<span class="n">help</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on Parameters in module MDMC.MD.parameters object:
+
+class Parameters(builtins.dict)
+ |  Parameters(init_parameters: &#34;Optional[Union[Parameter, &#39;list[Parameter]&#39;]]&#34; = None)
+ |
+ |  A `dict-like` object where every element is a ``Parameter`` indexed by name,
+ |  which contains a number of helper methods for filtering.
+ |
+ |  Although ``Parameters`` is a `dict`, it should be treated like a `list` when writing to it;
+ |  i.e. initialise it using a `list` and use `append` to add to it. These parameters can
+ |  then be accessed by their name as a key.
+ |
+ |  In short; Parameters writes like a list and reads like a dict.
+ |
+ |  Parameters
+ |  ----------
+ |  init_parameters: ``Parameter`` or `list` of ``Parameter``s, optional, default None
+ |      The initial ``Parameter`` objects that the ``Parameters`` object contains.
+ |
+ |  Attributes
+ |  ----------
+ |  array: np.ndarray
+ |      An alphabetically-sorted numpy array of the ``Parameter``s stored in this object.
+ |
+ |  Method resolution order:
+ |      Parameters
+ |      builtins.dict
+ |      builtins.object
+ |
+ |  Methods defined here:
+ |
+ |  __getitem__(self, key: &#39;str&#39;) -&gt; &#34;Union[Parameter, &#39;list[Parameter]&#39;]&#34;
+ |      x.__getitem__(y) &lt;==&gt; x[y]
+ |
+ |  __init__(self, init_parameters: &#34;Optional[Union[Parameter, &#39;list[Parameter]&#39;]]&#34; = None)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |
+ |  __setitem__(self, key: &#39;str&#39;, value: &#39;Parameter&#39;) -&gt; &#39;NoReturn&#39;
+ |      Set self[key] to value.
+ |
+ |  append(self, parameters: &#34;Union[&#39;list[Parameter]&#39;, Parameter]&#34;) -&gt; &#39;None&#39;
+ |      Appends a ``Parameter`` or list of ``Parameter``s to the dict,
+ |      with the parameter name as its key.
+ |
+ |      Parameters
+ |      ----------
+ |      parameters: ``Parameter`` or `list` of ``Parameter``s
+ |          The parameter(s) to be added to the dict.
+ |
+ |  filter(self, predicate: &#39;Callable[[Parameter], bool]&#39;) -&gt; &#39;Parameters&#39;
+ |      Filters using a predicate
+ |
+ |      Parameters
+ |      ----------
+ |      predicate : function
+ |          A function that returns a `bool` which takes a ``Parameter`` as an
+ |          argument.
+ |
+ |      Returns
+ |      -------
+ |      Parameters
+ |          The ``Parameter`` objects which meet the condition of the predicate
+ |
+ |  filter_atom_attribute(self, attribute: &#39;str&#39;, value: &#39;Union[str, float]&#39;) -&gt; &#39;Parameters&#39;
+ |      Filters based on the attribute of ``Atom`` objects which have each
+ |      ``Parameter`` applied to them
+ |
+ |
+ |      Parameters
+ |      ----------
+ |      attribute : str
+ |          An attribute of an ``Atom``. Attributes to match to must be either
+ |          `float` or str.
+ |      value : str, float
+ |          The value of the ``Atom`` ``attribute``.
+ |
+ |      Returns
+ |      -------
+ |      Parameters
+ |          The ``Parameter`` objects which are applied to an ``Atom`` object
+ |          which has the specified ``value`` of the specified ``attribute``
+ |
+ |  filter_function(self, function_name: &#39;str&#39;) -&gt; &#39;Parameters&#39;
+ |      Filters based on the name of the ``InteractionFunction`` of each
+ |      ``Parameter``
+ |
+ |      Parameters
+ |      ----------
+ |      function_name : str
+ |          The name of the ``InteractionFunction`` of ``Parameter`` objects to
+ |          return, for example ``&#39;LennardJones&#39;`` or ``&#39;HarmonicPotential&#39;``.
+ |
+ |      Returns
+ |      -------
+ |      Parameters
+ |          The ``Parameter`` objects which have a ``function`` with the
+ |          specified ``function_name``
+ |
+ |  filter_interaction(self, interaction_name: &#39;str&#39;) -&gt; &#39;Parameters&#39;
+ |      Filters based on the name of the ``Interaction`` of each ``Parameter``
+ |
+ |      Parameters
+ |      ----------
+ |      interaction_name : str
+ |          The name of the ``Interaction`` of ``Parameter`` objects to return,
+ |          for example ``&#39;Bond&#39;``.
+ |
+ |      Returns
+ |      -------
+ |      Parameters
+ |          The ``Parameter`` objects which have an ``Interaction`` with the
+ |          specified ``interaction_name``
+ |
+ |  filter_name(self, name: &#39;str&#39;) -&gt; &#39;Parameters&#39;
+ |      Filters by ``name``
+ |
+ |      Parameters
+ |      ----------
+ |      name : str
+ |          The ``name`` of the ``Parameter`` objects to return.
+ |
+ |      Returns
+ |      -------
+ |      Parameters
+ |          The ``Parameter`` objects with ``name``
+ |
+ |  filter_structure(self, structure_name: &#39;str&#39;) -&gt; &#39;Parameters&#39;
+ |      Filters based on the name of the ``Structure`` to which each
+ |      ``Parameter`` applies
+ |
+ |      Parameters
+ |      ----------
+ |      structure_name : str
+ |          The name of a ``Structure``.
+ |
+ |      Returns
+ |      -------
+ |      Parameters
+ |          The ``Parameter`` objects which are applied to a ``Structure``
+ |          which has the specified ``structure_name``
+ |
+ |  filter_value(self, comparison: &#39;str&#39;, value: &#39;float&#39;) -&gt; &#39;Parameters&#39;
+ |      Filters by ``value``
+ |
+ |      Parameters
+ |      ----------
+ |      comparison : str
+ |          A `str` representing a comparison operator, ``&#39;&gt;&#39;``, ``&#39;&lt;&#39;``,
+ |          ``&#39;&gt;=&#39;``, ``&#39;&lt;=&#39;``, ``&#39;==&#39;``, ``&#39;!=&#39;``.
+ |      value : float
+ |          A `float` with which ``Parameter`` values are compared, using the
+ |          ``comparison`` operator.
+ |
+ |      Returns
+ |      -------
+ |      Parameters
+ |          The ``Parameter`` objects which return a `True` when their values
+ |          are compared with ``value`` using the ``comparison`` operator
+ |
+ |  log_parameters(self) -&gt; &#39;None&#39;
+ |      Logs all Parameters by ID
+ |
+ |  ----------------------------------------------------------------------
+ |  Readonly properties defined here:
+ |
+ |  as_array
+ |      The parameters in the object as a sorted numpy array.
+ |
+ |      Returns
+ |      -------
+ |      np.ndarray
+ |          An alphabetically-sorted array of parameter values in the object.
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from builtins.dict:
+ |
+ |  __contains__(self, key, /)
+ |      True if the dictionary has the specified key, else False.
+ |
+ |  __delitem__(self, key, /)
+ |      Delete self[key].
+ |
+ |  __eq__(self, value, /)
+ |      Return self==value.
+ |
+ |  __ge__(self, value, /)
+ |      Return self&gt;=value.
+ |
+ |  __getattribute__(self, name, /)
+ |      Return getattr(self, name).
+ |
+ |  __gt__(self, value, /)
+ |      Return self&gt;value.
+ |
+ |  __ior__(self, value, /)
+ |      Return self|=value.
+ |
+ |  __iter__(self, /)
+ |      Implement iter(self).
+ |
+ |  __le__(self, value, /)
+ |      Return self&lt;=value.
+ |
+ |  __len__(self, /)
+ |      Return len(self).
+ |
+ |  __lt__(self, value, /)
+ |      Return self&lt;value.
+ |
+ |  __ne__(self, value, /)
+ |      Return self!=value.
+ |
+ |  __or__(self, value, /)
+ |      Return self|value.
+ |
+ |  __repr__(self, /)
+ |      Return repr(self).
+ |
+ |  __reversed__(self, /)
+ |      Return a reverse iterator over the dict keys.
+ |
+ |  __ror__(self, value, /)
+ |      Return value|self.
+ |
+ |  __sizeof__(...)
+ |      D.__sizeof__() -&gt; size of D in memory, in bytes
+ |
+ |  clear(...)
+ |      D.clear() -&gt; None.  Remove all items from D.
+ |
+ |  copy(...)
+ |      D.copy() -&gt; a shallow copy of D
+ |
+ |  get(self, key, default=None, /)
+ |      Return the value for key if key is in the dictionary, else default.
+ |
+ |  items(...)
+ |      D.items() -&gt; a set-like object providing a view on D&#39;s items
+ |
+ |  keys(...)
+ |      D.keys() -&gt; a set-like object providing a view on D&#39;s keys
+ |
+ |  pop(...)
+ |      D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value.
+ |
+ |      If the key is not found, return the default if given; otherwise,
+ |      raise a KeyError.
+ |
+ |  popitem(self, /)
+ |      Remove and return a (key, value) pair as a 2-tuple.
+ |
+ |      Pairs are returned in LIFO (last-in, first-out) order.
+ |      Raises KeyError if the dict is empty.
+ |
+ |  setdefault(self, key, default=None, /)
+ |      Insert key with a value of default if key is not in the dictionary.
+ |
+ |      Return the value for key if key is in the dictionary, else default.
+ |
+ |  update(...)
+ |      D.update([E, ]**F) -&gt; None.  Update D from dict/iterable E and F.
+ |      If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+ |      If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+ |      In either case, this is followed by: for k in F:  D[k] = F[k]
+ |
+ |  values(...)
+ |      D.values() -&gt; an object providing a view on D&#39;s values
+ |
+ |  ----------------------------------------------------------------------
+ |  Class methods inherited from builtins.dict:
+ |
+ |  __class_getitem__(...) from builtins.type
+ |      See PEP 585
+ |
+ |  fromkeys(iterable, value=None, /) from builtins.type
+ |      Create a new dictionary with keys from iterable and values set to value.
+ |
+ |  ----------------------------------------------------------------------
+ |  Static methods inherited from builtins.dict:
+ |
+ |  __new__(*args, **kwargs) from builtins.type
+ |      Create and return a new object.  See help(type) for accurate signature.
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes inherited from builtins.dict:
+ |
+ |  __hash__ = None
+
+</pre></div></div>
+</div>
+<p>For example, if only the charge parameters should be refined, <code class="docutils literal notranslate"><span class="pre">parameters</span></code> could be filtered by name:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">charges</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">filter_name</span><span class="p">(</span><span class="s1">&#39;charge&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">charges</span><span class="p">)</span>
+
+<span class="c1"># charges is a Parameters object</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">The class of charges is: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">charges</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;charge (#4)&#39;: &lt;Parameter
+ {ID: 4,
+  type: &#39;charge&#39;,
+  value: 0.4238 e,
+  unit: &#39;e&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Coulombic&#39;,
+  functions_name: &#39;Coulomb&#39;,
+  tied: False}&gt;, &#39;charge (#19)&#39;: &lt;Parameter
+ {ID: 19,
+  type: &#39;charge&#39;,
+  value: -0.8476 e,
+  unit: &#39;e&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Coulombic&#39;,
+  functions_name: &#39;Coulomb&#39;,
+  tied: False}&gt;}
+
+The class of charges is: &lt;class &#39;MDMC.MD.parameters.Parameters&#39;&gt;
+</pre></div></div>
+</div>
+<p>As each filter returns a <code class="docutils literal notranslate"><span class="pre">Parameters</span></code> object, filters can be chained together. For example, to find the potential strengths of all bonds:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bond_potential_strengths</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">filter_name</span><span class="p">(</span><span class="s1">&#39;potential_strength&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">filter_interaction</span><span class="p">(</span><span class="s1">&#39;Bond&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bond_potential_strengths</span><span class="p">)</span>
+
+<span class="c1"># These operations are commutative</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">The order these methods are&#39;</span>
+      <span class="s1">&#39; applied does not matter: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bond_potential_strengths</span>
+                                             <span class="o">==</span> <span class="n">parameters</span><span class="o">.</span><span class="n">filter_interaction</span><span class="p">(</span><span class="s1">&#39;Bond&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">filter_name</span><span class="p">(</span><span class="s1">&#39;potential_strength&#39;</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;potential_strength (#32)&#39;: &lt;Parameter
+ {ID: 32,
+  type: &#39;potential_strength&#39;,
+  value: 4637.0 kJ / mol Ang ^ 2,
+  unit: &#39;kJ / mol Ang ^ 2&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Bond&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;}
+
+The order these methods are applied does not matter: True
+</pre></div></div>
+</div>
+<p>It is also possible to filter parameters based on the properties of the atoms to which they apply. For instance, we can filter the SPCE parameters so that only parameters of interactions on H atoms are shown:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">H_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">filter_atom_attribute</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">H_parameters</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;equilibrium_state (#31)&#39;: &lt;Parameter
+ {ID: 31,
+  type: &#39;equilibrium_state&#39;,
+  value: 1.0 Ang,
+  unit: &#39;Ang&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Bond&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;potential_strength (#32)&#39;: &lt;Parameter
+ {ID: 32,
+  type: &#39;potential_strength&#39;,
+  value: 4637.0 kJ / mol Ang ^ 2,
+  unit: &#39;kJ / mol Ang ^ 2&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Bond&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;equilibrium_state (#17)&#39;: &lt;Parameter
+ {ID: 17,
+  type: &#39;equilibrium_state&#39;,
+  value: 109.47 deg,
+  unit: &#39;deg&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;BondAngle&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;potential_strength (#18)&#39;: &lt;Parameter
+ {ID: 18,
+  type: &#39;potential_strength&#39;,
+  value: 383.0 kJ / mol rad ^ 2,
+  unit: &#39;kJ / mol rad ^ 2&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;BondAngle&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;charge (#4)&#39;: &lt;Parameter
+ {ID: 4,
+  type: &#39;charge&#39;,
+  value: 0.4238 e,
+  unit: &#39;e&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Coulombic&#39;,
+  functions_name: &#39;Coulomb&#39;,
+  tied: False}&gt;}
+</pre></div></div>
+</div>
+<p>Finally there is also a more flexible method (<code class="docutils literal notranslate"><span class="pre">Parameters.filter</span></code>) which can be used in conjunction with any function to filter the parameters by some predicate function (a function which takes a parameter and returns True or False according to what is ‘filtered out’). This is most easily done with a <a class="reference external" href="https://docs.python.org/3/howto/functional.html#small-functions-and-the-lambda-expression">lambda function</a> but a regular function can also be used.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">is_length</span><span class="p">(</span><span class="n">parameter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A function which tells you whether the parameter measures length or not.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">parameter</span><span class="o">.</span><span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;Ang&#39;</span>
+
+<span class="n">length_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">is_length</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">length_parameters</span><span class="p">)</span>
+
+<span class="c1"># For those more familiar with Python, this can also be done using a lambda</span>
+<span class="n">lambda_length_parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;Ang&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">The same filter can be achieved using lambdas: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lambda_length_parameters</span> <span class="o">==</span> <span class="n">length_parameters</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;equilibrium_state (#31)&#39;: &lt;Parameter
+ {ID: 31,
+  type: &#39;equilibrium_state&#39;,
+  value: 1.0 Ang,
+  unit: &#39;Ang&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Bond&#39;,
+  functions_name: &#39;HarmonicPotential&#39;,
+  tied: False}&gt;, &#39;sigma (#38)&#39;: &lt;Parameter
+ {ID: 38,
+  type: &#39;sigma&#39;,
+  value: 3.166 Ang,
+  unit: &#39;Ang&#39;,
+  fixed: False,
+  constraints: None,
+  interactions_name: &#39;Dispersion&#39;,
+  functions_name: &#39;LennardJones&#39;,
+  tied: False}&gt;}
+
+The same filter can be achieved using lambdas: True
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../parameter-refinement.html" class="btn btn-neutral float-left" title="Parameter Refinement" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
