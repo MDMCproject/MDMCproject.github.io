@@ -98,10 +98,10 @@
              
   <h1>Source code for MDMC.utilities.plotting</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Plotting related utilities</span>
+<span class="sd">Utility functions for plotting.</span>
 
 <span class="sd">These are additional functions which can be used to plot specific MDMC data,</span>
-<span class="sd">e.g. dynamic plotting during a refinement.  All plotting requires matplotlib to</span>
+<span class="sd">e.g. dynamic plotting during a refinement.  All plotting requires ``matplotlib`` to</span>
 <span class="sd">be installed, and dynamic plotting requires execution to be performed within a</span>
 <span class="sd">Jupyter notebook in order to display correctly.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -109,12 +109,8 @@
 <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">MethodType</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
-
 <span class="kn">from</span> <span class="nn">MDMC.common.df_operations</span> <span class="kn">import</span> <span class="n">filter_dataframe</span>
-
-<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">MDMC.control</span> <span class="kn">import</span> <span class="n">Control</span>
+<span class="kn">from</span> <span class="nn">MDMC.control</span> <span class="kn">import</span> <span class="n">Control</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -125,9 +121,14 @@
 
 
 <span class="c1"># Defaults for text and plot output sizes</span>
+
+<span class="c1">#: Default VBox height.</span>
 <span class="n">VBOX_HEIGHT</span> <span class="o">=</span> <span class="s1">&#39;73%&#39;</span>
+<span class="c1">#: Default number of text lines.</span>
 <span class="n">N_TEXT_LINES</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="c1">#: Default plot height.</span>
 <span class="n">PLOT_HEIGHT</span> <span class="o">=</span> <span class="mi">360</span>
+<span class="c1">#: Default CNVS width.</span>
 <span class="n">CNVS_WIDTH</span> <span class="o">=</span> <span class="mi">800</span>
 
 
@@ -135,32 +136,23 @@
 <span class="c1"># we are importing things out-of-order and copying variables on purpose here</span>
 <div class="viewcode-block" id="plot_progress">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.plotting.plot_progress">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_progress</span><span class="p">(</span><span class="n">inst</span><span class="p">:</span> <span class="s2">&quot;Control&quot;</span><span class="p">,</span> <span class="n">ynames</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Control&quot;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">plot_progress</span><span class="p">(</span><span class="n">inst</span><span class="p">:</span> <span class="n">Control</span><span class="p">,</span> <span class="n">ynames</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Control</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Modifies an instance of ``MDMC.control.Control`` so that the progress of 1</span>
-<span class="sd">    or more variables is plotted with each step when ``refine`` is called.</span>
+<span class="sd">    Plot current progress of a control.</span>
 
-<span class="sd">    This takes an instance of ``MDMC.control.Control`` as a parameter and</span>
+<span class="sd">    Modifies an instance of :any:`MDMC.control.Control` so that the progress of 1</span>
+<span class="sd">    or more variables is plotted with each step when :any:`refine` is called.</span>
+
+<span class="sd">    This takes an instance of ``Control`` as a parameter and</span>
 <span class="sd">    returns a modified instance, which can be treated exactly as the original</span>
 <span class="sd">    instance.  See the examples section for more details.</span>
-
-<span class="sd">    **This plotting should only be used in a Jupyter notebook and requires</span>
-<span class="sd">    ipywidgets and matplotlib to interactively display the progress. The</span>
-<span class="sd">    matplotlib backend must be set to &#39;notebook&#39; before calling `refine`. This</span>
-<span class="sd">    can be done by executing the following magic call within a Jupyter notebook</span>
-<span class="sd">    cell:**</span>
-
-<span class="sd">        .. highlight:: python</span>
-<span class="sd">        .. code-block:: python</span>
-
-<span class="sd">            %matplotlib notebook</span>
 
 <span class="sd">    Applying ``plot_progress`` will also change the text output so that only the</span>
 <span class="sd">    more recent five steps are shown.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    inst : MDMC.control.Control</span>
+<span class="sd">    inst : Control</span>
 <span class="sd">        An instance of the ``MDMC.control.Control`` class.</span>
 <span class="sd">    ynames : str, list of str</span>
 <span class="sd">        One or more str with the name of the variable to be displayed with each</span>
@@ -171,22 +163,35 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    MDMC.control.Control</span>
+<span class="sd">    Control</span>
 <span class="sd">        An instance of the ``MDMC.control.Control`` class, which is</span>
 <span class="sd">        modified so that a plot is displayed when ``inst.refine`` is called.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This plotting should only be used in a Jupyter notebook and requires</span>
+<span class="sd">    ipywidgets and matplotlib to interactively display the progress. The</span>
+<span class="sd">    matplotlib backend must be set to &#39;notebook&#39; before calling `refine`. This</span>
+<span class="sd">    can be done by executing the following magic call within a Jupyter notebook</span>
+<span class="sd">    cell:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        %matplotlib notebook</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    Modifying a ``Control`` instance to plot the progress of the &#39;FoM&#39; with each</span>
 <span class="sd">    refinement step. This should be executed within a Jupyter notebook:</span>
 
-<span class="sd">        .. highlight:: python</span>
-<span class="sd">        .. code-block:: python</span>
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
 
-<span class="sd">            %matplotlib notebook</span>
-<span class="sd">            control = Control(...)  # ... represents some parameters</span>
-<span class="sd">            control = plot_progress(control, &#39;FoM&#39;)</span>
-<span class="sd">            control.refine(100)</span>
+<span class="sd">        %matplotlib notebook</span>
+<span class="sd">        control = Control(...)  # ... represents some parameters</span>
+<span class="sd">        control = plot_progress(control, &#39;FoM&#39;)</span>
+<span class="sd">        control.refine(100)</span>
 
 <span class="sd">    First the matplotlib backend is set to &#39;notebook&#39;, then the ``Control``</span>
 <span class="sd">    instance is modified, and then a refinement is run. With each step of the</span>
@@ -196,13 +201,13 @@
 <span class="sd">    and &#39;epsilon&#39; with each refinement step. This should be executed within a</span>
 <span class="sd">    Jupyter notebook:</span>
 
-<span class="sd">        .. highlight:: python</span>
-<span class="sd">        .. code-block:: python</span>
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
 
-<span class="sd">            %matplotlib notebook</span>
-<span class="sd">            control = Control(...)  # ... represents some parameters</span>
-<span class="sd">            control = plot_progress(control, [&#39;FoM&#39;, &#39;sigma&#39;, &#39;epsilon&#39;])</span>
-<span class="sd">            control.refine(100)</span>
+<span class="sd">        %matplotlib notebook</span>
+<span class="sd">        control = Control(...)  # ... represents some parameters</span>
+<span class="sd">        control = plot_progress(control, [&#39;FoM&#39;, &#39;sigma&#39;, &#39;epsilon&#39;])</span>
+<span class="sd">        control.refine(100)</span>
 
 <span class="sd">    With each step of the refinement a graph of &#39;FoM&#39; against &#39;Steps&#39; will be</span>
 <span class="sd">    plotted, a graph of &#39;sigma&#39; against &#39;Steps&#39; will be plotted, and a graph of</span>

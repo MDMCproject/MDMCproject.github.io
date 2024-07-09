@@ -97,15 +97,18 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.utilities.installation_tests</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module containing installation tests. These determine which features are</span>
-<span class="sd">available in an installation of MDMC.</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module containing installation tests.</span>
+
+<span class="sd">These determine which features are available in an installation of MDMC.</span>
 
 <span class="sd">This includes:</span>
-<span class="sd">- If MDMC can be imported</span>
-<span class="sd">- If an MD engine can be run (e.g. LAMMPS)</span>
-<span class="sd">- If X11 forwarding is enabled and the ASE gui can run</span>
-<span class="sd">- If the optional dependencies for the dynamic plotting utility have been</span>
-<span class="sd">  installed</span>
+
+<span class="sd">- Whether MDMC can be imported.</span>
+<span class="sd">- Whether an MD engine can be run (e.g. LAMMPS).</span>
+<span class="sd">- Whether X11 forwarding is enabled and the ASE gui can run.</span>
+<span class="sd">- Whether the optional dependencies for the dynamic plotting utility have been</span>
+<span class="sd">  installed.</span>
 
 <span class="sd">These tests exist so that a user can test their installation of MDMC.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -115,7 +118,7 @@
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">basename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span>
 
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -127,24 +130,37 @@
 <div class="viewcode-block" id="InstlTestBase">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.installation_tests.InstlTestBase">[docs]</a>
 <span class="k">class</span> <span class="nc">InstlTestBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for installation tests</span>
+<span class="sd">    Base class for installation tests.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    success : str</span>
-<span class="sd">        A &#39;str&#39; denoting if the test has PASSED, FAILED, or is INCOMPLETE</span>
+<span class="sd">    success : Literal[&#39;PASSED&#39;, &#39;FAILED&#39;, &#39;INCOMPLETE&#39;]</span>
+<span class="sd">        A `str` denoting if the test has PASSED, FAILED, or is INCOMPLETE.</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of current test.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_success</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">success</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get whether or not the test has PASSED, FAILED or is INCOMPLETE&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">success</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;PASSED&#39;</span><span class="p">,</span> <span class="s1">&#39;FAILED&#39;</span><span class="p">,</span> <span class="s1">&#39;INCOMPLETE&#39;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get whether or not the test has PASSED, FAILED or is INCOMPLETE.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            One of &quot;PASSED&quot;, &quot;FAILED&quot; or &quot;INCOMPLETE&quot;</span>
+<span class="sd">            depending on test state.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If test state is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_success</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">return</span> <span class="s1">&#39;PASSED&#39;</span>
@@ -158,7 +174,9 @@
 <div class="viewcode-block" id="InstlTestBase.log_test_passed">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.installation_tests.InstlTestBase.log_test_passed">[docs]</a>
     <span class="k">def</span> <span class="nf">log_test_passed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Logs that the test passed&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Log that the test passed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> installation test passed&#39;</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
@@ -169,7 +187,9 @@
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.installation_tests.InstlTestBase.run">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the test and sets the value of &#39;&#39;self.success&#39;&#39;&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the test and sets the value of `self.success`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 </div>
@@ -181,8 +201,10 @@
 <span class="k">class</span> <span class="nc">InstlTestFactory</span><span class="p">:</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A factory class which keeps a registry of the installation tests and creates</span>
-<span class="sd">    instances of them</span>
+<span class="sd">    Testing factory class.</span>
+
+<span class="sd">    A factory class which keeps a registry of the installation tests</span>
+<span class="sd">    and creates instances of them.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">registry</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">InstlTestBase</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -192,7 +214,7 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A class level decorator for registering installation test classes</span>
+<span class="sd">        Decorator for registering installation test classes.</span>
 
 <span class="sd">        The name with which the test is registered should be the parameter</span>
 <span class="sd">        passed to the decorator.</span>
@@ -200,10 +222,15 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        name : str</span>
-<span class="sd">            The name with which the test is registered</span>
+<span class="sd">            The name with which the test is registered.</span>
 
-<span class="sd">        Example</span>
+<span class="sd">        Returns</span>
 <span class="sd">        -------</span>
+<span class="sd">        `function`</span>
+<span class="sd">            Wrapped class registered in factory.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
 <span class="sd">        To register the ``InstlTestCore`` class with ``InstlTestFactory``:</span>
 
 <span class="sd">            .. highlight:: python</span>
@@ -226,13 +253,17 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_instl_test</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InstlTestBase</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates an instance of the installation test for the class which</span>
-<span class="sd">        corresponds to the passed ``name``</span>
+<span class="sd">        Instantiate the installation test for the class `name`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        name : str</span>
-<span class="sd">            The ``registry`` name of the class to be initialized</span>
+<span class="sd">            The ``registry`` name of the class to be initialized.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        InstlTestBase</span>
+<span class="sd">            Corresponding class with name `name`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">instl_test</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">name</span><span class="p">]()</span>
@@ -246,8 +277,7 @@
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.installation_tests.run_installation_tests">[docs]</a>
 <span class="k">def</span> <span class="nf">run_installation_tests</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A helper function for running all installation tests and printing the</span>
-<span class="sd">    result for each test</span>
+<span class="sd">    Run all installation tests and print the result for each test.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">InstlTestFactory</span><span class="o">.</span><span class="n">registry</span><span class="p">:</span>
@@ -263,8 +293,9 @@
 <span class="nd">@InstlTestFactory</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s1">&#39;core&#39;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">InstlTestCore</span><span class="p">(</span><span class="n">InstlTestBase</span><span class="p">):</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to test if all MDMC subpackages can be imported&quot;&quot;&quot;</span>
-
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to test if all MDMC subpackages can be imported.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="InstlTestCore.run">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.installation_tests.InstlTestCore.run">[docs]</a>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -312,8 +343,7 @@
 <span class="k">class</span> <span class="nc">InstlTestLAMMPS</span><span class="p">(</span><span class="n">InstlTestBase</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class to test if LAMMPS is installed and if the PyLammps interface can be</span>
-<span class="sd">    accessed</span>
+<span class="sd">    Class to test if LAMMPS is installed and PyLammps interface can be accessed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">LOG_ERROR_MSG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Due to this, MDMC will not be able to run MD&#39;</span>
@@ -387,8 +417,10 @@
 <span class="k">class</span> <span class="nc">InstlTestX11Forwarding</span><span class="p">(</span><span class="n">InstlTestBase</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class to test if tkinter can access the display. This is used to determine</span>
-<span class="sd">    if X11 forwarding is working in Docker/Singularity containers.</span>
+<span class="sd">    Class to test if tkinter can access the display.</span>
+
+<span class="sd">    This is used to determine if X11 forwarding is working</span>
+<span class="sd">    in Docker/Singularity containers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">LOG_ERROR_MSG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Due to this, GUI elements requiring tkinter, such as&#39;</span>
@@ -439,8 +471,7 @@
 <span class="k">class</span> <span class="nc">InstlTestDynamicPlottingDependencies</span><span class="p">(</span><span class="n">InstlTestBase</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class to test if the optional dependencies required for dynamic plotting are</span>
-<span class="sd">    installed</span>
+<span class="sd">    Test if the dynamic plotting optional dependencies are installed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">LOG_ERROR_MSG</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Due to this, dynamic plotting of the refinement will not&#39;</span>

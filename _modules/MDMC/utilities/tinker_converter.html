@@ -98,8 +98,7 @@
              
   <h1>Source code for MDMC.utilities.tinker_converter</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This is a module for reading TINKER .prm files and converting them to MDMC</span>
-<span class="sd">force field python files.</span>
+<span class="sd">Read TINKER ``.prm`` files and convert them to MDMC force field python files.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
@@ -118,51 +117,51 @@
 
 <div class="viewcode-block" id="read_prm">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.tinker_converter.read_prm">[docs]</a>
-<span class="k">def</span> <span class="nf">read_prm</span><span class="p">(</span><span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ncols</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">14</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">read_prm</span><span class="p">(</span><span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ncols</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">14</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reads a TINKER prm (force field) file</span>
+<span class="sd">    Read a TINKER ``.prm`` (force field) file.</span>
 
 <span class="sd">    Ignores all errors raised by incorrectly formatted data, so will be</span>
-<span class="sd">    susceptible to incorrectly formatted prm files</span>
+<span class="sd">    susceptible to incorrectly formatted ``.prm`` files.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    fname : str</span>
-<span class="sd">        The name of the prm file</span>
-<span class="sd">    ncols : int</span>
+<span class="sd">        The name of the ``.prm`` file.</span>
+<span class="sd">    ncols : int, optional</span>
 <span class="sd">        The largest number of columns that should be read. The default is 14,</span>
 <span class="sd">        which is the number of columns required for the torsion (proper</span>
-<span class="sd">        dihedral) in oplsaa.prm</span>
+<span class="sd">        dihedral) in ``oplsaa.prm``.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    pandas.DataFrame</span>
 <span class="sd">        A dataframe with columns (named c0, c1, ...) up to (but not including)</span>
 <span class="sd">        ncols. Each row contains a row read correctly (i.e. no Error thrown)</span>
-<span class="sd">        from the prm file.</span>
+<span class="sd">        from the ``.prm`` file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_bad_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                       <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">dummy_headers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">14</span><span class="p">))</span></div>
+                       <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">dummy_headers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncols</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="parse_prm">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.tinker_converter.parse_prm">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_prm</span><span class="p">(</span><span class="n">dataframe</span><span class="p">:</span> <span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;tuple[pd.DataFrame]&quot;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">parse_prm</span><span class="p">(</span><span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Parses a prm file into DataFrames</span>
+<span class="sd">    Parse a ``.prm`` file into DataFrames.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dataframe : pandas.DataFrame</span>
-<span class="sd">        A dataframe of raw data read from a prm file</span>
+<span class="sd">        A dataframe of raw data read from a ``.prm`` file.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    tuple</span>
+<span class="sd">    tuple[pd.DataFrame, ...]</span>
 <span class="sd">        A tuple of dataframes, with each dataframe possessing only the entries</span>
-<span class="sd">        starting with the corresponding definition</span>
+<span class="sd">        starting with the corresponding definition.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ncols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
@@ -235,22 +234,31 @@
 <div class="viewcode-block" id="write_force_field_module">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.tinker_converter.write_force_field_module">[docs]</a>
 <span class="k">def</span> <span class="nf">write_force_field_module</span><span class="p">(</span><span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                             <span class="n">atoms</span><span class="p">:</span> <span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">,</span>
-                             <span class="o">*</span><span class="n">interactions</span><span class="p">:</span> <span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">,</span>
+                             <span class="n">atoms</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                             <span class="o">*</span><span class="n">interactions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                              <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="n">module_docstring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="n">class_docstring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write a temporary module to allow Tinker potentials to be imported.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    atoms : pandas.DataFrame</span>
-<span class="sd">    *interactions</span>
-<span class="sd">        An arbitrary number of `pandas.DataFrame` objects</span>
 <span class="sd">    fname : str</span>
-<span class="sd">        name of the module (excluding the file extension) and the class</span>
-<span class="sd">    module_docstring : str</span>
-<span class="sd">    class_docstring : str</span>
+<span class="sd">        Name of the module (excluding the file extension) and the class.</span>
+<span class="sd">    atoms : pandas.DataFrame</span>
+<span class="sd">        Atoms to dump.</span>
+<span class="sd">    *interactions</span>
+<span class="sd">        An arbitrary number of `pandas.DataFrame` objects.</span>
+<span class="sd">    path : str, optional</span>
+<span class="sd">        Path to dump to.</span>
+<span class="sd">    module_docstring : str, optional</span>
+<span class="sd">        Docstring for created module.</span>
+<span class="sd">    class_docstring : str, optional</span>
+<span class="sd">        Docstring for created class.</span>
+<span class="sd">    **settings</span>
+<span class="sd">        Extra options.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -295,13 +303,38 @@
 
 <div class="viewcode-block" id="write_data">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.tinker_converter.write_data">[docs]</a>
-<span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span>
+        <span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">atoms</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">settings</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Writes force field data to a .dat file.</span>
+<span class="sd">    Write forcefield data to a ``.dat`` file.</span>
 
-<span class="sd">    TODO: parameters and returns of this</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname : str</span>
+<span class="sd">        File name to write to.</span>
+<span class="sd">    atoms : pd.DataFrame</span>
+<span class="sd">        Force field to write.</span>
+<span class="sd">    path : str, optional</span>
+<span class="sd">        Path to read data from.</span>
+<span class="sd">    **settings</span>
+<span class="sd">        Extra options.</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    orig_file : str</span>
+<span class="sd">        Original file forcefield read from.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    For each of `disp`, `bond`, `angle`, `proper` and `improper`, there</span>
+<span class="sd">    exists a pair of optional arguments:</span>
+<span class="sd">    ``&lt;type&gt;s`` and ``&lt;type&gt;_function``</span>
+<span class="sd">    Which define the presence of parameters and the function to compute them.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">inter_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;disps&#39;</span><span class="p">,</span> <span class="s1">&#39;bonds&#39;</span><span class="p">,</span> <span class="s1">&#39;angles&#39;</span><span class="p">,</span> <span class="s1">&#39;propers&#39;</span><span class="p">,</span> <span class="s1">&#39;impropers&#39;</span><span class="p">]</span>
     <span class="n">disps</span><span class="p">,</span> <span class="n">bonds</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="n">propers</span><span class="p">,</span> <span class="n">impropers</span> <span class="o">=</span> <span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">inter_type</span><span class="p">,</span> <span class="p">[])</span> <span class="k">for</span>
                                                 <span class="n">inter_type</span> <span class="ow">in</span> <span class="n">inter_types</span><span class="p">]</span>
@@ -347,21 +380,21 @@
 
 <div class="viewcode-block" id="dummy_headers">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.tinker_converter.dummy_headers">[docs]</a>
-<span class="k">def</span> <span class="nf">dummy_headers</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;list[str]&quot;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">dummy_headers</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates dummy headers c0, c1, c2, ... until end (exclusive)</span>
+<span class="sd">    Generate dummy headers c0, c1, c2, ... until end (exclusive).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    start : int</span>
-<span class="sd">        The start of the header (inclusive)</span>
+<span class="sd">        The start of the header (inclusive).</span>
 <span class="sd">    end : int</span>
-<span class="sd">        The end of the header (exclusive)</span>
+<span class="sd">        The end of the header (exclusive).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    list of str</span>
-<span class="sd">        A `str` (``c{i}``) for each i between start and end (exclusive)</span>
+<span class="sd">        A `str` (``c{i}``) for each i between start and end (exclusive).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;c</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)]</span></div>
@@ -370,26 +403,28 @@
 
 <div class="viewcode-block" id="parse_dataframe">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.tinker_converter.parse_dataframe">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_dataframe</span><span class="p">(</span><span class="n">dataframe</span><span class="p">:</span> <span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">parse_dataframe</span><span class="p">(</span><span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">drop</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse a single dataframe.</span>
+
 <span class="sd">    Parses a dataframe containing single datatype (e.g. atom or angles) by</span>
-<span class="sd">    dropping any unnecessary columns and setting correct header names</span>
+<span class="sd">    dropping any unnecessary columns and setting correct header names.</span>
 
 <span class="sd">    If the dataframe has a header &#39;c0&#39; this is always dropped</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dataframe : pandas.DataFrame</span>
-<span class="sd">        The dataframe to be parsed</span>
+<span class="sd">        The dataframe to be parsed.</span>
 <span class="sd">    drop : list</span>
-<span class="sd">        A list of names of headers which will be dropped</span>
+<span class="sd">        A list of names of headers which will be dropped.</span>
 <span class="sd">    names : list</span>
-<span class="sd">        A list of the header names which will be set for the remaining columns.</span>
+<span class="sd">        A list of the header names which will be set for the remaining columns..</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    pandas.DataFrame</span>
-<span class="sd">        A parsed ``DataFrame``</span>
+<span class="sd">        A parsed ``DataFrame``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -404,14 +439,19 @@
 
 <div class="viewcode-block" id="convert_units">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.tinker_converter.convert_units">[docs]</a>
-<span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="s2">&quot;pd.Series&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts from TINKER units (kcal) to kJ</span>
+<span class="sd">    Convert from TINKER units (kcal) to kJ.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    series : pandas.Series</span>
-<span class="sd">        The ``Series`` for which the parameters will be converted</span>
+<span class="sd">        The ``Series`` for which the parameters will be converted.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        Value in kJ.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">kcal</span>
