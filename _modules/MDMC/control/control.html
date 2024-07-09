@@ -108,7 +108,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span><span class="p">,</span> <span class="n">interp2d</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span><span class="p">,</span> <span class="n">RectBivariateSpline</span>
 <span class="kn">from</span> <span class="nn">verbosemanager</span> <span class="kn">import</span> <span class="n">VerboseManager</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.control.plot_results</span> <span class="kn">import</span> <span class="n">PlotResults</span><span class="p">,</span> <span class="n">data_printers</span>
@@ -391,7 +391,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span> <span class="o">=</span> <span class="n">FoMFactory</span><span class="o">.</span><span class="n">create_FoM</span><span class="p">(</span><span class="n">FoM_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">,</span>
                                                     <span class="n">norm</span><span class="o">=</span><span class="n">FoM_norm</span><span class="p">,</span>
                                                     <span class="n">n_parameters</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_FoM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculating_max_FoM</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_FoM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_max_FoM</span><span class="p">()</span>
 
         <span class="c1"># Use specified MD_steps if supplied, else calculate</span>
         <span class="c1"># cont_slicing produces small sub-trajectories, so calculation is unnecessary</span>
@@ -1113,26 +1113,22 @@
                 <span class="n">err_uniform</span><span class="p">[</span><span class="n">err_uniform</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
             <span class="c1"># interpolation for 2D</span>
             <span class="k">elif</span> <span class="n">var_dimension</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="c1"># note: the interp2d interpolation function requires input of the form</span>
-                <span class="c1"># interp2d(x, y, z)</span>
-                <span class="c1"># where if np.size(x)=m and np.size(y)=n then np.shape(z)=(n,m)</span>
-                <span class="c1"># E.g. if x = [0,1,2]; y = [0,3]; z = [[1,2,3], [4,5,6]]</span>
                 <span class="c1"># Because Observable.dependent_variables_structure gives the order in which</span>
                 <span class="c1"># the independent variables are represented in the np.shape of the data,</span>
-                <span class="c1"># we have to reverse the order of the x and y arrays for interp2d:</span>
+                <span class="c1"># we have to reverse the order of the x and y arrays for interpolation:</span>
                 <span class="n">x_data</span> <span class="o">=</span> <span class="n">observable</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="n">var_indexing</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="n">y_data</span> <span class="o">=</span> <span class="n">observable</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="n">var_indexing</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-                <span class="n">data_interpol</span> <span class="o">=</span> <span class="n">interp2d</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="n">data_interpol</span> <span class="o">=</span> <span class="n">RectBivariateSpline</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
                 <span class="c1"># get the independent_variables that satisfy the uniformity requirements</span>
                 <span class="c1"># as created earlier</span>
                 <span class="n">x_uniform</span> <span class="o">=</span> <span class="n">indep_var_uniform</span><span class="p">[</span><span class="n">var_indexing</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="n">y_uniform</span> <span class="o">=</span> <span class="n">indep_var_uniform</span><span class="p">[</span><span class="n">var_indexing</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-                <span class="n">uniform_data</span> <span class="o">=</span> <span class="n">data_interpol</span><span class="p">(</span><span class="n">x_uniform</span><span class="p">,</span> <span class="n">y_uniform</span><span class="p">)</span>
+                <span class="n">uniform_data</span> <span class="o">=</span> <span class="n">data_interpol</span><span class="p">(</span><span class="n">x_uniform</span><span class="p">,</span> <span class="n">y_uniform</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
                 <span class="c1"># repeat the interpolation for the errors</span>
                 <span class="n">err_data</span> <span class="o">=</span> <span class="n">observable</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">err_data</span><span class="p">[</span><span class="n">err_data</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="n">err_interpol</span> <span class="o">=</span> <span class="n">interp2d</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">err_data</span><span class="p">)</span>
-                <span class="n">err_uniform</span> <span class="o">=</span> <span class="n">err_interpol</span><span class="p">(</span><span class="n">x_uniform</span><span class="p">,</span> <span class="n">y_uniform</span><span class="p">)</span>
+                <span class="n">err_interpol</span> <span class="o">=</span> <span class="n">RectBivariateSpline</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">err_data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">err_uniform</span> <span class="o">=</span> <span class="n">err_interpol</span><span class="p">(</span><span class="n">x_uniform</span><span class="p">,</span> <span class="n">y_uniform</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
                 <span class="n">err_uniform</span><span class="p">[</span><span class="n">err_uniform</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
@@ -1314,9 +1310,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*=</span> <span class="n">reduction_factor</span></div>
 
 
-<div class="viewcode-block" id="Control.calculating_max_FoM">
-<a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.calculating_max_FoM">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculating_max_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Control.calculate_max_FoM">
+<a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.calculate_max_FoM">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_max_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates a maximum Figure of Merit value by comparing a set of experimental observable</span>
 <span class="sd">        data, to arrays consisting of numbers close to zero. For use when the MD Engine fails with</span>
@@ -1332,7 +1328,7 @@
         <span class="c1"># pylint: disable=protected-access</span>
         <span class="c1"># the purpose of method is to create this empty observable so accessing is necessary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">_dependent_variables</span><span class="p">[</span><span class="s1">&#39;SQw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">**-</span><span class="mi">9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">_dependent_variables</span><span class="p">[</span><span class="s1">&#39;SQw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-9</span>
 
         <span class="n">max_FoM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FoM_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observable_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">MD_obs</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="kc">None</span>
