@@ -97,7 +97,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.common.log</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;This module configures logging for MDMC&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module configures logging for MDMC.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 
@@ -108,15 +110,15 @@
                   <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
                   <span class="n">capture_warnings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Start one or more loggers to capture log information from MDMC</span>
+<span class="sd">    Start one or more loggers to capture log information from MDMC.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    logfile : str, optional</span>
-<span class="sd">        The base name of the logfile</span>
+<span class="sd">        The base name of the logfile.</span>
 <span class="sd">    level : int, optional</span>
 <span class="sd">        The logging level, corresponding to values in standard library logging</span>
-<span class="sd">        module.  Default is 20 (``logging.INFO``).</span>
+<span class="sd">        module.</span>
 <span class="sd">    capture_warnings : bool, optional</span>
 <span class="sd">        Whether warnings are captured by the logger (with a level of</span>
 <span class="sd">        WARNING) or printed to stdout.</span>
@@ -129,6 +131,21 @@
 
 
 <span class="k">def</span> <span class="nf">_start_single_logger</span><span class="p">(</span><span class="n">logfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start a single MDMC logger.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Path for log to write to.</span>
+<span class="sd">    level : int</span>
+<span class="sd">        Level of logger to start.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    logging.Logger</span>
+<span class="sd">        Single MDMC logger.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">logger</span> <span class="o">=</span> <span class="n">create_logger</span><span class="p">(</span><span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;MDMC started logging to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">)</span>
@@ -137,11 +154,22 @@
 
 
 <span class="k">def</span> <span class="nf">_capture_warnings</span><span class="p">(</span><span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Enable warning capture for `logger`.</span>
 
-    <span class="c1"># logging module only provides warnings capturing at a module level,</span>
-    <span class="c1"># rather as a Logger method, so warnings have to be captured by default</span>
-    <span class="c1"># module level logger (&quot;py.warnings&quot;) which then has the file handler</span>
-    <span class="c1"># from the logger attached.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    logger : logging.Logger</span>
+<span class="sd">        Logger on which to enable warnings.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Logging module only provides warnings capturing at a module level,</span>
+<span class="sd">    rather as a Logger method, so warnings have to be captured by default</span>
+<span class="sd">    module level logger (&quot;py.warnings&quot;) which then has the file handler</span>
+<span class="sd">    from the logger attached.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">logging</span><span class="o">.</span><span class="n">captureWarnings</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">warnings_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;py.warnings&quot;</span><span class="p">)</span>
     <span class="n">file_handler</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">),</span>
@@ -155,16 +183,21 @@
                   <span class="n">logfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;MDMC.log&quot;</span><span class="p">,</span>
                   <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a formatter logger which outputs to a log file</span>
+<span class="sd">    Create a formatter logger which outputs to a log file.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    name : str</span>
-<span class="sd">        The name of the logger</span>
-<span class="sd">    logfile : str</span>
-<span class="sd">        The name of the log file</span>
-<span class="sd">    level : int</span>
-<span class="sd">        The debug level of the logger</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        The name of the logger.</span>
+<span class="sd">    logfile : str, optional</span>
+<span class="sd">        The name of the log file.</span>
+<span class="sd">    level : int, optional</span>
+<span class="sd">        The debug level of the logger.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    logging.Logger</span>
+<span class="sd">        Logger to handle MDMC logging.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>

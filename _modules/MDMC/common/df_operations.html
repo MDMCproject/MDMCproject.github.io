@@ -97,23 +97,35 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.common.df_operations</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Contains some utility functions related to pd.DataFrames, including filtering</span>
-<span class="sd">functions</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains some utility functions related to pd.DataFrames, including filtering functions.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">overload</span><span class="p">,</span> <span class="n">Sequence</span>
+
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">filter_dataframe</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+                     <span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                     <span class="n">column_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">filter_dataframe</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+                     <span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                     <span class="n">column_regex</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> <span class="o">...</span>
 
 
 <div class="viewcode-block" id="filter_dataframe">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.df_operations.filter_dataframe">[docs]</a>
 <span class="k">def</span> <span class="nf">filter_dataframe</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
                      <span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                     <span class="n">column_names</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">column_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">column_regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This filter ignores rows which are duplicated (i.e. it only returns the</span>
-<span class="sd">    first occurence of any duplicated rows).</span>
+<span class="sd">    Ignore duplicated rows (i.e. only return the first occurence of any duplicated row).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -122,22 +134,30 @@
 <span class="sd">        the columns defined by ``column_names`` or ``column_regex``, the row</span>
 <span class="sd">        will be included in the filtered return.</span>
 <span class="sd">    dataframe : pandas.DataFrame</span>
-<span class="sd">        The ``pd.DataFrame`` object to be filtered</span>
-<span class="sd">    column_names: list, optional</span>
+<span class="sd">        The ``pd.DataFrame`` object to be filtered.</span>
+<span class="sd">    column_names : list[str], optional</span>
 <span class="sd">        A `list` of `str` specifying the names of the columns which will be used</span>
-<span class="sd">        to filter the ``Dataframe``. This cannot be passed if ``column_regex``</span>
-<span class="sd">        is also passed.</span>
+<span class="sd">        to filter the ``Dataframe``.</span>
+
+<span class="sd">        This cannot be passed if ``column_regex`` is also passed.</span>
 <span class="sd">    column_regex : str</span>
 <span class="sd">        A regular expression matching one or more column names. This specifies</span>
-<span class="sd">        which columns will be used to filter the ``DataFrame``. This cannot be</span>
-<span class="sd">        passed if ``column_names`` is also passed.</span>
+<span class="sd">        which columns will be used to filter the ``DataFrame``.</span>
+
+<span class="sd">        This cannot be passed if ``column_names`` is also passed.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    pandas.DataFrame</span>
 <span class="sd">        A ``DataFrame`` which has been filtered so that each value in ``values``</span>
 <span class="sd">        must occur in one of the columns of ``DataFrame`` that are specified by</span>
-<span class="sd">        ``column_names`` or matched by ``column_regex``</span>
+<span class="sd">        ``column_names`` or matched by ``column_regex``.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If both `column_names` and `column_regex` were passed.</span>
+<span class="sd">        If there are fewer `column_names` than values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">column_names</span> <span class="ow">and</span> <span class="n">column_regex</span><span class="p">:</span>
@@ -157,32 +177,49 @@
     <span class="c1"># value in values</span>
     <span class="n">filtered_dataframes</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">:</span>
-        <span class="n">filtered_dataframes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="n">dataframe</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
-                                            <span class="o">==</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">filtered_dataframes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="n">dataframe</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">==</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
     <span class="c1"># Concat the list of filtered dataframes (1 for each matching column)</span>
     <span class="c1"># into a single dataframe</span>
     <span class="n">concat_filtered_dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">filtered_dataframes</span><span class="p">)</span>
     <span class="c1"># If there is more than one value in values, call _filter_df_multi</span>
     <span class="c1"># recursively to further filter by the remaining values</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">concat_filtered_dataframe</span> <span class="o">=</span> <span class="n">filter_dataframe</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">concat_filtered_dataframe</span><span class="p">,</span>
-                                              <span class="n">column_names</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+        <span class="n">concat_filtered_dataframe</span> <span class="o">=</span> <span class="n">filter_dataframe</span><span class="p">(</span>
+            <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+            <span class="n">concat_filtered_dataframe</span><span class="p">,</span>
+            <span class="n">column_names</span><span class="o">=</span><span class="n">column_names</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">concat_filtered_dataframe</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span></div>
 
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">filter_ordered_dataframe</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+                             <span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                             <span class="n">column_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                             <span class="n">wildcard</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">filter_ordered_dataframe</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+                             <span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                             <span class="n">column_regex</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">wildcard</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> <span class="o">...</span>
 
 
 <div class="viewcode-block" id="filter_ordered_dataframe">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.df_operations.filter_ordered_dataframe">[docs]</a>
 <span class="k">def</span> <span class="nf">filter_ordered_dataframe</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
                              <span class="n">dataframe</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                             <span class="n">column_names</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">column_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="n">column_regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="n">wildcard</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Filters a ``pd.DataFrame`` with an iterable of ordered values. The values</span>
-<span class="sd">    must occur in columns in the correct order, with the order specified by</span>
-<span class="sd">    ``column_names``, or by the order which column order which occurs from using</span>
-<span class="sd">    ``column_regex``.</span>
+<span class="sd">    Filter a ``pd.DataFrame`` with an iterable of ordered values.</span>
+
+<span class="sd">    The values must occur in columns in the correct order, with the</span>
+<span class="sd">    order specified by ``column_names``, or by the order which column</span>
+<span class="sd">    order which occurs from using ``column_regex``.</span>
 
 <span class="sd">    This filter ignores rows which are duplicated (i.e. it only returns the</span>
 <span class="sd">    first occurence of any duplicated rows).</span>
@@ -194,24 +231,32 @@
 <span class="sd">        the columns defined by ``column_names`` or ``column_regex``, the row</span>
 <span class="sd">        will be included in the filtered return.</span>
 <span class="sd">    dataframe : pandas.DataFrame</span>
-<span class="sd">        The ``pd.DataFrame`` object to be filtered</span>
-<span class="sd">    column_names: list, optional</span>
+<span class="sd">        The ``pd.DataFrame`` object to be filtered.</span>
+<span class="sd">    column_names : list[str], optional</span>
 <span class="sd">        A `list` of `str` specifying the names of the columns which will be used</span>
-<span class="sd">        to filter the ``Dataframe``. This cannot be passed if ``column_regex``</span>
-<span class="sd">        is also passed.</span>
+<span class="sd">        to filter the ``Dataframe``.</span>
+
+<span class="sd">        This cannot be passed if ``column_regex`` is also passed.</span>
 <span class="sd">    column_regex : str</span>
 <span class="sd">        A regular expression matching one or more column names. This specifies</span>
-<span class="sd">        which columns will be used to filter the ``DataFrame``. This cannot be</span>
-<span class="sd">        passed if ``column_names`` is also passed.</span>
+<span class="sd">        which columns will be used to filter the ``DataFrame``.</span>
+
+<span class="sd">        This cannot be passed if ``column_names`` is also passed.</span>
 <span class="sd">    wildcard : str</span>
-<span class="sd">        A `str` which will be a match in any column</span>
+<span class="sd">        A `str` which will be a match in any column.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    pandas.DataFrame</span>
 <span class="sd">        A ``DataFrame`` which has been filtered so that each value in ``values``</span>
 <span class="sd">        must occur in one of the columns of ``DataFrame`` that are specified by</span>
-<span class="sd">        ``column_names`` or matched by ``column_regex``</span>
+<span class="sd">        ``column_names`` or matched by ``column_regex``.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If both `column_names` and `column_regex` were passed.</span>
+<span class="sd">        If there are fewer `column_names` than values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">column_names</span> <span class="ow">and</span> <span class="n">column_regex</span><span class="p">:</span>
