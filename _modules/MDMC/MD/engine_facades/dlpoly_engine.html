@@ -103,34 +103,33 @@
 <span class="sd">the Python wrapper dlpoly-py that can interface with it.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c1"># pylint: disable=import-error</span>
-<span class="c1"># as it flags up dlpoly import errors outside of container</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">dlpoly.control</span>
-
-<span class="kn">from</span> <span class="nn">dlpoly</span> <span class="kn">import</span> <span class="n">DLPoly</span>
-<span class="kn">from</span> <span class="nn">dlpoly.species</span> <span class="kn">import</span> <span class="n">Species</span>
-<span class="kn">from</span> <span class="nn">dlpoly.field</span> <span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">Potential</span><span class="p">,</span> <span class="n">Molecule</span>
-<span class="kn">from</span> <span class="nn">dlpoly.new_control</span> <span class="kn">import</span> <span class="n">NewControl</span> <span class="k">as</span> <span class="n">DLPControl</span>
-<span class="kn">from</span> <span class="nn">dlpoly.config</span> <span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span><span class="p">,</span> <span class="n">Atom</span>
+<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Atoms</span>
 <span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">write</span>
 
+<span class="kn">from</span> <span class="nn">dlpoly</span> <span class="kn">import</span> <span class="n">DLPoly</span>
+<span class="kn">from</span> <span class="nn">dlpoly.config</span> <span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span> <span class="nn">dlpoly.field</span> <span class="kn">import</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Potential</span>
+<span class="kn">from</span> <span class="nn">dlpoly.new_control</span> <span class="kn">import</span> <span class="n">NewControl</span> <span class="k">as</span> <span class="n">DLPControl</span>
+<span class="kn">from</span> <span class="nn">dlpoly.species</span> <span class="kn">import</span> <span class="n">Species</span>
+<span class="kn">from</span> <span class="nn">dlpoly.utility</span> <span class="kn">import</span> <span class="n">next_file</span>
+
 <span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
-<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">repr_decorator</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngine</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Atom</span> <span class="k">as</span> <span class="n">MAtom</span><span class="p">,</span>
-                                <span class="n">Molecule</span> <span class="k">as</span> <span class="n">MMolecule</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Bond</span> <span class="k">as</span> <span class="n">MBond</span>
+<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.units</span> <span class="kn">import</span> <span class="n">Unit</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngine</span><span class="p">,</span> <span class="n">MDEngineError</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Bond</span> <span class="k">as</span> <span class="n">MBond</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span> <span class="k">as</span> <span class="n">MAtom</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Molecule</span> <span class="k">as</span> <span class="n">MMolecule</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
 <span class="kn">from</span> <span class="nn">MDMC.utilities.partitioning</span> <span class="kn">import</span> <span class="n">partition_interactions</span>
 
@@ -138,6 +137,7 @@
     <span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Universe</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
 
 <span class="c1"># mapping from the MDMC class names to names within DLPOLY</span>
 <span class="n">POTENTIAL_REF</span> <span class="o">=</span> <span class="p">{</span>
@@ -221,6 +221,14 @@
 <span class="sd">    Facade for DL_POLY</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># List of parameters handled explicitly during setup</span>
+    <span class="c1"># This is for filtering which params are passed directly</span>
+    <span class="c1"># to the DLP Control</span>
+    <span class="n">HANDLED_PARAMS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;pressure&quot;</span><span class="p">,</span> <span class="s2">&quot;ensemble&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;timestep&quot;</span><span class="p">,</span> <span class="s2">&quot;t_damp&quot;</span><span class="p">,</span> <span class="s2">&quot;p_damp&quot;</span><span class="p">,</span> <span class="s2">&quot;t_window&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;t_fraction&quot;</span><span class="p">,</span> <span class="s2">&quot;rescale_step&quot;</span><span class="p">,</span> <span class="s2">&quot;thermostat&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;barostat&quot;</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dlpoly</span><span class="p">:</span> <span class="n">DLPoly</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">Control</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">config</span><span class="p">:</span> <span class="n">dlpoly</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">Config</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="n">dlpoly</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">Field</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -389,7 +397,9 @@
                                                   <span class="n">traj_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">traj_step</span><span class="p">,</span>
                                                   <span class="n">time_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
                                                   <span class="n">dlpoly</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="p">,</span>
-                                                  <span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
+                                                  <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pass_settings_to_control</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly_simulation</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DLPOLYEngine.minimize">
@@ -483,11 +493,31 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">&#39;time_run&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="s1">&#39;steps&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">workdir</span> <span class="o">=</span> <span class="n">work_dir</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pass_settings_to_control</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">output_log</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_log</span> <span class="o">=</span> <span class="n">next_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">io_file_output</span><span class="p">)</span>
+
+        <span class="n">output_log</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_log</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
         <span class="c1"># pylint: disable=c-extension-no-member, too-many-lines</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">numProcs</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;numprocs&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">outputFile</span><span class="o">=</span><span class="n">output_log</span><span class="p">,</span>
-                        <span class="n">mpi</span><span class="o">=</span><span class="s2">&quot;mpirun --allow-run-as-root -n&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;update coordinates from &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">&#39;io_file_revcon&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">dest_config</span> <span class="o">=</span> <span class="s1">&#39;minim.config&#39;</span>
+        <span class="n">err_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">numProcs</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;numprocs&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                   <span class="n">outputFile</span><span class="o">=</span><span class="n">output_log</span><span class="p">,</span>
+                                   <span class="n">mpi</span><span class="o">=</span><span class="s2">&quot;mpirun --allow-run-as-root -n&quot;</span><span class="p">,</span>
+                                   <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">err_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MDEngineError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Non-zero exit code (</span><span class="si">{</span><span class="n">err_code</span><span class="si">}</span><span class="s2">), DLPoly run failed, &quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;see </span><span class="si">{</span><span class="n">output_log</span><span class="si">}</span><span class="s2"> for details&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">output_log</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">MDEngineError</span><span class="p">(</span><span class="s2">&quot;No output, DLPoly run may have failed, &quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;see </span><span class="si">{</span><span class="n">output_log</span><span class="si">}</span><span class="s2"> for details&quot;</span><span class="p">)</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;updating coordinates from </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">&#39;io_file_revcon&#39;</span><span class="p">])</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">&#39;io_file_revcon&#39;</span><span class="p">])</span></div>
 
 
@@ -523,7 +553,7 @@
         <span class="k">def</span> <span class="nf">read_line_as</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">typ</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
 
-        <span class="k">def</span> <span class="nf">create_atom</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">level_of_detail</span><span class="p">,</span> <span class="n">element_dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">create_atom</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">level_of_detail</span><span class="p">,</span> <span class="n">element_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
             <span class="c1"># level_of_detail of information in the file, 0, indicates only positions,</span>
             <span class="c1"># 1 positions and velocities, 2 positions, velocities and forces</span>
             <span class="c1"># the first line gives the symbol, mass and atom_ID of the atom</span>
@@ -557,15 +587,16 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="n">n_atoms</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
 
-            <span class="n">end</span> <span class="o">=</span> <span class="n">stop</span> <span class="ow">or</span> <span class="n">frames</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">stop</span> <span class="ow">or</span> <span class="n">frames</span>
 
             <span class="n">take</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
 
-            <span class="n">traj</span><span class="o">.</span><span class="n">preAllocate</span><span class="p">(</span><span class="n">n_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">take</span><span class="p">),</span> <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">n_atoms</span><span class="p">,</span>
-                <span class="n">useVelocity</span> <span class="o">=</span> <span class="n">level_of_detail</span> <span class="o">&gt;=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">traj</span><span class="o">.</span><span class="n">preAllocate</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">take</span><span class="p">),</span> <span class="n">n_atoms</span><span class="o">=</span><span class="n">n_atoms</span><span class="p">,</span>
+                             <span class="n">useVelocity</span><span class="o">=</span><span class="n">level_of_detail</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">traj_step</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">dlpoly_time_unit</span> <span class="o">=</span> <span class="n">SYSTEM</span><span class="p">[</span><span class="s1">&#39;TIME&#39;</span><span class="p">]</span>
             <span class="n">time_conv</span> <span class="o">=</span> <span class="n">dlpoly_time_unit</span><span class="o">.</span><span class="n">conversion_factor</span>
+
             <span class="k">for</span> <span class="n">iframe</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frames</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">iframe</span> <span class="ow">in</span> <span class="n">take</span><span class="p">:</span>
                     <span class="n">timestep_line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
@@ -581,9 +612,9 @@
                                                     <span class="n">element_dict</span><span class="o">=</span><span class="n">element_dictionary</span><span class="p">)</span>
                                             <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">)])</span>
                     <span class="k">if</span> <span class="n">level_of_detail</span><span class="p">:</span>
-                        <span class="n">traj</span><span class="o">.</span><span class="n">writeOneStep</span><span class="p">(</span><span class="n">traj_step</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tempdata</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">tempdata</span><span class="p">[:,</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+                        <span class="n">traj</span><span class="o">.</span><span class="n">writeOneStep</span><span class="p">(</span><span class="n">traj_step</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tempdata</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">tempdata</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">traj</span><span class="o">.</span><span class="n">writeOneStep</span><span class="p">(</span><span class="n">traj_step</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tempdata</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+                        <span class="n">traj</span><span class="o">.</span><span class="n">writeOneStep</span><span class="p">(</span><span class="n">traj_step</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">tempdata</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
                     <span class="n">mass_dictionary</span> <span class="o">=</span> <span class="p">{}</span>
                     <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tempdata</span><span class="p">)):</span>
                         <span class="n">mass_dictionary</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">tempdata</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])]</span> <span class="o">=</span> <span class="n">tempdata</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">]</span>
@@ -640,7 +671,31 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly_universe</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_config</span><span class="p">)</span></div>
-</div>
+
+
+<div class="viewcode-block" id="DLPOLYEngine.eval">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.MD.engine_facades.html#MDMC.MD.engine_facades.dlpoly_engine.DLPOLYEngine.eval">[docs]</a>
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dummy eval to satisfy Abstract specification</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;DLPolyEngine does not support eval&quot;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_pass_settings_to_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                                  <span class="n">control</span><span class="p">:</span> <span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">Control</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pass excess settings through to dlpoly control object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        settings : dict</span>
+<span class="sd">            Dictionary containing settings passed through as kwargs</span>
+<span class="sd">        control : dlpoly.control.Control</span>
+<span class="sd">            DLPoly control object to set</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">control</span><span class="o">.</span><span class="n">keys</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">HANDLED_PARAMS</span><span class="p">:</span>
+            <span class="n">control</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
 
 
 
@@ -796,7 +851,6 @@
                     <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_field</span><span class="p">(</span><span class="n">universe</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;field&#39;</span><span class="p">,</span> <span class="s1">&#39;FIELD&#39;</span><span class="p">))</span>
 
         <span class="n">mx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">cutoff</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">nonbonded_interactions</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">&#39;cutoff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">mx</span><span class="p">,</span> <span class="s1">&#39;Ang&#39;</span><span class="p">)</span>
@@ -855,12 +909,12 @@
             <span class="n">out</span><span class="o">.</span><span class="n">add_molecule</span><span class="p">(</span><span class="n">mols</span><span class="p">[</span><span class="n">structure</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
 
         <span class="k">for</span> <span class="n">disp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">disps</span><span class="p">:</span>
-            <span class="n">currAtm</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span><span class="p">[</span><span class="n">atm</span><span class="p">]</span> <span class="k">for</span> <span class="n">parm</span> <span class="ow">in</span> <span class="n">disp</span><span class="o">.</span><span class="n">atom_types</span> <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">parm</span><span class="p">]</span>
-            <span class="n">pot</span> <span class="o">=</span> <span class="n">Potential</span><span class="p">(</span><span class="s1">&#39;vdw&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">currAtm</span><span class="p">,</span>
+            <span class="n">curr_atom</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span><span class="p">[</span><span class="n">atm</span><span class="p">]</span> <span class="k">for</span> <span class="n">parm</span> <span class="ow">in</span> <span class="n">disp</span><span class="o">.</span><span class="n">atom_types</span> <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">parm</span><span class="p">]</span>
+            <span class="n">pot</span> <span class="o">=</span> <span class="n">Potential</span><span class="p">(</span><span class="s1">&#39;vdw&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">curr_atom</span><span class="p">,</span>
                                     <span class="n">POTENTIAL_REF</span><span class="p">[</span><span class="n">disp</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
                                     <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">real</span><span class="p">),</span> <span class="n">disp</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
                                     <span class="p">])</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">add_potential</span><span class="p">(</span><span class="n">currAtm</span><span class="p">,</span> <span class="n">pot</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">add_potential</span><span class="p">(</span><span class="n">curr_atom</span><span class="p">,</span> <span class="n">pot</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">out</span>
 
@@ -882,10 +936,10 @@
         <span class="n">new_molecule</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">name</span>
         <span class="n">species</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">name</span>
         <span class="n">MDMC_spec</span> <span class="o">=</span> <span class="n">universe</span><span class="o">.</span><span class="n">element_dict</span><span class="p">[</span><span class="n">species</span><span class="p">]</span>
-        <span class="n">newSpec</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
-                          <span class="n">charge</span><span class="o">=</span><span class="n">MDMC_spec</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="n">MDMC_spec</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
-        <span class="n">new_molecule</span><span class="o">.</span><span class="n">nAtoms</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">new_molecule</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">newSpec</span><span class="p">}</span>
+        <span class="n">new_spec</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                           <span class="n">charge</span><span class="o">=</span><span class="n">MDMC_spec</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="n">MDMC_spec</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
+        <span class="n">new_molecule</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">new_molecule</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">new_spec</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">new_molecule</span>
 
     <span class="nd">@staticmethod</span>
@@ -918,7 +972,7 @@
             <span class="n">new_species</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="n">atm</span><span class="o">.</span><span class="n">element</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span>
                                   <span class="n">MDMC_spec</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="n">MDMC_spec</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
             <span class="n">new_molecule</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_species</span>
-            <span class="n">new_molecule</span><span class="o">.</span><span class="n">nAtoms</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">new_molecule</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">mapping</span><span class="p">[</span><span class="n">atm</span><span class="o">.</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="n">ind</span>
 
         <span class="k">for</span> <span class="n">bond</span><span class="p">,</span> <span class="n">atms</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">bonded_interaction_pairs</span><span class="p">:</span>
@@ -927,8 +981,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bond</span><span class="p">,</span> <span class="n">MBond</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">bond</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> constraints &#39;</span>
                                               <span class="s1">&#39;not supported in DLPOLY&#39;</span><span class="p">)</span>
-                <span class="c1"># print(bond.parameters)</span>
-                <span class="c1"># print(bond.parameters[&#39;equilibrium_state (#21)&#39;])</span>
+
                 <span class="n">pot</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="s1">&#39;constraints&#39;</span><span class="p">,</span>
                            <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                             <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">current_atom</span><span class="p">),</span>
@@ -957,8 +1010,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">top_level_structure_list</span><span class="p">:</span>
-            <span class="n">currAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">molecules</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-            <span class="n">currAtom</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span>
+            <span class="n">curr_atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">molecules</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">curr_atom</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">charge</span>
 
     <span class="k">def</span> <span class="nf">_update_dispersions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
@@ -973,7 +1026,7 @@
                             <span class="k">for</span> <span class="n">parm</span> <span class="ow">in</span> <span class="n">disp</span><span class="o">.</span><span class="n">atom_types</span>
                             <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">parm</span><span class="p">]</span>
             <span class="n">current_pot</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">get_pot</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">current_atom</span><span class="p">,</span>
-                                                         <span class="n">potType</span><span class="o">=</span><span class="s1">&#39;lj&#39;</span><span class="p">))</span>
+                                                         <span class="n">pot_type</span><span class="o">=</span><span class="s1">&#39;lj&#39;</span><span class="p">))</span>
             <span class="n">current_pot</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">real</span><span class="p">),</span> <span class="n">disp</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())]</span>
 
     <span class="k">def</span> <span class="nf">_update_bonded_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -985,8 +1038,8 @@
 
         <span class="n">mols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">molecules</span>
 
-        <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">top_level_structure_list</span>
-                          <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">MMolecule</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">MMolecule</span><span class="p">),</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">top_level_structure_list</span><span class="p">):</span>
             <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">atm</span><span class="o">.</span><span class="n">ID</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">atm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="mi">1</span><span class="p">)}</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">mols</span><span class="p">[</span><span class="n">structure</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
 
@@ -1110,19 +1163,13 @@
 <span class="sd">            Temperature in ``K``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">temperature</span>
 
     <span class="nd">@temperature</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TEMPERATURE</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Set the initial temperature in the DL_POLY wrapper</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">&#39;temperature&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span><span class="p">),</span> <span class="s1">&#39;K&#39;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1258,6 +1305,10 @@
     <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="c1"># Set the temperature in the DL_POLY wrapper</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dlpoly</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">&#39;temperature&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span><span class="p">),</span> <span class="s1">&#39;K&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1270,7 +1321,7 @@
 
     <span class="nd">@pressure</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">PRESSURE</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_pressure</span> <span class="o">=</span> <span class="n">value</span>
 
