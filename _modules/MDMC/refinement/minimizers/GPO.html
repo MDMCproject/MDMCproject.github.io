@@ -100,8 +100,9 @@
 <span></span><span class="sd">&quot;&quot;&quot;The Gaussian-Process-Optimizer minimizer class&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">dedent</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">skopt</span> <span class="kn">import</span> <span class="n">Optimizer</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.refinement.minimizers.minimizer_abs</span> <span class="kn">import</span> <span class="n">Minimizer</span>
@@ -337,19 +338,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
-            <span class="n">converged_message</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">The refinement has finished.&#39;</span>
+            <span class="n">converged_message</span> <span class="o">=</span> <span class="s1">&#39;The refinement has finished.&#39;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">converged_message</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The refinement has not finished.&quot;</span>
+            <span class="n">converged_message</span> <span class="o">=</span> <span class="s2">&quot;The refinement has not finished.&quot;</span>
 
-        <span class="n">output_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">converged_message</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
-                         <span class="sa">f</span><span class="s1">&#39;Minimum measured point is: </span><span class="se">\n</span><span class="s1">&#39;</span>
-                         <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> with an &#39;</span>
-                         <span class="sa">f</span><span class="s1">&#39;FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">. </span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
-                         <span class="sa">f</span><span class="s1">&#39;Minimum point predicted is: </span><span class="se">\n</span><span class="s1">&#39;</span>
-                         <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1"> for an &#39;</span>
-                         <span class="sa">f</span><span class="s1">&#39;FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s1">.</span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1"> &#39;</span><span class="p">)</span>
+        <span class="n">output_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                        </span><span class="si">{</span><span class="n">converged_message</span><span class="si">}</span>
 
-        <span class="k">return</span> <span class="n">output_string</span></div>
+<span class="s2">                        Minimum measured point is:</span>
+<span class="s2">                        </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> with an</span>
+<span class="s2">                        FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span>
+
+<span class="s2">                        Minimum point predicted is:</span>
+<span class="s2">                        </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> for an</span>
+<span class="s2">                        FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span>
+<span class="s2">                        &quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dedent</span><span class="p">(</span><span class="n">output_string</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

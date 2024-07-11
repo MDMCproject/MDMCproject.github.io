@@ -100,6 +100,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;The Gaussian-Process-Regression minimizer class&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">dedent</span>
 
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -508,17 +509,26 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
-            <span class="n">converged_message</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">The refinement has finished.&#39;</span>
+            <span class="n">converged_message</span> <span class="o">=</span> <span class="s1">&#39;The refinement has finished.&#39;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">converged_message</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The refinement has not finished.&quot;</span>
+            <span class="n">converged_message</span> <span class="o">=</span> <span class="s2">&quot;The refinement has not finished.&quot;</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">converged_message</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;Minimum measured point is: </span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> with an &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">. </span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;Minimum point predicted is: </span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1"> for an &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s1">.</span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1"> &#39;</span><span class="p">)</span></div>
+        <span class="c1"># as of numpy 2.0.0, np.float64 has repr e.g. &quot;np.float64(3.14)&quot; instead of &quot;3.14&quot;</span>
+        <span class="c1"># we use legacy print options to make the string nicer with less fiddling</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">printoptions</span><span class="p">(</span><span class="n">legacy</span><span class="o">=</span><span class="s2">&quot;1.25&quot;</span><span class="p">):</span>
+            <span class="n">output_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                            </span><span class="si">{</span><span class="n">converged_message</span><span class="si">}</span>
+
+<span class="s2">                            Minimum measured point is:</span>
+<span class="s2">                            </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> with an</span>
+<span class="s2">                            FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span>
+
+<span class="s2">                            Minimum point predicted is:</span>
+<span class="s2">                            </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> for an</span>
+<span class="s2">                            FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span>
+<span class="s2">                            &quot;&quot;&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">dedent</span><span class="p">(</span><span class="n">output_string</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
