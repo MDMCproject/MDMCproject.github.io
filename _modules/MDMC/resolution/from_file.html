@@ -132,20 +132,21 @@
 
     <span class="k">def</span> <span class="nf">_calculate_resolution_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the resolution window in time from a self.resolution_function in the time</span>
-<span class="sd">        domain. Normalise this window so that the sum over energy for each Q</span>
+<span class="sd">        Calculate the resolution window in the time domain.</span>
+
+<span class="sd">        We normalise this window so that the sum over energy for each Q</span>
 <span class="sd">        value is the same (this enforces that the static structure factor is constant for all Q).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        Q : np.array</span>
+<span class="sd">        Q : ~numpy.ndarray</span>
 <span class="sd">            the points in energy at which FQt is calculated</span>
-<span class="sd">        t : np.array</span>
+<span class="sd">        t : ~numpy.ndarray</span>
 <span class="sd">             the points in time at which FQt is calculated</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.ndarray</span>
+<span class="sd">        ~numpy.ndarray</span>
 <span class="sd">            An ``array`` with the shape ``(N_Q, N_T)``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -159,7 +160,7 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Resolution objects are represented with the dictionary used to create them</span>
+<span class="sd">        Represent a ``FileResolution`` object as the dataset used to create it.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="s2">&quot;Resolution&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">({</span><span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">})</span></div>
@@ -168,14 +169,8 @@
 
 <span class="k">def</span> <span class="nf">_read_resolution_from_file</span><span class="p">(</span><span class="n">file_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_reader</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reads resolution data for the specified ``data_type`` from file and interpolates it</span>
-<span class="sd">    to give a dictionary of general resolution functions in the time domain for each dependent</span>
-<span class="sd">    variable.</span>
-<span class="sd">    Note that if this resolution function is used on data outside its original range, then it</span>
-<span class="sd">    will use nearest neighbour extrapolation. Additionally, the input will be reflected in the</span>
-<span class="sd">    time/energy domain as symmetry about 0 is assumed. If for whatever reason this is not</span>
-<span class="sd">    appropriate for the data in question, this function should not be used.</span>
-<span class="sd">    This may not be supported for all ``Observable`` types.</span>
+<span class="sd">    Read and interpolate resolution data from a file.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    file_type : str</span>
@@ -187,11 +182,20 @@
 <span class="sd">    dt : float</span>
 <span class="sd">        The time separation of frames in ``fs``, for the simulation</span>
 <span class="sd">        of the Observable.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    dict</span>
 <span class="sd">        A dictionary with keys for each dependent variable, where the</span>
 <span class="sd">        values are resolution functions for that variable.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If this resolution function is used on data outside its original range, then it</span>
+<span class="sd">    will use nearest neighbour extrapolation. Additionally, the input will be reflected in the</span>
+<span class="sd">    time/energy domain as symmetry about 0 is assumed. If for whatever reason this is not</span>
+<span class="sd">    appropriate for the data in question, this function should not be used.</span>
+<span class="sd">    This may not be supported for all ``Observable`` types.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">resolution_obs</span> <span class="o">=</span> <span class="n">ObservableFactory</span><span class="o">.</span><span class="n">create_observable</span><span class="p">(</span><span class="n">file_type</span><span class="p">)</span>

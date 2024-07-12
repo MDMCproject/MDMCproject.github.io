@@ -109,7 +109,7 @@
 <a class="viewcode-back" href="../../../reference/api/MDMC.resolution.html#MDMC.resolution.gaussian.GaussianResolution">[docs]</a>
 <span class="k">class</span> <span class="nc">GaussianResolution</span><span class="p">(</span><span class="n">Resolution</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A `Resolution` subclass for applying a Gaussian resolution</span>
+<span class="sd">    A class for applying a Gaussian resolution to an :any:`Observable`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e_res</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
@@ -129,22 +129,22 @@
 <a class="viewcode-back" href="../../../reference/api/MDMC.resolution.html#MDMC.resolution.gaussian.GaussianResolution.window_in_w">[docs]</a>
     <span class="k">def</span> <span class="nf">window_in_w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The Gaussian window in frequency space</span>
+<span class="sd">        Calculate the Gaussian window function in frequency space.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        w: array</span>
+<span class="sd">        w : ~numpy.ndarray</span>
 <span class="sd">            An array of frequency points.</span>
-<span class="sd">        mu: float</span>
-<span class="sd">            the offset of the function (defaults to 0)</span>
-<span class="sd">        norm: bool</span>
-<span class="sd">            if True, normalises the distribution to unity.</span>
+<span class="sd">        mu : float</span>
+<span class="sd">            The offset of the function (defaults to 0).</span>
+<span class="sd">        norm : bool</span>
+<span class="sd">            If ``True``, normalises the distribution to unity.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        array</span>
+<span class="sd">        ~numpy.ndarray</span>
 <span class="sd">            The window function in frequency space (i.e. the Gaussian with</span>
-<span class="sd">            FWHM self.e_res, centred on 0)</span>
+<span class="sd">            FWHM self.e_res, centred on 0) over the frequency array `w`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">window</span> <span class="o">=</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_res</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">norm</span><span class="p">)</span>
@@ -156,17 +156,17 @@
 <a class="viewcode-back" href="../../../reference/api/MDMC.resolution.html#MDMC.resolution.gaussian.GaussianResolution.window_in_t">[docs]</a>
     <span class="k">def</span> <span class="nf">window_in_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The Gaussian window in time space</span>
+<span class="sd">        Calculate the Gaussian window function in time space.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        t: array</span>
+<span class="sd">        t : ~numpy.ndarray</span>
 <span class="sd">            An array of time points.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        array</span>
-<span class="sd">            The Gaussian window over the times in t.</span>
+<span class="sd">        ~numpy.ndarray</span>
+<span class="sd">            The Gaussian window over the times in the array `t`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># We convert the FWHM energy resolution (in meV) into sigma_t (in fs) using the inverse</span>
@@ -182,7 +182,7 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Resolution objects are represented with the dictionary used to create them</span>
+<span class="sd">        Represent a ``GaussianResolution`` object as the given FWHM energy resolution.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="s2">&quot;Resolution&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">({</span><span class="s1">&#39;gaussian&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_res</span><span class="p">})</span></div>

@@ -128,13 +128,31 @@
             <span class="k">if</span> <span class="n">isclass</span><span class="p">(</span><span class="n">_type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">MDMC</span><span class="o">.</span><span class="n">resolution</span><span class="o">.</span><span class="n">Resolution</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">resolutions</span><span class="o">.</span><span class="n">update</span><span class="p">([[</span><span class="n">name</span><span class="p">,</span> <span class="n">_type</span><span class="p">]])</span>
 
-    <span class="c1"># users will input e.g. &#39;gaussian&#39; and this will provide a GaussianResolution object</span>
 <div class="viewcode-block" id="ResolutionFactory.create_instance">
 <a class="viewcode-back" href="../../../reference/api/MDMC.resolution.html#MDMC.resolution.resolution_factory.ResolutionFactory.create_instance">[docs]</a>
     <span class="k">def</span> <span class="nf">create_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                        <span class="n">resolution</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+                        <span class="n">resolution</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
                         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;MDMC.resolution.Resolution&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a Resolution object from a dictionary.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a Resolution object from a dictionary.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        resolution : dict, float, or str</span>
+<span class="sd">            A parameter specifying the resolution. Should be a one-line dict</span>
+<span class="sd">            giving the resolution type and parameters, e.g. a Lorentzian resolution</span>
+<span class="sd">            with FWHM of 3 is specified {&#39;lorentzian&#39;: 3.0}.</span>
+<span class="sd">            If a float is given, resolution is assumed to be Gaussian with FWHM</span>
+<span class="sd">            of that float.</span>
+<span class="sd">            If a str is given, the string is assumed to be a file path to a vanadium</span>
+<span class="sd">            run used to define a resolution.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ~MDMC.resolution.Resolution</span>
+<span class="sd">            A resolution object with the desired properties.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">resolution</span> <span class="o">=</span> <span class="n">_standardise_input</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
         <span class="n">function_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;Resolution&#39;</span>
         <span class="n">function_res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
@@ -159,8 +177,32 @@
 
 <span class="k">def</span> <span class="nf">_standardise_input</span><span class="p">(</span><span class="n">resolution</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Ensures that resolution is a one-line dictionary. Fixes &#39;lazy&#39; input, e.g. if resolution</span>
+<span class="sd">    Ensure that resolution is a one-line dictionary.</span>
+
+<span class="sd">    Fixes &#39;lazy&#39; input, e.g. if resolution</span>
 <span class="sd">    was input as a string or number.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    resolution: Any</span>
+<span class="sd">        The input to the resolution factory.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        If ``resolution`` is a dict, returns the first item of the dict.</span>
+<span class="sd">        If ``resolution`` was a float, returns ``{&#39;gaussian&#39;: resolution}``</span>
+<span class="sd">        If ``resolution`` was a string, returns ``{&#39;file&#39;: resolution}``</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NotImplementedError</span>
+<span class="sd">        If ``resolution`` is not a dict, string or float.</span>
+
+<span class="sd">    Warns</span>
+<span class="sd">    -----</span>
+<span class="sd">    SyntaxWarning</span>
+<span class="sd">        If ``resolution`` is a dict with multiple lines, or a float.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
