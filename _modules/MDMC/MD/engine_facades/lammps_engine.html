@@ -155,7 +155,7 @@
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<span class="c1"># pylint: disable=too-many-lines</span>
+<span class="c1"># pylint: disable=too-many-lines,possibly-used-before-assignment</span>
 
 <div class="viewcode-block" id="PyLammpsAttribute">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.MD.engine_facades.html#MDMC.MD.engine_facades.lammps_engine.PyLammpsAttribute">[docs]</a>
@@ -1835,7 +1835,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">unfix</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_state</span><span class="o">.</span><span class="n">natoms</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin_momentum_steps</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ang_momentum_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin_momentum_steps</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ang_momentum_steps</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;RemoveMomentum&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;momentum&#39;</span><span class="p">,</span>
                              <span class="bp">self</span><span class="o">.</span><span class="n">lin_momentum_steps</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;angular&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -2243,6 +2243,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">barostat</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="s1">&#39;nve&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;nve&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="n">thermo_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">press_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span><span class="p">:</span>
                 <span class="n">temp</span> <span class="o">=</span> <span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermostat</span> <span class="o">!=</span> <span class="s1">&#39;rescale&#39;</span><span class="p">:</span>
