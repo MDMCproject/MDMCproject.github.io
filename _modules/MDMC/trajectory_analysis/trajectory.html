@@ -97,20 +97,20 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.trajectory_analysis.trajectory</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module for ``Configuration`` and related classes&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module for ``Configuration`` and related classes.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">weakref</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Structure</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="kn">import</span> <span class="n">Universe</span>
-    <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Structure</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
-    <span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="n">function</span>
-
 
 <span class="c1"># pylint: disable=abstract-method</span>
 <span class="c1"># as __sub__ and scale() are not implemented</span>
@@ -119,21 +119,22 @@
 <div class="viewcode-block" id="AtomCollection">
 <a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.trajectory.AtomCollection">[docs]</a>
 <span class="k">class</span> <span class="nc">AtomCollection</span><span class="p">:</span>
-
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for ``Configurations``&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for ``Configurations``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_universe&#39;</span><span class="p">,</span> <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">universe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[Universe]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">universe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;Universe&#39;</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the ``Universe`` in which the ``AtomCollection`` exists</span>
+<span class="sd">        Get or set the ``Universe`` in which the ``AtomCollection`` exists.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Universe</span>
 <span class="sd">            The ``Universe`` in which the ``AtomCollection`` exists, or `None`</span>
-<span class="sd">            if it has not been set</span>
+<span class="sd">            if it has not been set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Call the weakref to return the universe as an object. If the use of</span>
@@ -158,13 +159,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;np.ndarray&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the ``dimensions`` of the ``Universe`` in which the</span>
-<span class="sd">        ``AtomCollection`` exists</span>
+<span class="sd">        Get the ``dimensions`` of the ``Universe`` in which the ``AtomCollection`` exists.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        array : numpy.ndarray</span>
-<span class="sd">            The ``dimensions`` of the ``Universe``</span>
+<span class="sd">        snumpy.ndarray</span>
+<span class="sd">            The ``dimensions`` of the ``Universe``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span><span class="o">.</span><span class="n">dimensions</span></div>
@@ -177,37 +177,38 @@
 <span class="k">class</span> <span class="nc">Configuration</span><span class="p">(</span><span class="n">AtomCollection</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A ``Configuration`` stores ``Atom`` objects and their positions and</span>
-<span class="sd">    velocities</span>
+<span class="sd">    A ``Configuration`` stores ``Atom`` objects and their positions and velocities.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    *structures</span>
-<span class="sd">        Zero or more ``Structure`` objects to be added to the</span>
-<span class="sd">        ``Configuration``</span>
-<span class="sd">    **settings</span>
-<span class="sd">        ``universe`` (``Universe``)</span>
-<span class="sd">            The ``Universe`` of the ``Configuration``</span>
+<span class="sd">        Zero or more ``Structure`` objects to be added to the ``Configuration``.</span>
+<span class="sd">    **settings : dict</span>
+<span class="sd">        Extra options.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    element_set : set</span>
 <span class="sd">        `set` of the elements in the ``Configuration``</span>
-<span class="sd">    universe : Universe or None</span>
-<span class="sd">    data : *structures</span>
+<span class="sd">    data : tuple[Structure, ...]</span>
+<span class="sd">         Tuple of all contained structures.</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    universe : Universe</span>
+<span class="sd">        The ``Universe`` of the ``Configuration``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_data&#39;</span><span class="p">,</span> <span class="s1">&#39;element_set&#39;</span><span class="p">,</span> <span class="s1">&#39;_structure_list&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">structures</span><span class="p">:</span> <span class="s1">&#39;Structure&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">structures</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;universe&quot;</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;universe&#39;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">universe</span>
-            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">structures</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">universe</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">universe</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">structures</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">element_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_list</span><span class="p">)</span>
 
@@ -232,80 +233,77 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Atom]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Atom</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the `list` of ``Atom`` which belong to the ``Configuration``</span>
+<span class="sd">        Get the `list` of ``Atom`` which belong to the ``Configuration``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
-<span class="sd">            A `list` of ``Atom``</span>
+<span class="sd">        list[Atom]</span>
+<span class="sd">            A `list` of all ``Atom`` s in ``Configuration``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;atom&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">atom_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">atom_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the `list` of ``Atom.position`` which belong to the</span>
-<span class="sd">        ``Configuration``</span>
+<span class="sd">        Get the `list` of ``Atom.position`` which belong to the ``Configuration``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
-<span class="sd">            A `list` of ``Atom.position``</span>
+<span class="sd">        list[numpy.ndarray]</span>
+<span class="sd">            A `list` of ``Atom.position`` s in ``Configuration``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">atom_velocities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">atom_velocities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the `list` of ``Atom.velocity`` which belong to the</span>
-<span class="sd">        ``Configuration``</span>
+<span class="sd">        Get the `list` of ``Atom.velocity`` which belong to the ``Configuration``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
-<span class="sd">            A `list` of ``Atom.velocity`</span>
+<span class="sd">        list[numpy.ndarray]</span>
+<span class="sd">            A `list` of ``Atom.velocity` s in ``Configuration``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;velocity&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">element_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">element_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the `list` of ``Atom.element.symbol`` which belong to the ``Configuration``</span>
+<span class="sd">        Get the `list` of ``Atom.element.symbol`` which belong to the ``Configuration``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
-<span class="sd">            A `list` of `str` for the elements</span>
+<span class="sd">        list[str]</span>
+<span class="sd">            A `list` of `str` of element abbreviations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">molecule_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Molecule]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">molecule_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Molecule</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the `list` of ``Molecule`` which belong to the ``Configuration``</span>
+<span class="sd">        Get the `list` of ``Molecule`` which belong to the ``Configuration``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
-<span class="sd">            A `list` of ``Molecule``</span>
+<span class="sd">        list[Molecule]</span>
+<span class="sd">            A `list` of ``Molecule``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_structures</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">structure_type</span> <span class="o">==</span> <span class="s1">&#39;Molecule&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">structure_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Structure]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">structure_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Structure</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the `list` of ``Structure`` which belong to the ``Configuration``</span>
+<span class="sd">        Get the `list` of ``Structure`` which belong to the ``Configuration``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
-<span class="sd">            A `list` of ``Structure``</span>
+<span class="sd">        list[Structure]</span>
+<span class="sd">            A `list` of ``Structure``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Call the weakref to return the structures as an object. If the</span>
@@ -316,16 +314,14 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the ``Atom``, ``Atom.position``, and ``Atom.velocity`` which</span>
-<span class="sd">        belong to the ``Configuration``</span>
+<span class="sd">        Get or set the ``Atom`` properties of the ``Configuration``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray</span>
 <span class="sd">            A structured NumPy ``array`` with ``&#39;atom&#39;``, ``&#39;position&#39;``, and</span>
-<span class="sd">            ``&#39;velocity&#39;`` fields</span>
+<span class="sd">            ``&#39;velocity&#39;`` fields.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">atom</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
                          <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">],</span>
                         <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;atom&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">),</span>
@@ -341,14 +337,14 @@
 
 <div class="viewcode-block" id="Configuration.add_structure">
 <a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.trajectory.Configuration.add_structure">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">:</span> <span class="s1">&#39;Structure&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">add_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">:</span> <span class="n">Structure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Adds the ``Atom`` objects from a ``Structure`` to the data</span>
+<span class="sd">        Add the ``Atom`` objects from a ``Structure`` to the data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        structures : Structure</span>
-<span class="sd">            The ``Structure`` to add</span>
+<span class="sd">            The ``Structure`` to add.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">validate_structure</span><span class="p">(</span><span class="n">structures</span><span class="p">)</span>
@@ -361,33 +357,33 @@
 
 <div class="viewcode-block" id="Configuration.validate_structure">
 <a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.trajectory.Configuration.validate_structure">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="s1">&#39;Structure&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">validate_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validates the structure by testing that it belongs to the same</span>
-<span class="sd">        ``Universe`` as the ``Configuration``</span>
+<span class="sd">        Validate the structure by testing that it belongs to the same ``Universe``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        structure : Structure</span>
-<span class="sd">            The ``Structure`` to validate</span>
+<span class="sd">            The ``Structure`` to validate.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        AssertionError</span>
 <span class="sd">            If the ``Structure`` does not belong to the same ``Universe``</span>
-<span class="sd">            as the ``Configuration``</span>
+<span class="sd">            as the ``Configuration``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Test that all structural units are from the same universe</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">structure</span><span class="o">.</span><span class="n">universe</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe</span>
         <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
-                <span class="s1">&#39;Atoms are not all from same universe&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span></div>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Atoms are not all from same universe&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span></div>
 
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">:</span> <span class="s1">&#39;Configuration&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Configuration&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add the structures from the other ``Configuration`` into this one.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Configuration</span>
@@ -410,27 +406,34 @@
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        NotImplementedError</span>
-<span class="sd">            THIS HAS NOT BEEN IMPLEMENTED</span>
+<span class="sd">            THIS HAS NOT BEEN IMPLEMENTED.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the number of atoms in this ``Configuration``.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        int</span>
-<span class="sd">            The number of ``Atom`` objects in the ``Configuration``</span>
+<span class="sd">            The number of ``Atom`` objects in the ``Configuration``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;atom&#39;</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="s1">&#39;velocity&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        item : {&#39;atom&#39;, &#39;position&#39;, &#39;velocity&#39;}</span>
+
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray</span>
-<span class="sd">            A NumPy ``array`` containing a slice from the data. The same fields</span>
+<span class="sd">            A numpy ``array`` containing a slice from the data. The same fields</span>
 <span class="sd">            can be accessed with ``&#39;atom&#39;``, ``&#39;position&#39;``, and ``&#39;velocity&#39;``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -438,20 +441,20 @@
 
 <div class="viewcode-block" id="Configuration.filter_structures">
 <a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.trajectory.Configuration.filter_structures">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">:</span> <span class="s1">&#39;function&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Structure]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">filter_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Structure</span><span class="p">],</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Structure</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Filters the `list` of ``Structures`` using the predicate</span>
+<span class="sd">        Filter the `list` of ``Structures`` using the predicate.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        predicate : function</span>
-<span class="sd">            A function which returns a `bool` when passed a ``Structure``</span>
+<span class="sd">        predicate : Callable[[Structure], bool]</span>
+<span class="sd">            A function which returns a `bool` when passed a ``Structure``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list</span>
 <span class="sd">            A `list` of ``Structures`` which are `True` for the given</span>
-<span class="sd">            predicate</span>
+<span class="sd">            predicate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure_list</span><span class="p">))</span></div>
@@ -459,19 +462,19 @@
 
 <div class="viewcode-block" id="Configuration.filter_atoms">
 <a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.trajectory.Configuration.filter_atoms">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">:</span> <span class="s1">&#39;function&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Atom]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">filter_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Atom</span><span class="p">],</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Atom</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Filters the `list` of ``Atom`` using the predicate</span>
+<span class="sd">        Filter the `list` of ``Atom`` using the predicate.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        predicate : function</span>
-<span class="sd">            A function which returns a `bool` when passed an ``Atom``</span>
+<span class="sd">        predicate : Callable[[Atom], bool]</span>
+<span class="sd">            A function which returns a `bool` when passed an ``Atom``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list</span>
-<span class="sd">            A `list` of ``Atom`` which are `True` for the given predicate</span>
+<span class="sd">            A `list` of ``Atom`` which are `True` for the given predicate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">))</span></div>
@@ -479,20 +482,20 @@
 
 <div class="viewcode-block" id="Configuration.filter_by_element">
 <a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.trajectory.Configuration.filter_by_element">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_by_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Atom]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">filter_by_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Atom</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Filter the ``Configuration`` using an ``element``</span>
+<span class="sd">        Filter the ``Configuration`` using an ``element``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        element: str</span>
+<span class="sd">        element : str</span>
 <span class="sd">            An elemental symbol of the same format as is used for creating</span>
-<span class="sd">            ``Atom`` objects</span>
+<span class="sd">            ``Atom`` objects.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list</span>
-<span class="sd">            A `list` of ``Atom`` of the specified ``element``</span>
+<span class="sd">            A `list` of ``Atom`` of the specified ``element``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_atoms</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">element</span><span class="p">)</span></div>
@@ -500,21 +503,23 @@
 
 <div class="viewcode-block" id="Configuration.scale">
 <a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.trajectory.Configuration.scale">[docs]</a>
-    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">vectors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;positions&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">factor</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+              <span class="n">vectors</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;positions&#39;</span><span class="p">,</span> <span class="s1">&#39;velocities&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;positions&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Scales either ``atom_positions`` or ``atom_velocities`` by a factor</span>
+<span class="sd">        Scale either ``atom_positions`` or ``atom_velocities`` by a factor.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        factor : float</span>
-<span class="sd">            Factor by which the vector is scaled</span>
-<span class="sd">        vectors : str, optional</span>
-<span class="sd">            ``&#39;positions&#39;`` (default) or ``&#39;velocities&#39;``</span>
+<span class="sd">            Factor by which the vector is scaled.</span>
+<span class="sd">        vectors : {&#39;positions&#39;, &#39;velocities&#39;}</span>
+<span class="sd">            Vectors to rescale.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        NotImplementedError</span>
-<span class="sd">            THIS IS NOT IMPEMENTED</span>
+<span class="sd">            THIS IS NOT IMPEMENTED.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
@@ -528,19 +533,21 @@
 <span class="k">class</span> <span class="nc">TemporalConfiguration</span><span class="p">(</span><span class="n">Configuration</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A configuration which has a time associated with it</span>
+<span class="sd">    A configuration which has a time associated with it.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    time : float</span>
-<span class="sd">        The time of the ``TemporalConfiguration`` in ``fs``</span>
-<span class="sd">    *structure_units</span>
-<span class="sd">        Zero or more ``Structures``</span>
+<span class="sd">        The time of the ``TemporalConfiguration`` in ``fs``.</span>
+<span class="sd">    *structures : Structure</span>
+<span class="sd">        Zero or more ``Structures``.</span>
+<span class="sd">    **settings : dict</span>
+<span class="sd">        Extra options to pass to superclass.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">structures</span><span class="p">:</span> <span class="s1">&#39;Structure&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">structures</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">structures</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
@@ -551,7 +558,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        TemporalConfiguration</span>
 <span class="sd">            New ``TemporalConfiguration`` from the sum of the</span>
-<span class="sd">            ``TemporalConfigurations``</span>
+<span class="sd">            ``TemporalConfigurations``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">configuration</span><span class="o">.</span><span class="n">time</span><span class="p">])</span>

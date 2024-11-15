@@ -97,7 +97,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.trajectory_analysis.observables.sqw</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module for AbstractSQw and total SQw class&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module for AbstractSQw and total SQw class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
@@ -119,15 +121,28 @@
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.sqw.SQwMixins">[docs]</a>
 <span class="k">class</span> <span class="nc">SQwMixins</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A mixin class for properties used by both SQw and FQt objects</span>
+<span class="sd">    A mixin class for properties used by both SQw and FQt objects.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SQwMixins.minimum_frames">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.sqw.SQwMixins.minimum_frames">[docs]</a>
     <span class="k">def</span> <span class="nf">minimum_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The minimum number of ``CompactTrajectory`` frames needed to calculate the</span>
-<span class="sd">        ``dependent_variables`` depends on ``self.use_FFT``.</span>
+<span class="sd">        Compute minimum number of ``CompactTrajectory`` frames to calculate ``dependent_variables``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dt : float, optional</span>
+<span class="sd">            The time separation of frames in ``fs``, default is `None`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The minimum number of frames.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Depends on ``self.use_FFT``.</span>
 
 <span class="sd">        If `self.use_FFT == True`, it is the number of energy steps + 1, in order to allow for</span>
 <span class="sd">        a reflection in time which only counts the end points once.</span>
@@ -146,16 +161,6 @@
 <span class="sd">        .. math::</span>
 
 <span class="sd">            N = \frac{T_{min}}{2 \Delta t} + 1 = \frac{h}{2 \Delta t \Delta E_{min}} + 1</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        dt : float, optional</span>
-<span class="sd">            The time separation of frames in ``fs``, default is `None`</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        int</span>
-<span class="sd">            The minimum number of frames</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">nE</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">)</span>
@@ -180,19 +185,22 @@
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.sqw.SQwMixins.maximum_frames">[docs]</a>
     <span class="k">def</span> <span class="nf">maximum_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The maximum number of ``CompactTrajectory`` frames that can be used to</span>
-<span class="sd">        calculate the ``dependent_variables`` depends on ``self.use_FFT``.</span>
+<span class="sd">        Compute maximum number of ``CompactTrajectory`` frames to calculate ``dependent_variables``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The maximum number of frames.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Depends on `self.use_FFT`.</span>
 
 <span class="sd">        If `True`, it is the number of energy steps + 1, in order to allow for</span>
 <span class="sd">        a reflection in time which only counts the end points once.</span>
 
 <span class="sd">        Otherwise, there is no limit and all frames will contribute to the</span>
 <span class="sd">        calculation.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        int</span>
-<span class="sd">            The maximum number of frames</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_FFT</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
@@ -205,12 +213,12 @@
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">LENGTH</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the momentum transfers</span>
+<span class="sd">        Get or set the momentum transfers.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        numpy.array</span>
-<span class="sd">            1D array of Q `float` (in ``Ang^-1``)</span>
+<span class="sd">            1D array of Q `float` (in ``Ang^-1``).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
@@ -228,11 +236,17 @@
 <span class="k">class</span> <span class="nc">AbstractSQw</span><span class="p">(</span><span class="n">SQwMixins</span><span class="p">,</span> <span class="n">Observable</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    An abstract class for total, coherent and incoherent dynamic structure</span>
-<span class="sd">    factors. The equations used for calculating this are based on Kneller et</span>
-<span class="sd">    al. Comput. Phys. Commun. 91 (1995) 191-214.</span>
+<span class="sd">    An abstract class for total, coherent and incoherent dynamic structure factors.</span>
 
-<span class="sd">    Note that properties for MD frames &amp; Q are found in the SQwMixins class.</span>
+<span class="sd">    The equations used for calculating this are based on Kneller *et al*. [Kneller]_.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       Properties for MD frames &amp; Q are found in the :class:`SQwMixins` class.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [Kneller] Kneller *et al*. Comput. Phys. Commun. 91 (1995) 191-214.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -248,13 +262,17 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the independent variables: these are</span>
-<span class="sd">        the frequency Q (in ``Ang^-1``) and energy E (in``meV``)</span>
+<span class="sd">        Get or set the independent variables.</span>
+
+<span class="sd">        These are:</span>
+
+<span class="sd">        - the frequency :math:`Q` (in ``Ang^-1``)</span>
+<span class="sd">        - energy :math:`E` (in``meV``)</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
-<span class="sd">            The independent variables</span>
+<span class="sd">            The independent variables.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_independent_variables</span>
@@ -266,26 +284,30 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the dependent variables: this is SQw, the</span>
-<span class="sd">        dynamic structure factor (in ``arb``)</span>
+<span class="sd">        Get the dependent variables.</span>
+
+<span class="sd">        This is:</span>
+
+<span class="sd">        - SQw, the dynamic structure factor (in ``arb``)</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
-<span class="sd">            The dependent variables</span>
+<span class="sd">            The dependent variables.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the errors on the dependent variables, the dynamic</span>
-<span class="sd">        structure factor (in ``arb``)</span>
+<span class="sd">        Get or set the errors on the dependent variables.</span>
+
+<span class="sd">        The dynamic structure factor (in ``arb``)</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
-<span class="sd">            The errors on the ``dependent_variables``</span>
+<span class="sd">            The errors on the ``dependent_variables``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span>
 
@@ -297,12 +319,12 @@
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">ENERGY_TRANSFER</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;np.array&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the energies</span>
+<span class="sd">        Get the energies.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        numpy.array</span>
-<span class="sd">            1D array of energy `float` (in ``meV``)</span>
+<span class="sd">            1D array of energy `float` (in ``meV``).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">:</span>
@@ -316,12 +338,12 @@
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;ps&#39;</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">w</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;np.array&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the angular frequencies</span>
+<span class="sd">        Get the angular frequencies.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        numpy.array</span>
-<span class="sd">            1D array of angular frequency `float` in units of ``1 / ps``</span>
+<span class="sd">            1D array of angular frequency (in ``1 / ps``).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="n">h_bar</span> <span class="o">*</span> <span class="mf">1e15</span><span class="p">)</span>
@@ -329,13 +351,13 @@
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">ARBITRARY</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">SQw</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the dynamic structure factor, S(Q, w), in arb</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the dynamic structure factor, :math:`S(Q, \omega{})` (in ``arb``).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list of numpy.ndarray</span>
-<span class="sd">            `list` of 2D arrays of S(Q, w) `float` with arbitrary units</span>
+<span class="sd">            `list` of 2D arrays of :math:`S(Q, \omega{})` (in arbitrary units).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -346,13 +368,13 @@
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">ARBITRARY</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">SQw_err</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the errors on the dynamic structure factor in arb</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the errors on the dynamic structure factor (in ``arb``).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list of numpy.ndarray</span>
-<span class="sd">            `list` of 2D array of S(Q, w) error `float` with arbitrary units</span>
+<span class="sd">            `list` of 2D arrays of :math:`S(Q, \omega{})` error (in arbitrary units).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -361,9 +383,14 @@
             <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">recreated_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">recreated_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the indices of the recreated Q_values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            Array of recreated Q values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recreated_Q</span>
 
@@ -375,6 +402,8 @@
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.sqw.AbstractSQw.validate_energy">[docs]</a>
     <span class="k">def</span> <span class="nf">validate_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure ``dt`` is valid for computing energies.</span>
+
 <span class="sd">        Asserts that the user set frame separation ``dt`` leads to energy</span>
 <span class="sd">        separation that matches that of the experiment. If not, it</span>
 <span class="sd">        changes the time step and trajectory step to fix this. The time step value is</span>
@@ -382,19 +411,20 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        time_step: float, optional</span>
+<span class="sd">        time_step : float, optional</span>
 <span class="sd">            User specified length of time for each update of the atoms trajectories</span>
 <span class="sd">            in the simulation, default is None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        tuple</span>
-<span class="sd">            contains a boolean, and two floats (if traj_step and time_step have values)</span>
-<span class="sd">            or two NoneType (if traj_step and time_step were passed in as None).</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        AssertionError</span>
+<span class="sd">        valid : bool</span>
+<span class="sd">            Whether ``dt`` is valid.</span>
+<span class="sd">        traj_step : Optional[int]</span>
+<span class="sd">            Ideal ``traj_step`` if provided.</span>
+<span class="sd">        time_step : Optional[float]</span>
+<span class="sd">            Ideal ``time_step`` if provided.</span>
+<span class="sd">        dt : float</span>
+<span class="sd">            Required ``dt``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">dt_required</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_dt</span><span class="p">()</span>
@@ -413,58 +443,81 @@
 
 <div class="viewcode-block" id="AbstractSQw.calculate_from_MD">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.sqw.AbstractSQw.calculate_from_MD">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_from_MD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_input</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calculate_from_MD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                          <span class="n">MD_input</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span>
+                          <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                          <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the dynamic structure factor, S(Q, w) from a ``CompactTrajectory``.</span>
 
-<span class="sd">        If the ``CompactTrajectory`` has more frames than the ``self.maximum_frames()``</span>
-<span class="sd">        that can be used to recreate the grid of energy points, it can slice the</span>
-<span class="sd">        ``CompactTrajectory`` into sub-trajectories of length ``self.maximum_frames()``,</span>
-<span class="sd">        with the slicing specified through the settings ``use_average`` and ``cont_slicing``.</span>
+<span class="sd">        If the ``CompactTrajectory`` has more frames than the</span>
+<span class="sd">        ``self.maximum_frames()`` that can be used to recreate the</span>
+<span class="sd">        grid of energy points, it can slice the ``CompactTrajectory``</span>
+<span class="sd">        into sub-trajectories of length ``self.maximum_frames()``,</span>
+<span class="sd">        with the slicing specified through the settings</span>
+<span class="sd">        ``use_average`` and ``cont_slicing``.</span>
 
-<span class="sd">        The ``independent_variable`` ``Q`` can either be set previously or defined within</span>
-<span class="sd">        ``**settings``.</span>
+<span class="sd">        The ``independent_variable`` ``Q`` can either be set</span>
+<span class="sd">        previously or defined within ``**settings``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        MD_input : CompactTrajectory</span>
-<span class="sd">            An MDMC ``CompactTrajectory`` from which to calculate ``SQw``</span>
-<span class="sd">        verbose: int, optional</span>
+<span class="sd">            An MDMC ``CompactTrajectory`` from which to calculate ``SQw``.</span>
+<span class="sd">        verbose : int, optional</span>
 <span class="sd">            The level of verbosity:</span>
-<span class="sd">            Verbose level 0 gives no information.</span>
-<span class="sd">            Verbose level 1 gives final time for the whole method.</span>
-<span class="sd">            Verbose level 2 gives final time and also a progress bar.</span>
-<span class="sd">            Verbose level 3 gives final time, a progress bar, and time per step.</span>
-<span class="sd">        **settings</span>
-<span class="sd">            ``n_Q_vectors`` (`int`)</span>
-<span class="sd">                The maximum number of ``Q_vectors`` for any ``Q`` value. The</span>
-<span class="sd">                greater the number of ``Q_vectors``, the more accurate the</span>
-<span class="sd">                calculation, but the longer it will take.</span>
-<span class="sd">            ``dimensions`` (`list`, `tuple`, `numpy.ndarray`)</span>
-<span class="sd">                A 3 element `tuple` or ``array`` of `float` specifying the</span>
-<span class="sd">                dimensions of the ``Universe`` in units of ``Ang``</span>
-<span class="sd">            ``energy_resolution` (`dict`)</span>
-<span class="sd">                Optionally specify energy resolution and function in units of ueV (micro eV),</span>
-<span class="sd">                in the format of the one-line dict {&#39;function&#39;: value}, where `function`</span>
-<span class="sd">                is the resolution function and `value` is the desired `FWHM`.</span>
-<span class="sd">                e.g. to pass a Gaussian resolution of 80ueV we use {&#39;gaussian&#39;: 80}.</span>
-<span class="sd">                Currently accepted functions are &#39;gaussian&#39; and &#39;lorentzian&#39;</span>
-<span class="sd">                Can also be &#39;lazily&#39; given as `float`, in which case it is assumed to be Gaussian.</span>
-<span class="sd">            ``Q_values`` (`array`)</span>
-<span class="sd">                1D array of Q `float` (in ``Ang^-1``). (optional)</span>
-<span class="sd">            ``use_average`` (`bool`)</span>
-<span class="sd">                Optional parameter if a list of more than one ``Trajectory`` is used. If set to</span>
-<span class="sd">                True (default) then the mean value for S(Q, w) is calculated. Also, the errors</span>
-<span class="sd">                are set to the standard deviation calculated over the list of</span>
-<span class="sd">                ``CompactTrajectory`` objects.</span>
-<span class="sd">             ``cont_slicing`` (`bool`)</span>
-<span class="sd">                Flag to decide between two possible behaviours when the number of ``MD_steps`` is</span>
-<span class="sd">                larger than the minimum required to calculate the observables. If ``False``</span>
-<span class="sd">                (default) then the ``CompactTrajectory`` is sliced into non-overlapping</span>
-<span class="sd">                sub-``CompactTrajectory`` blocks for each of which the observable is calculated.</span>
-<span class="sd">                If ``True``, then the ``CompactTrajectory`` is sliced into as many non-identical</span>
-<span class="sd">                sub-``CompactTrajectory`` blocks as possible (with overlap allowed).</span>
+
+<span class="sd">            - Verbose level 0 gives no information.</span>
+<span class="sd">            - Verbose level 1 gives final time for the whole method.</span>
+<span class="sd">            - Verbose level 2 gives final time and also a progress bar.</span>
+<span class="sd">            - Verbose level 3 gives final time, a progress bar, and time per step.</span>
+<span class="sd">        **settings : dict</span>
+<span class="sd">            Extra options.</span>
+
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        n_Q_vectors : int</span>
+<span class="sd">            The maximum number of ``Q_vectors`` for any ``Q`` value. The</span>
+<span class="sd">            greater the number of ``Q_vectors``, the more accurate the</span>
+<span class="sd">            calculation, but the longer it will take.</span>
+<span class="sd">        dimensions : list, tuple or numpy.ndarray</span>
+<span class="sd">            A 3 element `tuple` or ``array`` of `float` specifying the</span>
+<span class="sd">            dimensions of the ``Universe`` in units of ``Ang``.</span>
+<span class="sd">        energy_resolution : dict</span>
+<span class="sd">            Specify energy resolution and function in units</span>
+<span class="sd">            of ueV (micro eV), in the format of the one-line dict</span>
+<span class="sd">            {&#39;function&#39;: value}, where `function` is the resolution</span>
+<span class="sd">            function and `value` is the desired `FWHM`.</span>
+
+<span class="sd">            For example, to pass a Gaussian resolution of 80ueV we use</span>
+<span class="sd">            {&#39;gaussian&#39;: 80}.</span>
+
+<span class="sd">            Currently accepted functions are &#39;gaussian&#39; and</span>
+<span class="sd">            &#39;lorentzian&#39; Can also be &#39;lazily&#39; given as `float`, in</span>
+<span class="sd">            which case it is assumed to be Gaussian.</span>
+<span class="sd">        Q_values : numpy.ndarray</span>
+<span class="sd">            1D array of Q `float` (in ``Ang^-1``).</span>
+<span class="sd">        use_average : bool</span>
+<span class="sd">            Optional parameter if a list of more than one ``Trajectory``</span>
+<span class="sd">            is used.</span>
+
+<span class="sd">            If set to True (default) then the mean value for S(Q, w)</span>
+<span class="sd">            is calculated. Also, the errors are set to the standard</span>
+<span class="sd">            deviation calculated over the list of</span>
+<span class="sd">            ``CompactTrajectory`` objects.</span>
+<span class="sd">        cont_slicing : bool</span>
+
+<span class="sd">            Flag to decide between two possible behaviours when the</span>
+<span class="sd">            number of ``MD_steps`` is larger than the minimum required</span>
+<span class="sd">            to calculate the observables.</span>
+
+<span class="sd">            If ``False`` (default) then the ``CompactTrajectory`` is</span>
+<span class="sd">            sliced into non-overlapping sub-``CompactTrajectory``</span>
+<span class="sd">            blocks for each of which the observable is calculated.</span>
+
+<span class="sd">            If ``True``, then the ``CompactTrajectory`` is sliced into</span>
+<span class="sd">            as many non-identical sub-``CompactTrajectory`` blocks as</span>
+<span class="sd">            possible (with overlap allowed).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span> <span class="o">=</span> <span class="s1">&#39;MD&#39;</span>
@@ -507,19 +560,19 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;dimensions&#39;</span><span class="p">])</span>
                 <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Either trajectory requires a dimensions&#39;</span>
-                                        <span class="s1">&#39; attribute or dimensions must be passed&#39;</span>
-                                        <span class="s1">&#39; when calling calculate_from_MD&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
-        <span class="k">else</span><span class="p">:</span> <span class="c1"># If the dimensions of the simulation box are not fixed, we use the first value</span>
+                    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Either trajectory requires a dimensions &#39;</span>
+                                         <span class="s1">&#39;attribute or dimensions must be passed &#39;</span>
+                                         <span class="s1">&#39;when calling calculate_from_MD&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># If the dimensions of the simulation box are not fixed, we use the first value</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span> <span class="o">=</span> <span class="n">MD_input</span><span class="o">.</span><span class="n">changing_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;dimensions&#39;</span><span class="p">])</span>
                 <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Either trajectory requires a dimensions&#39;</span>
-                                        <span class="s1">&#39; attribute or dimensions must be passed&#39;</span>
-                                        <span class="s1">&#39; when calling calculate_from_MD&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+                    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Either trajectory requires a dimensions &#39;</span>
+                                         <span class="s1">&#39;attribute or dimensions must be passed &#39;</span>
+                                         <span class="s1">&#39;when calling calculate_from_MD&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
 
         <span class="c1"># Test that, if there is an existing E, it is consistent with E</span>
         <span class="c1"># calculated from trajectory times</span>
@@ -595,7 +648,12 @@
 
     <span class="k">def</span> <span class="nf">_get_fqt_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Gets the name of the FQt type associated with each SQw type.</span>
+<span class="sd">        Get the name of the FQt type associated with each SQw type.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            FQt associated with SQw.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fqt_types</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SQw&#39;</span><span class="p">:</span> <span class="s1">&#39;FQt&#39;</span><span class="p">,</span>
                      <span class="s1">&#39;SQwCoherent&#39;</span><span class="p">:</span> <span class="s1">&#39;FQt_coh&#39;</span><span class="p">,</span>
@@ -607,13 +665,17 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">calculate_E</span><span class="p">(</span><span class="n">nE</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculates an array of ``nE`` uniformly spaced energy values from the</span>
-<span class="sd">        time separation of the ``CompactTrajectory`` frames, ``dt``. The</span>
-<span class="sd">        frequencie are determined by the Fast Fourier Transform, as implemented</span>
-<span class="sd">        by numpy, for ``2 * nE`` points in time which we then crop to only</span>
-<span class="sd">        include ``nE`` positive frequencies. As we are dealing with frequency</span>
-<span class="sd">        rather than angular frequency here, the relation to between energy</span>
-<span class="sd">        is given by:</span>
+<span class="sd">        Compute energy from MD.</span>
+
+<span class="sd">        Calculate an array of ``nE`` uniformly spaced energy values from the</span>
+<span class="sd">        time separation of the ``CompactTrajectory`` frames, ``dt``.</span>
+
+<span class="sd">        The frequencies are determined by the fast Fourier transform,</span>
+<span class="sd">        as implemented by numpy, for ``2 * nE`` points in time which</span>
+<span class="sd">        are truncated to only include ``nE`` positive frequencies.</span>
+
+<span class="sd">        As we are dealing with frequency rather than angular frequency</span>
+<span class="sd">        here, the relation to between energy is given by:</span>
 
 <span class="sd">        .. math::</span>
 
@@ -622,14 +684,18 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        nE : int</span>
-<span class="sd">            The number of energy values to be calculated</span>
+<span class="sd">            The number of energy values to be calculated.</span>
 <span class="sd">        dt : float</span>
-<span class="sd">            The step size between frames in ``fs``</span>
+<span class="sd">            The step size between frames in ``fs``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray</span>
-<span class="sd">            An ``array`` of `float` specifying the energy in units of ``meV``</span>
+<span class="sd">            An ``array`` of `float` specifying the energy in units of ``meV``.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        numpy.fft.fftfreq : Frequency calculation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># h is in units of eV s whereas system units are meV fs, so apply a</span>
@@ -641,21 +707,28 @@
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.sqw.AbstractSQw.calculate_dt">[docs]</a>
     <span class="k">def</span> <span class="nf">calculate_dt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculates the time separation of frames required by the experimental</span>
-<span class="sd">        dataset, assuming uniform spacing. Note that this may be different from</span>
-<span class="sd">        the time separation that the user has given as an input, as it only</span>
-<span class="sd">        depends on the current values for ``self.E``. The relationship between</span>
-<span class="sd">        time and energy comes from the numpy implementation of the FFT for</span>
-<span class="sd">        ``2 * nE`` points where:</span>
+<span class="sd">        Calculate timestep required by experimental dataset assuming uniform spacing.</span>
 
-<span class="sd">        .. math::</span>
-<span class="sd">            \nu_{max} &amp;=&amp; \frac{n_E - 1}{2 n_E \Delta t} \\\\</span>
+<span class="sd">        .. note::</span>
+
+<span class="sd">           This may be different from the time separation that the</span>
+<span class="sd">           user has given as an input, as it only depends on the</span>
+<span class="sd">           current values for ``self.E``.</span>
+
+<span class="sd">        The relationship between time and energy comes from the numpy</span>
+<span class="sd">        implementation of the FFT for ``2 * nE`` points where:</span>
+
+<span class="sd">        .. math:: \nu_{max} &amp;=&amp; \frac{n_E - 1}{2 n_E \Delta t} \\\\</span>
 <span class="sd">            \therefore \Delta t &amp;=&amp; \frac{h (n_E - 1)}{2 n_E E_{max}}</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        float</span>
-<span class="sd">            The time separation required by the current values of ``self.E``</span>
+<span class="sd">            The time separation required by the current values of ``self.E``.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        numpy.fft.fft : Numpy FFT implementation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># h is in units of eV s whereas system units are meV fs, so apply a</span>
@@ -668,30 +741,40 @@
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.sqw.AbstractSQw.calculate_resolution_functions">[docs]</a>
     <span class="k">def</span> <span class="nf">calculate_resolution_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generates a resolution function in momentum and time that can be used in the calculation of</span>
-<span class="sd">        SQw. Note that this uses the ``SQw`` values of the ``Observable`` it is called from, and so</span>
-<span class="sd">        should only be called for an observable which has been created from relevant resolution</span>
-<span class="sd">        data, i.e. a vanadium sample.</span>
-
-<span class="sd">        Note that if this resolution function is used on data outside its original range, then it</span>
-<span class="sd">        will use nearest neighbour extrapolation. Additionally, the input will be reflected in the</span>
-<span class="sd">        time/energy domain as symmetry about 0 is assumed. If for whatever reason this is not</span>
-<span class="sd">        appropriate for the data in question, this function should not be used.</span>
-
+<span class="sd">        Generate resolution function in momentum and time.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        dt : float</span>
-<span class="sd">            The time spacing to use when performing the inverse Fourier transform in units of `fs`.</span>
-<span class="sd">            Ideally this should be the same as the frame separation expected when applying this</span>
-<span class="sd">            function.</span>
+<span class="sd">            The time spacing for the inverse Fourier transform (in ``fs``).</span>
+
+<span class="sd">            Ideally this should be the same as the frame separation</span>
+<span class="sd">            expected when applying this function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
-<span class="sd">            A dictionary with the key &#39;SQw&#39; corresponding to function which accepts arrays of time</span>
-<span class="sd">            and momentum (respectively) and returns a 2D array of values for the instrument</span>
+<span class="sd">            A dictionary with the key &#39;SQw&#39; corresponding to function</span>
+<span class="sd">            which accepts arrays of time and momentum (respectively)</span>
+<span class="sd">            and returns a 2D array of values for the instrument</span>
 <span class="sd">            resolution.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        There are several caveats to this function a user should be aware of:</span>
+
+<span class="sd">        - This uses the ``SQw`` values of the ``Observable`` it is</span>
+<span class="sd">          called from, and so should only be called for an observable</span>
+<span class="sd">          which has been created from relevant resolution data,</span>
+<span class="sd">          i.e. a vanadium sample.</span>
+<span class="sd">        - If this resolution function is used on data outside</span>
+<span class="sd">          its original range, then it will use nearest neighbour</span>
+<span class="sd">          extrapolation.</span>
+<span class="sd">        - The input will be reflected in the time/energy domain as</span>
+<span class="sd">          symmetry about 0 is assumed.</span>
+
+<span class="sd">        If for whatever reason this is not appropriate for the data in</span>
+<span class="sd">        question, this function should not be used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># NB: this function is only used by methods in the FileResolution object</span>
@@ -743,7 +826,32 @@
         <span class="c1"># reverse the order of the x and y arrays for RectBivariateSpline.</span>
         <span class="c1"># RectBivariateSpline does not return complex numbers,</span>
         <span class="c1"># so define a new function that combines the real and imaginary parts</span>
-        <span class="k">def</span> <span class="nf">data_interpol</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">data_interpol</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Internal function for interpolating complex t &amp; Q.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            t : numpy.ndarray</span>
+<span class="sd">                Time domain.</span>
+<span class="sd">            Q : numpy.ndarray</span>
+<span class="sd">                Momentum domain.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            np.ndarray</span>
+<span class="sd">                Interpolated complex t &amp; Q data.</span>
+
+<span class="sd">            See Also</span>
+<span class="sd">            --------</span>
+<span class="sd">            scipy.interpolate.RectBivariateSpline : Interpolation mechanism.</span>
+
+<span class="sd">            Notes</span>
+<span class="sd">            -----</span>
+<span class="sd">            RectBivariateSpline does not return complex numbers, so</span>
+<span class="sd">            this function exists to emulate complex interpolation.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
             <span class="n">real</span> <span class="o">=</span> <span class="n">RectBivariateSpline</span><span class="p">(</span><span class="n">t_array</span><span class="p">,</span> <span class="n">Q_cropped</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">SQw_ift</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
             <span class="n">imag</span> <span class="o">=</span> <span class="n">RectBivariateSpline</span><span class="p">(</span><span class="n">t_array</span><span class="p">,</span> <span class="n">Q_cropped</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">SQw_ift</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">real</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">imag</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
@@ -755,33 +863,39 @@
     <span class="k">def</span> <span class="nf">dependent_variables_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The order in which the &#39;SQw&#39; dependent variable is indexed in terms of &#39;Q&#39; and &#39;E&#39;.</span>
-<span class="sd">        Explicitly: we have that self.SQw[Q_index, E_index] is the data point for</span>
-<span class="sd">        given indices of self.Q and self.E</span>
-<span class="sd">        It also means that:</span>
-<span class="sd">        np.shape(self.SQw)=(np.size(self.Q), np.size(self.E))</span>
 
 <span class="sd">        The purpose of this method is to ensure consistency</span>
 <span class="sd">        between different readers/methods which create ``SQw`` objects.</span>
 
-<span class="sd">        Return</span>
-<span class="sd">        ------</span>
-<span class="sd">        Dict[str, list]</span>
-<span class="sd">            The shape of the SQw dependent variable</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict[str, list]</span>
+<span class="sd">            The shape of the SQw dependent variable.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Explicitly: we have that self.SQw[Q_index, E_index] is the data point for</span>
+<span class="sd">        given indices of self.Q and self.E.</span>
+
+<span class="sd">        It also means that:</span>
+<span class="sd">        np.shape(self.SQw)=(np.size(self.Q), np.size(self.E)).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;SQw&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">]}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">uniformity_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get restrictions required for computing E &amp; Q.</span>
+
 <span class="sd">        Captures the current limitations on the energy &#39;E&#39; and reciprocal</span>
 <span class="sd">        lattice points &#39;Q&#39; within the dynamic structure factor ``Observables``.</span>
 <span class="sd">        If using FFT, then &#39;E&#39; must be uniform and start at zero, otherwise it</span>
 <span class="sd">        has no restrictions. &#39;Q&#39; must be uniform but does not need to start at</span>
 <span class="sd">        zero.</span>
 
-<span class="sd">        Return</span>
-<span class="sd">        ------</span>
-<span class="sd">        Dict[str, Dict[str, bool]]</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict[str, dict[str, bool]]</span>
 <span class="sd">            Dictionary of uniformity restrictions for &#39;E&#39; and &#39;Q&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -798,9 +912,8 @@
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.sqw.SQw">[docs]</a>
 <span class="nd">@ObservableFactory</span><span class="o">.</span><span class="n">register</span><span class="p">((</span><span class="s1">&#39;DynamicStructureFactor&#39;</span><span class="p">,</span> <span class="s1">&#39;SQw&#39;</span><span class="p">))</span>
 <span class="k">class</span> <span class="nc">SQw</span><span class="p">(</span><span class="n">AbstractSQw</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for the total dynamic structure factor</span>
+<span class="sd">    A class for the total dynamic structure factor.</span>
 
 <span class="sd">    Calculation is done in the respective FQt object, and this is</span>
 <span class="sd">    just a reference to get the correct FQt object.</span>
@@ -815,9 +928,8 @@
                              <span class="s1">&#39;SQwCoh&#39;</span><span class="p">,</span>
                              <span class="s1">&#39;SQw_coh&#39;</span><span class="p">))</span>
 <span class="k">class</span> <span class="nc">SQwCoherent</span><span class="p">(</span><span class="n">AbstractSQw</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for the coherent dynamic structure factor</span>
+<span class="sd">    A class for the coherent dynamic structure factor.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
 
 
@@ -829,9 +941,8 @@
                              <span class="s1">&#39;SQwIncoh&#39;</span><span class="p">,</span>
                              <span class="s1">&#39;SQw_incoh&#39;</span><span class="p">))</span>
 <span class="k">class</span> <span class="nc">SQwIncoherent</span><span class="p">(</span><span class="n">AbstractSQw</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for the incoherent dynamic structure factor</span>
+<span class="sd">    A class for the incoherent dynamic structure factor.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
 
 </pre></div>

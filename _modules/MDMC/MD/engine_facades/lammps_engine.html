@@ -655,6 +655,11 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_handler</span><span class="p">:</span>
             <span class="n">file_generator</span> <span class="o">=</span> <span class="n">_make_gen</span><span class="p">(</span><span class="n">file_handler</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>
             <span class="n">line_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">buf</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="n">file_generator</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">line_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Trajectory file empty, run may have failed&quot;</span>
+                          <span class="s2">&quot; or run length may be less than dump frequency.&quot;</span><span class="p">)</span>
+
         <span class="c1"># And header_size will tell us how many lines per frame</span>
         <span class="c1"># are added on top of the atom positions</span>
         <span class="n">header_size</span> <span class="o">=</span> <span class="mi">0</span>

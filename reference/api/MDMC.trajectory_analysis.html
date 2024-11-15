@@ -262,7 +262,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="MDMC.trajectory_analysis.observables.html#module-MDMC.trajectory_analysis.observables">Module contents</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="MDMC.trajectory_analysis.observables.html#observables-indicates-alias">Observables (/ indicates alias)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MDMC.trajectory_analysis.observables.html#observables">Observables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.CoherentDynamicStructureFactor"><code class="docutils literal notranslate"><span class="pre">CoherentDynamicStructureFactor</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.CoherentIntermediateScatteringFunction"><code class="docutils literal notranslate"><span class="pre">CoherentIntermediateScatteringFunction</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.DynamicStructureFactor"><code class="docutils literal notranslate"><span class="pre">DynamicStructureFactor</span></code></a></li>
@@ -321,8 +321,9 @@
 </section>
 <section id="module-MDMC.trajectory_analysis.compact_trajectory">
 <span id="mdmc-trajectory-analysis-compact-trajectory-module"></span><h2>MDMC.trajectory_analysis.compact_trajectory module<a class="headerlink" href="#module-MDMC.trajectory_analysis.compact_trajectory" title="Link to this heading"></a></h2>
-<p>Module for memory-efficient MD trajectory handling.
-Seeing how the current (as of August 2022) trajectory implementation
+<p>Module for memory-efficient MD trajectory handling.</p>
+<p class="rubric">Notes</p>
+<p>Seeing how the current (as of August 2022) trajectory implementation
 consumes a lot of memory, an attempt is being made to build an object
 that will contain the bare minimum of functionality, to show the
 limits of performance that we can achieve within Python.</p>
@@ -330,68 +331,103 @@ limits of performance that we can achieve within Python.</p>
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.compact_trajectory.</span></span><span class="sig-name descname"><span class="pre">CompactTrajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">useVelocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits_per_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Stores an MD trajectory in numpy arrays.
-The units are system units.</p>
+<p>Store an MD trajectory in numpy arrays.</p>
+<p>The units are system units.</p>
 <p>The normal workflow for a CompactTrajectory is:</p>
-<p>1. Create and allocate memory.
-traj = CompactTrajectory(n_step, n_atoms, useVelocity)
-or
-traj = CompactTrajectory()
-traj.preAllocate(n_step, n_atoms, useVelocity)</p>
-<p>2. Write values into arrays.
-for n in frame_numbers:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>if not traj.validateTypes(atom_types):</dt><dd><p>traj.WriteOneStep(step_number = n, time = time_value, positions = pos_values)
-traj.setDimensions(box_dimensions, step_number = n)</p>
+<ol class="arabic">
+<li><p>Create and allocate memory.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">traj</span> <span class="o">=</span> <span class="n">CompactTrajectory</span><span class="p">(</span><span class="n">n_step</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">useVelocity</span><span class="p">)</span>
+<span class="ow">or</span>
+<span class="n">traj</span> <span class="o">=</span> <span class="n">CompactTrajectory</span><span class="p">()</span>
+<span class="n">traj</span><span class="o">.</span><span class="n">preAllocate</span><span class="p">(</span><span class="n">n_step</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">useVelocity</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Write values into arrays.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">frame_numbers</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">traj</span><span class="o">.</span><span class="n">validateTypes</span><span class="p">(</span><span class="n">atom_types</span><span class="p">):</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">WriteOneStep</span><span class="p">(</span><span class="n">step_number</span> <span class="o">=</span> <span class="n">n</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">time_value</span><span class="p">,</span> <span class="n">positions</span> <span class="o">=</span> <span class="n">pos_values</span><span class="p">)</span>
+        <span class="n">traj</span><span class="o">.</span><span class="n">setDimensions</span><span class="p">(</span><span class="n">box_dimensions</span><span class="p">,</span> <span class="n">step_number</span> <span class="o">=</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Add chemical element information.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">traj</span><span class="o">.</span><span class="n">labelAtoms</span><span class="p">(</span><span class="n">atom_symbols</span><span class="p">,</span> <span class="n">atom_masses</span><span class="p">)</span>
+<span class="n">traj</span><span class="o">.</span><span class="n">setCharges</span><span class="p">(</span><span class="n">atom_charges</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="5">
+<li><p>Check internal consistency, trim arrays.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">traj</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – <p>Number of simulation steps in the trajectory. Defaults to 0.</p>
+<p><code class="docutils literal notranslate"><span class="pre">n_steps</span> <span class="pre">=</span> <span class="pre">0</span></code> means that <code class="docutils literal notranslate"><span class="pre">preAllocate</span></code> will have to be run
+separately after the <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> has been created.</p>
+<p><code class="docutils literal notranslate"><span class="pre">n_steps</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> means that <code class="docutils literal notranslate"><span class="pre">preAllocate</span></code> will be run immediately
+in the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function.</p>
+</p></li>
+<li><p><strong>n_atoms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of atoms in the system. Defaults to 1.</p></li>
+<li><p><strong>useVelocity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If the trajectory contains velocities, set to <code class="docutils literal notranslate"><span class="pre">True</span></code>
+to allocate an additional array for the velocity values.
+Defaults to False.</p></li>
+<li><p><strong>bits_per_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Set number of bytes in floating point numbers.</p></li>
+<li><p><strong>**settings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Extra options.</p></li>
+</ul>
 </dd>
 </dl>
-</div></blockquote>
-<p>3. Add chemical element information
-traj.labelAtoms(atom_symbols, atom_masses)
-traj.setCharges(atom_charges)</p>
-<p>4. Check internal consistency, trim arrays
-traj.postProcess()</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.data" title="Link to this definition"></a></dt>
-<dd><p>Returns the step numbers and time steps
-in a single array.</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.data" title="Link to this definition"></a></dt>
+<dd><p>The step numbers and time steps in a single array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Concatenation of separate data arrays.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><em>ndarray</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.exportAtom">
 <span class="sig-name descname"><span class="pre">exportAtom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.exportAtom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.exportAtom" title="Link to this definition"></a></dt>
-<dd><p>For compatibility with <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code>, creates an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> object
-for a chosen time step of the simulation and atom number.</p>
+<dd><p>Create an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> object for a chosen time step of the simulation and atom number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>step_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – number of the simulation step at which the atom
-position should be read</p></li>
-<li><p><strong>atom_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – number of the atom in the trajectory that will
-be created as an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> object</p></li>
+<li><p><strong>step_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of the simulation step at which the atom
+position should be read.</p></li>
+<li><p><strong>atom_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of the atom in the trajectory that will
+be created as an <code class="docutils literal notranslate"><span class="pre">Atom</span></code> object.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a single <code class="docutils literal notranslate"><span class="pre">Atom</span></code> object, for whatever purpose the user
-may need it.</p>
+<dd class="field-even"><p>A single <code class="docutils literal notranslate"><span class="pre">Atom</span></code> object.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Atom" title="MDMC.MD.structures.Atom">Atom</a></p>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>For compatibility with <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_element">
-<span class="sig-name descname"><span class="pre">filter_by_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.filter_by_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_element" title="Link to this definition"></a></dt>
-<dd><p>Create a subtrajectory out of the original CompactTrajectory,
-containing only the chemical elements specified in the input
-element list.</p>
+<span class="sig-name descname"><span class="pre">filter_by_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory"><span class="pre">CompactTrajectory</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.filter_by_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_element" title="Link to this definition"></a></dt>
+<dd><p>Filter subtrajectory by chemical symbol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>)</em>) – List of chemical elements given as string.</p>
+<dd class="field-odd"><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>) – List of chemical elements given as string.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> containing only the atoms of
@@ -405,41 +441,43 @@ the specified chemical elements.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_time">
-<span class="sig-name descname"><span class="pre">filter_by_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.filter_by_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_time" title="Link to this definition"></a></dt>
-<dd><p>Create another CompactTrajectory, containing only the frames
+<span class="sig-name descname"><span class="pre">filter_by_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory"><span class="pre">CompactTrajectory</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.filter_by_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_time" title="Link to this definition"></a></dt>
+<dd><p>Filter to within time defined by <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code>.</p>
+<p>Create another CompactTrajectory, containing only the frames
 with the time values equal to or larger than the start parameter,
-and smaller than the end parameter.
-If only one time value is given, the function will create a
+and smaller than the end parameter.</p>
+<p>If only one time value is given, the function will create a
 CompactTrajectory with a single time step equal to start,
-or raise and error if start is not an element of the time array.</p>
+or raise an error if start is not an element of the time array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The start time for filtering the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></p></li>
-<li><p><strong>end</strong> (<em>, </em><em>optional</em>) – The end time for filtering the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code>.  The default is
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The start time for filtering the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code>.</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – The end time for filtering the <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code>.  The default is
 <cite>None</cite>, which means the new returned <code class="docutils literal notranslate"><span class="pre">Trajectory</span></code> has a single
-time, defined by the <code class="docutils literal notranslate"><span class="pre">start</span></code></p></li>
+time, defined by the <code class="docutils literal notranslate"><span class="pre">start</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> with <code class="docutils literal notranslate"><span class="pre">times</span></code> in half open interval defined by
-<code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code></p>
+<dd class="field-even"><p>A copy with <code class="docutils literal notranslate"><span class="pre">times</span></code> in half open interval defined by
+<code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory">CompactTrajectory</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – No valid MD frames found.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_type">
-<span class="sig-name descname"><span class="pre">filter_by_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.filter_by_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_type" title="Link to this definition"></a></dt>
-<dd><p>Create a subtrajectory out of the original CompactTrajectory,
-containing only the atoms with the atom_type specified in the input
-types list.</p>
+<span class="sig-name descname"><span class="pre">filter_by_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory"><span class="pre">CompactTrajectory</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.filter_by_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_type" title="Link to this definition"></a></dt>
+<dd><p>Filter subtrajectory by atom ID.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>types</strong> (<em>List</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – A list of atom_type numbers.</p>
+<dd class="field-odd"><p><strong>types</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>) – A list of atom IDs.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> containing only the atoms of
@@ -453,37 +491,53 @@ the specified type.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.labelAtoms">
-<span class="sig-name descname"><span class="pre">labelAtoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom_symbols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_masses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.labelAtoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.labelAtoms" title="Link to this definition"></a></dt>
-<dd><p>Creates a list of chemical elements of all the atoms in a trajectory frame,
-a set of all the chemical elements present in a trajectory, and a
-list of atom masses of all the atoms in a trajectory frame.
-It is up to the engine facade to construct the input dictionaries containing
+<span class="sig-name descname"><span class="pre">labelAtoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom_symbols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_masses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.labelAtoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.labelAtoms" title="Link to this definition"></a></dt>
+<dd><p>Create internal atom references.</p>
+<ul class="simple">
+<li><p>A <cite>list</cite> of chemical elements of all the atoms in a trajectory frame,</p></li>
+<li><p>a <cite>set</cite> of all the chemical elements present in a trajectory,</p></li>
+<li><p>a <cite>list</cite> of atom masses of all the atoms in a trajectory frame.</p></li>
+</ul>
+<p>It is up to the engine facade to construct the input dictionaries containing
 the correct information about the chemical elements and masses.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>atom_symbols</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – a dictionary which returns a ‘str’
-chemical element symbol for every ‘int’ atom_ID from
-the trajectory.</p></li>
-<li><p><strong>atom_masses</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – a dictionary of ‘float’ atom masses,
-using as keys the ‘int’ atom_ID values.</p></li>
+<li><p><strong>atom_symbols</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>) – Mapping from trajectory atom_ID to chemical symbol.</p></li>
+<li><p><strong>atom_masses</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em>) – Mapping from trajectory atom_ID to chemical mass.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>References created successfully.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.positions">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">positions</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.positions" title="Link to this definition"></a></dt>
-<dd><p>Returns the position array.
-Added for those parts of code that use the plural form
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">positions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.positions" title="Link to this definition"></a></dt>
+<dd><p>The position array.</p>
+<p>Added for those parts of code that use the plural form
 instead of singular.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Time samples array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><em>ndarray</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.postProcess">
 <span class="sig-name descname"><span class="pre">postProcess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.postProcess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.postProcess" title="Link to this definition"></a></dt>
-<dd><p>This function should be called after the all the trajectory steps have
+<dd><p>Finalise trajectory analysis.</p>
+<p class="rubric">Notes</p>
+<p>This function should be called after the all the trajectory steps have
 been read. It will discard the unnecessary rows of the arrays,
 in case we had allocated too many due to some rounding error.</p>
 </dd></dl>
@@ -491,7 +545,8 @@ in case we had allocated too many due to some rounding error.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.preAllocate">
 <span class="sig-name descname"><span class="pre">preAllocate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">useVelocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.preAllocate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.preAllocate" title="Link to this definition"></a></dt>
-<dd><p>Creates empty arrays for storing atom positions, velocities,
+<dd><p>Allocate array space for data.</p>
+<p>Creates empty arrays for storing atom positions, velocities,
 time values of the simulation frames, and the simulation
 box dimensions.</p>
 <p>The numpy empty object do not initialise elements until they
@@ -502,16 +557,14 @@ method is called.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>(</strong><strong>int</strong> (<em>n_atoms</em>) – Number of simulation steps in the
+<li><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of simulation steps in the
 trajectory. Defaults to 1.</p></li>
-<li><p><strong>optional</strong><strong>)</strong> (<em>If the trajectory contains</em>) – Number of simulation steps in the
-trajectory. Defaults to 1.</p></li>
-<li><p><strong>(</strong><strong>int</strong> – Defaults to 1.</p></li>
-<li><p><strong>optional</strong><strong>)</strong> – Defaults to 1.</p></li>
-<li><p><strong>(</strong><strong>bool</strong> (<em>useVelocity</em>) – velocities, set to True to allocate an additional array
-for the velocity values. Defaults to False.</p></li>
-<li><p><strong>optional</strong><strong>)</strong> – velocities, set to True to allocate an additional array
-for the velocity values. Defaults to False.</p></li>
+<li><p><strong>n_atoms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of atoms in the system.
+Defaults to 1.</p></li>
+<li><p><strong>useVelocity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If the trajectory contains
+velocities, set to <cite>True</cite> to allocate an additional array
+for the velocity values.
+Defaults to False.</p></li>
 </ul>
 </dd>
 </dl>
@@ -520,30 +573,34 @@ for the velocity values. Defaults to False.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setBytesPerNumber">
 <span class="sig-name descname"><span class="pre">setBytesPerNumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bytes_per_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.setBytesPerNumber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setBytesPerNumber" title="Link to this definition"></a></dt>
-<dd><p>Changes the number of bytes per number in the arrays storing atom positions,
-velocities, the frame timestamps and simulation box dimensions.
-The best approach is to set the correct value before populating the arrays,
-but it is still possible to change the data type using this function
-when the CompactTrajectory already contains some numbers.</p>
+<dd><p>Change the number of bytes per number in the arrays.</p>
+<p>This is used for storing atom positions, velocities, the frame
+timestamps and simulation box dimensions.</p>
+<p>The best approach is to set the correct value before
+populating the arrays, but it is still possible to change the
+data type using this function when the <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>
+already contains some values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>(</strong><strong>int</strong> (<em>bytes_per_number</em>) – If 8, the arrays will use np.float64 to
-store the positions, velocities and time at each step. Will always be rounded
-up to the nearest multiple of 2.</p></li>
-<li><p><strong>optional</strong><strong>)</strong> – If 8, the arrays will use np.float64 to
-store the positions, velocities and time at each step. Will always be rounded
-up to the nearest multiple of 2.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>bytes_per_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – If 8, the arrays will use <code class="xref any docutils literal notranslate"><span class="pre">np.float64</span></code> to store the
+positions, velocities and time at each step. Will always
+be rounded up to the nearest multiple of 2.</p>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">CompactTrajectory._get_dtype</span></code></dt><dd><p>Type getter.</p>
+</dd>
+</dl>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setCharge">
-<span class="sig-name descname"><span class="pre">setCharge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charge_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.setCharge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setCharge" title="Link to this definition"></a></dt>
-<dd><p>Sets the values of partial charge for each atom.
-It assumes that the charges are constant within
+<span class="sig-name descname"><span class="pre">setCharge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charge_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.setCharge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setCharge" title="Link to this definition"></a></dt>
+<dd><p>Set the values of partial charge for each atom.</p>
+<p>It assumes that the charges are constant within
 the simulation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -551,20 +608,26 @@ the simulation.</p>
 given in a list with one floating point number
 per atom.</p>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether charges have been set.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setDimensions">
-<span class="sig-name descname"><span class="pre">setDimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_dimensions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.setDimensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setDimensions" title="Link to this definition"></a></dt>
-<dd><p>Writes the simulation box dimensions into the object header.
-Additionally, if the simulation box dimensions change with time,
+<span class="sig-name descname"><span class="pre">setDimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_dimensions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><span class="pre">ndarray</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.setDimensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setDimensions" title="Link to this definition"></a></dt>
+<dd><p>Write the simulation box dimensions into the object header.</p>
+<p>Additionally, if the simulation box dimensions change with time,
 it will keep track of the new dimensions at each step in the
 self.changing_dimensions object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_dimensions</strong> (<em>np.array</em>) – 3 float numbers defining the size
+<li><p><strong>frame_dimensions</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><em>numpy.ndarray</em></a>) – 3 float numbers defining the size
 of the simulation box along x, y and z.</p></li>
 <li><p><strong>step_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The number of the simulation frame at which
 the frame_dimensions array was read.</p></li>
@@ -575,67 +638,87 @@ the frame_dimensions array was read.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.subtrajectory">
-<span class="sig-name descname"><span class="pre">subtrajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><span class="pre">List</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.subtrajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.subtrajectory" title="Link to this definition"></a></dt>
-<dd><p>Returns another CompactTrajectory instance, which contains the
-same header information, and a subset of the original trajectory
-steps. The arrays in the original trajectory will be sliced
-following the pattern: new = old[start:stop:step].</p>
-<p>Optionally, atom_filter can be specified to choose only
-specific atoms from the trajectory. It is recommended not to
-use subtrajectory directly in this case, but to use the
-filter_by_element or filter_by_type methods, which will
-create the element_filter themselves.</p>
+<span class="sig-name descname"><span class="pre">subtrajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.subtrajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.subtrajectory" title="Link to this definition"></a></dt>
+<dd><p>Slice a <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>.</p>
+<p>Returns another <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> instance, which contains
+the same header information, and a subset of the original
+trajectory steps.</p>
+<p>The arrays in the original trajectory will be sliced following
+the pattern: <cite>new = old[start:stop:step]</cite>.</p>
+<p>Optionally, <code class="docutils literal notranslate"><span class="pre">atom_filter</span></code> can be specified to choose only
+specific atoms from the trajectory.</p>
+<p>It is recommended not to use <code class="docutils literal notranslate"><span class="pre">subtrajectory</span></code> directly in
+this case, but to use the <code class="docutils literal notranslate"><span class="pre">filter_by_element</span></code> or
+<code class="docutils literal notranslate"><span class="pre">filter_by_type</span></code> methods, which will create the
+<code class="docutils literal notranslate"><span class="pre">element_filter</span></code> themselves.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – number defining the beginning of the slicing range.</p></li>
-<li><p><strong>stop</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – number defining the end of the slicing range.</p></li>
-<li><p><strong>step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – step size of the slicing operation</p></li>
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number defining the beginning of the slicing range.</p></li>
+<li><p><strong>stop</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number defining the end of the slicing range.</p></li>
+<li><p><strong>step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Step size of the slicing operation.</p></li>
+<li><p><strong>atom_filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>) – Atom indices to extract.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>CompactTrajectory</strong> (<em>a trajectory containing the same header</em>)</p></li>
-<li><p><em>and the same or less steps than the original.</em></p></li>
-</ul>
-</p>
+<dd class="field-even"><p>A trajectory containing the same header
+and the same or fewer steps than the original.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory">CompactTrajectory</a></p>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_element" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_element"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_element</span></code></a></dt><dd><p>Get components by species.</p>
+</dd>
+<dt><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_type" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.filter_by_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_type</span></code></a></dt><dd><p>Get components by ID.</p>
+</dd>
+</dl>
+</div>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.times">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">times</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.times" title="Link to this definition"></a></dt>
-<dd><p>Returns the time array.
-Added for those parts of code that use the plural form
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">times</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.times" title="Link to this definition"></a></dt>
+<dd><p>The time array.</p>
+<p>Added for those parts of code that use the plural form
 instead of singular.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Time samples array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><em>ndarray</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.validateTypes">
-<span class="sig-name descname"><span class="pre">validateTypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_atom_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.validateTypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.validateTypes" title="Link to this definition"></a></dt>
-<dd><p>This function either sets the array of atom types
-(if it had not been set before), or checks if the
-array of atom types from the new frame is the same
-as the original array of atom types.</p>
+<span class="sig-name descname"><span class="pre">validateTypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_atom_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.validateTypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.validateTypes" title="Link to this definition"></a></dt>
+<dd><p>Check and set the array of atom types.</p>
+<p>If previously run, verify the array of atom types from the new
+frame is the same as the original array of atom types.</p>
 <p>If the atom types have changed during the simulation,
-we cannot process the results using the CompactTrajectory
-object, and the validation will return False.
+we cannot process the results using the <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code>
+object, and the validation will return <code class="docutils literal notranslate"><span class="pre">False</span></code>.
 It is up to the engine facade to decide what to do
-if valideTypes returns False.</p>
+if <code class="docutils literal notranslate"><span class="pre">validateTypes</span></code> returns <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>atom_types</strong> (<em>np.array</em>) – an array of all the atom types, sorted by the atom ID.
-If these are numbers, like in a LAMMPS simulation,
-then they will be stored directly.
-If raw_atom_types are strings, an internal method
-called _create_types_from_elements will create
+<dd class="field-odd"><p><strong>raw_atom_types</strong> (<em>numpy.array</em>) – <p>An array of all the atom types, sorted by the atom ID.</p>
+<p>If these are numbers, like in a LAMMPS simulation,
+then they will be stored directly.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">raw_atom_types</span></code> are strings, an internal method
+called <code class="docutils literal notranslate"><span class="pre">_create_types_from_elements</span></code> will create
 numbers that correspond to the strings, so that
 every atom type has its own number.</p>
+</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if the atom types are the same as in
-the beginning, False otherwise.</p>
+<dd class="field-even"><p>Whether the atom types are unchanged.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
@@ -645,25 +728,33 @@ the beginning, False otherwise.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.velocities">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocities</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.velocities" title="Link to this definition"></a></dt>
-<dd><p>Returns the velocity array.
-Added for those parts of code that use the plural form
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocities</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.velocities" title="Link to this definition"></a></dt>
+<dd><p>The velocity array.</p>
+<p>Added for those parts of code that use the plural form
 instead of singular.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Velocities array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><em>ndarray</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.writeEmptyStep">
 <span class="sig-name descname"><span class="pre">writeEmptyStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.writeEmptyStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.writeEmptyStep" title="Link to this definition"></a></dt>
-<dd><p>This function advances the iterators without writing any data.
-It is basically a reduced version of the writeOneStep method.
+<dd><p>Advance the iterators without writing any data.</p>
+<p>It is basically a reduced version of the writeOneStep method.
 This was added since the tests/trajectory_analysis/test_PDF.py
 use a trajectory made of 1000 _empty_ configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>step_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – the index at which the numbers will be written.
+<li><p><strong>step_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – The index at which the numbers will be written.
 Defaults to -1.</p></li>
-<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – the time stamp of the simulation step, in the
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – The time stamp of the simulation step, in the
 correct time units (femtoseconds). Defaults to -1.0.</p></li>
 </ul>
 </dd>
@@ -673,22 +764,17 @@ correct time units (femtoseconds). Defaults to -1.0.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.writeOneStep">
 <span class="sig-name descname"><span class="pre">writeOneStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#CompactTrajectory.writeOneStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.writeOneStep" title="Link to this definition"></a></dt>
-<dd><p>Writes the atom positions (and, optionally, velocities) of a single
-simulation frame into the trajectory arrays.
-This function assumes that we have allocated the memory already,
-and that we have sorted the atoms according to their IDs.
-It will then put the numbers into the arrays at the correct frame,
-given by the step_num parameter.</p>
+<dd><p>Write the atom properties of a single frame into the trajectory arrays.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>step_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – the index at which the numbers will be written.
+<li><p><strong>step_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – The index at which the numbers will be written.
 Defaults to -1.</p></li>
-<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – the time stamp of the simulation step, in the
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The time stamp of the simulation step, in the
 correct time units (femtoseconds). Defaults to -1.0.</p></li>
-<li><p><strong>positions</strong> (<em>np.array</em>) – the array of the atom positions, shaped
+<li><p><strong>positions</strong> (<em>np.array</em>) – The array of the atom positions, shaped
 (n_atoms, 3). Defaults to None.</p></li>
-<li><p><strong>velocities</strong> (<em>np.array</em><em>, </em><em>optional</em>) – the array of the atom velocities, shaped
+<li><p><strong>velocities</strong> (<em>np.array</em><em>, </em><em>optional</em>) – The array of the atom velocities, shaped
 (n_atoms, 3). If we don’t use velocities, it can be skipped.
 Defaults to None.</p></li>
 </ul>
@@ -700,22 +786,20 @@ Defaults to None.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.compact_trajectory.configurations_as_compact_trajectory">
-<span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.compact_trajectory.</span></span><span class="sig-name descname"><span class="pre">configurations_as_compact_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">configs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#MDMC.trajectory_analysis.trajectory.TemporalConfiguration" title="MDMC.trajectory_analysis.trajectory.TemporalConfiguration"><span class="pre">TemporalConfiguration</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory"><span class="pre">CompactTrajectory</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#configurations_as_compact_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.configurations_as_compact_trajectory" title="Link to this definition"></a></dt>
-<dd><p>Populate the arrays of the CompactTrajectory using the input list
-of <code class="docutils literal notranslate"><span class="pre">TemporalConfiguration</span></code> objects.</p>
+<span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.compact_trajectory.</span></span><span class="sig-name descname"><span class="pre">configurations_as_compact_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">configs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#MDMC.trajectory_analysis.trajectory.TemporalConfiguration" title="MDMC.trajectory_analysis.trajectory.TemporalConfiguration"><span class="pre">TemporalConfiguration</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory"><span class="pre">CompactTrajectory</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/compact_trajectory.html#configurations_as_compact_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.compact_trajectory.configurations_as_compact_trajectory" title="Link to this definition"></a></dt>
+<dd><p>Populate <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> arrays from list of <code class="docutils literal notranslate"><span class="pre">TemporalConfiguration</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>objects</strong> (<em>configs -- A list</em><em> of </em><a class="reference internal" href="#MDMC.trajectory_analysis.trajectory.TemporalConfiguration" title="MDMC.trajectory_analysis.trajectory.TemporalConfiguration"><em>TemporalConfiguration</em></a>) – most likely containing atoms</p>
+<dd class="field-odd"><p><strong>*configs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference internal" href="#MDMC.trajectory_analysis.trajectory.TemporalConfiguration" title="MDMC.trajectory_analysis.trajectory.TemporalConfiguration"><em>TemporalConfiguration</em></a><em>]</em>) – Most likely containing atoms.</p>
 </dd>
-</dl>
-<p>:param : most likely containing atoms</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p><em>A CompactTrajectory with atom types and positions matching those in the</em></p></li>
-<li><p><em>input configurations.</em></p></li>
-</ul>
-</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>With atom types and positions matching those in the input configurations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory" title="MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory">CompactTrajectory</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.13)"><strong>TypeError</strong></a> – No configurations provided.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -723,23 +807,22 @@ of <code class="docutils literal notranslate"><span class="pre">TemporalConfigur
 </section>
 <section id="module-MDMC.trajectory_analysis.trajectory">
 <span id="mdmc-trajectory-analysis-trajectory-module"></span><h2>MDMC.trajectory_analysis.trajectory module<a class="headerlink" href="#module-MDMC.trajectory_analysis.trajectory" title="Link to this heading"></a></h2>
-<p>Module for <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> and related classes</p>
+<p>Module for <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> and related classes.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.AtomCollection">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.trajectory.</span></span><span class="sig-name descname"><span class="pre">AtomCollection</span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#AtomCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.AtomCollection" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Base class for <code class="docutils literal notranslate"><span class="pre">Configurations</span></code></p>
+<p>Base class for <code class="docutils literal notranslate"><span class="pre">Configurations</span></code>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.AtomCollection.dimensions">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dimensions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.AtomCollection.dimensions" title="Link to this definition"></a></dt>
-<dd><p>Get the <code class="docutils literal notranslate"><span class="pre">dimensions</span></code> of the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> in which the
-<code class="docutils literal notranslate"><span class="pre">AtomCollection</span></code> exists</p>
+<dd><p>Get the <code class="docutils literal notranslate"><span class="pre">dimensions</span></code> of the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> in which the <code class="docutils literal notranslate"><span class="pre">AtomCollection</span></code> exists.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>array</strong> – The <code class="docutils literal notranslate"><span class="pre">dimensions</span></code> of the <code class="docutils literal notranslate"><span class="pre">Universe</span></code></p>
+<dd class="field-odd"><p>The <code class="docutils literal notranslate"><span class="pre">dimensions</span></code> of the <code class="docutils literal notranslate"><span class="pre">Universe</span></code>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)">numpy.ndarray</a></p>
+<dd class="field-even"><p>snumpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -747,11 +830,11 @@ of <code class="docutils literal notranslate"><span class="pre">TemporalConfigur
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.AtomCollection.universe">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">universe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.simulation.Universe" title="MDMC.MD.simulation.Universe"><span class="pre">Universe</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.AtomCollection.universe" title="Link to this definition"></a></dt>
-<dd><p>Get or set the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> in which the <code class="docutils literal notranslate"><span class="pre">AtomCollection</span></code> exists</p>
+<dd><p>Get or set the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> in which the <code class="docutils literal notranslate"><span class="pre">AtomCollection</span></code> exists.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The <code class="docutils literal notranslate"><span class="pre">Universe</span></code> in which the <code class="docutils literal notranslate"><span class="pre">AtomCollection</span></code> exists, or <cite>None</cite>
-if it has not been set</p>
+if it has not been set.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="MDMC.MD.html#MDMC.MD.simulation.Universe" title="MDMC.MD.simulation.Universe">Universe</a></p>
@@ -765,18 +848,12 @@ if it has not been set</p>
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.trajectory.</span></span><span class="sig-name descname"><span class="pre">Configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">structures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><span class="pre">Structure</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#MDMC.trajectory_analysis.trajectory.AtomCollection" title="MDMC.trajectory_analysis.trajectory.AtomCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomCollection</span></code></a></p>
-<p>A <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> stores <code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects and their positions and
-velocities</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> stores <code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects and their positions and velocities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*structures</strong> – Zero or more <code class="docutils literal notranslate"><span class="pre">Structure</span></code> objects to be added to the
-<code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p></li>
-<li><p><strong>**settings</strong> – <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">universe</span></code> (<code class="docutils literal notranslate"><span class="pre">Universe</span></code>)</dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">Universe</span></code> of the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
-</dd>
-</dl>
-</p></li>
+<li><p><strong>*structures</strong> – Zero or more <code class="docutils literal notranslate"><span class="pre">Structure</span></code> objects to be added to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p></li>
+<li><p><strong>**settings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Extra options.</p></li>
 </ul>
 </dd>
 </dl>
@@ -792,62 +869,56 @@ velocities</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.universe">
-<span class="sig-name descname"><span class="pre">universe</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.universe" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="MDMC.MD.html#MDMC.MD.simulation.Universe" title="MDMC.MD.simulation.Universe">Universe</a> or None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.data">
 <span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.data" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Tuple of all contained structures.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a href="#id1"><span class="problematic" id="id2">*</span></a>structures</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure">Structure</a>, …]</p>
 </dd>
 </dl>
 </dd></dl>
 
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>universe</strong> (<a class="reference internal" href="MDMC.MD.html#MDMC.MD.simulation.Universe" title="MDMC.MD.simulation.Universe"><em>Universe</em></a>) – The <code class="docutils literal notranslate"><span class="pre">Universe</span></code> of the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.add_structure">
 <span class="sig-name descname"><span class="pre">add_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><span class="pre">Structure</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration.add_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.add_structure" title="Link to this definition"></a></dt>
-<dd><p>Adds the <code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects from a <code class="docutils literal notranslate"><span class="pre">Structure</span></code> to the data</p>
+<dd><p>Add the <code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects from a <code class="docutils literal notranslate"><span class="pre">Structure</span></code> to the data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>structures</strong> (<a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><em>Structure</em></a>) – The <code class="docutils literal notranslate"><span class="pre">Structure</span></code> to add</p>
+<dd class="field-odd"><p><strong>structures</strong> (<a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><em>Structure</em></a>) – The <code class="docutils literal notranslate"><span class="pre">Structure</span></code> to add.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.atom_positions">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">atom_positions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.atom_positions" title="Link to this definition"></a></dt>
-<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom.position</span></code> which belong to the
-<code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">atom_positions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.atom_positions" title="Link to this definition"></a></dt>
+<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom.position</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom.position</span></code></p>
+<dd class="field-odd"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom.position</span></code> s in <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)">numpy.ndarray</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.atom_velocities">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">atom_velocities</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.atom_velocities" title="Link to this definition"></a></dt>
-<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom.velocity</span></code> which belong to the
-<code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">atom_velocities</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.atom_velocities" title="Link to this definition"></a></dt>
+<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom.velocity</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <cite>list</cite> of <a href="#id3"><span class="problematic" id="id4">``</span></a>Atom.velocity`</p>
+<dd class="field-odd"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom.velocity`</span> <span class="pre">s</span> <span class="pre">in</span> <span class="pre">``Configuration</span></code>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)">numpy.ndarray</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -855,13 +926,13 @@ velocities</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.atoms">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">atoms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Atom" title="MDMC.MD.structures.Atom"><span class="pre">Atom</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.atoms" title="Link to this definition"></a></dt>
-<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code></p>
+<dd class="field-odd"><p>A <cite>list</cite> of all <code class="docutils literal notranslate"><span class="pre">Atom</span></code> s in <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Atom" title="MDMC.MD.structures.Atom">Atom</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -869,12 +940,11 @@ velocities</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="id0">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
-<dd><p>Get or set the <code class="docutils literal notranslate"><span class="pre">Atom</span></code>, <code class="docutils literal notranslate"><span class="pre">Atom.position</span></code>, and <code class="docutils literal notranslate"><span class="pre">Atom.velocity</span></code> which
-belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+<dd><p>Get or set the <code class="docutils literal notranslate"><span class="pre">Atom</span></code> properties of the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A structured NumPy <code class="docutils literal notranslate"><span class="pre">array</span></code> with <code class="docutils literal notranslate"><span class="pre">'atom'</span></code>, <code class="docutils literal notranslate"><span class="pre">'position'</span></code>, and
-<code class="docutils literal notranslate"><span class="pre">'velocity'</span></code> fields</p>
+<code class="docutils literal notranslate"><span class="pre">'velocity'</span></code> fields.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1)">numpy.ndarray</a></p>
@@ -884,33 +954,33 @@ belong to the <code class="docutils literal notranslate"><span class="pre">Confi
 
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.element_list">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.element_list" title="Link to this definition"></a></dt>
-<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom.element.symbol</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.element_list" title="Link to this definition"></a></dt>
+<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom.element.symbol</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <cite>list</cite> of <cite>str</cite> for the elements</p>
+<dd class="field-odd"><p>A <cite>list</cite> of <cite>str</cite> of element abbreviations.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id5">
-<span class="sig-name descname"><span class="pre">element_set</span></span><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">element_set</span></span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.filter_atoms">
-<span class="sig-name descname"><span class="pre">filter_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Atom" title="MDMC.MD.structures.Atom"><span class="pre">Atom</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration.filter_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.filter_atoms" title="Link to this definition"></a></dt>
-<dd><p>Filters the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code> using the predicate</p>
+<span class="sig-name descname"><span class="pre">filter_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Atom" title="MDMC.MD.structures.Atom"><span class="pre">Atom</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Atom" title="MDMC.MD.structures.Atom"><span class="pre">Atom</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration.filter_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.filter_atoms" title="Link to this definition"></a></dt>
+<dd><p>Filter the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code> using the predicate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>predicate</strong> (<em>function</em>) – A function which returns a <cite>bool</cite> when passed an <code class="docutils literal notranslate"><span class="pre">Atom</span></code></p>
+<dd class="field-odd"><p><strong>predicate</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Atom" title="MDMC.MD.structures.Atom"><em>Atom</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>]</em>) – A function which returns a <cite>bool</cite> when passed an <code class="docutils literal notranslate"><span class="pre">Atom</span></code>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code> which are <cite>True</cite> for the given predicate</p>
+<dd class="field-even"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code> which are <cite>True</cite> for the given predicate.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
@@ -921,14 +991,14 @@ belong to the <code class="docutils literal notranslate"><span class="pre">Confi
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.filter_by_element">
 <span class="sig-name descname"><span class="pre">filter_by_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Atom" title="MDMC.MD.structures.Atom"><span class="pre">Atom</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration.filter_by_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.filter_by_element" title="Link to this definition"></a></dt>
-<dd><p>Filter the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> using an <code class="docutils literal notranslate"><span class="pre">element</span></code></p>
+<dd><p>Filter the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> using an <code class="docutils literal notranslate"><span class="pre">element</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>element</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – An elemental symbol of the same format as is used for creating
-<code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects</p>
+<code class="docutils literal notranslate"><span class="pre">Atom</span></code> objects.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code> of the specified <code class="docutils literal notranslate"><span class="pre">element</span></code></p>
+<dd class="field-even"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Atom</span></code> of the specified <code class="docutils literal notranslate"><span class="pre">element</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
@@ -938,15 +1008,15 @@ belong to the <code class="docutils literal notranslate"><span class="pre">Confi
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.filter_structures">
-<span class="sig-name descname"><span class="pre">filter_structures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><span class="pre">Structure</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration.filter_structures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.filter_structures" title="Link to this definition"></a></dt>
-<dd><p>Filters the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Structures</span></code> using the predicate</p>
+<span class="sig-name descname"><span class="pre">filter_structures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><span class="pre">Structure</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><span class="pre">Structure</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration.filter_structures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.filter_structures" title="Link to this definition"></a></dt>
+<dd><p>Filter the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Structures</span></code> using the predicate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>predicate</strong> (<em>function</em>) – A function which returns a <cite>bool</cite> when passed a <code class="docutils literal notranslate"><span class="pre">Structure</span></code></p>
+<dd class="field-odd"><p><strong>predicate</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><em>Structure</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>]</em>) – A function which returns a <cite>bool</cite> when passed a <code class="docutils literal notranslate"><span class="pre">Structure</span></code>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Structures</span></code> which are <cite>True</cite> for the given
-predicate</p>
+predicate.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
@@ -957,30 +1027,30 @@ predicate</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.molecule_list">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">molecule_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Molecule" title="MDMC.MD.structures.Molecule"><span class="pre">Molecule</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.molecule_list" title="Link to this definition"></a></dt>
-<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Molecule</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Molecule</span></code></p>
+<dd class="field-odd"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Molecule</span></code>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Molecule" title="MDMC.MD.structures.Molecule">Molecule</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.scale">
-<span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vectors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'positions'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration.scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.scale" title="Link to this definition"></a></dt>
-<dd><p>Scales either <code class="docutils literal notranslate"><span class="pre">atom_positions</span></code> or <code class="docutils literal notranslate"><span class="pre">atom_velocities</span></code> by a factor</p>
+<span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vectors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'positions'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'velocities'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'positions'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration.scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.scale" title="Link to this definition"></a></dt>
+<dd><p>Scale either <code class="docutils literal notranslate"><span class="pre">atom_positions</span></code> or <code class="docutils literal notranslate"><span class="pre">atom_velocities</span></code> by a factor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Factor by which the vector is scaled</p></li>
-<li><p><strong>vectors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <code class="docutils literal notranslate"><span class="pre">'positions'</span></code> (default) or <code class="docutils literal notranslate"><span class="pre">'velocities'</span></code></p></li>
+<li><p><strong>factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Factor by which the vector is scaled.</p></li>
+<li><p><strong>vectors</strong> (<em>{'positions'</em><em>, </em><em>'velocities'}</em>) – Vectors to rescale.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.13)"><strong>NotImplementedError</strong></a> – THIS IS NOT IMPEMENTED</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.13)"><strong>NotImplementedError</strong></a> – THIS IS NOT IMPEMENTED.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -988,13 +1058,13 @@ predicate</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.structure_list">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">structure_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><span class="pre">Structure</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.structure_list" title="Link to this definition"></a></dt>
-<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Structure</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+<dd><p>Get the <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Structure</span></code> which belong to the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Structure</span></code></p>
+<dd class="field-odd"><p>A <cite>list</cite> of <code class="docutils literal notranslate"><span class="pre">Structure</span></code>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure">Structure</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1002,15 +1072,14 @@ predicate</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.Configuration.validate_structure">
 <span class="sig-name descname"><span class="pre">validate_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><span class="pre">Structure</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#Configuration.validate_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.Configuration.validate_structure" title="Link to this definition"></a></dt>
-<dd><p>Validates the structure by testing that it belongs to the same
-<code class="docutils literal notranslate"><span class="pre">Universe</span></code> as the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+<dd><p>Validate the structure by testing that it belongs to the same <code class="docutils literal notranslate"><span class="pre">Universe</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>structure</strong> (<a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><em>Structure</em></a>) – The <code class="docutils literal notranslate"><span class="pre">Structure</span></code> to validate</p>
+<dd class="field-odd"><p><strong>structure</strong> (<a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><em>Structure</em></a>) – The <code class="docutils literal notranslate"><span class="pre">Structure</span></code> to validate.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – If the <code class="docutils literal notranslate"><span class="pre">Structure</span></code> does not belong to the same <code class="docutils literal notranslate"><span class="pre">Universe</span></code>
-    as the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+    as the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1021,12 +1090,13 @@ predicate</p>
 <dt class="sig sig-object py" id="MDMC.trajectory_analysis.trajectory.TemporalConfiguration">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.trajectory_analysis.trajectory.</span></span><span class="sig-name descname"><span class="pre">TemporalConfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">structures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><span class="pre">Structure</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/trajectory_analysis/trajectory.html#TemporalConfiguration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.trajectory_analysis.trajectory.TemporalConfiguration" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#MDMC.trajectory_analysis.trajectory.Configuration" title="MDMC.trajectory_analysis.trajectory.Configuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Configuration</span></code></a></p>
-<p>A configuration which has a time associated with it</p>
+<p>A configuration which has a time associated with it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The time of the <code class="docutils literal notranslate"><span class="pre">TemporalConfiguration</span></code> in <code class="docutils literal notranslate"><span class="pre">fs</span></code></p></li>
-<li><p><strong>*structure_units</strong> – Zero or more <code class="docutils literal notranslate"><span class="pre">Structures</span></code></p></li>
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The time of the <code class="docutils literal notranslate"><span class="pre">TemporalConfiguration</span></code> in <code class="docutils literal notranslate"><span class="pre">fs</span></code>.</p></li>
+<li><p><strong>*structures</strong> (<a class="reference internal" href="MDMC.MD.html#MDMC.MD.structures.Structure" title="MDMC.MD.structures.Structure"><em>Structure</em></a>) – Zero or more <code class="docutils literal notranslate"><span class="pre">Structures</span></code>.</p></li>
+<li><p><strong>**settings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Extra options to pass to superclass.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1040,12 +1110,13 @@ predicate</p>
 </section>
 <section id="module-MDMC.trajectory_analysis">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-MDMC.trajectory_analysis" title="Link to this heading"></a></h2>
-<p>Modules relating to describing a molecular dynamics trajectory and
-calculating observables from them</p>
+<p>Modules relating to describing an MD trajectory and calculating observables.</p>
 <section id="contents">
 <h3>Contents<a class="headerlink" href="#contents" title="Link to this heading"></a></h3>
-<p>observables
-trajectory</p>
+<ul class="simple">
+<li><p>observables</p></li>
+<li><p>trajectory</p></li>
+</ul>
 </section>
 </section>
 </section>

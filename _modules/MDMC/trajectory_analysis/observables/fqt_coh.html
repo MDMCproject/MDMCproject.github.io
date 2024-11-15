@@ -97,7 +97,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.trajectory_analysis.observables.fqt_coh</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module for coherent FQt class&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module for coherent FQt class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">periodictable</span>
@@ -115,18 +117,17 @@
                              <span class="s1">&#39;FQt_coh&#39;</span><span class="p">))</span>
 <span class="k">class</span> <span class="nc">FQtCoherent</span><span class="p">(</span><span class="n">AbstractFQt</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for containing, calculating and reading the intermediate scattering</span>
-<span class="sd">    function for the coherent dynamic structure factor</span>
+<span class="sd">    Class for processing the intermediate scattering function for coherent dynamic structure factor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the neutron weighting for coherent scattering&quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> \
-                        <span class="k">if</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the neutron weighting for coherent scattering.&quot;&quot;&quot;</span>
+        <span class="n">elem_getter</span> <span class="o">=</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="n">elem_getter</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span>
+                        <span class="k">if</span> <span class="n">elem_getter</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                         <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span><span class="o">.</span><span class="n">element_set</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_FQt_single_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;np.ndarray&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_calculate_FQt_single_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="c1"># Inherit docstring of abstract method</span>
 
         <span class="n">n_t</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
@@ -139,8 +140,7 @@
             <span class="c1"># Get the positions of all atoms (the configuration) of each</span>
             <span class="c1"># element over time such that ``element_configs`` has time as its</span>
             <span class="c1"># first dimension and each atom of ``element`` as its second</span>
-            <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span><span class="o">.</span><span class="n">element_list</span><span class="p">)</span>
-                               <span class="o">==</span> <span class="n">element</span><span class="p">)</span>
+            <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span><span class="o">.</span><span class="n">element_list</span><span class="p">)</span> <span class="o">==</span> <span class="n">element</span><span class="p">)</span>
             <span class="n">element_configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span><span class="o">.</span><span class="n">position</span><span class="p">[:,</span> <span class="n">indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
 
             <span class="n">rho_element</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_rho_config</span><span class="p">(</span><span class="n">element_configs</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">)</span>
@@ -149,10 +149,10 @@
         <span class="k">for</span> <span class="n">element1</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">element2</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
                 <span class="c1"># A sum over the Q vectors is performed within ``correlation``.</span>
-                <span class="n">FQt_single_Q</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">element1</span><span class="p">]</span> \
-                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">element2</span><span class="p">]</span> \
-                    <span class="o">*</span> <span class="n">faster_correlation</span><span class="p">(</span><span class="n">rho_element</span><span class="p">[</span><span class="n">element1</span><span class="p">],</span>
-                                  <span class="n">rho_element</span><span class="p">[</span><span class="n">element2</span><span class="p">])[:</span><span class="n">n_t</span><span class="p">]</span>
+                <span class="n">FQt_single_Q</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">element1</span><span class="p">]</span> <span class="o">*</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">element2</span><span class="p">]</span> <span class="o">*</span>
+                                 <span class="n">faster_correlation</span><span class="p">(</span><span class="n">rho_element</span><span class="p">[</span><span class="n">element1</span><span class="p">],</span>
+                                                    <span class="n">rho_element</span><span class="p">[</span><span class="n">element2</span><span class="p">])[:</span><span class="n">n_t</span><span class="p">])</span>
 
         <span class="c1"># Normalise to the number of orthogonal vectors</span>
         <span class="k">try</span><span class="p">:</span>

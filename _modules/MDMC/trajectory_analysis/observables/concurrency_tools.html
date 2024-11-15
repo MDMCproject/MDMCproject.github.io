@@ -101,21 +101,23 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">islice</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="create_executor">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.concurrency_tools.create_executor">[docs]</a>
 <span class="k">def</span> <span class="nf">create_executor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ThreadPoolExecutor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates a ThreadPoolExecutor with the</span>
-<span class="sd">    relevant number of workers (according to</span>
-<span class="sd">    the number of cores specified).</span>
+<span class="sd">    Create a ``ThreadPoolExecutor`` with the relevant number of workers.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    ThreadPoolExecutor</span>
-<span class="sd">        A thread pool executor with max_workers=`OMP_NUM_THREADS`</span>
+<span class="sd">        A thread pool executor with max_workers=`OMP_NUM_THREADS` or 1 if not set.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># we use a ThreadPoolExecutor as most of the concurrent operations</span>
@@ -128,39 +130,35 @@
 
 <div class="viewcode-block" id="core_batch">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.concurrency_tools.core_batch">[docs]</a>
-<span class="k">def</span> <span class="nf">core_batch</span><span class="p">(</span><span class="n">generator</span><span class="p">:</span> <span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">core_batch</span><span class="p">(</span><span class="n">generator</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Turn a generator into a new generator that yields in batches according</span>
-<span class="sd">    to the number of available cores, `OMP_NUM_THREADS`.</span>
-
-<span class="sd">    Example:</span>
-<span class="sd">    &gt;&gt;&gt; core_batch((i for i in range (10))</span>
-<span class="sd">    on 1 core produces [0], [1], [2], [3], [4], [5], [6], [7], [8], [9]</span>
-<span class="sd">    on 4 cores produces [0, 1, 2, 3], [4, 5, 6, 7], [8, 9].</span>
+<span class="sd">    Batch generator according to the number of available cores, `OMP_NUM_THREADS`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    generator: Generator</span>
+<span class="sd">    generator : Iterable[T]</span>
 <span class="sd">        The generator to batch.</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Generator</span>
-<span class="sd">        A generator which iterates in batches of size `OMP_NUM_THREADS`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Yields</span>
+<span class="sd">    ------</span>
+<span class="sd">    tuple[T]</span>
+<span class="sd">        Batches of size `OMP_NUM_THREADS`.</span>
 
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    itertools.batched : Standard implementation from 3.12.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">        &gt;&gt;&gt; core_batch(range(10))</span>
+<span class="sd">        on 1 core produces [0], [1], [2], [3], [4], [5], [6], [7], [8], [9]</span>
+<span class="sd">        on 4 cores produces [0, 1, 2, 3], [4, 5, 6, 7], [8, 9].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">num_cores</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-    <span class="n">generator_not_exhausted</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="k">while</span> <span class="n">generator_not_exhausted</span><span class="p">:</span>
-        <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_cores</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">))</span>
-            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-                <span class="n">generator_not_exhausted</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="k">break</span>
+    <span class="n">iterator</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">batch</span> <span class="o">:=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">islice</span><span class="p">(</span><span class="n">iterator</span><span class="p">,</span> <span class="n">num_cores</span><span class="p">)):</span>
         <span class="k">yield</span> <span class="n">batch</span></div>
 
 </pre></div>

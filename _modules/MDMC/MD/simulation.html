@@ -101,10 +101,12 @@
 
 <span class="sd"> Classes for the simulation box, minimizer and integrator.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span><span class="p">,</span> <span class="n">filterfalse</span><span class="p">,</span> <span class="n">product</span>
-<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+
 <span class="kn">from</span> <span class="nn">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">kpss</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1691,6 +1693,11 @@
         <span class="c1"># step in this function so verbose levels 2 or 3 would not provide extra information</span>
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">verbose</span><span class="p">))</span>
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">n_steps</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_steps</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">traj_step</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Run length (</span><span class="si">{</span><span class="n">n_steps</span><span class="si">}</span><span class="s2">) less than dump frequency (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">traj_step</span><span class="si">}</span><span class="s2">), &quot;</span>
+                          <span class="s2">&quot;run may not produce usable output.&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">equilibration</span><span class="o">=</span><span class="n">equilibration</span><span class="p">,</span> <span class="n">output_log</span><span class="o">=</span><span class="n">output_log</span><span class="p">,</span>
                         <span class="n">work_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
 

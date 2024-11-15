@@ -97,11 +97,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MDMC.trajectory_analysis.observables.pdf</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module for calculating the total pair distribution function (PDF)&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module for calculating the total pair distribution function (PDF).</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">combinations_with_replacement</span><span class="p">,</span>
                        <span class="n">product</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -119,40 +121,44 @@
 <span class="nd">@ObservableFactory</span><span class="o">.</span><span class="n">register</span><span class="p">((</span><span class="s1">&#39;PDF&#39;</span><span class="p">,</span> <span class="s1">&#39;PairDistributionFunction&#39;</span><span class="p">))</span>
 <span class="k">class</span> <span class="nc">PairDistributionFunction</span><span class="p">(</span><span class="n">Observable</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for containing, calculating and reading a pair distribution function (PDF).</span>
+<span class="sd">    Class for processing a pair distribution function (PDF).</span>
 
-<span class="sd">    We derive our definitions for this from the following publication:</span>
-<span class="sd">    &quot;A comparison of various commonly used correlation functions for describing total scattering&quot;</span>
-<span class="sd">    Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.</span>
-<span class="sd">    DOI: https://doi.org/10.1107/S0021889800019993</span>
+<span class="sd">    We derive our definitions for this from [Keen]_:</span>
 
-<span class="sd">    We employ the following mathematical form for the total pair distribution function (``PDF``):</span>
+<span class="sd">    We employ the following mathematical form for the total pair</span>
+<span class="sd">    distribution function (``PDF``):</span>
 
-<span class="sd">        .. math::</span>
+<span class="sd">    .. math::</span>
 
-<span class="sd">            G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)</span>
+<span class="sd">        G(r) = \sum_{i,j}^{N_{elements}} c_ic_jb_ib_j(g_{ij}(r) - 1)</span>
 
-
-<span class="sd">        where :math:`c_i` is the number concentration of element :math:`i`,</span>
-<span class="sd">        :math:`b_i` is the (coherent) scattering length of element :math:`i`.</span>
-<span class="sd">        (This corresponds to equation 8 in the above publication)</span>
-
+<span class="sd">    where :math:`c_i` is the number concentration of element :math:`i`,</span>
+<span class="sd">    :math:`b_i` is the (coherent) scattering length of element :math:`i`.</span>
+<span class="sd">    (This corresponds to equation 8 in the above publication)</span>
 
 <span class="sd">    The partial pair distribution, :math:`g_{ij}`, is:</span>
 
-<span class="sd">        .. math::</span>
+<span class="sd">    .. math::</span>
 
-<span class="sd">            g_{ij}(r) = \frac{h_{ij}(r)}{4 \pi r^2 \rho_{j} \Delta{r}}</span>
+<span class="sd">        g_{ij}(r) = \frac{h_{ij}(r)}{4 \pi r^2 \rho_{j} \Delta{r}}</span>
 
-<span class="sd">        where :math:`h_{ij}`` is the histogram of distances of :math:`j` element</span>
-<span class="sd">        atoms around atoms of element :math:`i`, with bins of size</span>
-<span class="sd">        :math:`\Delta{r}`, and :math:`\rho_{j}` is the number density of</span>
-<span class="sd">        atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that</span>
-<span class="sd">        :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.</span>
-<span class="sd">        (This corresponds to equation 10 in the above publication)</span>
+<span class="sd">    where :math:`h_{ij}`` is the histogram of distances of :math:`j` element</span>
+<span class="sd">    atoms around atoms of element :math:`i`, with bins of size</span>
+<span class="sd">    :math:`\Delta{r}`, and :math:`\rho_{j}` is the number density of</span>
+<span class="sd">    atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that</span>
+<span class="sd">    :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.</span>
+<span class="sd">    (This corresponds to equation 10 in the above publication)</span>
 
-<span class="sd">    The total PDF is contained in ``PDF`` and the partial pair PDFs (if calculated or imported)</span>
-<span class="sd">    are contained in ``partial_pdfs``.</span>
+<span class="sd">    The total PDF is contained in ``PDF`` and the partial pair PDFs</span>
+<span class="sd">    (if calculated or imported) are contained in ``partial_pdfs``.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [Keen] Keen, D. A.,</span>
+<span class="sd">       &quot;A comparison of various commonly used correlation functions for describing total scattering&quot;</span>
+<span class="sd">       J. Appl. Cryst. 34 (2001) 172-177.</span>
+
+<span class="sd">       DOI: https://doi.org/10.1107/S0021889800019993</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -173,13 +179,14 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the independent variable: this is</span>
-<span class="sd">        the atomic separation distance r (in ``Ang``)</span>
+<span class="sd">        Get or set the independent variables.</span>
+
+<span class="sd">        This is the atomic separation distance r (in ``Ang``).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
-<span class="sd">            The independent variables</span>
+<span class="sd">            The independent variables.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_independent_variables</span>
@@ -191,27 +198,29 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the dependent variables: these are PDF, the pair distribution function (in ``barn``)</span>
+<span class="sd">        Get the dependent variables.</span>
+
+<span class="sd">        This is the pair distribution function (in ``barn``).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
-<span class="sd">            The dependent variables</span>
+<span class="sd">            The dependent variables.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get or set the errors on the dependent variables, the pair distribution function</span>
-<span class="sd">        (in ``arb``)</span>
+<span class="sd">        Get or set the errors on the dependent variables.</span>
+
+<span class="sd">        This is the pair distribution function (in ``barn``)</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
-<span class="sd">            The errors on the ``dependent_variables``</span>
+<span class="sd">            The errors on the ``dependent_variables``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span>
@@ -224,21 +233,21 @@
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.pdf.PairDistributionFunction.minimum_frames">[docs]</a>
     <span class="k">def</span> <span class="nf">minimum_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The minimum number of ``CompactTrajectory`` frames needed to</span>
-<span class="sd">        calculate the ``dependent_variables`` is 1</span>
+<span class="sd">        The minimum number of frames needed to calculate the ``dependent_variables``.</span>
+
+<span class="sd">        For PDF, this is 1.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        dt : float, optional</span>
 <span class="sd">            The time separation of frames in ``fs``, default is `None`, not</span>
-<span class="sd">            used</span>
+<span class="sd">            used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        int</span>
-<span class="sd">            The minimum number of frames</span>
+<span class="sd">            The minimum number of frames.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">return</span> <span class="mi">1</span></div>
 
 
@@ -246,12 +255,13 @@
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.pdf.PairDistributionFunction.maximum_frames">[docs]</a>
     <span class="k">def</span> <span class="nf">maximum_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        There is no hard limit on the number of frames that can be used, so</span>
-<span class="sd">        return None</span>
+<span class="sd">        The maximum number of frames needed to calculate the ``dependent_variables``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        None</span>
+<span class="sd">            There is no hard limit on the number of frames that can be used, so</span>
+<span class="sd">            return None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="kc">None</span></div>
@@ -259,7 +269,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get or set the value of the atomic separation distance (in ``Ang``)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or set the value of the atomic separation distance (in ``Ang``).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The atomic separation distance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -277,7 +294,14 @@
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;barn&#39;</span><span class="p">))</span>
     <span class="k">def</span> <span class="nf">PDF</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the value of the total pair distribution function (in ``barn``)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the value of the total pair distribution function (in ``barn``).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The total PDF.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span><span class="p">[</span><span class="s1">&#39;PDF&#39;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -286,21 +310,31 @@
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;barn&#39;</span><span class="p">))</span>
     <span class="k">def</span> <span class="nf">PDF_err</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the errors on the total pair distribution function (in ``barn``)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the errors on the total pair distribution function (in ``barn``).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The error on the PDF.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="s1">&#39;PDF&#39;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-
 <div class="viewcode-block" id="PairDistributionFunction.calculate_from_MD">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.pdf.PairDistributionFunction.calculate_from_MD">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_from_MD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_input</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calculate_from_MD</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">MD_input</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the pair distribution function, :math:`G(r)`` from a</span>
-<span class="sd">        ``CompactTrajectory``</span>
+<span class="sd">        Calculate the pair distribution function, :math:`G(r)` from a ``CompactTrajectory``.</span>
 
-<span class="sd">        The partial pair distribution for a pair i-j, :math:`g_{ij}`, is:</span>
+<span class="sd">        The partial pair distribution (from __) for a pair i-j, :math:`g_{ij}`, is:</span>
 
 <span class="sd">        .. math::</span>
 
@@ -310,13 +344,7 @@
 <span class="sd">        atoms around atoms of element :math:`i`, with bins of size</span>
 <span class="sd">        :math:`\Delta{r}`, and :math:`\rho_{j}` is the number density of</span>
 <span class="sd">        atoms of element :math:`j`. As :math:`g_{ij}(0) = 0`, it is evident that</span>
-<span class="sd">        :math:`G(0) = -\sum_{i,j}^{N_{elements}} c_ic_jb_ib_j`.</span>
-
-<span class="sd">        This corresponds to the equation (8) in the following paper:</span>
-<span class="sd">        &quot;A comparison of various commonly used correlation functions for</span>
-<span class="sd">         describing total scattering&quot;</span>
-<span class="sd">        Keen, D. A. (2001). J. Appl. Cryst. 34, 172-177.</span>
-<span class="sd">        DOI: https://doi.org/10.1107/S0021889800019993</span>
+<span class="sd">        :math:`G(0) = -\sum\limits_{i,j}^{N_{elements}} c_ic_jb_ib_j`.</span>
 
 <span class="sd">        The total pair distribution function (``pdf.PDF``) has the form:</span>
 
@@ -340,94 +368,97 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        MD_input : CompactTrajectory</span>
-<span class="sd">             A single ``CompactTrajectory`` object.</span>
-<span class="sd">        verbose: int</span>
+<span class="sd">            A single ``CompactTrajectory`` object.</span>
+<span class="sd">        verbose : int</span>
 <span class="sd">            Verbose print settings. Not currently implemented for PDF.</span>
 <span class="sd">        **settings</span>
-<span class="sd">            n_frames : int</span>
-<span class="sd">                The number of frames from which the pdf and its error are</span>
-<span class="sd">                calculated. These frames are selected uniformly, and the step is taken to be</span>
-<span class="sd">                n_frames / total number of frames rounded to the nearest positive integer.</span>
-<span class="sd">                If this is not passed, 1% of the total number of frames are used</span>
-<span class="sd">                (rounded up to the nearest positive integer).</span>
-<span class="sd">            use_average : bool</span>
-<span class="sd">                Optional parameter. If set to True then the mean value for PDF is</span>
-<span class="sd">                calculated across selected frames from the trajectory. Also, the errors</span>
-<span class="sd">                are set to the standard deviation calculated over the multiple frames.</span>
-<span class="sd">                If set to False (default), only the last frame of the trajectory is used and</span>
-<span class="sd">                n_frames will be ignored.</span>
-<span class="sd">            subset : list of tuples</span>
-<span class="sd">                The subset of element pairs from which the PDF is calculated.</span>
-<span class="sd">                This can be used to calculate the partial PDFs of a</span>
-<span class="sd">                multicomponent system. If this is not passed, all combinations</span>
-<span class="sd">                of elements are used i.e. the PDF is the total PDF.</span>
-<span class="sd">            b_coh : dict</span>
-<span class="sd">                A dictionary containing coherent scattering length values for one or more elements.</span>
-<span class="sd">                This can be used to calculate the PDF of a system where one or more elements</span>
-<span class="sd">                has a coherent scattering length different from the coherent scattering lengths</span>
-<span class="sd">                from periodictable.</span>
-<span class="sd">            r_min : float</span>
-<span class="sd">                The minimum ``r`` (atomic separation) in Angstrom for which the PDF will be</span>
-<span class="sd">                calculated. If this, ``r_max``, and ``r_step`` are passed then</span>
-<span class="sd">                these will create a range for the independent variable ``r``,</span>
-<span class="sd">                which will overwrite any ``r`` which has previously been</span>
-<span class="sd">                defined. This cannot be passed if ``r`` is passed.</span>
-<span class="sd">            r_max : float</span>
-<span class="sd">                The maximum ``r`` (atomic separation) in Angstrom for which the PDF will be</span>
-<span class="sd">                calculated. If this, ``r_min``, and ``r_step`` are passed then</span>
-<span class="sd">                these will create a range for the independent variable ``r``,</span>
-<span class="sd">                which will overwrite any ``r`` which has previously been</span>
-<span class="sd">                defined. This cannot be passed if ``r`` is passed.</span>
-<span class="sd">            r_step : float</span>
-<span class="sd">                The step size of ``r`` (atomic separation) for which the PDF</span>
-<span class="sd">                will be calculated. If this, ``r_min``, and ``r_max`` are passed</span>
-<span class="sd">                then these will create a range for the independent variable</span>
-<span class="sd">                ``r``, which will overwrite any ``r`` which has previously been</span>
-<span class="sd">                defined. This cannot be passed if ``r`` is passed.</span>
-<span class="sd">            r : numpy.ndarray</span>
-<span class="sd">                The uniform ``r`` values in Angstrom for which the PDF will be calculated.</span>
-<span class="sd">                This cannot be passed if ``r_min``, ``r_max``, and ``r_step``</span>
-<span class="sd">                are passed.</span>
-<span class="sd">            dimensions : array-like</span>
-<span class="sd">                A 3 element `array-like` (`list`, `tuple`) with the dimensions</span>
-<span class="sd">                of the ``Universe`` in Angstrom.</span>
+<span class="sd">            Extra options.</span>
 
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        n_frames : int</span>
+<span class="sd">            The number of frames from which the PDF and its error are</span>
+<span class="sd">            calculated. These frames are selected uniformly, and the</span>
+<span class="sd">            step is taken to be n_frames / total number of frames</span>
+<span class="sd">            rounded to the nearest positive integer.</span>
+
+<span class="sd">            If this is not passed, 1% of the total number of frames</span>
+<span class="sd">            are used (rounded up).</span>
+<span class="sd">        use_average : bool</span>
+<span class="sd">            If set to `False` (default), only the last frame of the</span>
+<span class="sd">            trajectory is used and n_frames will be ignored.</span>
+
+<span class="sd">            If set to `True` then the mean value for PDF is calculated</span>
+<span class="sd">            across selected frames from the trajectory. Also, the</span>
+<span class="sd">            errors are set to the standard deviation calculated over</span>
+<span class="sd">            the multiple frames.</span>
+<span class="sd">        subset : list of tuples</span>
+<span class="sd">            The subset of element pairs from which the PDF is calculated.</span>
+
+<span class="sd">            This can be used to calculate the partial PDFs of a</span>
+<span class="sd">            multicomponent system. If this is not passed, all combinations</span>
+<span class="sd">            of elements are used i.e. the PDF is the total PDF.</span>
+<span class="sd">        b_coh : dict</span>
+<span class="sd">            A dictionary containing coherent scattering length values</span>
+<span class="sd">            for one or more elements.</span>
+
+<span class="sd">            This can be used to calculate</span>
+<span class="sd">            the PDF of a system where one or more elements has a</span>
+<span class="sd">            coherent scattering length different from the coherent</span>
+<span class="sd">            scattering lengths from ``periodictable``.</span>
+<span class="sd">        r_min : float</span>
+<span class="sd">            The minimum ``r`` (atomic separation) in Angstrom for</span>
+<span class="sd">            which the PDF will be calculated.</span>
+<span class="sd">        r_max : float</span>
+<span class="sd">            The maximum ``r`` (atomic separation) in Angstrom for</span>
+<span class="sd">            which the PDF will be calculated.</span>
+<span class="sd">        r_step : float</span>
+<span class="sd">            The step size of ``r`` (atomic separation) for which the PDF</span>
+<span class="sd">            will be calculated.</span>
+<span class="sd">        r : numpy.ndarray</span>
+<span class="sd">            The uniform ``r`` values in Angstrom for which the PDF</span>
+<span class="sd">            will be calculated.</span>
+<span class="sd">        dimensions : array-like</span>
+<span class="sd">            A 3 element `array-like` (`list`, `tuple`) with the</span>
+<span class="sd">            dimensions of the ``Universe`` in Angstrom.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        If this, ``r_min``, ``r_max``, and ``r_step`` are passed then these</span>
+<span class="sd">        will create a range for the independent variable ``r``,</span>
+<span class="sd">        which will overwrite any ``r`` which has previously been</span>
+<span class="sd">        defined. These cannot be passed if ``r`` is passed.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        To calculate the O-O partial PDF from a simulation of water, use the</span>
 <span class="sd">        subset keyword:</span>
 
-<span class="sd">            .. highlight:: python</span>
-<span class="sd">            .. code-block:: python</span>
+<span class="sd">        .. code-block:: python</span>
 
 <span class="sd">            pdf.calculate_from_MD(trajectory, subset=[(O, O)])</span>
 
 <span class="sd">        To calculate the sum of the H-O and O-O partial PDFs:</span>
 
-<span class="sd">            .. highlight:: python</span>
-<span class="sd">            .. code-block:: python</span>
+<span class="sd">        .. code-block:: python</span>
 
 <span class="sd">            pdf.calculate_from_MD(trajectory, subset=[(O, O), (H, O)])</span>
 
 <span class="sd">        To calculate the total PDF for sodium chloride with 37Cl:</span>
 
-<span class="sd">            .. highlight:: python</span>
-<span class="sd">            .. code-block:: python</span>
+<span class="sd">        .. code-block:: python</span>
 
 <span class="sd">            pdf.calculate_from_MD(trajectory, b_coh={&#39;Cl&#39;:3.08})</span>
 
 <span class="sd">        To calculate the total PDF for r values of [1., 2., 3., 4.]:</span>
 
-<span class="sd">            .. highlight:: python</span>
-<span class="sd">            .. code-block:: python</span>
+<span class="sd">        .. code-block:: python</span>
 
 <span class="sd">            pdf.calculate_from_MD(trajectory, r=[1., 2., 3., 4.])</span>
 
 <span class="sd">        To calculate the total PDF over an average of 5 frames:</span>
 
-<span class="sd">            .. highlight:: python</span>
-<span class="sd">            .. code-block:: python</span>
+<span class="sd">        .. code-block:: python</span>
 
 <span class="sd">            pdf.calculate_from_MD(trajectory, use_average=True, n_frames=5)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -464,15 +495,15 @@
 
     <span class="k">def</span> <span class="nf">_calculate_partial_pdfs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the partial PDFs for each partial pairing</span>
+<span class="sd">        Calculate the partial PDFs for each partial pairing.</span>
 
 <span class="sd">        This uses equation (8) in the paper with an additional normalisation factor</span>
 <span class="sd">        to achieve proper normalisation behaviour.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        trajectory: CompactTrajectory</span>
-<span class="sd">            The sliced up trajectory to be used to calculate PDFs</span>
+<span class="sd">        trajectory : CompactTrajectory</span>
+<span class="sd">            The sliced up trajectory to be used to calculate PDFs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Calculate histograms for each frame in trajectory</span>
@@ -497,9 +528,13 @@
 
     <span class="k">def</span> <span class="nf">_calculate_total_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the total pdf from the partial pairs</span>
-<span class="sd">        This function calculates the total PDF in accordance with equation (10)</span>
-<span class="sd">        This calculation is done in-place</span>
+<span class="sd">        Calculate the total pdf from the partial pairs.</span>
+
+<span class="sd">        This function calculates the total PDF in accordance with equation (10).</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This calculation is done in-place.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">total_number_of_particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numbers_of_atoms</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span><span class="p">[</span><span class="s1">&#39;PDF&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">)</span>
@@ -523,28 +558,34 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span><span class="p">[</span><span class="s1">&#39;PDF&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ci_cj</span> <span class="o">*</span> <span class="n">bi_bj</span> <span class="o">*</span> <span class="p">(</span><span class="n">partial_value</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm_fac</span>
 
-
-    <span class="k">def</span> <span class="nf">_slice_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> \
-            <span class="o">-&gt;</span> <span class="n">CompactTrajectory</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_slice_trajectory</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompactTrajectory</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Slice the trajectory into frames used to calculate an average total PDF</span>
+<span class="sd">        Slice the trajectory into frames used to calculate an average total PDF.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        trajectory: CompactTrajectory</span>
-<span class="sd">            The trajectory to slice</span>
-<span class="sd">        settings: dict</span>
-<span class="sd">            A dictionary of kwargs used for the pdf calculation</span>
-<span class="sd">            n_frames : int</span>
-<span class="sd">                The number of frames from which the pdf and its error are</span>
-<span class="sd">                calculated. These frames are selected uniformly, and the step is taken to be</span>
-<span class="sd">                n_frames / total number of frames rounded to the nearest positive integer.</span>
-<span class="sd">                If this is not passed, 1% of the total number of frames are used</span>
-<span class="sd">                (rounded up to the nearest positive integer).</span>
+<span class="sd">        trajectory : CompactTrajectory</span>
+<span class="sd">            The trajectory to slice.</span>
+<span class="sd">        **settings : dict</span>
+<span class="sd">            A dictionary of kwargs used for the pdf calculation.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        CompactTrajectory</span>
-<span class="sd">            The slices of the trajectory (selected frames) to use</span>
+<span class="sd">            The slices of the trajectory (selected frames) to use.</span>
+
+<span class="sd">        Other Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        n_frames : int</span>
+<span class="sd">            The number of frames from which the pdf and its error are</span>
+<span class="sd">            calculated. These frames are selected uniformly, and the step is taken to be</span>
+<span class="sd">            n_frames / total number of frames rounded to the nearest positive integer.</span>
+<span class="sd">            If this is not passed, 1% of the total number of frames are used</span>
+<span class="sd">            (rounded up to the nearest positive integer).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># np.max ensures that n_frames is at least 1 (relevant if total_n_frames &lt; 100)</span>
         <span class="n">total_n_frames</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
@@ -557,37 +598,36 @@
                       <span class="k">else</span> <span class="p">((</span><span class="n">total_n_frames</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">n_frames</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">trajectory</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">total_n_frames</span><span class="p">:</span><span class="n">frame_step</span><span class="p">]</span>
 
-
     <span class="k">def</span> <span class="nf">_parse_apply_MD_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parses the MD settings and applies them to the class</span>
+<span class="sd">        Parse the MD settings and apply them to the class.</span>
 
 <span class="sd">        This includes setting:</span>
-<span class="sd">            - the number of evenly spaced frames for which the ``PDF`` will be</span>
-<span class="sd">              averaged</span>
-<span class="sd">            - the partial pairs for which ``PDF`` will be calculated</span>
-<span class="sd">            - the elements involved in the ``PDF``</span>
-<span class="sd">            - the weights for each element</span>
-<span class="sd">            - the volume of the universe</span>
-<span class="sd">            - the independent variables (``r``)</span>
-<span class="sd">        and slicing the trajectory as requested by the user</span>
+
+<span class="sd">        - the number of evenly spaced frames for which the ``PDF`` will be</span>
+<span class="sd">          averaged.</span>
+<span class="sd">        - the partial pairs for which ``PDF`` will be calculated.</span>
+<span class="sd">        - the elements involved in the ``PDF``.</span>
+<span class="sd">        - the weights for each element.</span>
+<span class="sd">        - the volume of the universe.</span>
+<span class="sd">        - the independent variables (``r``).</span>
+<span class="sd">        - slicing the trajectory as requested by the user</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        trajectory: CompactTrajectory</span>
-<span class="sd">            A `CompactTrajectory` object to be used for the PDF calculations</span>
-
+<span class="sd">        trajectory : CompactTrajectory</span>
+<span class="sd">            A `CompactTrajectory` object to be used for the PDF calculations.</span>
 <span class="sd">        settings : dict</span>
-<span class="sd">            A `dict` of settings to be parsed</span>
+<span class="sd">            A `dict` of settings to be parsed.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
 <span class="sd">            If ``n_frames`` is less than 1 or greater than the number of frames</span>
-<span class="sd">            in the ``CompactTrajectory``</span>
+<span class="sd">            in the ``CompactTrajectory``.</span>
 <span class="sd">        TypeError</span>
 <span class="sd">            If ``r`` is in settings as well any of ``r_min``, ``r_max``, and</span>
-<span class="sd">            ``r_step``</span>
+<span class="sd">            ``r_step``.</span>
 
 <span class="sd">        Warnings</span>
 <span class="sd">        --------</span>
@@ -652,20 +692,35 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="p">{}</span>
 
-
     <span class="k">def</span> <span class="nf">_calculate_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Partitions the atomic positions into regions where they are within</span>
-<span class="sd">        ``r_max`` from all other atoms</span>
+<span class="sd">        Partition the atomic positions into regions of ``r_max`` from other atoms.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trajectory : CompactTrajectory</span>
+<span class="sd">            A `CompactTrajectory` object to be used for the PDF calculations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span> <span class="nf">get_component_lengths</span><span class="p">(</span><span class="n">universe_dim</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Use ``r`` values for each component that are at least as big as</span>
-<span class="sd">            ``r_max``, but that are a factor of the dimensions</span>
+<span class="sd">            Get maximum lengths as limited by ``Universe``.</span>
+
+<span class="sd">            Use ``r`` values for each component that is at least as big as</span>
+<span class="sd">            ``r_max``, but that is a factor of the dimensions.</span>
 
 <span class="sd">            When ``r &gt; r_max``, some atom pairs within each partition will have</span>
 <span class="sd">            separations which will not be histogrammed (as they are</span>
-<span class="sd">            ``&gt; r_max``), however this is unavoidable</span>
+<span class="sd">            ``&gt; r_max``), however this is unavoidable.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            universe_dim : float</span>
+<span class="sd">                Maximum dimension of universe.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            numpy.ndarray</span>
+<span class="sd">                Maximum component length.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
 
             <span class="n">r_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">])</span>
@@ -680,7 +735,7 @@
         <span class="n">part_comps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">get_component_lengths</span><span class="p">,</span>
                                        <span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span><span class="p">)))</span>
         <span class="n">partitions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partition</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span>
-                                    <span class="n">part_comps</span><span class="p">)</span>
+                                     <span class="n">part_comps</span><span class="p">)</span>
         <span class="c1"># Get the partition_indexes and the pairs of partitions. As well as</span>
         <span class="c1"># calculating atom pairs within a partition, each partition will have 26</span>
         <span class="c1"># neighbors for which atom pairs must be calculated.</span>
@@ -694,9 +749,10 @@
             <span class="n">elem_A</span><span class="p">,</span> <span class="n">elem_B</span> <span class="o">=</span> <span class="n">partial_string</span>
 
             <span class="c1"># And here we iterate over possible pairs of neighbouring partitions</span>
-            <span class="k">for</span> <span class="n">part1</span><span class="p">,</span> <span class="n">part2</span> <span class="ow">in</span> <span class="n">partition_pair_indexes</span> <span class="o">+</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partition_indexes</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">part1</span><span class="p">,</span> <span class="n">part2</span> <span class="ow">in</span> <span class="n">partition_pair_indexes</span> <span class="o">+</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partition_indexes</span><span class="p">]:</span>
                 <span class="n">distance_squared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_squared_distances</span><span class="p">(</span><span class="n">elem_A</span><span class="p">,</span> <span class="n">elem_B</span><span class="p">,</span>
-                                                  <span class="n">part1</span><span class="p">,</span> <span class="n">part2</span><span class="p">,</span> <span class="n">partitions</span><span class="p">)</span>
+                                                                     <span class="n">part1</span><span class="p">,</span> <span class="n">part2</span><span class="p">,</span>
+                                                                     <span class="n">partitions</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">distance_squared</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">histogram</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">distance_squared</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bin_edges_squared</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">partial_pdfs</span><span class="p">[</span><span class="n">partial_string</span><span class="p">]</span> <span class="o">+=</span> <span class="n">histogram</span>
@@ -704,13 +760,43 @@
             <span class="k">if</span> <span class="n">elem_A</span> <span class="o">!=</span> <span class="n">elem_B</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">part1</span><span class="p">,</span> <span class="n">part2</span> <span class="ow">in</span> <span class="n">partition_pair_indexes</span><span class="p">:</span>
                     <span class="n">distance_squared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_squared_distances</span><span class="p">(</span><span class="n">elem_B</span><span class="p">,</span> <span class="n">elem_A</span><span class="p">,</span>
-                                                    <span class="n">part1</span><span class="p">,</span> <span class="n">part2</span><span class="p">,</span> <span class="n">partitions</span><span class="p">)</span>
+                                                                         <span class="n">part1</span><span class="p">,</span> <span class="n">part2</span><span class="p">,</span>
+                                                                         <span class="n">partitions</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">distance_squared</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">histogram</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">distance_squared</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bin_edges_squared</span><span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">partial_pdfs</span><span class="p">[</span><span class="n">partial_string</span><span class="p">]</span> <span class="o">+=</span> <span class="n">histogram</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_squared_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">elem2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                                     <span class="n">part1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">part2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">partitions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_calculate_squared_distances</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">elem1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">elem2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">part1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
+            <span class="n">part2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
+            <span class="n">partitions</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate square distances between 2 atoms.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        elem1 : str</span>
+<span class="sd">            Atom 1.</span>
+<span class="sd">        elem2 : str</span>
+<span class="sd">            Atom 2.</span>
+<span class="sd">        part1 : tuple</span>
+<span class="sd">            Position 1.</span>
+<span class="sd">        part2 : tuple</span>
+<span class="sd">            Position 2.</span>
+<span class="sd">        partitions : dict</span>
+<span class="sd">            Dictionary of atomic positions as returned by</span>
+<span class="sd">            :meth:`_partition`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Distance squared between two atoms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">distance_squared</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">array1</span> <span class="o">=</span> <span class="n">partitions</span><span class="p">[</span><span class="n">elem1</span><span class="p">][</span><span class="n">part1</span><span class="p">]</span>
         <span class="n">array2</span> <span class="o">=</span> <span class="n">partitions</span><span class="p">[</span><span class="n">elem2</span><span class="p">][</span><span class="n">part2</span><span class="p">]</span>
@@ -719,52 +805,45 @@
 
         <span class="n">n_at_array1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">array1</span><span class="p">)</span>
         <span class="n">n_at_array2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">array2</span><span class="p">)</span>
-        <span class="n">array1</span> <span class="o">=</span> <span class="n">array1</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n_at_array1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">array2</span> <span class="o">=</span> <span class="n">array2</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_at_array2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">array1</span> <span class="o">=</span> <span class="n">array1</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_at_array1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">array2</span> <span class="o">=</span> <span class="n">array2</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_at_array2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
         <span class="n">difference</span> <span class="o">=</span> <span class="n">array1</span> <span class="o">-</span> <span class="n">array2</span>
         <span class="c1"># this calculated the difference in coordinates between every atom</span>
         <span class="c1"># in array1 and every element in array2</span>
         <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-            <span class="n">temp_array</span> <span class="o">=</span> <span class="n">difference</span><span class="p">[:,:,</span><span class="n">dim</span><span class="p">]</span>
+            <span class="n">temp_array</span> <span class="o">=</span> <span class="n">difference</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">dim</span><span class="p">]</span>
             <span class="n">box_side</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
             <span class="c1"># Correct for periodic boundary conditions</span>
             <span class="n">crit1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">temp_array</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">box_side</span><span class="p">)</span>
             <span class="n">crit2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">temp_array</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box_side</span><span class="p">)</span>
             <span class="n">temp_array</span><span class="p">[</span><span class="n">crit1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">box_side</span>
             <span class="n">temp_array</span><span class="p">[</span><span class="n">crit2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">box_side</span>
-            <span class="n">difference</span><span class="p">[:,:,</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_array</span>
+            <span class="n">difference</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_array</span>
 
-        <span class="k">if</span> <span class="n">elem1</span><span class="o">==</span><span class="n">elem2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">part1</span> <span class="o">==</span> <span class="n">part2</span><span class="p">):</span>
-            <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">difference</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">elem1</span> <span class="o">==</span> <span class="n">elem2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">part1</span> <span class="o">==</span> <span class="n">part2</span><span class="p">):</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">difference</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
             <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="c1"># now the array contains only the part above the diagonal</span>
             <span class="c1"># and this way we avoid double counting.</span>
             <span class="n">distance_squared</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">distance_squared</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">difference</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">distance_squared</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">difference</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">distance_squared</span>
 
-
     <span class="k">def</span> <span class="nf">_partition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span> <span class="n">part_comps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Partitions the atomic positions into paritions of dimensions specified</span>
-<span class="sd">        by ``part_comps``</span>
+<span class="sd">        Partition atomic positions into regions of dimensions specified by ``part_comps``.</span>
 
-<span class="sd">        ``Atom`` objects are grouped in partitions by ``Atom.element.symbol``</span>
+<span class="sd">        ``Atom`` objects are grouped in partitions by ``Atom.element.symbol``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        positions : numpy.ndarray</span>
-<span class="sd">            the full CompactTrajectory.positions array, with the</span>
-<span class="sd">            shape = (num_time_steps, num_atoms, 3)</span>
-<span class="sd">        element_list : list</span>
-<span class="sd">            A `list` of `str` with the same length as ``positions``. Each `str`</span>
-<span class="sd">            specifies the ``Atom.element.symbol`` for the corresponding index in</span>
-<span class="sd">            ``positions``.</span>
+<span class="sd">        trajectory : CompactTrajectory</span>
+<span class="sd">            The CompactTrajectory containing atoms and positions arrays.</span>
 <span class="sd">        part_comps : numpy.ndarray</span>
 <span class="sd">            A 3 element array specifying the length of each component for all</span>
-<span class="sd">            partitions</span>
+<span class="sd">            partitions.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -803,16 +882,18 @@
 
     <span class="k">def</span> <span class="nf">_get_partition_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partition_components</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculates which partitions are neighbours and pairs them. This includes</span>
-<span class="sd">        partitions that are neighbours due to periodic boundary conditions.</span>
+<span class="sd">        Calculate neighbouring partitions and pair them.</span>
+
+<span class="sd">        This includes partitions that are neighbours due to periodic</span>
+<span class="sd">        boundary conditions.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        partition_components : numpy.ndarray</span>
 <span class="sd">            3 element ``array`` of `float`, where each `float` is the length of</span>
 <span class="sd">            one component of a partition. For example (1., 2., 3.) would mean</span>
-<span class="sd">            that every component was length 1. in the x direction, 2. in the y</span>
-<span class="sd">            direction, and 3. in the z direction.</span>
+<span class="sd">            that every component was length ``1.`` in the x direction,</span>
+<span class="sd">            ``2.`` in the y direction, and ``3.`` in the z direction.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -821,7 +902,6 @@
 <span class="sd">            are 3 element arrays with the indexes of the partition. Each pair of</span>
 <span class="sd">            partitions are neighbours.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">p_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_partition_indexes</span><span class="p">(</span><span class="n">partition_components</span><span class="p">)</span>
         <span class="n">max_indices</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span>
                        <span class="o">/</span> <span class="n">partition_components</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
@@ -840,56 +920,75 @@
 
         <span class="k">return</span> <span class="n">pairs</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_partition_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partition_components</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;product[tuple]&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span>
-                                        <span class="o">/</span> <span class="n">partition_components</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">_calculate_partition_indexes</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">partition_components</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the partition indices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        partition_components : numpy.ndarray</span>
+<span class="sd">            3 element ``array`` of `float`, where each `float` is the length of</span>
+<span class="sd">            one component of a partition. For example (1., 2., 3.) would mean</span>
+<span class="sd">            that every component was length ``1.`` in the x direction,</span>
+<span class="sd">            ``2.`` in the y direction, and ``3.`` in the z direction.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        itertools.product[tuple[float, float, float]]</span>
+<span class="sd">            Generator of evenly spaced grid-points in ``Universe``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">,</span>
+                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span> <span class="o">/</span> <span class="n">partition_components</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">))</span>
                        <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_set_weights</span><span class="p">(</span><span class="n">unique_elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">b_coh</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the weights for each element</span>
+<span class="sd">        Set the weights for each element.</span>
 
 <span class="sd">        Uses any scattering lengths passed in b_coh, but defaults to values from</span>
-<span class="sd">        the imported periodictable module.</span>
+<span class="sd">        the imported :any:`periodictable` module.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        unique_elements : list of str</span>
-<span class="sd">            Where each `str` specifies an element</span>
+<span class="sd">            Where each `str` specifies an element.</span>
 <span class="sd">        b_coh : dict</span>
-<span class="sd">            ``(element:b_c)`` where ``element`` is a `str` specifying an element</span>
+<span class="sd">            ``{element: b_c}`` where ``element`` is a `str` specifying an element</span>
 <span class="sd">            occuring in ``unique_elements``, and ``b_c`` is the weight (coherent</span>
-<span class="sd">            scattering length) to be set for that element</span>
+<span class="sd">            scattering length) to be set for that element.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
-<span class="sd">            ``(element:weight)`` where ``element`` is a `str` and ``weight`` is</span>
-<span class="sd">            the corresponding weight</span>
+<span class="sd">            ``{element: weight}`` where ``element`` is a `str` and ``weight`` is</span>
+<span class="sd">            the corresponding weight.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="n">b_coh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span>\
-            <span class="k">if</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">element</span>
-                <span class="ow">in</span> <span class="n">unique_elements</span><span class="p">}</span>
+        <span class="n">elem_getter</span> <span class="o">=</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="n">b_coh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">elem_getter</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span>
+                                   <span class="k">if</span> <span class="n">elem_getter</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                                   <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">unique_elements</span><span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_set_numbers</span><span class="p">(</span><span class="n">unique_elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">element_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the number of atoms of each element</span>
+<span class="sd">        Set the number of atoms of each element.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        unique_elements : list of str</span>
-<span class="sd">            Where each `str` specifies an element</span>
+<span class="sd">            Where each `str` specifies an element.</span>
 <span class="sd">        element_list : list of str</span>
-<span class="sd">            A `list` of the elements for every ``Atom`` in the ``CompactTrajectory``</span>
+<span class="sd">            A `list` of the elements for every ``Atom`` in the ``CompactTrajectory``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
-<span class="sd">            ``(element:number)`` where ``element`` is a `str` and ``number`` is</span>
-<span class="sd">            the number of atoms of the that element in the ``element_list``</span>
+<span class="sd">            ``{element: number}`` where ``element`` is a `str` and ``number`` is</span>
+<span class="sd">            the number of atoms of the that element in the ``element_list``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="n">element_list</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="k">for</span> <span class="n">element</span>
@@ -898,25 +997,26 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dependent_variables_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The shape of the &#39;PDF&#39; dependent variable in terms of &#39;r&#39;&#39;:</span>
-<span class="sd">        np.shape(self.PDF)=(np.size(self.r))</span>
+<span class="sd">        The shape of the &#39;PDF&#39; dependent variable in terms of &#39;r&#39;.</span>
 
-<span class="sd">        Return</span>
-<span class="sd">        ------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The shape of the PDF dependent variable</span>
+<span class="sd">        Where ``np.shape(self.PDF) == (np.size(self.r))``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict[str, list[str]]</span>
+<span class="sd">            The shape of the PDF dependent variable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;PDF&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">uniformity_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Defines the current limitations on the atomic separation distance &#39;r&#39;</span>
-<span class="sd">        of the ``PairDistributionFunction`` ``Observable.</span>
+<span class="sd">        Define the current limitations on the atomic separation distance &#39;r&#39;.</span>
+
 <span class="sd">        The requirement is that &#39;r&#39; must be uniform, but it does not have to start at zero.</span>
 
-<span class="sd">        Return</span>
-<span class="sd">        ------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        dict[str, dict[str, bool]]</span>
 <span class="sd">            Dictionary of uniformity restrictions for &#39;r&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
