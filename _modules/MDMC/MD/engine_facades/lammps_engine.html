@@ -121,15 +121,16 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">product</span>
-<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -138,18 +139,22 @@
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span><span class="s1">&#39;The Python interface for LAMMPS (lammps.py) is&#39;</span>
                               <span class="s1">&#39; not in the PYTHONPATH. See LAMMPS documentation&#39;</span>
-                              <span class="s1">&#39; on Python to rectify this.&#39;</span>
-                              <span class="p">)</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
+                              <span class="s1">&#39; on Python to rectify this.&#39;</span><span class="p">,</span>
+                              <span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.common.units</span> <span class="kn">import</span> <span class="n">Unit</span>
 <span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
-<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">unit_decorator_getter</span><span class="p">,</span> \
-    <span class="n">repr_decorator</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="kn">import</span> <span class="n">Universe</span><span class="p">,</span> <span class="n">KSpaceSolver</span><span class="p">,</span> <span class="n">ConstraintAlgorithm</span>
+<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">unit_decorator_getter</span>
+<span class="kn">from</span> <span class="nn">MDMC.common.units</span> <span class="kn">import</span> <span class="n">Unit</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngine</span><span class="p">,</span> <span class="n">MDEngineError</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Bond</span><span class="p">,</span>
+    <span class="n">BondAngle</span><span class="p">,</span>
+    <span class="n">BondedInteraction</span><span class="p">,</span>
+    <span class="n">Interaction</span><span class="p">,</span>
+    <span class="n">NonBondedInteraction</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="kn">import</span> <span class="n">ConstraintAlgorithm</span><span class="p">,</span> <span class="n">KSpaceSolver</span><span class="p">,</span> <span class="n">Universe</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">BondedInteraction</span><span class="p">,</span> <span class="n">Interaction</span><span class="p">,</span> \
-    <span class="n">NonBondedInteraction</span><span class="p">,</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">BondAngle</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
 <span class="kn">from</span> <span class="nn">MDMC.utilities.partitioning</span> <span class="kn">import</span> <span class="n">partition</span><span class="p">,</span> <span class="n">partition_interactions</span>
 
@@ -724,10 +729,7 @@
                         <span class="c1"># optional</span>
                         <span class="n">i_id</span><span class="p">,</span> <span class="n">i_type</span><span class="p">,</span> <span class="n">i_pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">splt</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">prop</span>
                                                <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="n">pos_string</span><span class="p">]]</span>
-                        <span class="k">if</span> <span class="s1">&#39;vx&#39;</span> <span class="ow">in</span> <span class="n">splt</span><span class="p">:</span>
-                            <span class="n">i_vel</span> <span class="o">=</span> <span class="n">splt</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;vx&#39;</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">i_vel</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">i_vel</span> <span class="o">=</span> <span class="n">splt</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;vx&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;vx&#39;</span> <span class="ow">in</span> <span class="n">splt</span> <span class="k">else</span> <span class="kc">None</span>
 
                         <span class="c1"># now we try to get the correct number of frames in the trajectory</span>
                         <span class="n">real_n_steps</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">line_count</span> <span class="o">//</span> <span class="p">(</span><span class="n">n_atoms</span> <span class="o">+</span> <span class="n">header_size</span><span class="p">)</span>
@@ -1074,7 +1076,7 @@
                             <span class="s1">&#39;extra/bond/per/atom&#39;</span><span class="p">,</span> <span class="n">max_bonds_per_atom</span><span class="p">,</span>
                             <span class="s1">&#39;extra/angle/per/atom&#39;</span><span class="p">,</span> <span class="n">max_angles_per_atom</span><span class="p">,</span>
                             <span class="s1">&#39;extra/dihedral/per/atom&#39;</span><span class="p">,</span> <span class="n">max_dihedrals_per_atom</span><span class="p">,</span>
-                            <span class="s1">&#39;extra/improper/per/atom&#39;</span><span class="p">,</span> <span class="n">max_impropers_per_atom</span>
+                            <span class="s1">&#39;extra/improper/per/atom&#39;</span><span class="p">,</span> <span class="n">max_impropers_per_atom</span><span class="p">,</span>
                             <span class="p">)</span>
 
     <span class="c1"># ID is an acronym</span>
@@ -1113,7 +1115,7 @@
         <span class="c1"># that it is possible to index into atom_type_properties with</span>
         <span class="c1"># atom_type - 1 (where the -1 is to account for 0 indexing on lists)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atom_type_properties</span> <span class="o">=</span> <span class="p">[(</span><span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">element</span><span class="p">,</span> <span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
-                                     <span class="k">for</span> <span class="nb">type</span><span class="p">,</span> <span class="n">atom</span>
+                                     <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">atom</span>
                                      <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="o">.</span><span class="n">items</span><span class="p">())]</span>
 
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Add atoms to LAMMPS&#39;</span><span class="p">,</span>
@@ -1459,10 +1461,8 @@
         <span class="n">coeff_function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lmp_name</span><span class="si">}</span><span class="s1">_coeff&#39;</span><span class="p">)</span>
         <span class="c1"># If bonds already exist, new bond IDs are generated from lowest unused</span>
         <span class="c1"># integer</span>
-        <span class="k">if</span> <span class="n">ID_attr</span><span class="p">:</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ID_attr</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ID_attr</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">ID_attr</span> <span class="k">else</span> <span class="mi">1</span>
+
         <span class="k">for</span> <span class="n">ID</span><span class="p">,</span> <span class="n">b_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bonded_interactions</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">):</span>
             <span class="c1"># Create the bonded interaction coefficients</span>
             <span class="n">coeff_function</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="o">*</span><span class="n">parse_bonded_coefficients</span><span class="p">(</span><span class="n">b_i</span><span class="p">))</span>
@@ -1634,11 +1634,9 @@
     <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">suppress</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="c1"># Set the timestep in LAMMPS wrapper</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">timestep</span><span class="p">(</span><span class="n">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span><span class="p">))</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="k">pass</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1779,12 +1777,10 @@
     <span class="k">def</span> <span class="nf">neighbor_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_neighbor_steps</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">suppress</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
             <span class="c1"># Set the modifiers to the neighbor list in the LAMMPS wrapper</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lmp</span><span class="o">.</span><span class="n">neigh_modify</span><span class="p">(</span><span class="s1">&#39;every&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neighbor_steps</span><span class="p">),</span> <span class="s1">&#39;delay&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
                                   <span class="s1">&#39;check&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="k">pass</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">lin_momentum_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -2340,7 +2336,7 @@
     <span class="s1">&#39;TEMPERATURE&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">),</span>
     <span class="s1">&#39;ENERGY&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;kcal&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;mol&#39;</span><span class="p">),</span>
     <span class="s1">&#39;FORCE&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;kcal&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Ang&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;mol&#39;</span><span class="p">)),</span>
-    <span class="s1">&#39;PRESSURE&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;atm&#39;</span><span class="p">)</span>
+    <span class="s1">&#39;PRESSURE&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;atm&#39;</span><span class="p">),</span>
 <span class="p">}</span>
 
 
@@ -2816,10 +2812,8 @@
                 <span class="n">combined_parsed_inters</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span>
                     <span class="n">indiv_cmd</span> <span class="o">+</span> <span class="p">[</span><span class="n">cutoffs</span><span class="p">])]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="n">int1</span><span class="p">,</span> <span class="n">int2</span><span class="p">]:</span>
-                    <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">suppress</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">):</span>
                         <span class="k">del</span> <span class="n">combined_parsed_inters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                        <span class="k">pass</span>
 
     <span class="k">return</span> <span class="n">combined_parsed_inters</span></div>
 

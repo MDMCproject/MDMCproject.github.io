@@ -98,31 +98,30 @@
              
   <h1>Source code for MDMC.control.control</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module for performing the refinement&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">statistics</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span><span class="p">,</span> <span class="n">RectBivariateSpline</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">RectBivariateSpline</span><span class="p">,</span> <span class="n">interp1d</span>
 <span class="kn">from</span> <span class="nn">verbosemanager</span> <span class="kn">import</span> <span class="n">VerboseManager</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.control.plot_results</span> <span class="kn">import</span> <span class="n">PlotResults</span><span class="p">,</span> <span class="n">data_printers</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
+<span class="kn">from</span> <span class="nn">MDMC.control.plot_results</span> <span class="kn">import</span> <span class="n">PlotResults</span><span class="p">,</span> <span class="n">data_printers</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngineError</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="kn">import</span> <span class="n">Simulation</span>
-<span class="kn">from</span> <span class="nn">MDMC.refinement.minimizers.minimizer_factory</span> <span class="kn">import</span> <span class="n">MinimizerFactory</span>
-<span class="kn">from</span> <span class="nn">MDMC.refinement.FoM.FoM_factory</span> <span class="kn">import</span> <span class="n">FoMFactory</span>
 <span class="kn">from</span> <span class="nn">MDMC.refinement.FoM.FoM_abs</span> <span class="kn">import</span> <span class="n">ObservablePair</span>
+<span class="kn">from</span> <span class="nn">MDMC.refinement.FoM.FoM_factory</span> <span class="kn">import</span> <span class="n">FoMFactory</span>
+<span class="kn">from</span> <span class="nn">MDMC.refinement.minimizers.minimizer_factory</span> <span class="kn">import</span> <span class="n">MinimizerFactory</span>
 <span class="kn">from</span> <span class="nn">MDMC.resolution.resolution_factory</span> <span class="kn">import</span> <span class="n">ResolutionFactory</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span> \
-    <span class="kn">import</span> <span class="nn">ObservableFactory</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> <span class="n">Observable</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngineError</span>
+<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span> <span class="kn">import</span> <span class="n">ObservableFactory</span>
 
 
 <div class="viewcode-block" id="Control">
@@ -340,7 +339,8 @@
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="n">use_FFT</span> <span class="o">=</span> <span class="kc">True</span>
 
-            <span class="c1"># keep the keys in the _dset_input_check function consistent with the ones retrieved from dset</span>
+            <span class="c1"># keep the keys in the _dset_input_check function</span>
+            <span class="c1"># consistent with the ones retrieved from dset</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_input_check</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;reader&#39;</span><span class="p">,</span> <span class="s1">&#39;file_name&#39;</span><span class="p">])</span>
             <span class="n">exp_observable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_observable_from_file</span><span class="p">(</span><span class="n">dset</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
                                                         <span class="n">dset</span><span class="p">[</span><span class="s1">&#39;reader&#39;</span><span class="p">],</span>
@@ -421,7 +421,7 @@
             <span class="n">resolution_factory</span> <span class="o">=</span> <span class="n">ResolutionFactory</span><span class="p">()</span>
             <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">traj_step</span>
 
-            <span class="k">if</span> <span class="s1">&#39;resolution&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dset</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;resolution&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dset</span><span class="p">:</span>
                 <span class="c1"># create list of user keys for resolutions to add to the error</span>
                 <span class="n">userkeys</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">resolution_factory</span><span class="o">.</span><span class="n">resolutions</span><span class="p">:</span>
@@ -451,7 +451,7 @@
             <span class="s1">&#39;  Minimizer&#39;</span><span class="p">,</span>
             <span class="s1">&#39;  FoM type&#39;</span><span class="p">,</span>
             <span class="s1">&#39;  Number of observables&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;  Number of parameters&#39;</span>
+            <span class="s1">&#39;  Number of parameters&#39;</span><span class="p">,</span>
         <span class="p">]</span>
 
         <span class="c1"># Printing settings</span>
@@ -477,14 +477,14 @@
             <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s2">&quot;-&quot;</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">exp_datasets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">exp_datasets</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
                         <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                         <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">dataset</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
 
             <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;- FoM Options&quot;</span><span class="p">)</span>
             <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s2">&quot;-&quot;</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">FoM_options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">FoM_options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">FoM_options</span><span class="p">:</span>
                     <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                     <span class="n">data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">FoM_options</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
 
@@ -972,10 +972,7 @@
         <span class="n">traj_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">traj_step</span>
         <span class="n">maximum_frames</span> <span class="o">=</span> <span class="n">observable_pair</span><span class="o">.</span><span class="n">exp_obs</span><span class="o">.</span><span class="n">maximum_frames</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">maximum_frames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">maximum_steps</span> <span class="o">=</span> <span class="n">traj_step</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">maximum_steps</span> <span class="o">=</span> <span class="n">traj_step</span> <span class="o">*</span> <span class="n">maximum_frames</span>
+        <span class="n">maximum_steps</span> <span class="o">=</span> <span class="n">traj_step</span> <span class="k">if</span> <span class="n">maximum_frames</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">traj_step</span> <span class="o">*</span> <span class="n">maximum_frames</span>
 
         <span class="k">return</span> <span class="n">maximum_steps</span> <span class="o">*</span> <span class="p">(</span><span class="n">MD_steps</span> <span class="o">//</span> <span class="p">(</span><span class="n">maximum_steps</span><span class="p">))</span>
 
@@ -1067,10 +1064,7 @@
             <span class="c1"># check if the independent variable needs to be made uniform</span>
             <span class="k">if</span> <span class="n">var_key</span> <span class="ow">in</span> <span class="n">indep_vars_to_be_changed</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">observable</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">uniformity_required</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="s1">&#39;zeroed&#39;</span><span class="p">]:</span>
-                    <span class="n">minimum</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">minimum</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">minimum</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">uniformity_required</span><span class="p">[</span><span class="n">var_key</span><span class="p">][</span><span class="s1">&#39;zeroed&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">uniform_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minimum</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">num</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
                 <span class="n">indep_var_uniform</span><span class="p">[</span><span class="n">var_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniform_data</span>
             <span class="c1"># if uniformity requirements are satisfied already,</span>

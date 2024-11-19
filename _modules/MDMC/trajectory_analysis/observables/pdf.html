@@ -100,20 +100,19 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Module for calculating the total pair distribution function (PDF).</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">combinations_with_replacement</span><span class="p">,</span>
-                       <span class="n">product</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations_with_replacement</span><span class="p">,</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">periodictable</span>
 
 <span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
 <span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">unit_decorator_getter</span>
+<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> <span class="n">Observable</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span> <span class="kn">import</span> <span class="n">ObservableFactory</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
 
 
 <div class="viewcode-block" id="PairDistributionFunction">
@@ -329,7 +328,7 @@
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">MD_input</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span>
             <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span>
+            <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the pair distribution function, :math:`G(r)` from a ``CompactTrajectory``.</span>
@@ -551,17 +550,14 @@
             <span class="c1"># Partials of differing elements need to be scaled by 2 when added to total,</span>
             <span class="c1"># as only one of the indentical pairs is considered</span>
             <span class="c1"># (e.g. for water H-O is added but not O-H)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">partial_name</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">norm_fac</span> <span class="o">=</span> <span class="mf">1.</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">norm_fac</span> <span class="o">=</span> <span class="mf">2.</span>
+            <span class="n">norm_fac</span> <span class="o">=</span> <span class="mf">1.</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">partial_name</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mf">2.</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span><span class="p">[</span><span class="s1">&#39;PDF&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ci_cj</span> <span class="o">*</span> <span class="n">bi_bj</span> <span class="o">*</span> <span class="p">(</span><span class="n">partial_value</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm_fac</span>
 
     <span class="k">def</span> <span class="nf">_slice_trajectory</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span>
+            <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompactTrajectory</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Slice the trajectory into frames used to calculate an average total PDF.</span>
@@ -670,13 +666,13 @@
         <span class="c1"># independent variable. If one or two are in settings, warn the user</span>
         <span class="c1"># that all three are required to set r.</span>
         <span class="n">r_kwargs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r_min&#39;</span><span class="p">,</span> <span class="s1">&#39;r_max&#39;</span><span class="p">,</span> <span class="s1">&#39;r_step&#39;</span><span class="p">]</span>
-        <span class="n">r_kwarg_defined</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">r_kw</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">r_kw</span> <span class="ow">in</span> <span class="n">r_kwargs</span><span class="p">)</span>
+        <span class="n">r_kwarg_defined</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">r_kw</span> <span class="ow">in</span> <span class="n">settings</span> <span class="k">for</span> <span class="n">r_kw</span> <span class="ow">in</span> <span class="n">r_kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">r_kwarg_defined</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;r cannot be passed if r_min, r_max or r_step&#39;</span>
                                 <span class="s1">&#39; are passed&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">r_kw</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">r_kw</span> <span class="ow">in</span> <span class="n">r_kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">r_kw</span> <span class="ow">in</span> <span class="n">settings</span> <span class="k">for</span> <span class="n">r_kw</span> <span class="ow">in</span> <span class="n">r_kwargs</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;r_min&#39;</span><span class="p">],</span>
                                <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;r_max&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;r_step&#39;</span><span class="p">],</span>
                                <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;r_step&#39;</span><span class="p">])</span>
@@ -772,7 +768,7 @@
             <span class="n">elem2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">part1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
             <span class="n">part2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
-            <span class="n">partitions</span><span class="p">:</span> <span class="nb">dict</span>
+            <span class="n">partitions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate square distances between 2 atoms.</span>
@@ -921,7 +917,7 @@
         <span class="k">return</span> <span class="n">pairs</span>
 
     <span class="k">def</span> <span class="nf">_calculate_partition_indexes</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">partition_components</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">partition_components</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the partition indices.</span>
@@ -940,7 +936,7 @@
 <span class="sd">            Generator of evenly spaced grid-points in ``Universe``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">,</span>
-                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span> <span class="o">/</span> <span class="n">partition_components</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">))</span>
+                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span> <span class="o">/</span> <span class="n">partition_components</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">)),</span>
                        <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>

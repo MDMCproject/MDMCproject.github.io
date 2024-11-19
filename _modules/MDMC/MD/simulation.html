@@ -105,28 +105,31 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span><span class="p">,</span> <span class="n">filterfalse</span><span class="p">,</span> <span class="n">product</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
-
-<span class="kn">from</span> <span class="nn">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">kpss</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">kpss</span>
 <span class="kn">from</span> <span class="nn">verbosemanager</span> <span class="kn">import</span> <span class="n">VerboseManager</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator_getter</span><span class="p">,</span> \
-    <span class="n">mod_docstring</span><span class="p">,</span> <span class="n">repr_decorator</span><span class="p">,</span> <span class="n">unit_decorator</span>
 <span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
+<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">mod_docstring</span><span class="p">,</span>
+    <span class="n">repr_decorator</span><span class="p">,</span>
+    <span class="n">unit_decorator</span><span class="p">,</span>
+    <span class="n">unit_decorator_getter</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.container</span> <span class="kn">import</span> <span class="n">AtomContainer</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade_factory</span> <span class="kn">import</span> <span class="n">MDEngineFacadeFactory</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.force_fields.force_field_factory</span> <span class="kn">import</span> <span class="n">ForceFieldFactory</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Coulombic</span><span class="p">,</span> <span class="n">Dispersion</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.solvents.solvents</span> <span class="kn">import</span> <span class="n">get_solvent_names</span><span class="p">,</span> <span class="n">get_solvent_config</span>
+<span class="kn">from</span> <span class="nn">MDMC.MD.solvents.solvents</span> <span class="kn">import</span> <span class="n">get_solvent_config</span><span class="p">,</span> <span class="n">get_solvent_names</span>
 <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Structure</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Dispersion</span><span class="p">,</span> <span class="n">Coulombic</span>
 <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.trajectory</span> <span class="kn">import</span> <span class="n">Configuration</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Atom</span>
     <span class="kn">from</span> <span class="nn">MDMC.MD.interactions</span> <span class="kn">import</span> <span class="n">Interaction</span>
+    <span class="kn">from</span> <span class="nn">MDMC.MD.structures</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Molecule</span>
     <span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
 
 
@@ -1188,8 +1191,8 @@
             <span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">orig_box_dimensions</span> <span class="o">*</span> <span class="n">dim_scaling</span>
             <span class="n">num_tiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">/</span> <span class="n">box_dimensions</span><span class="p">)</span>
             <span class="c1"># Binary list for axes along which whole num of tiles are used.</span>
-            <span class="n">wrap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="nb">dir</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span>
-                             <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">num_tiles</span><span class="p">])</span>
+            <span class="n">wrap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">direc</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span>
+                             <span class="k">for</span> <span class="n">direc</span> <span class="ow">in</span> <span class="n">num_tiles</span><span class="p">])</span>
             <span class="n">num_tiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_tiles</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
             <span class="n">mols</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1354,10 +1357,8 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="o">==</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
@@ -1682,10 +1683,7 @@
 <span class="sd">            Working directory for the MD engine to write to. Default is `None`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">equilibration</span><span class="p">:</span>
-            <span class="n">process</span> <span class="o">=</span> <span class="s1">&#39;equilibration&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">process</span> <span class="o">=</span> <span class="s1">&#39;simulation&#39;</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="s1">&#39;equilibration&#39;</span> <span class="k">if</span> <span class="n">equilibration</span> <span class="k">else</span> <span class="s1">&#39;simulation&#39;</span>
 
         <span class="n">verbose_manager</span> <span class="o">=</span> <span class="n">VerboseManager</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
         <span class="c1"># to match legacy use of verbose on this function (where verbose was bool) we use bool</span>
@@ -1711,7 +1709,7 @@
 <div class="viewcode-block" id="Simulation.auto_equilibrate">
 <a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Simulation.auto_equilibrate">[docs]</a>
     <span class="k">def</span> <span class="nf">auto_equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                         <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="s1">&#39;pe&#39;</span><span class="p">],</span>
+                         <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="s1">&#39;pe&#39;</span><span class="p">),</span>
                          <span class="n">eq_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                          <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
                          <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>

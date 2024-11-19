@@ -106,7 +106,6 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Union</span>
@@ -115,7 +114,6 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Atoms</span>
 <span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">write</span>
-
 <span class="kn">from</span> <span class="nn">dlpoly</span> <span class="kn">import</span> <span class="n">DLPoly</span>
 <span class="kn">from</span> <span class="nn">dlpoly.config</span> <span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span> <span class="nn">dlpoly.field</span> <span class="kn">import</span> <span class="n">Bond</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Potential</span>
@@ -145,12 +143,12 @@
     <span class="s1">&#39;HarmonicPotential&#39;</span><span class="p">:</span> <span class="s1">&#39;harm&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Buckingham&#39;</span><span class="p">:</span> <span class="s1">&#39;buck&#39;</span><span class="p">,</span>
     <span class="s1">&#39;Coulomb&#39;</span><span class="p">:</span> <span class="s1">&#39;coul&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Periodic&#39;</span><span class="p">:</span> <span class="s1">&#39;cos&#39;</span>
+    <span class="s1">&#39;Periodic&#39;</span><span class="p">:</span> <span class="s1">&#39;cos&#39;</span><span class="p">,</span>
     <span class="p">}</span>
 <span class="n">BOND_CLASS_REF</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;Bond&#39;</span><span class="p">:</span> <span class="s1">&#39;bonds&#39;</span><span class="p">,</span>
     <span class="s1">&#39;BondAngle&#39;</span><span class="p">:</span> <span class="s1">&#39;angles&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;DihedralAngle&#39;</span><span class="p">:</span> <span class="s1">&#39;dihedrals&#39;</span>
+    <span class="s1">&#39;DihedralAngle&#39;</span><span class="p">:</span> <span class="s1">&#39;dihedrals&#39;</span><span class="p">,</span>
     <span class="p">}</span>
 
 
@@ -158,7 +156,7 @@
 <span class="c1"># pylint: disable=redefined-outer-name</span>
 <div class="viewcode-block" id="DLPOLYAttribute">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.MD.engine_facades.html#MDMC.MD.engine_facades.dlpoly_engine.DLPOLYAttribute">[docs]</a>
-<span class="k">class</span> <span class="nc">DLPOLYAttribute</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">DLPOLYAttribute</span><span class="p">:</span>
     <span class="c1"># pylint: disable=too-few-public-methods</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class which has a ``dlpoly-py`` object as an</span>
@@ -566,10 +564,7 @@
             <span class="c1"># the next line gives the position of the atom</span>
             <span class="n">pos</span> <span class="o">=</span> <span class="n">read_line_as</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
             <span class="c1"># the next line, if it exists, gives the velocity of the atom</span>
-            <span class="k">if</span> <span class="n">level_of_detail</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">vel</span> <span class="o">=</span> <span class="n">read_line_as</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">vel</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">vel</span> <span class="o">=</span> <span class="n">read_line_as</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="k">if</span> <span class="n">level_of_detail</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="c1"># next line, if existent, gives the force on the atom. currently not used by MDMC</span>
             <span class="k">if</span> <span class="n">level_of_detail</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">_</span> <span class="o">=</span> <span class="n">read_line_as</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>  <span class="c1"># this is actually force acting on the atom, never used</span>
@@ -912,7 +907,7 @@
             <span class="n">curr_atom</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span><span class="p">[</span><span class="n">atm</span><span class="p">]</span> <span class="k">for</span> <span class="n">parm</span> <span class="ow">in</span> <span class="n">disp</span><span class="o">.</span><span class="n">atom_types</span> <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">parm</span><span class="p">]</span>
             <span class="n">pot</span> <span class="o">=</span> <span class="n">Potential</span><span class="p">(</span><span class="s1">&#39;vdw&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">curr_atom</span><span class="p">,</span>
                                     <span class="n">POTENTIAL_REF</span><span class="p">[</span><span class="n">disp</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
-                                    <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">real</span><span class="p">),</span> <span class="n">disp</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                                    <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">real</span><span class="p">),</span> <span class="n">disp</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
                                     <span class="p">])</span>
             <span class="n">out</span><span class="o">.</span><span class="n">add_potential</span><span class="p">(</span><span class="n">curr_atom</span><span class="p">,</span> <span class="n">pot</span><span class="p">)</span>
 
@@ -985,13 +980,13 @@
                 <span class="n">pot</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="s1">&#39;constraints&#39;</span><span class="p">,</span>
                            <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                             <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">current_atom</span><span class="p">),</span>
-                            <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">bond</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">bond</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">real</span><span class="p">),</span>
                             <span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">pot</span> <span class="o">=</span> <span class="n">Bond</span><span class="p">(</span><span class="n">BOND_CLASS_REF</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">bond</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span>
                            <span class="p">[</span><span class="n">POTENTIAL_REF</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
                             <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">current_atom</span><span class="p">),</span>
-                            <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">real</span><span class="p">),</span> <span class="n">bond</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                            <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">real</span><span class="p">),</span> <span class="n">bond</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
                             <span class="p">])</span>
             <span class="n">new_molecule</span><span class="o">.</span><span class="n">add_potential</span><span class="p">(</span><span class="n">current_atom</span><span class="p">,</span> <span class="n">pot</span><span class="p">)</span>
 
@@ -1382,7 +1377,7 @@
     <span class="s1">&#39;TEMPERATURE&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">),</span>
     <span class="s1">&#39;ENERGY&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;kcal&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;mol&#39;</span><span class="p">),</span>
     <span class="s1">&#39;FORCE&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;kcal&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;Ang&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;mol&#39;</span><span class="p">)),</span>
-    <span class="s1">&#39;PRESSURE&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;katm&#39;</span><span class="p">)</span>
+    <span class="s1">&#39;PRESSURE&#39;</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;katm&#39;</span><span class="p">),</span>
 <span class="p">}</span>
 
 
@@ -1558,7 +1553,7 @@
             <span class="n">l_sys</span><span class="p">[</span><span class="s1">&#39;ANGLE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
 
         <span class="n">expanded_unit</span> <span class="o">=</span> <span class="n">expand_components</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">)</span>
-        <span class="n">system_inv</span> <span class="o">=</span> <span class="p">{</span><span class="n">unit</span><span class="p">:</span> <span class="nb">property</span> <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">system_inv</span> <span class="o">=</span> <span class="p">{</span><span class="n">unit</span><span class="p">:</span> <span class="n">prop</span> <span class="k">for</span> <span class="n">prop</span><span class="p">,</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="c1"># Apply inversion to all components</span>
         <span class="n">unit_nums</span><span class="p">,</span> <span class="n">unit_denoms</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">comp_list</span><span class="p">:</span> <span class="p">[</span><span class="n">l_sys</span><span class="p">[</span><span class="n">system_inv</span><span class="p">[</span><span class="n">comp</span><span class="p">]]</span>
                                                         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">comp_list</span><span class="p">],</span>
