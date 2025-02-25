@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MDMC.common.decorators &mdash; MDMC 0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
 
   
@@ -101,21 +101,21 @@
 <span class="sd">Module which defines decorators.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">import</span> <span class="nn">textwrap</span>
-<span class="kn">import</span> <span class="nn">weakref</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
-<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">FunctionType</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">weakref</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.common.time_keeper</span> <span class="kn">import</span> <span class="n">TimeKeeper</span>
-<span class="kn">from</span> <span class="nn">MDMC.common.units</span> <span class="kn">import</span> <span class="n">UnitFloat</span><span class="p">,</span> <span class="n">unit_array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.time_keeper</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeKeeper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnitFloat</span><span class="p">,</span> <span class="n">unit_array</span>
 
 
 <div class="viewcode-block" id="unit_decorator">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.decorators.unit_decorator">[docs]</a>
-<span class="k">def</span> <span class="nf">unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decorate ``property.setter`` methods to add units.</span>
 
@@ -158,14 +158,14 @@
 
     <span class="c1"># Ignore pylint warning for decorator inner function docstrings</span>
     <span class="c1"># pylint: disable=missing-docstring</span>
-    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">unit_creator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">unit_creator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UnitFloat</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit_array</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">))</span>
 
-        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
             <span class="c1"># If decorator doesn&#39;t have a unit passed to it, use the unit of the</span>
             <span class="c1"># object to which the method belongs. If this unit is None then the</span>
             <span class="c1"># property is unitless, so return the setter applied to the value</span>
@@ -184,7 +184,7 @@
 
 <div class="viewcode-block" id="unit_decorator_getter">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.decorators.unit_decorator_getter">[docs]</a>
-<span class="k">def</span> <span class="nf">unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decorate ``property.getter`` methods to add units.</span>
 
@@ -223,14 +223,14 @@
 
     <span class="c1"># Ignore pylint warning for decorator inner function docstrings</span>
     <span class="c1"># pylint: disable=missing-docstring</span>
-    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">unit_creator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">unit_creator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">UnitFloat</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">unit</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">unit_array</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">unit</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="c1"># If decorator doesn&#39;t have a unit passed to it, use the unit of the</span>
             <span class="c1"># object to which the method belongs (`self`). If `self.unit` is also `None`, simply</span>
             <span class="c1"># call the getter without any unit attached.</span>
@@ -246,7 +246,7 @@
 
 <div class="viewcode-block" id="set_docstring">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.decorators.set_docstring">[docs]</a>
-<span class="k">def</span> <span class="nf">set_docstring</span><span class="p">(</span><span class="n">docstring</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_docstring</span><span class="p">(</span><span class="n">docstring</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decorator for setting the docstring of a function, method, class or property.</span>
 
@@ -310,7 +310,7 @@
 
     <span class="c1"># Ignore pylint warning for decorator inner function docstrings</span>
     <span class="c1">#pylint: disable=missing-docstring</span>
-    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">doc_object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">doc_object</span><span class="p">):</span>
         <span class="c1"># docstring must be set outside of wrapper. This means that</span>
         <span class="c1"># functools.wraps can be used to preserve the docstring of a function,</span>
         <span class="c1"># after it has been wrapped.</span>
@@ -318,7 +318,7 @@
         <span class="c1"># Decoration of function, method or property requires returning wrapper</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doc_object</span><span class="p">,</span> <span class="n">FunctionType</span><span class="p">):</span>
             <span class="nd">@wraps</span><span class="p">(</span><span class="n">doc_object</span><span class="p">)</span>
-            <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">doc_object</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">wrapper</span>
         <span class="c1"># Decoration of classes</span>
@@ -331,7 +331,7 @@
 
 <div class="viewcode-block" id="mod_docstring">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.decorators.mod_docstring">[docs]</a>
-<span class="k">def</span> <span class="nf">mod_docstring</span><span class="p">(</span><span class="n">replacements</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mod_docstring</span><span class="p">(</span><span class="n">replacements</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decorator for modifying the docstring of a function, method, class or property.</span>
 
@@ -404,7 +404,7 @@
 
     <span class="c1"># Ignore pylint warning for decorator inner function docstrings</span>
     <span class="c1">#pylint: disable=missing-docstring</span>
-    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">doc_object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">doc_object</span><span class="p">):</span>
         <span class="c1"># docstring must be modified outside of wrapper. This means that</span>
         <span class="c1"># functools.wraps can be used to preserve the docstring of a function,</span>
         <span class="c1"># after it has been wrapped.</span>
@@ -417,7 +417,7 @@
         <span class="c1"># property decorator</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doc_object</span><span class="p">,</span> <span class="n">FunctionType</span><span class="p">):</span>
             <span class="nd">@wraps</span><span class="p">(</span><span class="n">doc_object</span><span class="p">)</span>
-            <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">doc_object</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">wrapper</span>
         <span class="c1"># Decoration of classes</span>
@@ -430,7 +430,7 @@
 
 <div class="viewcode-block" id="wrap_docstring">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.decorators.wrap_docstring">[docs]</a>
-<span class="k">def</span> <span class="nf">wrap_docstring</span><span class="p">(</span><span class="n">docstring</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">line_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wrap_docstring</span><span class="p">(</span><span class="n">docstring</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">line_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrap a docstring to a specific line length.</span>
 
@@ -500,7 +500,7 @@
 
 <div class="viewcode-block" id="repr_decorator">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.decorators.repr_decorator">[docs]</a>
-<span class="k">def</span> <span class="nf">repr_decorator</span><span class="p">(</span><span class="n">attribute</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">attributes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">repr_decorator</span><span class="p">(</span><span class="n">attribute</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">attributes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implement ``__repr__`` for a class using passed attributes (including properties).</span>
 
@@ -558,8 +558,8 @@
 
     <span class="c1"># Ignore pylint warning for decorator inner function docstrings</span>
     <span class="c1"># pylint: disable=missing-docstring</span>
-    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="n">attrs</span> <span class="o">=</span> <span class="p">(</span><span class="n">attribute</span><span class="p">,)</span> <span class="o">+</span> <span class="n">attributes</span>
             <span class="c1"># Using getattr rather than __dict__ avoids problems with __slots__</span>
             <span class="c1"># and properties</span>
@@ -579,7 +579,7 @@
 
 <div class="viewcode-block" id="weakref_cache">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.decorators.weakref_cache">[docs]</a>
-<span class="k">def</span> <span class="nf">weakref_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weakref_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Weakref LRU cache to avoid memory leaks.</span>
 
@@ -597,14 +597,14 @@
 <span class="sd">    `function`</span>
 <span class="sd">        Decorated function with LRU cache.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 
         <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="p">)</span>  <span class="c1"># create a &#39;semi-static&#39; cached version of the method</span>
-        <span class="k">def</span> <span class="nf">_func</span><span class="p">(</span><span class="n">_self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_func</span><span class="p">(</span><span class="n">_self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">_self</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>  <span class="c1"># call the &#39;semi-static&#39; method with weakref</span>
-        <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">_func</span><span class="p">(</span><span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">inner</span>
@@ -615,7 +615,7 @@
 
 <div class="viewcode-block" id="time_function_execution">
 <a class="viewcode-back" href="../../../reference/api/MDMC.common.html#MDMC.common.decorators.time_function_execution">[docs]</a>
-<span class="k">def</span> <span class="nf">time_function_execution</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">time_function_execution</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Time a given function.</span>
 
@@ -636,7 +636,7 @@
 <span class="sd">    `function`</span>
 <span class="sd">        Decorated function with attached timer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">decorated_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorated_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">tk</span> <span class="o">=</span> <span class="n">TimeKeeper</span><span class="p">()</span>
         <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__module__</span><span class="p">])</span>
         <span class="c1"># print(fname)</span>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MDMC.refinement.minimizers.GPO &mdash; MDMC 0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
   
@@ -98,24 +98,24 @@
              
   <h1>Source code for MDMC.refinement.minimizers.GPO</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;The Gaussian-Process-Optimizer minimizer class&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">dedent</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">textwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">dedent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">skopt</span> <span class="kn">import</span> <span class="n">Optimizer</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">skopt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optimizer</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.refinement.minimizers.GPR</span> <span class="kn">import</span> <span class="n">GPR</span>
-<span class="kn">from</span> <span class="nn">MDMC.refinement.minimizers.minimizer_abs</span> <span class="kn">import</span> <span class="n">Minimizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.refinement.minimizers.GPR</span><span class="w"> </span><span class="kn">import</span> <span class="n">GPR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.refinement.minimizers.minimizer_abs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Minimizer</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">MDMC.control</span> <span class="kn">import</span> <span class="n">Control</span>
-    <span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.control</span><span class="w"> </span><span class="kn">import</span> <span class="n">Control</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.MD.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameters</span>
 
 
 <div class="viewcode-block" id="GPO">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO">[docs]</a>
-<span class="k">class</span> <span class="nc">GPO</span><span class="p">(</span><span class="n">Minimizer</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GPO</span><span class="p">(</span><span class="n">Minimizer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ``Minimizer`` which uses Gaussian process optimisation to find the global minimum</span>
 <span class="sd">    figure of merit.</span>
@@ -162,7 +162,7 @@
 <span class="sd">        list of the column titles, and parameter names in the minimizer history</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="s1">&#39;Control&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;Parameters&#39;</span><span class="p">,</span> \
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="s1">&#39;Control&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;Parameters&#39;</span><span class="p">,</span> \
         <span class="n">previous_history</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">previous_history</span><span class="p">)</span>
 
@@ -198,7 +198,7 @@
             <span class="n">n_initial_points</span><span class="o">=</span><span class="n">initial_points</span><span class="p">,</span> <span class="n">model_queue_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">history_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">history_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns column labels of the history</span>
 
@@ -212,7 +212,7 @@
 
 <div class="viewcode-block" id="GPO.has_converged">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.has_converged">[docs]</a>
-    <span class="k">def</span> <span class="nf">has_converged</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">has_converged</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the refinement process has finished, i.e. if the number of points is</span>
 <span class="sd">        equal to or greater than the number of maximum refinement points of the associated</span>
@@ -228,7 +228,7 @@
 
 <div class="viewcode-block" id="GPO.set_parameter_values">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.set_parameter_values">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_parameter_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_names</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="s1">&#39;list[float]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_parameter_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_names</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="s1">&#39;list[float]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assigns a new value to each parameter (specified by the parameter.name)</span>
 
@@ -246,7 +246,7 @@
 
 <div class="viewcode-block" id="GPO.change_parameters">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.change_parameters">[docs]</a>
-    <span class="k">def</span> <span class="nf">change_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">change_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects a new value for each parameter from the array of parameter values to interrogate</span>
 <span class="sd">        from the parameter_point_array.</span>
@@ -259,7 +259,7 @@
 
 <div class="viewcode-block" id="GPO.reset_parameters">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.reset_parameters">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Not necessary for this minimizer&quot;&quot;&quot;</span>
         <span class="c1"># pylint: disable=unnecessary-pass</span>
         <span class="k">pass</span></div>
@@ -267,7 +267,7 @@
 
 <div class="viewcode-block" id="GPO.step">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FoM</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FoM</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Increments the minimization by a step, tells the optimizer the most recent measured point</span>
 <span class="sd">        asks for the coordinates of the next point, updates the history, checks for convergance</span>
@@ -297,7 +297,7 @@
 
 <div class="viewcode-block" id="GPO.extract_result">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.extract_result">[docs]</a>
-    <span class="k">def</span> <span class="nf">extract_result</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_result</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts the measured &amp; predicted FoM and point(s)</span>
 
@@ -322,7 +322,7 @@
 
 <div class="viewcode-block" id="GPO.format_result_string">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.GPO.GPO.format_result_string">[docs]</a>
-    <span class="k">def</span> <span class="nf">format_result_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimizer_output</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_result_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimizer_output</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>

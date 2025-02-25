@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MDMC.trajectory_analysis.observables.fqt &mdash; MDMC 0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
   
@@ -100,33 +100,33 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Module for Intermediate Scattering Function class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">suppress</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">periodictable</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">periodictable</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.common</span> <span class="kn">import</span> <span class="n">units</span>
-<span class="kn">from</span> <span class="nn">MDMC.common.constants</span> <span class="kn">import</span> <span class="n">h_bar</span>
-<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">unit_decorator_getter</span>
-<span class="kn">from</span> <span class="nn">MDMC.common.mathematics</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">h_bar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">unit_decorator_getter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.mathematics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">UNIT_VECTOR</span><span class="p">,</span>
     <span class="n">faster_autocorrelation</span><span class="p">,</span>
     <span class="n">faster_correlation</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">MDMC.resolution</span> <span class="kn">import</span> <span class="n">Resolution</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.compact_trajectory</span> <span class="kn">import</span> <span class="n">CompactTrajectory</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.concurrency_tools</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.resolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">Resolution</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.compact_trajectory</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompactTrajectory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.concurrency_tools</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">core_batch</span><span class="p">,</span>
     <span class="n">create_executor</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> <span class="n">Observable</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span> <span class="kn">import</span> <span class="n">ObservableFactory</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.sqw</span> <span class="kn">import</span> <span class="n">SQwMixins</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.obs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Observable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObservableFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.sqw</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQwMixins</span>
 
 <span class="c1"># pylint: disable=c-extension-no-member</span>
 <span class="n">ThreeVec</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
@@ -134,7 +134,7 @@
 
 <div class="viewcode-block" id="AbstractFQt">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.AbstractFQt">[docs]</a>
-<span class="k">class</span> <span class="nc">AbstractFQt</span><span class="p">(</span><span class="n">SQwMixins</span><span class="p">,</span> <span class="n">Observable</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AbstractFQt</span><span class="p">(</span><span class="n">SQwMixins</span><span class="p">,</span> <span class="n">Observable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract class for total, coherent, and incoherent intermediate scattering functions.</span>
 
@@ -149,7 +149,7 @@
 <span class="sd">    .. [Kneller] Kneller *et al*. Comput. Phys. Commun. 91 (1995) 191-214.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_independent_variables</span> <span class="o">=</span> <span class="p">{}</span>
@@ -165,7 +165,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">recreated_Q</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the independent variables.</span>
 
@@ -179,11 +179,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_independent_variables</span>
 
     <span class="nd">@independent_variables</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">independent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_independent_variables</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the dependent variables.</span>
 
@@ -198,7 +198,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the errors on the dependent variables.</span>
 
@@ -213,11 +213,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span>
 
     <span class="nd">@errors</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">t</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">t</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the times of the intermediate scattering function (in ``fs``).</span>
 
@@ -231,13 +231,13 @@
 
     <span class="nd">@t</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@unit_decorator</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">TIME</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;np.ndarray&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;np.ndarray&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">independent_variables</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="nd">@unit_decorator_getter</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">ARBITRARY</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">FQt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">FQt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get or set the dynamic structure factor, F(Q, t) (in ``arb``).</span>
 
@@ -253,12 +253,12 @@
             <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@FQt</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">FQt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;list[np.ndarray]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">FQt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;list[np.ndarray]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">[</span><span class="s1">&#39;FQt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="AbstractFQt.calculate_from_MD">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.AbstractFQt.calculate_from_MD">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_from_MD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_input</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_from_MD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_input</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the intermediate scattering function from a trajectory.</span>
@@ -306,7 +306,7 @@
             <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Either trajectory requires a dimensions&#39;</span>
                                      <span class="s1">&#39; attribute or dimensions must be passed&#39;</span>
-                                     <span class="s1">&#39; when calling calculate_from_MD&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+                                     <span class="s1">&#39; when calling calculate_from_MD&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_basis</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">universe_dimensions</span><span class="p">)</span>
                                  <span class="o">*</span> <span class="n">UNIT_VECTOR</span><span class="p">)</span>
@@ -341,7 +341,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">FQt</span> <span class="o">=</span> <span class="n">FQt_array</span><span class="p">[:</span><span class="n">FQt_size</span><span class="p">]</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_calculate_Q_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_values</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_Q_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_values</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate a number of Q vectors that lie close to each Q value.</span>
 
@@ -381,7 +381,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">Q_values</span> <span class="o">=</span> <span class="n">updated_Q_values</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_vectors_single_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_vectors_single_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate a number of Q vectors with a magnitude between ``Q_min`` and ``Q_max``.</span>
 
@@ -438,7 +438,7 @@
         <span class="k">return</span> <span class="n">Q_vectors</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">_calculate_FQt_single_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_FQt_single_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate F(Q, t) for a single value of Q.</span>
 
@@ -527,7 +527,7 @@
 
 <div class="viewcode-block" id="AbstractFQt.calculate_rho_config">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.AbstractFQt.calculate_rho_config">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_rho_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_rho_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate density over an entire configuration.</span>
 
@@ -544,7 +544,7 @@
 <span class="sd">            An array of rho values for each timestep summed over the</span>
 <span class="sd">            atoms in the system, corresponding to each Q.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">helper_coherent</span><span class="p">(</span><span class="n">configs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">helper_coherent</span><span class="p">(</span><span class="n">configs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                             <span class="n">q_vector</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Wrapper for `calculate_rho` and the summation of the resulting array.</span>
@@ -599,7 +599,7 @@
 
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the neutron weighting.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -607,7 +607,7 @@
 
 <div class="viewcode-block" id="AbstractFQt.calculate_SQw">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.AbstractFQt.calculate_SQw">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_SQw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">resolution</span><span class="p">:</span> <span class="n">Resolution</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_SQw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">resolution</span><span class="p">:</span> <span class="n">Resolution</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate S(Q, w) from F(Q, t), accounting for instrument resolution.</span>
 
@@ -677,7 +677,7 @@
 
 <div class="viewcode-block" id="AbstractFQt.apply_resolution">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.AbstractFQt.apply_resolution">[docs]</a>
-    <span class="k">def</span> <span class="nf">apply_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="n">Resolution</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;FQt&quot;</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="n">Resolution</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;FQt&quot;</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply instrument resolution to an FQt object.</span>
 
@@ -698,7 +698,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dependent_variables_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dependent_variables_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The order of indexing of &#39;FQt&#39; dependent variables in terms of &#39;Q&#39; and &#39;t&#39;.</span>
 
@@ -721,7 +721,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;FQt&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">]}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">uniformity_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uniformity_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get restrictions required for computing E &amp; Q.</span>
 
@@ -750,12 +750,12 @@
 <div class="viewcode-block" id="FQt">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.FQt">[docs]</a>
 <span class="nd">@ObservableFactory</span><span class="o">.</span><span class="n">register</span><span class="p">((</span><span class="s1">&#39;IntermediateScatteringFunction&#39;</span><span class="p">,</span> <span class="s1">&#39;FQt&#39;</span><span class="p">))</span>
-<span class="k">class</span> <span class="nc">FQt</span><span class="p">(</span><span class="n">AbstractFQt</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FQt</span><span class="p">(</span><span class="n">AbstractFQt</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to process the intermediate scattering function for the total dynamic structure factor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the neutron weighting for coherent and incoherent scattering.</span>
 
@@ -772,7 +772,7 @@
                                             <span class="k">else</span> <span class="n">calc_incoherent_scatt_length</span><span class="p">(</span><span class="n">element</span><span class="p">))}</span>
                         <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span><span class="o">.</span><span class="n">element_set</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_FQt_single_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_FQt_single_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="c1"># Inherit docstring of abstract method</span>
 
         <span class="n">n_t</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
@@ -826,7 +826,7 @@
 
 <div class="viewcode-block" id="calculate_rho">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.calculate_rho">[docs]</a>
-<span class="k">def</span> <span class="nf">calculate_rho</span><span class="p">(</span><span class="n">positions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Q_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_rho</span><span class="p">(</span><span class="n">positions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Q_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate ``t`` dependent number density in reciprocal space for all Q vectors.</span>
 
@@ -853,7 +853,7 @@
 
 <div class="viewcode-block" id="get_point_group">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.get_point_group">[docs]</a>
-<span class="k">def</span> <span class="nf">get_point_group</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_point_group</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the Hermann-Mauguin point group for the universe.</span>
 
@@ -902,7 +902,7 @@
 
 <div class="viewcode-block" id="wyckoff_symmetries">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.wyckoff_symmetries">[docs]</a>
-<span class="k">def</span> <span class="nf">wyckoff_symmetries</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">,</span> <span class="n">point_group</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wyckoff_symmetries</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">,</span> <span class="n">point_group</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the Wyckoff symmetries for a point based on its point group.</span>
 
@@ -924,7 +924,7 @@
 <span class="sd">        A calculated set of the symmetries for the point.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">cubic</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cubic</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The symmetries of a point in a cubic group.</span>
 
@@ -951,7 +951,7 @@
                  <span class="p">(</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">),</span>
                  <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)})</span>
 
-    <span class="k">def</span> <span class="nf">tetragonal</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tetragonal</span><span class="p">(</span>
             <span class="n">unique_side</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">ThreeVec</span><span class="p">],</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -969,7 +969,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># slightly more complicated as we don&#39;t know what axis is unpermutable</span>
-        <span class="k">def</span> <span class="nf">tetragonal_z</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tetragonal_z</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Tetragonal symmetries for unpermutable z-axis.</span>
 
@@ -988,7 +988,7 @@
                     <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span>
                     <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">)})</span>
 
-        <span class="k">def</span> <span class="nf">tetragonal_y</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tetragonal_y</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Tetragonal symmetries for unpermutable y-axis.</span>
 
@@ -1007,7 +1007,7 @@
                     <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">),</span> <span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">),</span>
                     <span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">)})</span>
 
-        <span class="k">def</span> <span class="nf">tetragonal_x</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tetragonal_x</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Tetragonal symmetries for unpermutable x-axis.</span>
 
@@ -1033,7 +1033,7 @@
 
         <span class="k">return</span> <span class="n">side</span><span class="p">[</span><span class="n">unique_side</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">orthorhombic</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">orthorhombic</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">ThreeVec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">ThreeVec</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The symmetries of a point in an orthorhombic group.</span>
 
@@ -1064,7 +1064,7 @@
 
 <div class="viewcode-block" id="calc_incoherent_scatt_length">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.trajectory_analysis.observables.html#MDMC.trajectory_analysis.observables.fqt.calc_incoherent_scatt_length">[docs]</a>
-<span class="k">def</span> <span class="nf">calc_incoherent_scatt_length</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_incoherent_scatt_length</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate incoherent scattering length from incoherent scattering cross section.</span>
 

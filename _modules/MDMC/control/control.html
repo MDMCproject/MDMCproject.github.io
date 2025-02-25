@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MDMC.control.control &mdash; MDMC 0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
 
   
@@ -98,30 +98,30 @@
              
   <h1>Source code for MDMC.control.control</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module for performing the refinement&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">statistics</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">statistics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">suppress</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">RectBivariateSpline</span><span class="p">,</span> <span class="n">interp1d</span>
-<span class="kn">from</span> <span class="nn">verbosemanager</span> <span class="kn">import</span> <span class="n">VerboseManager</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">RectBivariateSpline</span><span class="p">,</span> <span class="n">interp1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verbosemanager</span><span class="w"> </span><span class="kn">import</span> <span class="n">VerboseManager</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.common.decorators</span> <span class="kn">import</span> <span class="n">repr_decorator</span>
-<span class="kn">from</span> <span class="nn">MDMC.control.plot_results</span> <span class="kn">import</span> <span class="n">PlotResults</span><span class="p">,</span> <span class="n">data_printers</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.engine_facades.facade</span> <span class="kn">import</span> <span class="n">MDEngineError</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.simulation</span> <span class="kn">import</span> <span class="n">Simulation</span>
-<span class="kn">from</span> <span class="nn">MDMC.refinement.FoM.FoM_abs</span> <span class="kn">import</span> <span class="n">ObservablePair</span>
-<span class="kn">from</span> <span class="nn">MDMC.refinement.FoM.FoM_factory</span> <span class="kn">import</span> <span class="n">FoMFactory</span>
-<span class="kn">from</span> <span class="nn">MDMC.refinement.minimizers.minimizer_factory</span> <span class="kn">import</span> <span class="n">MinimizerFactory</span>
-<span class="kn">from</span> <span class="nn">MDMC.resolution.resolution_factory</span> <span class="kn">import</span> <span class="n">ResolutionFactory</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs</span> <span class="kn">import</span> <span class="n">Observable</span>
-<span class="kn">from</span> <span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span> <span class="kn">import</span> <span class="n">ObservableFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">repr_decorator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.control.plot_results</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlotResults</span><span class="p">,</span> <span class="n">data_printers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.MD.engine_facades.facade</span><span class="w"> </span><span class="kn">import</span> <span class="n">MDEngineError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.MD.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.MD.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Simulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.refinement.FoM.FoM_abs</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObservablePair</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.refinement.FoM.FoM_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">FoMFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.refinement.minimizers.minimizer_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">MinimizerFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.resolution.resolution_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResolutionFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.obs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Observable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObservableFactory</span>
 
 
 <div class="viewcode-block" id="Control">
@@ -129,7 +129,7 @@
 <span class="nd">@repr_decorator</span><span class="p">(</span><span class="s1">&#39;simulation&#39;</span><span class="p">,</span> <span class="s1">&#39;exp_datasets&#39;</span><span class="p">,</span> <span class="s1">&#39;FoM_calculator&#39;</span><span class="p">,</span> <span class="s1">&#39;minimizer&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;reset_config&#39;</span><span class="p">,</span> <span class="s1">&#39;fit_parameters&#39;</span><span class="p">,</span> <span class="s1">&#39;MD_steps&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;verbose&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">Control</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Control</span><span class="p">:</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Controls the MDMC refinement</span>
@@ -283,7 +283,7 @@
 <span class="sd">        Number of molecular dynamics steps for each step of the refinement</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">exp_datasets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">exp_datasets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
                  <span class="n">fit_parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
                  <span class="n">minimizer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;MMC&#39;</span><span class="p">,</span> <span class="n">FoM_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">reset_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -412,7 +412,7 @@
             <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Experimental datasets provided require a &#39;</span>
                                  <span class="sa">f</span><span class="s1">&#39;minimum MD_steps value of </span><span class="si">{</span><span class="n">minimum_MD_steps</span><span class="si">}</span><span class="s1"> in order to &#39;</span>
-                                 <span class="s1">&#39;calculate observables&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+                                 <span class="s1">&#39;calculate observables&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span> <span class="o">=</span> <span class="n">minimum_MD_steps</span>
 
@@ -496,7 +496,7 @@
         <span class="c1"># set up data printer and attach minimiser history to it</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_printer</span> <span class="o">=</span> <span class="n">data_printers</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data_printer&#39;</span><span class="p">,</span> <span class="s1">&#39;plaintext&#39;</span><span class="p">)]()</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">exp_dataset_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_datasets</span><span class="p">]</span>
 
         <span class="c1"># plural adds &quot;s&quot; to end of &quot;parameter&quot; if there is more than one parameter</span>
@@ -506,7 +506,7 @@
 
 <div class="viewcode-block" id="Control.refine">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.refine">[docs]</a>
-    <span class="k">def</span> <span class="nf">refine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">refine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Refines the specified potential parameters</span>
 
@@ -618,7 +618,7 @@
 
 <div class="viewcode-block" id="Control.minimize">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.minimize">[docs]</a>
-    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                  <span class="n">minimize_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -659,13 +659,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span><span class="n">minimize_every</span><span class="p">,</span><span class="n">verbose</span><span class="p">,</span>
                                         <span class="n">output_log</span><span class="p">,</span><span class="n">work_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Minimization failed, please check the parameter values.&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span></div>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Minimization failed, please check the parameter values.&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span></div>
 
 
 
 <div class="viewcode-block" id="Control.equilibrate">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.equilibrate">[docs]</a>
-    <span class="k">def</span> <span class="nf">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -699,13 +699,13 @@
             <span class="k">except</span> <span class="n">MDEngineError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;The MD engine produced an error. This is often due to &#39;</span>
                 <span class="s1">&#39;bad constraints or parameter values - please check these and try again.&#39;</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="n">MDEngineError</span> <span class="kn">from</span> <span class="nn">exc</span></div>
+                <span class="k">raise</span> <span class="n">MDEngineError</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span></div>
 
 
 
 <div class="viewcode-block" id="Control.step">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bad_param_location</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bad_param_location</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Do a full step: generate and run MD to calculate FoM for existing</span>
 <span class="sd">        parameters, iterate parameters a step forward and reset MD (phasespace)</span>
@@ -755,7 +755,7 @@
 
 <div class="viewcode-block" id="Control.plot_results">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.plot_results">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">MH_norm</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">20.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">MH_norm</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">20.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Instantiates an insstance of the PlotResults class and generates a cornerplot</span>
 <span class="sd">        from the data in self.results_filename</span>
@@ -789,7 +789,7 @@
 
 
 
-    <span class="k">def</span> <span class="nf">_generate_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the MD for an iteration/step, calculate observable, compare with</span>
 <span class="sd">        observed and return the FoM</span>
@@ -809,14 +809,14 @@
 
         <span class="k">return</span> <span class="n">FoM_value</span>
 
-    <span class="k">def</span> <span class="nf">_run_MD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run_MD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run a molecular dynamics simulation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MD_steps</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_update_engine_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_engine_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the force field parameters of the MD engine</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -824,7 +824,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">update_parameters</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_read_observable_from_file</span><span class="p">(</span><span class="n">obstype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reader</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_observable_from_file</span><span class="p">(</span><span class="n">obstype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reader</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                                    <span class="n">use_FFT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Observable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an Observable of the specified type and reads in data from file</span>
@@ -852,7 +852,7 @@
         <span class="k">return</span> <span class="n">observable</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_create_empty_observable</span><span class="p">(</span><span class="n">exp_observable</span><span class="p">:</span> <span class="n">Observable</span><span class="p">,</span> <span class="n">use_FFT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Observable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_empty_observable</span><span class="p">(</span><span class="n">exp_observable</span><span class="p">:</span> <span class="n">Observable</span><span class="p">,</span> <span class="n">use_FFT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Observable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a ``Observable`` without data but with independent variables</span>
 <span class="sd">        specified from another ``Observable``.  This is a placeholder in which</span>
@@ -879,7 +879,7 @@
         <span class="n">observable</span><span class="o">.</span><span class="n">use_FFT</span> <span class="o">=</span>  <span class="n">use_FFT</span>
         <span class="k">return</span> <span class="n">observable</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_observables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                <span class="n">simulation</span><span class="p">:</span> <span class="n">Simulation</span><span class="p">,</span>
                                <span class="n">observable_pairs</span><span class="p">:</span> <span class="s1">&#39;list[ObservablePair]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -913,7 +913,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">timings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
         <span class="n">verbose_manager</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="s2">&quot;Calculating observables&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_minimum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_minimum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the minimum number of steps required for the MD engine in</span>
 <span class="sd">        order to calculate MD ``Observables`` objects with the same independent</span>
@@ -940,7 +940,7 @@
 
         <span class="k">return</span> <span class="n">traj_step</span> <span class="o">*</span> <span class="n">minimum_frames</span>
 
-    <span class="k">def</span> <span class="nf">_calculate_maximum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_maximum_MD_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                                     <span class="n">observable_pair</span><span class="p">:</span> <span class="n">ObservablePair</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the maximum number of steps that ``observable_pair`` will be</span>
@@ -977,7 +977,7 @@
         <span class="k">return</span> <span class="n">maximum_steps</span> <span class="o">*</span> <span class="p">(</span><span class="n">MD_steps</span> <span class="o">//</span> <span class="p">(</span><span class="n">maximum_steps</span><span class="p">))</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_is_data_uniform</span><span class="p">(</span><span class="n">observable</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_data_uniform</span><span class="p">(</span><span class="n">observable</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the values for each independent variable of an ``Observable`` are uniformly</span>
 <span class="sd">        spaced and if they start at zero. This information is returned in a single dictionary.</span>
@@ -1010,7 +1010,7 @@
                 <span class="s1">&#39;uniform&#39;</span><span class="p">:</span> <span class="n">is_uniform</span><span class="p">,</span> <span class="s1">&#39;zeroed&#39;</span><span class="p">:</span> <span class="n">var_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">uniformity_dict</span>
 
-    <span class="k">def</span> <span class="nf">_make_data_uniform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Observable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data_uniform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observable</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Observable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes an ``Observable``, checks the requirements for its ``independent_variables``</span>
 <span class="sd">        to be uniform or start at zero, creates uniform grids for the variables that do not</span>
@@ -1084,7 +1084,7 @@
             <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;Expected experimental dataset to only have one dependent &#39;</span>
                                      <span class="sa">f</span><span class="s1">&#39;variable entry for </span><span class="si">{</span><span class="n">var_key</span><span class="si">}</span><span class="s1">, &#39;</span>
-                                     <span class="sa">f</span><span class="s1">&#39;but found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span><span class="si">}</span><span class="s1"> instead&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+                                     <span class="sa">f</span><span class="s1">&#39;but found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span><span class="si">}</span><span class="s1"> instead&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
             <span class="c1"># determine the dimension of the dependent variable</span>
             <span class="n">var_dimension</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span>
@@ -1129,7 +1129,7 @@
         <span class="n">observable</span><span class="o">.</span><span class="n">independent_variables</span> <span class="o">=</span> <span class="n">indep_var_uniform</span>
         <span class="k">return</span> <span class="n">observable</span>
 
-    <span class="k">def</span> <span class="nf">_validate_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">Observable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Try and validate the energy of the ``Observable`` provided, and pass if</span>
 <span class="sd">        it does not have a ``validate_energy`` function itself. The time step and trajectory step</span>
@@ -1160,7 +1160,7 @@
                     <span class="s2">&quot;Context: for this dataset, traj_step multiplied by time_step&quot;</span>
                     <span class="s2">&quot; must be ~= </span><span class="si">%f</span><span class="s2"> (6 d.p). </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="p">,</span> <span class="n">traj_step</span><span class="p">,</span><span class="n">time_step</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dt_required</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_input_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">general_set</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_input_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">general_set</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Handles error for retrieving data from a set where the input is not found.</span>
@@ -1184,9 +1184,9 @@
             <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;There was an issue retrieving the input: &quot;</span>
                                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">input_check</span><span class="si">}</span><span class="s2"> &quot;</span>
-                                <span class="s2">&quot;from the dataset, please check your inputs again.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+                                <span class="s2">&quot;from the dataset, please check your inputs again.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
-    <span class="k">def</span> <span class="nf">_trim_dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_trim_dependent_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trims the dependent variable data, and the associated errors, for observables</span>
 <span class="sd">        where necessary. One such application is when the smallest q_values cannot be recreated by</span>
@@ -1216,7 +1216,7 @@
 
 <div class="viewcode-block" id="Control.engine_recovery_from_equil">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.engine_recovery_from_equil">[docs]</a>
-    <span class="k">def</span> <span class="nf">engine_recovery_from_equil</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">engine_recovery_from_equil</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
             <span class="n">output_log</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Handles an MDEngineError thrown by the MD engine. Currently this error is only raised by</span>
@@ -1267,7 +1267,7 @@
 
 <div class="viewcode-block" id="Control.reset_engine">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.reset_engine">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clears and resets the MD engine when there is an error thrown by the</span>
 <span class="sd">        equilibration or production methods. Currently this is only applicable to LAMMPS.</span>
@@ -1282,7 +1282,7 @@
 
 <div class="viewcode-block" id="Control.trial_reduce_time_step">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.trial_reduce_time_step">[docs]</a>
-    <span class="k">def</span> <span class="nf">trial_reduce_time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">reduction_factor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trial_reduce_time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">reduction_factor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reduces the time_step by the reduction factor specified.</span>
 
@@ -1301,7 +1301,7 @@
 
 <div class="viewcode-block" id="Control.calculate_max_FoM">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control.calculate_max_FoM">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_max_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_max_FoM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates a maximum Figure of Merit value by comparing a set of experimental observable</span>
 <span class="sd">        data, to arrays consisting of numbers close to zero. For use when the MD Engine fails with</span>

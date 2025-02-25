@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MDMC.MD.packmol.packmol_wrapper &mdash; MDMC 0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
   
@@ -98,27 +98,27 @@
              
   <h1>Source code for MDMC.MD.packmol.packmol_wrapper</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module that integrates packmol into MDMC&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
-<span class="kn">from</span> <span class="nn">MDMC.exporters.configurations.ase</span> <span class="kn">import</span> <span class="n">ASEExporter</span>
-<span class="kn">from</span> <span class="nn">MDMC.exporters.configurations.packmol_input</span> <span class="kn">import</span> <span class="n">PackmolInputExporter</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">Universe</span>
-<span class="kn">from</span> <span class="nn">MDMC.MD.packmol.packmol_setup</span> <span class="kn">import</span> <span class="n">PackmolSetup</span>
-<span class="kn">from</span> <span class="nn">MDMC.readers.configurations.packmol_pdb</span> <span class="kn">import</span> <span class="n">PackmolPDBReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.exporters.configurations.ase</span><span class="w"> </span><span class="kn">import</span> <span class="n">ASEExporter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.exporters.configurations.packmol_input</span><span class="w"> </span><span class="kn">import</span> <span class="n">PackmolInputExporter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.MD</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">Universe</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.MD.packmol.packmol_setup</span><span class="w"> </span><span class="kn">import</span> <span class="n">PackmolSetup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.readers.configurations.packmol_pdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">PackmolPDBReader</span>
 
 
 <div class="viewcode-block" id="PackmolFiller">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_wrapper.PackmolFiller">[docs]</a>
-<span class="k">class</span> <span class="nc">PackmolFiller</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PackmolFiller</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class representing a packmol run based on a `PackmolSetup` object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup_data</span><span class="p">:</span> <span class="n">PackmolSetup</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setup_data</span><span class="p">:</span> <span class="n">PackmolSetup</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_data</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">setup_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mol_file_names</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filled_universe</span><span class="p">:</span> <span class="n">Universe</span> <span class="o">=</span> <span class="kc">None</span>
@@ -127,7 +127,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">filled_universe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Universe</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filled_universe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Universe</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the `Universe` filled via the packmol run.</span>
 
@@ -139,7 +139,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filled_universe</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">setup_data</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PackmolSetup</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_data</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PackmolSetup</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The Packmol setup data for this run.</span>
 
@@ -152,7 +152,7 @@
 
 <div class="viewcode-block" id="PackmolFiller.fill_with_packmol">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_wrapper.PackmolFiller.fill_with_packmol">[docs]</a>
-    <span class="k">def</span> <span class="nf">fill_with_packmol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Universe</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fill_with_packmol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Universe</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -175,7 +175,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filled_universe</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_create_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the necessary paths and (if needed) directories in which to</span>
 <span class="sd">        place &amp; run packmol files</span>
@@ -188,7 +188,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_input_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_packmol_files_path</span><span class="p">,</span> <span class="s2">&quot;input_file.inp&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_packmol_files_path</span><span class="p">,</span> <span class="s2">&quot;output-universe.pdb&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_export_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_export_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Exports the molecules from a `PackmolSetup` object to pdb format</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -203,7 +203,7 @@
                 <span class="n">pdb_exporter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_mol_file_names</span><span class="p">[</span><span class="n">structure</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_name</span>
 
-    <span class="k">def</span> <span class="nf">_export_system_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_export_system_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Exports the setup of a `PackmolSetup` system to a packmol input file (.inp file).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -212,7 +212,7 @@
         <span class="k">with</span> <span class="n">inp_exporter</span><span class="p">:</span>
             <span class="n">inp_exporter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setup_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mol_file_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_call_packmol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_call_packmol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A function to call packmol on the input path using the packmol files directory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -226,7 +226,7 @@
 <div class="viewcode-block" id="PackmolFiller.get_packmol_path">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_wrapper.PackmolFiller.get_packmol_path">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_packmol_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_packmol_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a string containing the path to packmol from the PATH environment variable,</span>
 <span class="sd">        if it exists. Otherwise, returns the current working directory if packmol is not in PATH.</span>
@@ -238,7 +238,7 @@
 
 <div class="viewcode-block" id="PackmolFiller.get_packmol_output_path">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_wrapper.PackmolFiller.get_packmol_output_path">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_packmol_output_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_packmol_output_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Obtains the name of the packmol output file, as defined by the input file.</span>
 <span class="sd">        Returns an empty string if there is no input file name defined.</span>
@@ -263,7 +263,7 @@
 
 <div class="viewcode-block" id="PackmolFiller.get_packmol_files_path">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.MD.packmol.html#MDMC.MD.packmol.packmol_wrapper.PackmolFiller.get_packmol_files_path">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_packmol_files_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_packmol_files_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the path in which packmol files are placed and run.</span>
 
@@ -275,7 +275,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_packmol_files_path</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_read_packmol_output</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Structure</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_packmol_output</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Structure</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A function to read in the packmol output and return the molecules read in</span>
 
@@ -290,7 +290,7 @@
             <span class="n">output_structures</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">structures</span>
         <span class="k">return</span> <span class="n">output_structures</span>
 
-    <span class="k">def</span> <span class="nf">_fill_universe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_structures</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Structure</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Universe</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fill_universe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_structures</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Structure</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Universe</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A function to fill in the universe with the output data from packmol.</span>
 
@@ -346,7 +346,7 @@
         <span class="k">return</span> <span class="n">universe</span>
 
     <span class="c1">#TODO possibly move this to common or utils?</span>
-    <span class="k">def</span> <span class="nf">_call_external_program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_call_external_program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A function to call an external program in a specific working directory - defaults to</span>
 <span class="sd">        current working directory as a failsafe</span>
