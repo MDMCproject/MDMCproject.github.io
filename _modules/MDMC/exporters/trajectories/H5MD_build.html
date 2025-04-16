@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.exporters.trajectories.H5MD_build &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.exporters.trajectories.H5MD_build</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.exporters.trajectories.H5MD_build</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A module for writing and saving a H5MD file.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">periodictable</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.compact_trajectory</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompactTrajectory</span>
+
+<span class="c1">#: Generic H5MD information like, version of H5MD and any H5MD `modules` used.</span>
+<span class="n">H5MD_DATA</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;creator_name&#39;</span><span class="p">:</span> <span class="s1">&#39;MDMC&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;creator_version&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+    <span class="s1">&#39;h5md_version&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="s1">&#39;module_name&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;module_version&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+    <span class="s1">&#39;loc&#39;</span><span class="p">:</span> <span class="s1">&#39;h5md&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">ROOT_TRAJECTORY</span> <span class="o">=</span> <span class="s1">&#39;particles/all&#39;</span>
+
+<div class="viewcode-block" id="create_empty_groups">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.exporters.trajectories.html#MDMC.exporters.trajectories.H5MD_build.create_empty_groups">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_empty_groups</span><span class="p">(</span><span class="n">open_file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span>
+                          <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create all groups and subgroups that make up the main base structure of the file format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    open_file : h5py.File</span>
+<span class="sd">        A pre-opened file that is being written to</span>
+<span class="sd">    groups : list[str]</span>
+<span class="sd">        A list of groups that are being created</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">group_name</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+        <span class="n">open_file</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">group_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_metadata_group">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.exporters.trajectories.html#MDMC.exporters.trajectories.H5MD_build.create_metadata_group">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_metadata_group</span><span class="p">(</span><span class="n">open_file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">creator_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">creator_email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create the H5MD group that contains all Metadata information.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    open_file : h5py.File</span>
+<span class="sd">        A pre-opened file that the data is being written into</span>
+<span class="sd">    creator_name : str</span>
+<span class="sd">        Name of person running the MDMC simulation.</span>
+<span class="sd">    creator_email : str</span>
+<span class="sd">        Email of the person running the MDMC simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">group</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">[</span><span class="n">H5MD_DATA</span><span class="p">[</span><span class="s1">&#39;loc&#39;</span><span class="p">]]</span>
+    <span class="n">group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">H5MD_DATA</span><span class="p">[</span><span class="s1">&#39;h5md_version&#39;</span><span class="p">]</span>
+
+    <span class="n">author_group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;author&#39;</span><span class="p">)</span>
+    <span class="n">author_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">creator_name</span>
+    <span class="n">author_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;email&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">creator_email</span>
+
+    <span class="n">creator_group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;creator&#39;</span><span class="p">)</span>
+    <span class="n">creator_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">H5MD_DATA</span><span class="p">[</span><span class="s1">&#39;creator_name&#39;</span><span class="p">]</span>
+    <span class="n">creator_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">H5MD_DATA</span><span class="p">[</span><span class="s1">&#39;creator_version&#39;</span><span class="p">]</span>
+
+    <span class="n">modules_group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;modules&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">version</span><span class="p">,</span> <span class="n">module</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">H5MD_DATA</span><span class="p">[</span><span class="s1">&#39;module_version&#39;</span><span class="p">],</span> <span class="n">H5MD_DATA</span><span class="p">[</span><span class="s1">&#39;module_name&#39;</span><span class="p">]):</span>
+        <span class="n">module_group</span> <span class="o">=</span> <span class="n">modules_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+        <span class="n">module_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span></div>
+
+
+<div class="viewcode-block" id="create_simulation_data">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.exporters.trajectories.html#MDMC.exporters.trajectories.H5MD_build.create_simulation_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_simulation_data</span><span class="p">(</span><span class="n">open_file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span>
+                           <span class="n">group_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                           <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">time_increment</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">step_increment</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">time_offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">step_offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Store data about the simulation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    open_file : h5py.File</span>
+<span class="sd">        A pre-opened file that the data is being written into</span>
+<span class="sd">    group_name : str</span>
+<span class="sd">        The group name for the data being stored</span>
+<span class="sd">    value : int | float | str | np.ndarray</span>
+<span class="sd">        The data being stored in the H5MD file</span>
+<span class="sd">    unit : str, optional</span>
+<span class="sd">        The units for the data being stored. Default is None.</span>
+<span class="sd">    time_increment : int, optional</span>
+<span class="sd">        The increment in time between each simulation step, by default None</span>
+<span class="sd">    step_increment : int, optional</span>
+<span class="sd">        The increment in between steps in a simulation, by default None</span>
+<span class="sd">    time_offset : int, optional</span>
+<span class="sd">        The offset that the time starts at, by default None</span>
+<span class="sd">    step_offset : int, optional</span>
+<span class="sd">        The offset what is where the steps start at, by default None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">group</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">[</span><span class="n">ROOT_TRAJECTORY</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">time_increment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">subdata</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">subgroup</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">group_name</span><span class="p">)</span>
+        <span class="n">subdata</span> <span class="o">=</span> <span class="n">subgroup</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">time_link</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="k">lambda</span> <span class="n">name</span><span class="p">:</span> <span class="n">name</span> <span class="k">if</span> <span class="s1">&#39;time&#39;</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">step_link</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="k">lambda</span> <span class="n">name</span><span class="p">:</span> <span class="n">name</span> <span class="k">if</span> <span class="s1">&#39;step&#39;</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">time_link</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">time_data</span> <span class="o">=</span> <span class="n">subgroup</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">group</span><span class="p">[</span><span class="n">time_link</span><span class="p">])</span>
+            <span class="n">step_data</span> <span class="o">=</span> <span class="n">subgroup</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">group</span><span class="p">[</span><span class="n">step_link</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time_data</span> <span class="o">=</span> <span class="n">subgroup</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">time_increment</span><span class="p">)</span>
+            <span class="n">step_data</span> <span class="o">=</span> <span class="n">subgroup</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">step_increment</span><span class="p">)</span>
+            <span class="n">time_data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_offset</span>
+            <span class="n">time_data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">[</span><span class="s1">&#39;TIME&#39;</span><span class="p">])</span>
+            <span class="n">step_data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">step_offset</span>
+    <span class="k">if</span> <span class="n">unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">subdata</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_box_data">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.exporters.trajectories.html#MDMC.exporters.trajectories.H5MD_build.create_box_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_box_data</span><span class="p">(</span><span class="n">open_file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span>
+                    <span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create the box group and add all attributes associated with this group.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    trajectory : CompactTrajectory</span>
+<span class="sd">        The compact trajectory the file is being built from</span>
+<span class="sd">    open_file : h5py.File</span>
+<span class="sd">        A pre-opened file that the data is being written into</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">box_group</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ROOT_TRAJECTORY</span><span class="si">}</span><span class="s1">/box&#39;</span><span class="p">]</span>
+    <span class="n">box_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;dimensions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">is_fixedbox</span><span class="p">:</span>
+        <span class="n">boundary</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;periodic&#39;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">dimensions</span><span class="p">]</span>  <span class="c1"># MDMC assumes periodic</span>
+        <span class="n">box_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;boundary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boundary</span></div>
+
+
+<div class="viewcode-block" id="create_parameter_data">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.exporters.trajectories.html#MDMC.exporters.trajectories.H5MD_build.create_parameter_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_parameter_data</span><span class="p">(</span><span class="n">open_file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create and store the remaining parameter data in the H5MD file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    open_file : h5py.File</span>
+<span class="sd">        A pre-opened file that the data is being written into</span>
+<span class="sd">    data : np.array</span>
+<span class="sd">        The data being stored</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span>
+    <span class="n">parameters</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;atom_symbols&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_H5MD">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.exporters.trajectories.html#MDMC.exporters.trajectories.H5MD_build.write_H5MD">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_H5MD</span><span class="p">(</span><span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span>
+               <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;trajectory.h5&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+               <span class="n">timestamp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+               <span class="n">file_loc</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">),</span>
+               <span class="o">**</span><span class="n">settings</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write a CompactTrajectory to a H5MD file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    trajectory : CompactTrajectory</span>
+<span class="sd">        The compact trajectory the file is being built from</span>
+<span class="sd">    filename : str, optional</span>
+<span class="sd">        The name of the H5MD file,</span>
+<span class="sd">        standards suggest it ends with `.h5`, by default &quot;trajectory.h5&quot;</span>
+<span class="sd">    timestamp : bool, optional</span>
+<span class="sd">        If true adds time timestamp to file name, by default True</span>
+<span class="sd">    file_loc : Path, optional</span>
+<span class="sd">        The directory where the H5MD file should be stored, by default Path(&#39;.&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">time_increment</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">time_offset</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">step_increment</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">step_offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">file_loc</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_loc</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">timestamp</span><span class="p">:</span>
+        <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">%m%y-%H.%M.%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">with_stem</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">filename</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">time_stamp</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">file_path_name</span> <span class="o">=</span> <span class="n">file_loc</span> <span class="o">/</span> <span class="n">filename</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;creator_name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;creator_email&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No creator_name or creator_email provided.&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_path_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">no_data_groups</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;particles&#39;</span><span class="p">,</span>
+                          <span class="n">ROOT_TRAJECTORY</span><span class="p">,</span>
+                          <span class="s1">&#39;h5md&#39;</span><span class="p">,</span>
+                          <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ROOT_TRAJECTORY</span><span class="si">}</span><span class="s1">/box&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;parameters&#39;</span><span class="p">]</span>
+        <span class="n">create_empty_groups</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">no_data_groups</span><span class="p">)</span>
+
+        <span class="n">create_metadata_group</span><span class="p">(</span><span class="n">file</span><span class="p">,</span>
+                              <span class="n">creator_name</span><span class="o">=</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;creator_name&quot;</span><span class="p">],</span>
+                              <span class="n">creator_email</span><span class="o">=</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;creator_email&quot;</span><span class="p">])</span>
+
+        <span class="n">charge</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">atom_charges</span>
+        <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">charge</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">charge</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">charge</span> <span class="o">=</span> <span class="n">charge</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">periodictable</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">number</span>
+                   <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">element_list</span><span class="p">]</span>
+
+        <span class="n">simulation_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;species&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">species</span><span class="p">],</span>
+            <span class="s1">&#39;charge&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">charge</span><span class="p">,</span>
+                       <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">[</span><span class="s1">&#39;CHARGE&#39;</span><span class="p">]],</span>
+            <span class="s1">&#39;mass&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">atom_masses</span><span class="p">,</span>
+                     <span class="n">units</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">[</span><span class="s1">&#39;MASS&#39;</span><span class="p">]],</span>
+            <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+                         <span class="n">trajectory</span><span class="o">.</span><span class="n">position_unit</span><span class="p">,</span>
+                         <span class="n">time_increment</span><span class="p">,</span><span class="n">step_increment</span><span class="p">,</span>
+                         <span class="n">time_offset</span><span class="p">,</span><span class="n">step_offset</span><span class="p">],</span>
+            <span class="s1">&#39;box/edges&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span>
+                          <span class="n">trajectory</span><span class="o">.</span><span class="n">position_unit</span><span class="p">,</span>
+                          <span class="n">time_increment</span><span class="p">,</span><span class="n">step_increment</span><span class="p">,</span>
+                          <span class="n">time_offset</span><span class="p">,</span>
+                          <span class="n">step_offset</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">has_velocity</span><span class="p">:</span>
+            <span class="n">simulation_data</span><span class="p">[</span><span class="s1">&#39;velocity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span>
+                                           <span class="n">trajectory</span><span class="o">.</span><span class="n">velocity_unit</span><span class="p">,</span>
+                                           <span class="n">time_increment</span><span class="p">,</span>
+                                           <span class="n">step_increment</span><span class="p">,</span>
+                                           <span class="n">time_offset</span><span class="p">,</span>
+                                           <span class="n">step_offset</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">grp_name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">create_simulation_data</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">grp_name</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="n">create_box_data</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">)</span>
+        <span class="n">atom_symbols_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">element_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="n">create_parameter_data</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">atom_symbols_data</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

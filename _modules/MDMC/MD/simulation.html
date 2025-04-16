@@ -1708,11 +1708,14 @@
     <span class="c1"># this is safe and has better readability</span>
 <div class="viewcode-block" id="Simulation.auto_equilibrate">
 <a class="viewcode-back" href="../../../reference/api/MDMC.MD.html#MDMC.MD.simulation.Simulation.auto_equilibrate">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">auto_equilibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                         <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="s1">&#39;pe&#39;</span><span class="p">),</span>
-                         <span class="n">eq_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                         <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-                         <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">auto_equilibrate</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="s1">&#39;pe&#39;</span><span class="p">),</span>
+            <span class="n">eq_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+            <span class="n">max_step</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Equilibrate until the specified list of variables have stabilised.</span>
 <span class="sd">        Uses the KPSS stationarity test to determine</span>
@@ -1757,7 +1760,7 @@
             <span class="n">window</span> <span class="o">=</span> <span class="n">variable_values</span><span class="p">[</span><span class="o">-</span><span class="n">window_size</span><span class="p">:]</span>
             <span class="n">results</span> <span class="o">=</span> <span class="n">kpss</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
             <span class="c1"># results[1] is the p-value from the test</span>
-            <span class="c1"># we base our tolerance on the p-value, where the altenrative hypothesis</span>
+            <span class="c1"># we base our tolerance on the p-value, where the alternative hypothesis</span>
             <span class="c1"># for KPSS is &quot;NOT stationary&quot; - statsmodels also never gives a p above</span>
             <span class="c1"># 0.1 as it doesn&#39;t hold critical values above that point. so for 0.05</span>
             <span class="c1"># tolerance, we are asking that p be greater than 0.95</span>
@@ -1769,8 +1772,12 @@
 
         <span class="c1"># we consider the simulation stable if the rolling window</span>
         <span class="c1"># is stationary for all variables (by KPSS)</span>
-        <span class="k">while</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">window_is_stationary</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">vals_dict</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_step</span> <span class="o">-</span> <span class="n">window_size</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">window_is_stationary</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">vals_dict</span><span class="p">):</span>
+                <span class="k">break</span>
             <span class="n">auto_step</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Auto-equilibration stability not reached after </span><span class="si">{max_step}</span><span class="s2"> steps.&quot;</span><span class="p">)</span>
 
         <span class="n">total_steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">vals_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">eq_step</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Auto-equilibration has detected stability &quot;</span>

@@ -120,6 +120,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.MD.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atom</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">H5MD_reader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.trajectory</span><span class="w"> </span><span class="kn">import</span> <span class="n">TemporalConfiguration</span>
 
 
@@ -266,6 +267,42 @@
         <span class="k">if</span> <span class="n">bpn</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float16</span>
+
+<div class="viewcode-block" id="CompactTrajectory.create_from_h5md">
+<a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.create_from_h5md">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_from_h5md</span><span class="p">(</span><span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a CompactTrajectory from an H5MD file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Path to the H5MD file containing the desired trajectory.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        CompactTrajectory</span>
+<span class="sd">            The trajectory described by the file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_ct</span> <span class="o">=</span> <span class="n">CompactTrajectory</span><span class="p">()</span>
+        <span class="n">all_data</span> <span class="o">=</span> <span class="n">H5MD_reader</span><span class="o">.</span><span class="n">read_all_data</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;species&#39;</span><span class="p">])</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;no_steps&#39;</span><span class="p">]</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">preAllocate</span><span class="p">(</span><span class="n">n_atoms</span><span class="o">=</span><span class="n">n_atoms</span><span class="p">,</span>
+                           <span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">,</span>
+                           <span class="n">useVelocity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">setCharge</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s2">&quot;charge&quot;</span><span class="p">])</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">setDimensions</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s2">&quot;box_dimension&quot;</span><span class="p">])</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;velocity&#39;</span><span class="p">]</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">atom_masses</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;mass&#39;</span><span class="p">]</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">=</span> <span class="n">new_ct</span><span class="o">.</span><span class="n">validateTypes</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;atom_symbol&#39;</span><span class="p">])</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">element_list</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;atom_symbol&#39;</span><span class="p">]</span>
+        <span class="n">new_ct</span><span class="o">.</span><span class="n">element_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;atom_symbol&#39;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">new_ct</span></div>
+
 
 <div class="viewcode-block" id="CompactTrajectory.setBytesPerNumber">
 <a class="viewcode-back" href="../../../reference/api/MDMC.trajectory_analysis.html#MDMC.trajectory_analysis.compact_trajectory.CompactTrajectory.setBytesPerNumber">[docs]</a>

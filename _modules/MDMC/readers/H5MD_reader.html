@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.readers.H5MD_reader &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.readers.H5MD_reader</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.readers.H5MD_reader</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module for reading in H5MD files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+
+<span class="c1"># Note: In getter functions within this file, the slices</span>
+<span class="c1">#       are to ensure that the returned types from the</span>
+<span class="c1">#       functions are `numpy.ndarray`s and not `h5py.dataset`s.</span>
+
+
+<div class="viewcode-block" id="particles_file_path">
+<a class="viewcode-back" href="../../../reference/api/MDMC.readers.html#MDMC.readers.H5MD_reader.particles_file_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">particles_file_path</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the path in the H5MD file where the particle data is stored.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file : h5py.File</span>
+<span class="sd">        The H5MD file being read from.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    h5py.Group</span>
+<span class="sd">        Particle data group.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;particles&#39;</span><span class="p">]))</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;particles/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">root</span></div>
+
+
+<div class="viewcode-block" id="read_dataset">
+<a class="viewcode-back" href="../../../reference/api/MDMC.readers.html#MDMC.readers.H5MD_reader.read_dataset">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_dataset</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read a dataset within an H5MD file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file : h5py.File</span>
+<span class="sd">        The H5MD file being read from</span>
+<span class="sd">    dataset_name: str</span>
+<span class="sd">        The dataset attempting to be read</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Returns an array of the whole dataset</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    KeyError</span>
+<span class="sd">        If the dataset is not found in the file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">group</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="k">lambda</span> <span class="n">name</span><span class="p">:</span> <span class="n">name</span> <span class="k">if</span> <span class="n">dataset_name</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;There is no dataset named &#39;</span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2">&#39; found in the H5MD file.&quot;</span><span class="p">)</span>
+
+    <span class="n">grp</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="n">group</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">grp</span><span class="p">:</span>
+        <span class="n">grp</span> <span class="o">=</span> <span class="n">grp</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+
+    <span class="c1"># if read in as bytestring read as string</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">grp</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">asstr</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">grp</span><span class="p">[:]</span></div>
+
+
+<div class="viewcode-block" id="read_units">
+<a class="viewcode-back" href="../../../reference/api/MDMC.readers.html#MDMC.readers.H5MD_reader.read_units">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_units</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">data_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read the SI units of the data stored in an H5MD file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file : h5py.File</span>
+<span class="sd">        The H5MD file being read from</span>
+<span class="sd">    data_name : str</span>
+<span class="sd">        The name of the data the unit is to be read from</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        String abbreviation of the units</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;particles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># time is stored deeper than the other units so done like this</span>
+    <span class="k">if</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">file</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;particles/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">/position/time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span>
+
+    <span class="n">grp</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;particles/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">data_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">grp</span><span class="p">:</span>
+        <span class="n">grp</span> <span class="o">=</span> <span class="n">grp</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="read_times">
+<a class="viewcode-back" href="../../../reference/api/MDMC.readers.html#MDMC.readers.H5MD_reader.read_times">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_times</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read the time of a specified step from an H5MD file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file : h5py.File</span>
+<span class="sd">        The H5MD file being read from</span>
+<span class="sd">    step: int</span>
+<span class="sd">        The time step the H5MD file is calculating the time</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Simulation time at simulation step</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">group_step</span> <span class="o">=</span> <span class="n">particles_file_path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">group_step</span><span class="p">[</span><span class="s1">&#39;position/time&#39;</span><span class="p">][</span><span class="n">group_step</span><span class="p">[</span><span class="s1">&#39;position/time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+    <span class="n">time_offset</span> <span class="o">=</span> <span class="n">group_step</span><span class="p">[</span><span class="s1">&#39;position/time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="n">step</span><span class="p">)</span><span class="o">+</span><span class="n">time_offset</span></div>
+
+
+<div class="viewcode-block" id="read_number_steps">
+<a class="viewcode-back" href="../../../reference/api/MDMC.readers.html#MDMC.readers.H5MD_reader.read_number_steps">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_number_steps</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the total number of simulation frames stored in an H5MD file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file : h5py.File</span>
+<span class="sd">        The H5MD file being read from</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        Number of steps stored in H5MD file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">group_step</span> <span class="o">=</span> <span class="n">particles_file_path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">position_grps</span> <span class="o">=</span> <span class="n">group_step</span><span class="p">[</span><span class="s1">&#39;position/value&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">position_grps</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="read_box_property">
+<a class="viewcode-back" href="../../../reference/api/MDMC.readers.html#MDMC.readers.H5MD_reader.read_box_property">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_box_property</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads box properties from H5MD file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file : h5py.File</span>
+<span class="sd">        The H5MD file being read from</span>
+
+<span class="sd">    property_name : str</span>
+<span class="sd">        The name of the box property being read</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndaray</span>
+<span class="sd">        An array returning the property read</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This `box` is equivalent to what MDMC calls a `Universe` internally.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">group_step</span> <span class="o">=</span> <span class="n">particles_file_path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">group_step</span><span class="p">[</span><span class="s1">&#39;box&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="read_all_data">
+<a class="viewcode-back" href="../../../reference/api/MDMC.readers.html#MDMC.readers.H5MD_reader.read_all_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_all_data</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read all data from an H5MD file and return it as a dictionary.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file : str</span>
+<span class="sd">        The name of file being read from.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        A dictionary storing all data in the H5MD file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">all_time</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_times</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">read_number_steps</span><span class="p">(</span><span class="n">file</span><span class="p">))]</span>
+        <span class="n">all_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">all_time</span><span class="p">,</span>
+            <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="n">read_dataset</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;velocity&#39;</span><span class="p">:</span> <span class="n">read_dataset</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;velocity&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;mass&#39;</span><span class="p">:</span> <span class="n">read_dataset</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;mass&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;species&#39;</span><span class="p">:</span> <span class="n">read_dataset</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;species&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;no_steps&#39;</span><span class="p">:</span> <span class="n">read_number_steps</span><span class="p">(</span><span class="n">file</span><span class="p">),</span>
+            <span class="s1">&#39;box_dimension&#39;</span><span class="p">:</span> <span class="n">read_box_property</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;dimensions&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;box_boundary&#39;</span><span class="p">:</span> <span class="n">read_box_property</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;boundary&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;charge&#39;</span><span class="p">:</span> <span class="n">read_dataset</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;charge&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;atom_symbol&#39;</span><span class="p">:</span> <span class="n">read_dataset</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;atom_symbols&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;time_unit&#39;</span><span class="p">:</span> <span class="n">read_units</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;position_unit&#39;</span><span class="p">:</span> <span class="n">read_units</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;velocity_unit&#39;</span><span class="p">:</span> <span class="n">read_units</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;velocity&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;mass_unit&#39;</span><span class="p">:</span> <span class="n">read_units</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;mass&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;charge_unit&#39;</span><span class="p">:</span> <span class="n">read_units</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;charge&#39;</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="k">return</span> <span class="n">all_data</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
