@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
@@ -5,19 +7,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MDMC.exporters.trajectories.H5MD_build &mdash; MDMC 0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
-        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -278,26 +276,33 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    trajectory : CompactTrajectory</span>
-<span class="sd">        The compact trajectory the file is being built from</span>
+<span class="sd">        The compact trajectory the file is being built from.</span>
 <span class="sd">    filename : str, optional</span>
 <span class="sd">        The name of the H5MD file,</span>
-<span class="sd">        standards suggest it ends with `.h5`, by default &quot;trajectory.h5&quot;</span>
+<span class="sd">        standards suggest it ends with `.h5`, by default &quot;trajectory.h5&quot;.</span>
 <span class="sd">    timestamp : bool, optional</span>
-<span class="sd">        If true adds time timestamp to file name, by default True</span>
+<span class="sd">        If true adds time timestamp to file name, by default True.</span>
 <span class="sd">    file_loc : Path, optional</span>
-<span class="sd">        The directory where the H5MD file should be stored, by default Path(&#39;.&#39;)</span>
+<span class="sd">        The directory where the H5MD file should be stored, by default Path(&#39;.&#39;).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">time_increment</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">time_offset</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">step_increment</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">step_offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">time_increment</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">time_offset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">step_increment</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">step_offset</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">time_increment</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">time_offset</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">step_increment</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">step_offset</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">file_loc</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_loc</span><span class="p">)</span>
 
+
     <span class="k">if</span> <span class="n">timestamp</span><span class="p">:</span>
         <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">%m%y-%H.%M.%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">with_stem</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">filename</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">time_stamp</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">with_stem</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">time_stamp</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">file_path_name</span> <span class="o">=</span> <span class="n">file_loc</span> <span class="o">/</span> <span class="n">filename</span>
 
