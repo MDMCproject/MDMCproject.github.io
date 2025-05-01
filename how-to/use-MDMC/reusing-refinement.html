@@ -1,0 +1,224 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reusing Refinements &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=10f1778b"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Reusing Refinements</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/how-to/use-MDMC/reusing-refinement.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="reusing-refinements">
+<h1>Reusing Refinements<a class="headerlink" href="#reusing-refinements" title="Link to this heading"></a></h1>
+<p>MDMC allows for trajectories to be created and stored at the refinement stage of the simulation.
+The trajectories are saved in a standardised H5MD file format found at the <a class="reference external" href="https://h5md.nongnu.org/h5md.html">H5MD Website</a>.</p>
+<p>H5MD trajectory files can be read back into MDMC as a <code class="docutils literal notranslate"><span class="pre">CompactTrajectory</span></code> or
+used with software that supports the standardised H5MD file format.</p>
+<p>This can be useful as it allows for the trajectories to be reused in MDMC and other software without taking time to
+re-run the simulations.</p>
+<section id="creating-a-trajectory-file">
+<h2>Creating a trajectory File<a class="headerlink" href="#creating-a-trajectory-file" title="Link to this heading"></a></h2>
+<p>In MDMC, an H5MD file can be created at the refinement stage of the simulation. It is possible to
+either create a H5MD file only from the trajectory with the best figure of merit or from every trajectory generated.</p>
+<p>To get an H5MD trajectory file from the refinement stage pass <code class="docutils literal notranslate"><span class="pre">Dump.EVERY</span></code> to the control object to create a H5MD file from every trajectory,
+or <code class="docutils literal notranslate"><span class="pre">Dump.BEST</span></code>, to create a H5MD file from the trajectory with the best figure of merit.</p>
+<p>This will result in files name “&lt;timestamp&gt;trajectory.h5” being created within the MDMC files.</p>
+<section id="optional">
+<h3>Optional<a class="headerlink" href="#optional" title="Link to this heading"></a></h3>
+<p>Optionally, additional parameters can be used to change how or where the File is created:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">h5md_filename</span></code> can be set to a preferred name of the H5MD trajectory files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">h5md_file_loc</span></code> can be set to change where the file is stored,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">h5md_timestamp</span></code> can be set to True or False, adding or removing the time stamp at the end of the file name respectively.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>MDMC will not add the <code class="docutils literal notranslate"><span class="pre">.h5</span></code> extension to the name of the file and will use exactly the name you define.
+Not specifying this will not break the file but it is recommended, as some operating systems rely on the extension
+to work out the appropriate reader, as well as simply making the file easier to find.</p>
+</div>
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<p>This example shows how to set up a <code class="docutils literal notranslate"><span class="pre">Control</span></code> object to dump the best trajectory in a subfolder of the folder in which you are running
+MDMC, called <code class="docutils literal notranslate"><span class="pre">trajectories</span></code>; i.e. if you are running a refinement in a folder <code class="docutils literal notranslate"><span class="pre">my_refinement_folder</span></code>, this would dump the trajectory
+to the file <code class="docutils literal notranslate"><span class="pre">my_refinement_folder/trajectories/best_trajectory.h5</span></code>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">control</span> <span class="o">=</span> <span class="n">Control</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">simulation</span><span class="p">,</span>
+            <span class="n">exp_datasets</span><span class="o">=</span><span class="n">exp_datasets</span><span class="p">,</span>
+            <span class="n">fit_parameters</span><span class="o">=</span><span class="n">fit_parameters</span><span class="p">,</span>
+            <span class="n">MD_steps</span><span class="o">=</span><span class="mi">570</span><span class="p">,</span>
+            <span class="n">h5md_dump</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span>
+            <span class="n">h5md_file_loc</span><span class="o">=</span><span class="s2">&quot;./trajectories&quot;</span>
+            <span class="n">h5md_filename</span><span class="o">=</span><span class="s2">&quot;best_trajectory.h5&quot;</span><span class="p">,</span>
+            <span class="n">h5md_timestamp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can set h5md_dump to dump every trajectory created by the analysis with a timestamp. This example <code class="docutils literal notranslate"><span class="pre">Control</span></code> object would dump trajectories
+to the same <code class="docutils literal notranslate"><span class="pre">trajectories</span></code> subfolder as previously, with the name <code class="docutils literal notranslate"><span class="pre">traj_DDMMYYYY-HH.MM.SS</span></code>, i.e. trajectory dumped
+at 12:23:15pm on the 18th of October 2025, the name would be <code class="docutils literal notranslate"><span class="pre">traj_18102025-12.23.15</span></code>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">control</span> <span class="o">=</span> <span class="n">Control</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">simulation</span><span class="p">,</span>
+            <span class="n">exp_datasets</span><span class="o">=</span><span class="n">exp_datasets</span><span class="p">,</span>
+            <span class="n">fit_parameters</span><span class="o">=</span><span class="n">fit_parameters</span><span class="p">,</span>
+            <span class="n">MD_steps</span><span class="o">=</span><span class="mi">570</span><span class="p">,</span>
+            <span class="n">h5md_dump</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span>
+            <span class="n">h5md_file_loc</span><span class="o">=</span><span class="s2">&quot;./trajectories&quot;</span>
+            <span class="n">h5md_filename</span><span class="o">=</span><span class="s2">&quot;traj&quot;</span><span class="p">,</span>
+            <span class="n">h5md_timestamp</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If printing all trajectories <code class="docutils literal notranslate"><span class="pre">h5md_timestamp</span></code> should be set to true, if not the file will be continually overwritten
+and the file will only contain the last trajectory.</p>
+</div>
+</section>
+<section id="external-use">
+<h2>External Use<a class="headerlink" href="#external-use" title="Link to this heading"></a></h2>
+<p>The H5MD files can then be used within external programs that have support the standard H5MD file format.</p>
+<p>Examples of this include:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://mdanse.readthedocs.io/en/latest/index.html">MDANSE</a>: Simulation software that can be used for trajectory visualization and analysis.</p></li>
+</ul>
+<section id="how-to-be-used-with-mdanse">
+<h3>How to be used with MDANSE<a class="headerlink" href="#how-to-be-used-with-mdanse" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">MDANSE</span></code> installation instructions can be found at <a class="reference external" href="https://mdanse.readthedocs.io/en/latest/pages/H_start.html">MDANSE install docs</a>.</p>
+<p>Once <code class="docutils literal notranslate"><span class="pre">MDANSE</span></code> is installed, you can use the User Interface to visualise the trajectory:
+1. Using the tabs along the top of the interface, navigate to the <cite>Trajectory</cite> tab.
+2. Under that tab, select the button “Load .MDT Trajectory”.
+3. Your file explorer should appear, and select your <cite>.h5</cite> trajectory file.
+4. Your file name should appear below the load trajectory button. Double-click it, and a visualisation of the trajectory should appear in the model box.
+5. You can now use the bar or buttons below the visualisation to see the visualisation through time.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MDANSE</span></code> can also be used for trajectory analysis:
+1. Load a trajectory as seen in above instructions.
+2. Navigete to the <cite>Actions</cite> tab and select Analysis.
+3. Chose an analysis type and configer the paramiters.
+4. Run analysis with the run button.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MDANSE</span></code> has futher fcuntionality and for more infomation use the MDANSE documentation <a class="reference external" href="https://mdanse.readthedocs.io/en/latest/index.html">MDANSE</a> or the MDANSE Tutorials <a class="reference external" href="https://mdanse.readthedocs.io/en/latest/pages/T_sim.html">MDANSE Turorials</a>.</p>
+</section>
+</section>
+<section id="useful-links">
+<h2>Useful Links<a class="headerlink" href="#useful-links" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MDMC.writers.H5MD_build</span></code>: API documentation intended for developers.</p></li>
+<li><p><cite>MDANSE</cite>: MDANSE documentation.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

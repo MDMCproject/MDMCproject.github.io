@@ -100,9 +100,9 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">periodictable</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.mathematics</span><span class="w"> </span><span class="kn">import</span> <span class="n">faster_correlation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.periodictable_objects</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_list_of_element_objects</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.fqt</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFQt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObservableFactory</span>
 
@@ -120,10 +120,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the neutron weighting for coherent scattering.&quot;&quot;&quot;</span>
-        <span class="n">elem_getter</span> <span class="o">=</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="n">elem_getter</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span>
-                        <span class="k">if</span> <span class="n">elem_getter</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span><span class="o">.</span><span class="n">element_set</span><span class="p">}</span>
+        <span class="n">elements_list</span> <span class="o">=</span> <span class="n">create_list_of_element_objects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trajectory</span><span class="o">.</span><span class="n">element_set</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">):</span> <span class="n">element</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+                        <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">elements_list</span><span class="p">}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_FQt_single_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_Q_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="c1"># Inherit docstring of abstract method</span>

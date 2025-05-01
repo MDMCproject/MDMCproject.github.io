@@ -104,10 +104,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">periodictable</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">unit_decorator</span><span class="p">,</span> <span class="n">unit_decorator_getter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.periodictable_objects</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_list_of_element_objects</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.compact_trajectory</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompactTrajectory</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.obs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Observable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.trajectory_analysis.observables.obs_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObservableFactory</span>
@@ -960,11 +960,11 @@
 <span class="sd">            ``{element: weight}`` where ``element`` is a `str` and ``weight`` is</span>
 <span class="sd">            the corresponding weight.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">elem_getter</span> <span class="o">=</span> <span class="n">periodictable</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="n">b_coh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">elem_getter</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span>
-                                   <span class="k">if</span> <span class="n">elem_getter</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                                   <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">unique_elements</span><span class="p">}</span>
+        <span class="n">elements_list</span> <span class="o">=</span> <span class="n">create_list_of_element_objects</span><span class="p">(</span><span class="n">unique_elements</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">):</span> <span class="n">b_coh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">),</span> <span class="n">element</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span>\
+            <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">neutron</span><span class="o">.</span><span class="n">b_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">element</span>
+                <span class="ow">in</span> <span class="n">elements_list</span><span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_numbers</span><span class="p">(</span><span class="n">unique_elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">element_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
