@@ -48,6 +48,7 @@
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/accessing-atom-properties.html">Creating Atoms and Accessing Properties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
@@ -99,83 +100,44 @@
 <span class="sd">Factory class for generating Figure of Merits</span>
 <span class="sd">And ObservablePair class fro defining the obseravble pairs used to calculate the Figure of Merit</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">glob</span><span class="w"> </span><span class="kn">import</span> <span class="n">glob</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_module</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">getmembers</span><span class="p">,</span> <span class="n">isabstract</span><span class="p">,</span> <span class="n">isclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">basename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleFactory</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.refinement.FoM.FoM_abs</span><span class="w"> </span><span class="kn">import</span> <span class="n">FigureOfMerit</span>
 
 
 <div class="viewcode-block" id="FoMFactory">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_factory.FoMFactory">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">FoMFactory</span><span class="p">:</span>
-
+<span class="k">class</span><span class="w"> </span><span class="nc">FoMFactory</span><span class="p">(</span><span class="n">ModuleFactory</span><span class="p">[</span><span class="n">FigureOfMerit</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Provides a factory for creating a ``Figure of Merit`` also called FoM.  Any FoM within</span>
-<span class="sd">    the FoM folder can be created with a string of the class name, as</span>
+<span class="sd">    Provides a factory for creating a ``Figure of Merit`` also called FoM.</span>
+
+<span class="sd">    Any FoM within the FoM folder can be created with a string of the class name, as</span>
 <span class="sd">    long as it is a subclass of ``FigureOfMerit``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FigureOfMerit</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">curr_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">curr_pack</span> <span class="o">=</span> <span class="n">__package__</span>
+    <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="n">curr_path</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">,</span> <span class="n">curr_path</span> <span class="o">/</span> <span class="s2">&quot;FoM_factory.py&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="FoMFactory.create_FoM">
-<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_factory.FoMFactory.create_FoM">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_FoM</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">obs_pairs</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;data_points&#39;</span><span class="p">,</span> <span class="n">n_parameters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        FigureOfMerit</span>
-<span class="sd">            A ``Figure of Merit`` specified by ``module_name``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="FoMFactory.scan">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_factory.FoMFactory.scan">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scan</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">scan</span><span class="p">()</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span>
-                <span class="s1">&#39;.ChiSquared_&#39;</span> <span class="o">+</span> <span class="n">module_name</span><span class="o">+</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="n">__package__</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.RSquared_&#39;</span><span class="o">+</span> <span class="n">module_name</span><span class="o">+</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="n">__package__</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">__package__</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s1"> is not a supported Figure of Merits&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
-
-        <span class="n">classes</span> <span class="o">=</span> <span class="n">getmembers</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="p">(</span><span class="n">isclass</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-                                                <span class="ow">and</span> <span class="ow">not</span> <span class="n">isabstract</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-                                                <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">FigureOfMerit</span><span class="p">)))</span>
-        <span class="k">return</span> <span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">](</span><span class="n">obs_pairs</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">n_parameters</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="FoMFactory.get_FoM_names">
-<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.FoM.html#MDMC.refinement.FoM.FoM_factory.FoMFactory.get_FoM_names">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_FoM_names</span><span class="p">():</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the names of available Figure of Merits(FoM)</span>
-
-<span class="sd">        Requires all ``Figure of Merits`` derived classes to be in modules of the same</span>
-<span class="sd">        name</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list</span>
-<span class="sd">            A `list` of `str` with the names of the available ``Figure of Merits``</span>
-<span class="sd">            objects</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">FoM_names</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">full_module_name</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;*.py&quot;</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">full_module_name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">full_module_name</span> <span class="o">!=</span> <span class="vm">__file__</span><span class="p">:</span>
-                <span class="n">module_name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">full_module_name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">module_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">module_name</span> <span class="o">!=</span> <span class="s1">&#39;FoM_abs.py&#39;</span><span class="p">:</span>
-                    <span class="n">FoM_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">FoM_names</span></div>
+        <span class="c1"># Add aliases</span>
+        <span class="n">FoMFactory</span><span class="o">.</span><span class="n">registry</span> <span class="o">|=</span> <span class="p">{</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                                <span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;chisquared&quot;</span><span class="p">)</span>
+                                <span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;rsquared&quot;</span><span class="p">)</span>
+                                <span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                                <span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">)</span> <span class="p">:</span> <span class="n">val</span>
+                                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">FoMFactory</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
 </div>
 
+
+
+<span class="n">FoMFactory</span><span class="o">.</span><span class="n">scan</span><span class="p">()</span>
 </pre></div>
 
            </div>

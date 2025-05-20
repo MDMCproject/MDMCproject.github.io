@@ -48,6 +48,7 @@
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/accessing-atom-properties.html">Creating Atoms and Accessing Properties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
@@ -97,28 +98,28 @@
   <h1>Source code for MDMC.readers.observables.obs_reader_factory</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Factory class for generating readers for observables&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleFactory</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.readers.observables.obs_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObservableReader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.readers.reader_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReaderFactory</span>
 
 
 <div class="viewcode-block" id="ObservableReaderFactory">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.readers.observables.html#MDMC.readers.observables.obs_reader_factory.ObservableReaderFactory">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ObservableReaderFactory</span><span class="p">(</span><span class="n">ReaderFactory</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ObservableReaderFactory</span><span class="p">(</span><span class="n">ModuleFactory</span><span class="p">[</span><span class="n">ObservableReader</span><span class="p">]):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides a factory for creating readers.  Any module within the readers</span>
 <span class="sd">    submodule can be created with a string of the class name, as long as it is a</span>
 <span class="sd">    subclass of ``Reader``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ObservableReader</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">curr_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">curr_pack</span> <span class="o">=</span> <span class="n">__package__</span>
+    <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="n">curr_path</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">,</span> <span class="n">curr_path</span> <span class="o">/</span> <span class="s2">&quot;obs_reader_factory.py&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ObservableReaderFactory.base_class">
-<a class="viewcode-back" href="../../../../reference/api/MDMC.readers.observables.html#MDMC.readers.observables.obs_reader_factory.ObservableReaderFactory.base_class">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">base_class</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ObservableReader</span><span class="p">:</span>
 
-        <span class="k">return</span> <span class="n">ObservableReader</span></div>
-</div>
-
+<span class="n">ObservableReaderFactory</span><span class="o">.</span><span class="n">scan</span><span class="p">()</span>
 </pre></div>
 
            </div>

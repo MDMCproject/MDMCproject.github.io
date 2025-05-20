@@ -48,6 +48,7 @@
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/accessing-atom-properties.html">Creating Atoms and Accessing Properties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
@@ -116,7 +117,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">glob</span><span class="w"> </span><span class="kn">import</span> <span class="n">glob</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">basename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegisterFactory</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -195,7 +198,7 @@
 
 <div class="viewcode-block" id="InstlTestFactory">
 <a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.installation_tests.InstlTestFactory">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">InstlTestFactory</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InstlTestFactory</span><span class="p">(</span><span class="n">RegisterFactory</span><span class="p">[</span><span class="n">InstlTestBase</span><span class="p">]):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Testing factory class.</span>
@@ -206,49 +209,10 @@
 
     <span class="n">registry</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">InstlTestBase</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-<div class="viewcode-block" id="InstlTestFactory.register">
-<a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.installation_tests.InstlTestFactory.register">[docs]</a>
+<div class="viewcode-block" id="InstlTestFactory.create">
+<a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.installation_tests.InstlTestFactory.create">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Decorator for registering installation test classes.</span>
-
-<span class="sd">        The name with which the test is registered should be the parameter</span>
-<span class="sd">        passed to the decorator.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        name : str</span>
-<span class="sd">            The name with which the test is registered.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        `function`</span>
-<span class="sd">            Wrapped class registered in factory.</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        To register the ``InstlTestCore`` class with ``InstlTestFactory``:</span>
-
-<span class="sd">            .. highlight:: python</span>
-<span class="sd">            .. code-block:: python</span>
-
-<span class="sd">                @InstlTestFactory.register(&#39;core&#39;)</span>
-<span class="sd">                class InstlTestCore(InstlTestBase):</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">class_wrapper</span><span class="p">(</span><span class="n">wrapped_class</span><span class="p">:</span> <span class="n">InstlTestBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-
-            <span class="bp">cls</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrapped_class</span>
-            <span class="k">return</span> <span class="n">wrapped_class</span>
-
-        <span class="k">return</span> <span class="n">class_wrapper</span></div>
-
-
-<div class="viewcode-block" id="InstlTestFactory.create_instl_test">
-<a class="viewcode-back" href="../../../reference/api/MDMC.utilities.html#MDMC.utilities.installation_tests.InstlTestFactory.create_instl_test">[docs]</a>
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_instl_test</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InstlTestBase</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InstlTestBase</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Instantiate the installation test for the class `name`.</span>
 
@@ -263,8 +227,8 @@
 <span class="sd">            Corresponding class with name `name`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">instl_test</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">name</span><span class="p">]()</span>
-        <span class="n">instl_test</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">instl_test</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">instl_test</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">key</span>
         <span class="k">return</span> <span class="n">instl_test</span></div>
 </div>
 
@@ -276,9 +240,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run all installation tests and print the result for each test.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">InstlTestFactory</span><span class="o">.</span><span class="n">registry</span><span class="p">:</span>
-        <span class="n">instl_test</span> <span class="o">=</span> <span class="n">InstlTestFactory</span><span class="o">.</span><span class="n">create_instl_test</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">instl_test</span> <span class="o">=</span> <span class="n">InstlTestFactory</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">instl_test</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
         <span class="c1"># Padded with spaces to ensure alignment</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0: &lt;30}</span><span class="s1">   </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">instl_test</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">instl_test</span><span class="o">.</span><span class="n">success</span><span class="p">))</span></div>

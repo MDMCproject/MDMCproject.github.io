@@ -48,6 +48,7 @@
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/accessing-atom-properties.html">Creating Atoms and Accessing Properties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
@@ -96,95 +97,29 @@
              
   <h1>Source code for MDMC.refinement.minimizers.minimizer_factory</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Factory class for generating minimizers&quot;&quot;&quot;</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">glob</span><span class="w"> </span><span class="kn">import</span> <span class="n">glob</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_module</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">getmembers</span><span class="p">,</span> <span class="n">isabstract</span><span class="p">,</span> <span class="n">isclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">basename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleFactory</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.refinement.minimizers.minimizer_abs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Minimizer</span>
 
-<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.control</span><span class="w"> </span><span class="kn">import</span> <span class="n">Control</span>
 
 <div class="viewcode-block" id="MinimizerFactory">
 <a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_factory.MinimizerFactory">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MinimizerFactory</span><span class="p">:</span>
-
+<span class="k">class</span><span class="w"> </span><span class="nc">MinimizerFactory</span><span class="p">(</span><span class="n">ModuleFactory</span><span class="p">[</span><span class="n">Minimizer</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Provides a factory for creating a ``Minimizer``.  Any minimizer within</span>
+<span class="sd">    Provides a factory for creating a ``Minimizer``.</span>
+
+<span class="sd">    Any minimizer within</span>
 <span class="sd">    the minimizers folder can be created with a string of the class name, as</span>
 <span class="sd">    long as it is a subclass of ``Minimizer``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="MinimizerFactory.create_minimizer">
-<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_factory.MinimizerFactory.create_minimizer">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_minimizer</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="s1">&#39;Control&#39;</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">,</span>
-                         <span class="n">previous_history</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Minimizer</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks that the module is a supported minimzer and instantiates it as a minimizer.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        module_name: str</span>
-<span class="sd">            The name of the module to be used as the minimizer, e.g. &#39;MMC&#39;</span>
-<span class="sd">        control: Control</span>
-<span class="sd">            The ``Control`` object which uses this Minimizer.</span>
-<span class="sd">        parameter: list[str]</span>
-<span class="sd">            List of parameters to be refined</span>
-<span class="sd">        **settings: dict, optional</span>
-<span class="sd">            Settings to be passed to the created minimiser, e.g. MC_norm=1.0 if MMC minimiser is</span>
-<span class="sd">            used or n_points=8 if GPR or GPO is used</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Minimizer</span>
-<span class="sd">            A ``Minimizer`` specified by ``module_name``</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">__package__</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s1"> is not a supported minimizer&#39;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
-        <span class="n">classes</span> <span class="o">=</span> <span class="n">getmembers</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="p">(</span><span class="n">isclass</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-                                                <span class="ow">and</span> <span class="ow">not</span> <span class="n">isabstract</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-                                                <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">Minimizer</span><span class="p">)))</span>
-        <span class="k">if</span> <span class="n">previous_history</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">](</span><span class="n">control</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">previous_history</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">](</span><span class="n">control</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span><span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
+    <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Minimizer</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">curr_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">curr_pack</span> <span class="o">=</span> <span class="n">__package__</span>
+    <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="n">curr_path</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">,</span> <span class="n">curr_path</span> <span class="o">/</span> <span class="s2">&quot;minimizer_factory.py&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MinimizerFactory.get_minimizer_names">
-<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.minimizer_factory.MinimizerFactory.get_minimizer_names">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_minimizer_names</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the names of available minimizer</span>
-
-<span class="sd">        Requires all ``Minimizer`` derived classes to be in modules of the same</span>
-<span class="sd">        name</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list[str]</span>
-<span class="sd">            A `list` of `str` with the names of the available ``Minimizer``</span>
-<span class="sd">            objects</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">minimizer_names</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">full_module_name</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;*.py&quot;</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">full_module_name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">full_module_name</span> <span class="o">!=</span> <span class="vm">__file__</span><span class="p">:</span>
-                <span class="n">module_name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">full_module_name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">module_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">module_name</span> <span class="o">!=</span> <span class="s1">&#39;minimizer_abs.py&#39;</span><span class="p">:</span>
-                    <span class="n">minimizer_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">minimizer_names</span></div>
-</div>
-
+<span class="n">MinimizerFactory</span><span class="o">.</span><span class="n">scan</span><span class="p">()</span>
 </pre></div>
 
            </div>

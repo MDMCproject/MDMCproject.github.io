@@ -48,6 +48,7 @@
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/accessing-atom-properties.html">Creating Atoms and Accessing Properties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
@@ -96,42 +97,34 @@
              
   <h1>Source code for MDMC.resolution.resolution_factory</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A factory pattern for instantiating Resolution objects.&quot;&quot;&quot;</span>
-<span class="c1"># pylint: disable=too-few-public-methods</span>
-<span class="c1"># pylint: disable=cyclic-import</span>
-<span class="c1"># as this is a factory class</span>
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">getmembers</span><span class="p">,</span> <span class="n">isabstract</span><span class="p">,</span> <span class="n">isclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">singledispatchmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">MDMC.resolution</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.common.factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.resolution.resolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">Resolution</span>
 
 
 <div class="viewcode-block" id="ResolutionFactory">
 <a class="viewcode-back" href="../../../reference/api/MDMC.resolution.html#MDMC.resolution.resolution_factory.ResolutionFactory">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ResolutionFactory</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ResolutionFactory</span><span class="p">(</span><span class="n">ModuleFactory</span><span class="p">[</span><span class="n">Resolution</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Factory class for resolution window functions.</span>
-<span class="sd">    Any function in resolution_windows.py can be instantiated using this factory.</span>
+
+<span class="sd">    Any function in `MDMC.resolution` s can be instantiated using this factory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">resolutions</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_load_resolutions</span><span class="p">()</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">resolutions</span> <span class="o">=</span> <span class="n">getmembers</span><span class="p">(</span><span class="n">MDMC</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
-                                 <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">isclass</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isabstract</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_type</span> <span class="ow">in</span> <span class="n">resolutions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">isclass</span><span class="p">(</span><span class="n">_type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">MDMC</span><span class="o">.</span><span class="n">resolution</span><span class="o">.</span><span class="n">Resolution</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">resolutions</span><span class="o">.</span><span class="n">update</span><span class="p">([[</span><span class="n">name</span><span class="p">,</span> <span class="n">_type</span><span class="p">]])</span>
+    <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Resolution</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">curr_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">curr_pack</span> <span class="o">=</span> <span class="n">__package__</span>
+    <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="n">curr_path</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">,</span> <span class="n">curr_path</span> <span class="o">/</span> <span class="s2">&quot;resolution_factory.py&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ResolutionFactory.create_instance">
 <a class="viewcode-back" href="../../../reference/api/MDMC.resolution.html#MDMC.resolution.resolution_factory.ResolutionFactory.create_instance">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                        <span class="n">resolution</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                        <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;MDMC.resolution.Resolution&#39;</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_instance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                        <span class="n">resolution</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Resolution</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Resolution object from a dictionary.</span>
 
@@ -152,59 +145,55 @@
 <span class="sd">            A resolution object with the desired properties.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">resolution</span> <span class="o">=</span> <span class="n">_standardise_input</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_standardise_input</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
         <span class="n">function_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;Resolution&#39;</span>
         <span class="n">function_res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolutions</span><span class="p">:</span>
-            <span class="c1"># *args are only required by some resolution types, e.g. file resolution</span>
-            <span class="k">if</span> <span class="n">function_name</span> <span class="o">==</span> <span class="s1">&#39;FileResolution&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolutions</span><span class="p">[</span><span class="n">function_name</span><span class="p">](</span><span class="n">function_res</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolutions</span><span class="p">[</span><span class="n">function_name</span><span class="p">](</span><span class="n">function_res</span><span class="p">)</span>
-
-        <span class="c1"># else, error if unrecognised function is used</span>
-        <span class="c1"># the userkeys line is to convert class names to the user equivalents</span>
-        <span class="n">userkeys</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolutions</span><span class="p">:</span>
-            <span class="n">userkeys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;resolution&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Resolution function &quot;</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
-                                  <span class="s2">&quot; not recognised. Recognised functions are: &quot;</span> <span class="o">+</span>
-                                  <span class="nb">str</span><span class="p">(</span><span class="n">userkeys</span><span class="p">))</span></div>
-</div>
+        <span class="k">if</span> <span class="n">function_name</span> <span class="o">==</span> <span class="s2">&quot;FileResolution&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">function_res</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">function_res</span><span class="p">)</span></div>
 
 
+    <span class="nd">@singledispatchmethod</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_standardise_input</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure that resolution is a one-line dictionary.</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_standardise_input</span><span class="p">(</span><span class="n">resolution</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Ensure that resolution is a one-line dictionary.</span>
+<span class="sd">        Fixes &#39;lazy&#39; input, e.g. if resolution</span>
+<span class="sd">        was input as a string or number.</span>
 
-<span class="sd">    Fixes &#39;lazy&#39; input, e.g. if resolution</span>
-<span class="sd">    was input as a string or number.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        resolution: Any</span>
+<span class="sd">            The input to the resolution factory.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    resolution: Any</span>
-<span class="sd">        The input to the resolution factory.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            If ``resolution`` is a dict, returns the first item of the dict.</span>
+<span class="sd">            If ``resolution`` was a float, returns ``{&#39;gaussian&#39;: resolution}``</span>
+<span class="sd">            If ``resolution`` was a string, returns ``{&#39;file&#39;: resolution}``</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    dict</span>
-<span class="sd">        If ``resolution`` is a dict, returns the first item of the dict.</span>
-<span class="sd">        If ``resolution`` was a float, returns ``{&#39;gaussian&#39;: resolution}``</span>
-<span class="sd">        If ``resolution`` was a string, returns ``{&#39;file&#39;: resolution}``</span>
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            If ``resolution`` is not a dict, string or float.</span>
 
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    NotImplementedError</span>
-<span class="sd">        If ``resolution`` is not a dict, string or float.</span>
+<span class="sd">        Warns</span>
+<span class="sd">        -----</span>
+<span class="sd">        SyntaxWarning</span>
+<span class="sd">            If ``resolution`` is a dict with multiple lines, or a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Format of resolution function not recognised.&quot;</span>
+                                  <span class="s2">&quot; It should be a one-line dictionary, but can also&quot;</span>
+                                  <span class="s2">&quot; be a number (for Gaussian resolution), a string&quot;</span>
+                                  <span class="s2">&quot; (for resolution from file), or explicitly stated as&quot;</span>
+                                  <span class="s2">&quot; None if resolution application is not needed.&quot;</span><span class="p">)</span>
 
-<span class="sd">    Warns</span>
-<span class="sd">    -----</span>
-<span class="sd">    SyntaxWarning</span>
-<span class="sd">        If ``resolution`` is a dict with multiple lines, or a float.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="nd">@_standardise_input</span><span class="o">.</span><span class="n">register</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">resolution</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The resolution dict should only have one line; ignoring&quot;</span>
                           <span class="s2">&quot; all lines except the first.&quot;</span>
@@ -213,24 +202,33 @@
             <span class="n">res</span> <span class="o">=</span> <span class="p">{</span><span class="nb">list</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]:</span> <span class="nb">list</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">resolution</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="n">resolution</span><span class="p">}</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;from_file&quot;</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">resolution</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]}</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="nd">@_standardise_input</span><span class="o">.</span><span class="n">register</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">resolution</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="n">resolution</span><span class="p">}</span>
+
+    <span class="nd">@_standardise_input</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="nd">@_standardise_input</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Assuming energy resolution is Gaussian. To change this,&quot;</span>
                       <span class="s2">&quot; input energy resolution as {&#39;function&#39;: &#39;value&#39;}, where&quot;</span>
                       <span class="s2">&quot; &#39;function&#39; is your desired resolution approximation function.&quot;</span><span class="p">,</span>
                       <span class="ne">SyntaxWarning</span><span class="p">)</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;gaussian&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolution</span><span class="p">)}</span>
-    <span class="k">elif</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;null&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Format of resolution function not recognised.&quot;</span>
-                                  <span class="s2">&quot; It should be a one-line dictionary, but can also&quot;</span>
-                                  <span class="s2">&quot; be a number (for Gaussian resolution), a string&quot;</span>
-                                  <span class="s2">&quot; (for resolution from file), or explicitly stated as&quot;</span>
-                                  <span class="s2">&quot; None if resolution application is not needed.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;gaussian&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolution</span><span class="p">)}</span>
 
-    <span class="k">return</span> <span class="n">res</span>
+    <span class="nd">@_standardise_input</span><span class="o">.</span><span class="n">register</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span><span class="n">resolution</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;null&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span></div>
+
+
+
+<span class="n">ResolutionFactory</span><span class="o">.</span><span class="n">scan</span><span class="p">()</span>
 </pre></div>
 
            </div>
