@@ -533,7 +533,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      used for a cubic universe.
  |  force_fields : ForceField, optional
  |      A force field to apply to the Universe. The force fields available are:
- |      SPC, TIP3PFB, SPCE, OPLSAA, TIP3P. Default is None.
+ |      SPCE, OPLSAA, TIP3P, TIP3PFB, SPC. Default is None.
  |  structures : list, optional
  |      ``Structure`` objects contained in the ``Universe``. Default is None.
  |  **settings
@@ -635,7 +635,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          The ``ForceField`` to parameterize ``interactions`` (if provided),
  |          or all the ``interactions`` in the ``Universe``. The available
  |          ``ForceField`` are:
- |          SPC, TIP3PFB, SPCE, OPLSAA, TIP3P
+ |          SPCE, OPLSAA, TIP3P, TIP3PFB, SPC
  |      *interactions
  |          ``Interaction`` objects to parameterize with the ``ForceField``
  |      **settings
@@ -676,7 +676,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      force_field : str, optional
  |          The force field to be applied to the structure. The available
  |          ``ForceField`` are:
- |          SPC, TIP3PFB, SPCE, OPLSAA, TIP3P
+ |          SPCE, OPLSAA, TIP3P, TIP3PFB, SPC
  |      center : bool, optional
  |          Whether to center `structure` within the Universe as it is
  |          added
@@ -704,7 +704,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      force_field : str
  |          Applies a ``ForceField`` to the ``Universe``. The available
  |          ``ForceField`` are:
- |          SPC, TIP3PFB, SPCE, OPLSAA, TIP3P
+ |          SPCE, OPLSAA, TIP3P, TIP3PFB, SPC
  |      num_density: float
  |          Non-negative `float` specifying the number density of the
  |          ``Structure``, in units of ``Structure / Ang ^ -3``
@@ -735,7 +735,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          of not converging.
  |      solvent : str, optional
  |          A `str` specifying an inbuilt ``Solvent`` from the following:
- |          SPC, TIP3P, TIP3PFB, SPCE.
+ |          TIP3PFB, SPCE, SPC, TIP3P.
  |          The default is &#39;SPCE&#39;.
  |      max_iterations: int, optional
  |          The maximum number of times to try to solvate the universe to
@@ -860,7 +860,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |      Get the ``ForceField`` acting on the ``Universe``
  |
  |      The available force fields are:
- |      SPC, TIP3PFB, SPCE, OPLSAA, TIP3P
+ |      SPCE, OPLSAA, TIP3P, TIP3PFB, SPC
  |
  |      Returns
  |      -------
@@ -1218,7 +1218,7 @@ None
 Help on class Control in module MDMC.control.control:
 
 class Control(builtins.object)
- |  Control(simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;MMC&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, h5md_dump: MDMC.control.control.Dump = &lt;Dump.NONE: 0&gt;, h5md_file_loc: pathlib.Path = PosixPath(&#39;.&#39;), h5md_timestamp: bool = True, h5md_filename: str = &#39;trajectory&#39;, **settings: dict)
+ |  Control(simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;MMC&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, file_dump_frequency: MDMC.control.control.DumpFreq = &lt;DumpFreq.NONE: 0&gt;, file_dump_extent: MDMC.control.control.DumpExtent = &lt;DumpExtent.BOTH: 3&gt;, file_dump_loc: pathlib.Path = PosixPath(&#39;.&#39;), file_dump_timestamp: bool = True, file_dump_prefix: str = &#39;trajectory&#39;, **settings: dict)
  |
  |  Controls the MDMC refinement
  |
@@ -1271,13 +1271,15 @@ class Control(builtins.object)
  |      All parameters which will be refined. Note that any ``Parameter`` that is ``fixed``,
  |      ``tied`` or equal to 0 will not be passed to the minimizer as these cannot be refined.
  |      Those with ``constraints`` set are still passed.
- |  h5md_dump : Dump | str, optional
- |      Defines how often the trajectory should be dumped to a H5MD file. Default is `Dump.NONE`
- |  h5md_file_loc: Path, optional
+ |  file_dump_frequency : DumpFreq | str, optional
+ |      Defines how often the trajectory should be dumped to a H5MD file. Default is `DumpFreq.NONE`
+ |  file_dump_extent : DumpExtent | str, optional
+ |      Which files should be written out in the dump. Default is `DumpExtent.BOTH`
+ |  file_dump_loc: Path, optional
  |      Location the H5MD file should be stored. Default is `Path(&#39;.&#39;)`
- |  h5md_timestamp: bool, optional
+ |  file_dump_timestamp: bool, optional
  |      True if a time stamp should be added to the end of the H5MD file name. Default is `True`
- |  h5md_filename: str, optional
+ |  file_dump_prefix: str, optional
  |      The name the dumped H5MD file should be. Default is ``trajectory``
  |  minimizer_type : str, optional
  |      The ``Minimizer`` type. Default is &#39;MMC&#39;.
@@ -1380,7 +1382,7 @@ class Control(builtins.object)
  |
  |  Methods defined here:
  |
- |  __init__(self, simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;MMC&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, h5md_dump: MDMC.control.control.Dump = &lt;Dump.NONE: 0&gt;, h5md_file_loc: pathlib.Path = PosixPath(&#39;.&#39;), h5md_timestamp: bool = True, h5md_filename: str = &#39;trajectory&#39;, **settings: dict)
+ |  __init__(self, simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;MMC&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, file_dump_frequency: MDMC.control.control.DumpFreq = &lt;DumpFreq.NONE: 0&gt;, file_dump_extent: MDMC.control.control.DumpExtent = &lt;DumpExtent.BOTH: 3&gt;, file_dump_loc: pathlib.Path = PosixPath(&#39;.&#39;), file_dump_timestamp: bool = True, file_dump_prefix: str = &#39;trajectory&#39;, **settings: dict)
  |      Initialize self.  See help(type(self)) for accurate signature.
  |
  |  __repr__(self) from MDMC.common.decorators.repr_decorator.&lt;locals&gt;.decorator.&lt;locals&gt;
@@ -1419,6 +1421,14 @@ class Control(builtins.object)
  |      When Dumping &#34;EVERY&#34; trajectory timestamp should be true
  |      or the file name must be different for each trajectory,
  |      as if not the file will be continually overwritten.
+ |
+ |  dump_observables(self, data_format: MDMC.control.control.ObsFormat)
+ |      Dump the observables.
+ |
+ |      Parameters
+ |      ----------
+ |      data_format: ObsFormat | str
+ |          File format for writing the observables.
  |
  |  engine_recovery_from_equil(self, n_steps: int, verbose: bool, output_log: str, work_dir: str, **settings: dict) -&gt; None
  |      Handles an MDEngineError thrown by the MD engine. Currently this error is only raised by
