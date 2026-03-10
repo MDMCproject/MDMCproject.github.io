@@ -165,6 +165,31 @@
     <span class="n">ALL</span> <span class="o">=</span> <span class="n">MDA</span> <span class="c1"># All supported formats</span></div>
 
 
+<div class="viewcode-block" id="timestamp_now">
+<a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.timestamp_now">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">timestamp_now</span><span class="p">(</span><span class="n">use_timestamp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dump_frequency</span><span class="p">:</span> <span class="n">DumpFreq</span> <span class="o">=</span> <span class="n">DumpFreq</span><span class="o">.</span><span class="n">EVERY</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a timestamp or an empty string for use in file names.</span>
+
+<span class="sd">    The intention is to use a time stamp if the user requested it,</span>
+<span class="sd">    or if files are written every step (to avoid overwriting files).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    use_timestamp : bool, optional</span>
+<span class="sd">        If True, forces the time stamp to be non-empty, by default True</span>
+<span class="sd">    dump_frequency : DumpFreq, optional</span>
+<span class="sd">        File output setting, by default DumpFreq.EVERY</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        Either a time stamp string or an empty string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_timestamp</span> <span class="ow">or</span> <span class="n">dump_frequency</span> <span class="ow">is</span> <span class="n">DumpFreq</span><span class="o">.</span><span class="n">EVERY</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;_%Y-%m-</span><span class="si">%d</span><span class="s2">--%H-%M-%S&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
+
 
 <div class="viewcode-block" id="Control">
 <a class="viewcode-back" href="../../../reference/api/MDMC.control.html#MDMC.control.control.Control">[docs]</a>
@@ -231,8 +256,8 @@
 <span class="sd">        Which files should be written out in the dump. Default is `DumpExtent.BOTH`</span>
 <span class="sd">    file_dump_loc: Path, optional</span>
 <span class="sd">        Location the H5MD file should be stored. Default is `Path(&#39;.&#39;)`</span>
-<span class="sd">    file_dump_timestamp: bool, optional</span>
-<span class="sd">        True if a time stamp should be added to the end of the H5MD file name. Default is `True`</span>
+<span class="sd">    file_dump_timestamped: bool, optional</span>
+<span class="sd">        Whether a time stamp should be added to the output file names. Default is `False`</span>
 <span class="sd">    file_dump_prefix: str, optional</span>
 <span class="sd">        The name the dumped H5MD file should be. Default is ``trajectory``</span>
 <span class="sd">    minimizer_type : str, optional</span>
@@ -346,7 +371,7 @@
                  <span class="n">file_dump_frequency</span><span class="p">:</span> <span class="n">DumpFreq</span> <span class="o">=</span> <span class="n">DumpFreq</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
                  <span class="n">file_dump_extent</span><span class="p">:</span> <span class="n">DumpExtent</span> <span class="o">=</span> <span class="n">DumpExtent</span><span class="o">.</span><span class="n">BOTH</span><span class="p">,</span>
                  <span class="n">file_dump_loc</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">),</span>
-                 <span class="n">file_dump_timestamp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">file_dump_timestamped</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">file_dump_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;trajectory&#39;</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 
@@ -371,7 +396,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_extent</span> <span class="o">=</span> <span class="n">file_dump_extent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_prefix</span> <span class="o">=</span> <span class="n">file_dump_prefix</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_timestamp</span> <span class="o">=</span> <span class="n">file_dump_timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_timestamp</span> <span class="o">=</span> <span class="n">file_dump_timestamped</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_loc</span> <span class="o">=</span> <span class="n">file_dump_loc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">h5md_creator</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;h5md_creator_name&quot;</span><span class="p">,</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">h5md_email</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;h5md_creator_email&quot;</span><span class="p">,</span>
@@ -395,7 +420,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n_steps&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;results_filename&#39;</span><span class="p">,</span>
-                                <span class="sa">f</span><span class="s1">&#39;results_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">--%H-%M-%S&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">)</span>
+                                <span class="sa">f</span><span class="s1">&#39;results</span><span class="si">{</span><span class="n">timestamp_now</span><span class="p">()</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">)</span>
         <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;results_filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span>
         <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;time_step_reductions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;time_step_reductions&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
@@ -822,7 +847,8 @@
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">bad_param_location</span><span class="p">:</span>
             <span class="c1"># Generate FoM by running MD for this step and then calculate FoM</span>
             <span class="n">fom</span><span class="p">,</span> <span class="n">trj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_FoM</span><span class="p">()</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_frequency</span> <span class="ow">in</span> <span class="p">(</span><span class="n">DumpFreq</span><span class="o">.</span><span class="n">EVERY</span><span class="p">,</span> <span class="n">DumpFreq</span><span class="o">.</span><span class="n">BEST</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_frequency</span> <span class="ow">is</span> <span class="n">DumpFreq</span><span class="o">.</span><span class="n">EVERY</span>
+               <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_frequency</span> <span class="ow">is</span> <span class="n">DumpFreq</span><span class="o">.</span><span class="n">BEST</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">is_best_FoM</span><span class="p">())):</span>
                 <span class="k">if</span> <span class="n">DumpExtent</span><span class="o">.</span><span class="n">TRAJ</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_extent</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">dump_h5md</span><span class="p">(</span><span class="n">trj</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">DumpExtent</span><span class="o">.</span><span class="n">OBS</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_extent</span><span class="p">:</span>
@@ -870,20 +896,13 @@
 <span class="sd">        or the file name must be different for each trajectory,</span>
 <span class="sd">        as if not the file will be continually overwritten.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_frequency</span> <span class="ow">is</span> <span class="n">DumpFreq</span><span class="o">.</span><span class="n">EVERY</span><span class="p">:</span>
-            <span class="n">H5MD_build</span><span class="o">.</span><span class="n">write_H5MD</span><span class="p">(</span><span class="n">trj</span><span class="p">,</span>
-                                  <span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_prefix</span><span class="p">,</span>
-                                  <span class="n">file_loc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_loc</span><span class="p">,</span>
-                                  <span class="n">timestamp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_timestamp</span><span class="p">,</span>
-                                  <span class="n">creator_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5md_creator</span><span class="p">,</span>
-                                  <span class="n">creator_email</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5md_email</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_frequency</span> <span class="ow">is</span> <span class="n">DumpFreq</span><span class="o">.</span><span class="n">BEST</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">is_best_FoM</span><span class="p">():</span>
-            <span class="n">H5MD_build</span><span class="o">.</span><span class="n">write_H5MD</span><span class="p">(</span><span class="n">trj</span><span class="p">,</span>
-                                  <span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_prefix</span><span class="p">,</span>
-                                  <span class="n">file_loc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_loc</span><span class="p">,</span>
-                                  <span class="n">timestamp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                  <span class="n">creator_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5md_creator</span><span class="p">,</span>
-                                  <span class="n">creator_email</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5md_email</span><span class="p">)</span></div>
+        <span class="n">H5MD_build</span><span class="o">.</span><span class="n">write_H5MD</span><span class="p">(</span><span class="n">trj</span><span class="p">,</span>
+                              <span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_prefix</span><span class="p">,</span>
+                              <span class="n">file_loc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_loc</span><span class="p">,</span>
+                              <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp_now</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_timestamp</span><span class="p">,</span>
+                                                      <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_frequency</span><span class="p">),</span>
+                              <span class="n">creator_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5md_creator</span><span class="p">,</span>
+                              <span class="n">creator_email</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5md_email</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Control.dump_observables">
@@ -902,7 +921,9 @@
                 <span class="n">write_MDA</span><span class="p">(</span><span class="n">obs_pair</span><span class="o">.</span><span class="n">MD_obs</span><span class="p">,</span>
                           <span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_prefix</span><span class="p">,</span>
                           <span class="n">file_loc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_loc</span><span class="p">,</span>
-                          <span class="n">timestamp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_dump_timestamp</span><span class="p">)</span></div>
+                          <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp_now</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_timestamp</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">file_dump_frequency</span><span class="p">),</span>
+                          <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Control.plot_results">

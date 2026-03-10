@@ -100,7 +100,6 @@
 <span class="sd">A module for writing and saving a H5MD file.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
@@ -275,7 +274,7 @@
     <span class="n">trajectory</span><span class="p">:</span> <span class="n">CompactTrajectory</span><span class="p">,</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;trajectory.h5&quot;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">file_loc</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span>
     <span class="o">**</span><span class="n">settings</span><span class="p">,</span>
 <span class="p">):</span>
@@ -312,14 +311,7 @@
         <span class="n">step_increment</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">step_offset</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="n">file_loc</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_loc</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">timestamp</span><span class="p">:</span>
-        <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">%m%y-%H.%M.%S.</span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">with_stem</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">time_stamp</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">file_path_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_loc</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">_traj&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.h5&#39;</span><span class="p">)</span>
+    <span class="n">file_path_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_loc</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">_traj&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.h5&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;creator_name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;creator_email&quot;</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No creator_name or creator_email provided.&quot;</span><span class="p">)</span>

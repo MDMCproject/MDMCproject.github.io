@@ -189,10 +189,10 @@
 Universe created with:
 Dimensions [38.44 38.44 38.44]
 Universe contains 1000 Ar atoms
-LAMMPS output is captured by PyLammps wrapper
 LAMMPS (2 Aug 2023 - Update 4)
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
+LAMMPS output is captured by PyLammps wrapper
 LAMMPS (2 Aug 2023 - Update 4)
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
@@ -247,6 +247,7 @@ DESCRIPTION
     DynamicStructureFactor / SQw
     CoherentDynamicStructureFactor / SQwCoherent / SQwCoh / SQw_coh
     IncoherentDynamicStructureFactor / SQwIncoherentSQwIncoh / SQw_incoh
+    FakeObservable / gauss2D
     PDF / PairDistributionFunction
     IntermediateScatteringFunction / FQt
     CoherentIntermediateScatteringFunction / FQtCoherent / FQtCoh / FQt_coh
@@ -266,6 +267,7 @@ DESCRIPTION
 
 PACKAGE CONTENTS
     concurrency_tools
+    fake_observable
     fqt
     fqt_coh
     fqt_incoh
@@ -280,6 +282,7 @@ CLASSES
         MDMC.trajectory_analysis.observables.fqt_coh.FQtCoherent
         MDMC.trajectory_analysis.observables.fqt_incoh.FQtIncoherent
     MDMC.trajectory_analysis.observables.obs.Observable(abc.ABC)
+        MDMC.trajectory_analysis.observables.fake_observable.FakeObservable
         MDMC.trajectory_analysis.observables.pdf.PairDistributionFunction
     MDMC.trajectory_analysis.observables.sqw.AbstractSQw(MDMC.trajectory_analysis.observables.sqw.SQwMixins, MDMC.trajectory_analysis.observables.obs.Observable)
         MDMC.trajectory_analysis.observables.sqw.SQw
@@ -3226,6 +3229,203 @@ CLASSES
      |
      |  ----------------------------------------------------------------------
      |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  name
+     |      Get or set the module name that used for factory instantiation.
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The name of the module in which the ``Observable`` is located.
+     |
+     |  origin
+     |      Get or set the origin of the observable.
+     |
+     |      Returns
+     |      -------
+     |      {&#39;experiment&#39;, &#39;MD&#39;}
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``.
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD.
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT.
+
+    class FakeObservable(MDMC.trajectory_analysis.observables.obs.Observable)
+     |  Calculates a function and ignores the trajectory contents.
+     |
+     |  The optimisation should produce the following arguments:
+     |      centre_x=5.0
+     |      centre_y=4.0
+     |      width_x=3.3
+     |      width_y=2.1
+     |
+     |  Method resolution order:
+     |      FakeObservable
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  calculate_from_MD(self, MD_input, verbose=0, **parameters)
+     |      Evaluate the function using the current parameter values.
+     |
+     |      Gets the current values of parameters from trajectory attributes.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : CompactTrajectory
+     |          An empty trajectory with a parameters attribute.
+     |      verbose : int, optional
+     |          Ignored, by default 0.
+     |
+     |  maximum_frames(self) -&gt; int
+     |      The max no. of ``CompactTrajectory`` frames able to calculate the ``dependent_variables``.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames.
+     |
+     |  minimum_frames(self, dt=None) -&gt; int
+     |      The no. of ``CompactTrajectory`` frames needed to calculate the ``dependent_variables``.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames.
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Generate the target values from hardcoded arguments.
+     |
+     |      The optimisation should produce the following arguments:
+     |          centre_x=5.0
+     |          centre_y=4.0
+     |          width_x=3.3
+     |          width_y=2.1
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |
+     |  dependent_variables_structure
+     |      Structure of the dependent variables with respect to the independent variables.
+     |
+     |      Specifically, the order in which the dependent variables are indexed
+     |      with regards to the independent variables.
+     |
+     |      The purpose of this method is to ensure that all ``Observable`` s of a particular type
+     |      are created with dependent_variables that are consistent
+     |      regardless of how they were created (e.g. by different ``Reader`` s).
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The np.shape of the dependent variables.
+     |
+     |      Examples
+     |      --------
+     |      If ``dep_var1[indep_var1_index, indep_var2_index, ...] == data point``
+     |      for values of the independent_variables with the stated indices,
+     |      then the relevant entry in the returned dict should be:
+     |      ``{&#39;dependent_variable1&#39;: [independent_variable1, independent_variable2, ...]}``
+     |
+     |      .. note::
+     |
+     |         This would also correspond to numpy.shape of the dependent variable being:
+     |
+     |         .. code-block:: python
+     |
+     |            np.shape(dependent_variable1)=(np.size(independent_variable1),
+     |                                           np.size(independent_variable2), ...)
+     |
+     |  errors
+     |      The errors on the dependent variables.
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``.
+     |
+     |  uniformity_requirements
+     |      Get the current limitations on ``independent_variables`` of the ``Observable``.
+     |
+     |      It captures if the ``independent_variables`` are required to be uniform or to start at zero
+     |      The keys of the returned dictionary should be the variables that have such a restriction,
+     |      with the associated values being a dictionary with booleans
+     |      if the variables are &#39;uniform&#39; or &#39;zeroed&#39;.
+     |
+     |      Variables without any requirements do not need to be included, but can be included.
+     |
+     |      .. note::
+     |
+     |         If there are no uniformity requirements it is okay to return &#39;None&#39;.
+     |
+     |      Returns
+     |      -------
+     |      dict[str, dict[str, bool]]
+     |          Dictionary of independent variables
+     |          with their uniformity restrictions represented as booleans.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  dependent_variables
+     |      The dependent variables.
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables.
+     |
+     |  independent_variables
+     |      The independent variables.
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self) from MDMC.common.decorators.repr_decorator.&lt;locals&gt;.decorator.&lt;locals&gt;
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data.
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
      |
      |  name
      |      Get or set the module name that used for factory instantiation.
@@ -7504,6 +7704,203 @@ CLASSES
      |      bool
      |          Whether to use FFT.
 
+    gauss2D = class FakeObservable(MDMC.trajectory_analysis.observables.obs.Observable)
+     |  Calculates a function and ignores the trajectory contents.
+     |
+     |  The optimisation should produce the following arguments:
+     |      centre_x=5.0
+     |      centre_y=4.0
+     |      width_x=3.3
+     |      width_y=2.1
+     |
+     |  Method resolution order:
+     |      FakeObservable
+     |      MDMC.trajectory_analysis.observables.obs.Observable
+     |      abc.ABC
+     |      builtins.object
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  calculate_from_MD(self, MD_input, verbose=0, **parameters)
+     |      Evaluate the function using the current parameter values.
+     |
+     |      Gets the current values of parameters from trajectory attributes.
+     |
+     |      Parameters
+     |      ----------
+     |      MD_input : CompactTrajectory
+     |          An empty trajectory with a parameters attribute.
+     |      verbose : int, optional
+     |          Ignored, by default 0.
+     |
+     |  maximum_frames(self) -&gt; int
+     |      The max no. of ``CompactTrajectory`` frames able to calculate the ``dependent_variables``.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The maximum number of frames.
+     |
+     |  minimum_frames(self, dt=None) -&gt; int
+     |      The no. of ``CompactTrajectory`` frames needed to calculate the ``dependent_variables``.
+     |
+     |      Parameters
+     |      ----------
+     |      dt : float, optional
+     |          The time separation of frames in ``fs``, default is `None`.
+     |
+     |      Returns
+     |      -------
+     |      int
+     |          The minimum number of frames.
+     |
+     |  read_from_file(self, reader, file_name)
+     |      Generate the target values from hardcoded arguments.
+     |
+     |      The optimisation should produce the following arguments:
+     |          centre_x=5.0
+     |          centre_y=4.0
+     |          width_x=3.3
+     |          width_y=2.1
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |
+     |  dependent_variables_structure
+     |      Structure of the dependent variables with respect to the independent variables.
+     |
+     |      Specifically, the order in which the dependent variables are indexed
+     |      with regards to the independent variables.
+     |
+     |      The purpose of this method is to ensure that all ``Observable`` s of a particular type
+     |      are created with dependent_variables that are consistent
+     |      regardless of how they were created (e.g. by different ``Reader`` s).
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The np.shape of the dependent variables.
+     |
+     |      Examples
+     |      --------
+     |      If ``dep_var1[indep_var1_index, indep_var2_index, ...] == data point``
+     |      for values of the independent_variables with the stated indices,
+     |      then the relevant entry in the returned dict should be:
+     |      ``{&#39;dependent_variable1&#39;: [independent_variable1, independent_variable2, ...]}``
+     |
+     |      .. note::
+     |
+     |         This would also correspond to numpy.shape of the dependent variable being:
+     |
+     |         .. code-block:: python
+     |
+     |            np.shape(dependent_variable1)=(np.size(independent_variable1),
+     |                                           np.size(independent_variable2), ...)
+     |
+     |  errors
+     |      The errors on the dependent variables.
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The errors on the ``dependent_variables``.
+     |
+     |  uniformity_requirements
+     |      Get the current limitations on ``independent_variables`` of the ``Observable``.
+     |
+     |      It captures if the ``independent_variables`` are required to be uniform or to start at zero
+     |      The keys of the returned dictionary should be the variables that have such a restriction,
+     |      with the associated values being a dictionary with booleans
+     |      if the variables are &#39;uniform&#39; or &#39;zeroed&#39;.
+     |
+     |      Variables without any requirements do not need to be included, but can be included.
+     |
+     |      .. note::
+     |
+     |         If there are no uniformity requirements it is okay to return &#39;None&#39;.
+     |
+     |      Returns
+     |      -------
+     |      dict[str, dict[str, bool]]
+     |          Dictionary of independent variables
+     |          with their uniformity restrictions represented as booleans.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  dependent_variables
+     |      The dependent variables.
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The dependent variables.
+     |
+     |  independent_variables
+     |      The independent variables.
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent variables.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __repr__(self) from MDMC.common.decorators.repr_decorator.&lt;locals&gt;.decorator.&lt;locals&gt;
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  data
+     |      Get the independent, dependent and error data.
+     |
+     |      Returns
+     |      -------
+     |      dict
+     |          The independent, dependent and error data.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from MDMC.trajectory_analysis.observables.obs.Observable:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  name
+     |      Get or set the module name that used for factory instantiation.
+     |
+     |      Returns
+     |      -------
+     |      str
+     |          The name of the module in which the ``Observable`` is located.
+     |
+     |  origin
+     |      Get or set the origin of the observable.
+     |
+     |      Returns
+     |      -------
+     |      {&#39;experiment&#39;, &#39;MD&#39;}
+     |          The origin of the ``Observable``, either ``&#39;experiment&#39;`` or ``&#39;MD&#39;``.
+     |
+     |  use_FFT
+     |      Get or set whether to use FFT when calculating from MD.
+     |
+     |      Returns
+     |      -------
+     |      bool
+     |          Whether to use FFT.
+
 DATA
     __all__ = [&#39;CoherentDynamicStructureFactor&#39;, &#39;CoherentIntermediateScat...
 
@@ -8567,7 +8964,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='3396b780-6656-4e62-9ce8-04bd1f8d98ff'></div></div>
+<div id='0891a93e-9a12-48b5-bca5-caf8a767fc61'></div></div>
 </div>
 <p>Therefore it is strongly recommended that you specify the <span class="math notranslate nohighlight">\(E\)</span> values for calculating the dynamic structure factor.</p>
 <p>The allowed values of <span class="math notranslate nohighlight">\(E\)</span> (in meV) are determined by trajectory times. To aid in calculating these, the <code class="docutils literal notranslate"><span class="pre">calculate_E</span></code> method can be used, which requires the time step of the trajectory (in fs) and the total number of E values to be calculated. The number of E values should be changed to improve the statistics, but somewhere in the range of 1/4 to 1/8 of the total number of trajectory configurations (i.e. the number of times for which a configuration was recorded) will often be
@@ -9668,7 +10065,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='149bb94c-22c1-436c-9291-887b75582b3c'></div></div>
+<div id='51658c40-8c9b-4787-b1e6-c511573a03b7'></div></div>
 </div>
 <p>We can compare this with experimental data measured using quasi-elastic neutron scattering (QENS) data (specifically here the <a class="reference external" href="https://doi.org/10.1103/PhysRevA.31.3391">van Well et al. (1985)</a> data, seen in detail in the <a class="reference internal" href="../../../tutorials/Argon-a-to-z.html"><span class="doc">Argon a-to-z</span></a> tutorial) by reading the data into an SQwCoh object:</p>
 <div class="nbinput nblast docutils container">
@@ -10693,7 +11090,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='3c003c97-7c41-42bb-8499-195c368d8f5d'></div></div>
+<div id='2a2b7d55-8185-4833-a737-f5795403730b'></div></div>
 </div>
 <section id="Other-observables">
 <h3>Other observables<a class="headerlink" href="#Other-observables" title="Link to this heading"></a></h3>
