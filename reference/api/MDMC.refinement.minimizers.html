@@ -125,6 +125,161 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
+<section id="module-MDMC.refinement.minimizers.CMAES">
+<span id="mdmc-refinement-minimizers-cmaes-module"></span><h2>MDMC.refinement.minimizers.CMAES module<a class="headerlink" href="#module-MDMC.refinement.minimizers.CMAES" title="Link to this heading"></a></h2>
+<p>Covariance Matrix Adaptation Evolution Strategy minimiser.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.refinement.minimizers.CMAES.</span></span><span class="sig-name descname"><span class="pre">CMAES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="MDMC.control.html#MDMC.control.control.Control" title="MDMC.control.control.Control"><span class="pre">Control</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="MDMC.MD.html#MDMC.MD.parameters.Parameters" title="MDMC.MD.parameters.Parameters"><span class="pre">Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/CMAES.html#CMAES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#MDMC.refinement.minimizers.minimizer_abs.Minimizer" title="MDMC.refinement.minimizers.minimizer_abs.Minimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Minimizer</span></code></a></p>
+<p>Minimiser using CMA-ES, but using it sequentially.</p>
+<p>Normally, CMA-ES produces several sets of input parameters per batch/generation.
+This wrapper executes them one at a time, and asks the CMA-ES optimiser
+for a new batch of inputs every time the existing batch has been used up.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>control</strong> (<a class="reference internal" href="MDMC.control.html#MDMC.control.control.Control" title="MDMC.control.control.Control"><em>Control</em></a>) – The <code class="docutils literal notranslate"><span class="pre">Control</span></code> object which uses this Minimizer.</p></li>
+<li><p><strong>sigma0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Initial standard deviation of the generated parameters.</p></li>
+<li><p><strong>CMA_popsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Population size, overrides the standard CMA-ES settings.</p></li>
+<li><p><strong>CMA_elitist</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to keep the best solution in the next generation of solutions.</p></li>
+<li><p><strong>conv_tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – The relative tolerance of the convergence check. Defaults to <cite>1e-5</cite></p></li>
+<li><p><strong>min_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – The number of refinement steps with an accepted state change after which
+convergence is checked. If the number of accepted state changes is less than this,
+then the refinement is deemed as not converged. Defaults to <cite>2</cite></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.history_columns">
+<span class="sig-name descname"><span class="pre">history_columns</span></span><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.history_columns" title="Link to this definition"></a></dt>
+<dd><p>list of the column titles for the minimizer history</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.DISTRIBUTION">
+<span class="sig-name descname"><span class="pre">DISTRIBUTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'uniform':</span> <span class="pre">&lt;bound</span> <span class="pre">method</span> <span class="pre">RandomState.uniform</span> <span class="pre">of</span> <span class="pre">RandomState(MT19937)&gt;}</span></em><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.DISTRIBUTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.change_parameters">
+<span class="sig-name descname"><span class="pre">change_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/CMAES.html#CMAES.change_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.change_parameters" title="Link to this definition"></a></dt>
+<dd><p>Assign new values to the simulation parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.change_state">
+<span class="sig-name descname"><span class="pre">change_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/CMAES.html#CMAES.change_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.change_state" title="Link to this definition"></a></dt>
+<dd><p>Stochastic determination of whether the state should change based on the
+FoM</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>True</cite> if the state should be change</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.extract_result">
+<span class="sig-name descname"><span class="pre">extract_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/CMAES.html#CMAES.extract_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.extract_result" title="Link to this definition"></a></dt>
+<dd><p>Extracts the result data from the history of the minimizer run</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output_data</strong> – A list of: last accepted point coordinates, last accepted point FoM value,
+best point coordinates, best point FoM</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.format_result_string">
+<span class="sig-name descname"><span class="pre">format_result_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimizer_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/CMAES.html#CMAES.format_result_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.format_result_string" title="Link to this definition"></a></dt>
+<dd><p>Formats a string output for the results of an CMAES minimizer run</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>minimizer_output</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – A list of: last accepted point coordinates, last accepted point FoM value,
+best point coordinates, best point FoM</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>output_string</strong> – A string containing the following: whether the minimizer has converged, last parameters,
+last FoM value, optimal (lowest FoM) parameters, optimal (lowest) FoM value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.has_converged">
+<span class="sig-name descname"><span class="pre">has_converged</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/CMAES.html#CMAES.has_converged"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.has_converged" title="Link to this definition"></a></dt>
+<dd><p>Checks if the refinement process has converged on a stable solution.
+Specifically, it checks if the Figure of Merit and the parameters being refined have all
+changed less than the relative conversion tolerance (<cite>conv_tol</cite>) between the last two
+accepted refinement steps. It also allows specifying a minimum number of refinement
+steps (<cite>min_steps</cite>) that must have been accepted before checking for convergence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether or not the minimizer has converged.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">history_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Returns column labels of the history</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">list</span></code> of <code class="docutils literal notranslate"><span class="pre">str</span></code> containing all the column labels in the history</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.next_parameter_point">
+<span class="sig-name descname"><span class="pre">next_parameter_point</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/CMAES.html#CMAES.next_parameter_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.next_parameter_point" title="Link to this definition"></a></dt>
+<dd><p>Return the next set of simulation parameters.</p>
+<p>If the current batch has been exhausted, it generates a new batch using CMA-ES.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/CMAES.html#CMAES.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.reset_parameters" title="Link to this definition"></a></dt>
+<dd><p>Not used.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MDMC.refinement.minimizers.CMAES.CMAES.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FoM</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/CMAES.html#CMAES.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.CMAES.CMAES.step" title="Link to this definition"></a></dt>
+<dd><p>Increments the minimization by a step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>FoM</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The current figure of merit value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-MDMC.refinement.minimizers.GPO">
 <span id="mdmc-refinement-minimizers-gpo-module"></span><h2>MDMC.refinement.minimizers.GPO module<a class="headerlink" href="#module-MDMC.refinement.minimizers.GPO" title="Link to this heading"></a></h2>
 <p>The Gaussian-Process-Optimizer minimizer class</p>
@@ -233,8 +388,8 @@ equal to or greater than the number of maximum refinement points of the associat
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id0">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">history_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">history_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd><p>Returns column labels of the history</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -495,8 +650,8 @@ the parameter_point_array have been measured.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id1">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">history_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id2">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">history_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd><p>Returns column labels of the history</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -531,161 +686,6 @@ the parameter_point_array have been measured.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MDMC.refinement.minimizers.GPR.GPR.step">
 <span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FoM</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/GPR.html#GPR.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.GPR.GPR.step" title="Link to this definition"></a></dt>
-<dd><p>Increments the minimization by a step</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>FoM</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The current figure of merit value.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="module-MDMC.refinement.minimizers.MMC">
-<span id="mdmc-refinement-minimizers-mmc-module"></span><h2>MDMC.refinement.minimizers.MMC module<a class="headerlink" href="#module-MDMC.refinement.minimizers.MMC" title="Link to this heading"></a></h2>
-<p>The Metropolis-Hastings minimizer class</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MDMC.refinement.minimizers.MMC.</span></span><span class="sig-name descname"><span class="pre">MMC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="MDMC.control.html#MDMC.control.control.Control" title="MDMC.control.control.Control"><span class="pre">Control</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="MDMC.MD.html#MDMC.MD.parameters.Parameters" title="MDMC.MD.parameters.Parameters"><span class="pre">Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/MMC.html#MMC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#MDMC.refinement.minimizers.minimizer_abs.Minimizer" title="MDMC.refinement.minimizers.minimizer_abs.Minimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Minimizer</span></code></a></p>
-<p><code class="docutils literal notranslate"><span class="pre">Minimizer</span></code> employing the Metropolis-Hastings algorithm</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>control</strong> (<a class="reference internal" href="MDMC.control.html#MDMC.control.control.Control" title="MDMC.control.control.Control"><em>Control</em></a>) – The <code class="docutils literal notranslate"><span class="pre">Control</span></code> object which uses this Minimizer.</p></li>
-<li><p><strong>MC_norm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Normalization parameter for MC which determines the accept/reject ratio, default is 1.0</p></li>
-<li><p><strong>max_parameter_change</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum factor by which a Parameter can change each step of the
-refinement. Defaults to <cite>0.01</cite></p></li>
-<li><p><strong>conv_tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – The relative tolerance of the convergence check. Defaults to <cite>1e-5</cite></p></li>
-<li><p><strong>min_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – The number of refinement steps with an accepted state change after which
-convergence is checked. If the number of accepted state changes is less than this,
-then the refinement is deemed as not converged. Defaults to <cite>2</cite></p></li>
-<li><p><strong>distribution</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The distribution from which <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> changes are selected. Defaults to ‘uniform’</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC.history_columns">
-<span class="sig-name descname"><span class="pre">history_columns</span></span><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC.history_columns" title="Link to this definition"></a></dt>
-<dd><p>list of the column titles for the minimizer history</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC.DISTRIBUTION">
-<span class="sig-name descname"><span class="pre">DISTRIBUTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'uniform':</span> <span class="pre">&lt;bound</span> <span class="pre">method</span> <span class="pre">RandomState.uniform</span> <span class="pre">of</span> <span class="pre">RandomState(MT19937)&gt;}</span></em><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC.DISTRIBUTION" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC.change_parameters">
-<span class="sig-name descname"><span class="pre">change_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/MMC.html#MMC.change_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC.change_parameters" title="Link to this definition"></a></dt>
-<dd><p>Selects a new value for each parameter from a distribution centered
-around the current value.</p>
-<p>Note that for <code class="docutils literal notranslate"><span class="pre">Parameter``s</span> <span class="pre">with</span> <span class="pre">``constraints</span></code> set, any proposed new value that would
-lie outside the range of the constraint is clipped to the lower or upper limit as
-appropriate.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parameters</strong> (<a class="reference internal" href="MDMC.MD.html#MDMC.MD.parameters.Parameters" title="MDMC.MD.parameters.Parameters"><em>Parameters</em></a>) – All <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> objects that are being refined</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC.change_state">
-<span class="sig-name descname"><span class="pre">change_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/MMC.html#MMC.change_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC.change_state" title="Link to this definition"></a></dt>
-<dd><p>Stochastic determination of whether the state should change based on the
-FoM</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><cite>True</cite> if the state should be change</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC.extract_result">
-<span class="sig-name descname"><span class="pre">extract_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/MMC.html#MMC.extract_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC.extract_result" title="Link to this definition"></a></dt>
-<dd><p>Extracts the result data from the history of the minimizer run</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>output_data</strong> – A list of: last accepted point coordinates, last accepted point FoM value,
-best point coordinates, best point FoM</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC.format_result_string">
-<span class="sig-name descname"><span class="pre">format_result_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minimizer_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/MMC.html#MMC.format_result_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC.format_result_string" title="Link to this definition"></a></dt>
-<dd><p>Formats a string output for the results of an MMC minimizer run</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>minimizer_output</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – A list of: last accepted point coordinates, last accepted point FoM value,
-best point coordinates, best point FoM</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>output_string</strong> – A string containing the following: whether the minimizer has converged, last parameters,
-last FoM value, optimal (lowest FoM) parameters, optimal (lowest) FoM value</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC.has_converged">
-<span class="sig-name descname"><span class="pre">has_converged</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/MMC.html#MMC.has_converged"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC.has_converged" title="Link to this definition"></a></dt>
-<dd><p>Checks if the refinement process has converged on a stable solution.
-Specifically, it checks if the Figure of Merit and the parameters being refined have all
-changed less than the relative conversion tolerance (<cite>conv_tol</cite>) between the last two
-accepted refinement steps. It also allows specifying a minimum number of refinement
-steps (<cite>min_steps</cite>) that must have been accepted before checking for convergence.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Whether or not the minimizer has converged.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="id2">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">history_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
-<dd><p>Returns column labels of the history</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">list</span></code> of <code class="docutils literal notranslate"><span class="pre">str</span></code> containing all the column labels in the history</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC.reset_parameters">
-<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/MMC.html#MMC.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC.reset_parameters" title="Link to this definition"></a></dt>
-<dd><p>Resets the <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> values to the values from the previous MMC step</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MDMC.refinement.minimizers.MMC.MMC.step">
-<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FoM</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/MDMC/refinement/minimizers/MMC.html#MMC.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MDMC.refinement.minimizers.MMC.MMC.step" title="Link to this definition"></a></dt>
 <dd><p>Increments the minimization by a step</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1032,7 +1032,7 @@ long as it is a subclass of <code class="docutils literal notranslate"><span cla
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="MDMC.refinement.minimizers.minimizer_factory.MinimizerFactory.registry">
-<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#MDMC.refinement.minimizers.minimizer_abs.Minimizer" title="MDMC.refinement.minimizers.minimizer_abs.Minimizer"><span class="pre">Minimizer</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GPO':</span> <span class="pre">&lt;class</span> <span class="pre">'MDMC.refinement.minimizers.GPO.GPO'&gt;,</span> <span class="pre">'GPR':</span> <span class="pre">&lt;class</span> <span class="pre">'MDMC.refinement.minimizers.GPR.GPR'&gt;,</span> <span class="pre">'MMC':</span> <span class="pre">&lt;class</span> <span class="pre">'MDMC.refinement.minimizers.MMC.MMC'&gt;}</span></em><a class="headerlink" href="#MDMC.refinement.minimizers.minimizer_factory.MinimizerFactory.registry" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#MDMC.refinement.minimizers.minimizer_abs.Minimizer" title="MDMC.refinement.minimizers.minimizer_abs.Minimizer"><span class="pre">Minimizer</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'CMAES':</span> <span class="pre">&lt;class</span> <span class="pre">'MDMC.refinement.minimizers.CMAES.CMAES'&gt;,</span> <span class="pre">'GPO':</span> <span class="pre">&lt;class</span> <span class="pre">'MDMC.refinement.minimizers.GPO.GPO'&gt;,</span> <span class="pre">'GPR':</span> <span class="pre">&lt;class</span> <span class="pre">'MDMC.refinement.minimizers.GPR.GPR'&gt;}</span></em><a class="headerlink" href="#MDMC.refinement.minimizers.minimizer_factory.MinimizerFactory.registry" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

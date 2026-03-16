@@ -735,7 +735,7 @@ class Universe(MDMC.MD.container.AtomContainer)
  |          of not converging.
  |      solvent : str, optional
  |          A `str` specifying an inbuilt ``Solvent`` from the following:
- |          SPC, SPCE, TIP3PFB, TIP3P.
+ |          SPC, TIP3PFB, TIP3P, SPCE.
  |          The default is &#39;SPCE&#39;.
  |      max_iterations: int, optional
  |          The maximum number of times to try to solvate the universe to
@@ -1218,7 +1218,7 @@ None
 Help on class Control in module MDMC.control.control:
 
 class Control(builtins.object)
- |  Control(simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;MMC&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, file_dump_frequency: MDMC.control.control.DumpFreq = &lt;DumpFreq.NONE: 0&gt;, file_dump_extent: MDMC.control.control.DumpExtent = &lt;DumpExtent.BOTH: 3&gt;, file_dump_loc: pathlib.Path = PosixPath(&#39;.&#39;), file_dump_timestamped: bool = False, file_dump_prefix: str = &#39;trajectory&#39;, **settings: dict)
+ |  Control(simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;CMAES&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, file_dump_frequency: MDMC.control.control.DumpFreq = &lt;DumpFreq.NONE: 0&gt;, file_dump_extent: MDMC.control.control.DumpExtent = &lt;DumpExtent.BOTH: 3&gt;, file_dump_loc: pathlib.Path = PosixPath(&#39;.&#39;), file_dump_timestamped: bool = False, file_dump_prefix: str = &#39;trajectory&#39;, **settings: dict)
  |
  |  Controls the MDMC refinement
  |
@@ -1282,7 +1282,7 @@ class Control(builtins.object)
  |  file_dump_prefix: str, optional
  |      The name the dumped H5MD file should be. Default is ``trajectory``
  |  minimizer_type : str, optional
- |      The ``Minimizer`` type. Default is &#39;MMC&#39;.
+ |      The ``Minimizer`` type. Default is &#39;CMAES&#39;.
  |  FoM_options : dict of {str : str}, optional
  |      Defines the details of the ``FigureOfMeritCalculator`` to use. Default is `None`, in which
  |      case the first option for each of the following keys is used:
@@ -1331,8 +1331,15 @@ class Control(builtins.object)
  |          blocks as possible (with overlap allowed).
  |      results_filename: str
  |          The name of the file in which the results of the MDMC run will be stored
- |      MC_norm: int
- |          1 if the MMC minimiser is to be used for parameter optimisation.
+ |      sigma0: float, optional
+ |          Initial standard deviation of the generated parameters.
+ |      CMA_popsize: int, optional
+ |          Population size, overrides the standard CMA-ES settings.
+ |      CMA_elitist: Any, optional
+ |          Whether to keep the best solution(s) in the next generation of solutions.
+ |          Can be an int, &#34;initial&#34; or True.
+ |      CMA_tolx: float, optional
+ |          Convergence criterion for the parameter change in consecutive generations. Def. 1e-3
  |      use_average : bool, optional
  |          Optional parameter relevant in case ``MD_steps`` is larger than the minimum required
  |          and the MD ``CompactTrajectory`` is sliced into sub-``CompactTrajectory`` blocks.
@@ -1382,7 +1389,7 @@ class Control(builtins.object)
  |
  |  Methods defined here:
  |
- |  __init__(self, simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;MMC&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, file_dump_frequency: MDMC.control.control.DumpFreq = &lt;DumpFreq.NONE: 0&gt;, file_dump_extent: MDMC.control.control.DumpExtent = &lt;DumpExtent.BOTH: 3&gt;, file_dump_loc: pathlib.Path = PosixPath(&#39;.&#39;), file_dump_timestamped: bool = False, file_dump_prefix: str = &#39;trajectory&#39;, **settings: dict)
+ |  __init__(self, simulation: MDMC.MD.simulation.Simulation, exp_datasets: List[dict], fit_parameters: MDMC.MD.parameters.Parameters, minimizer_type: str = &#39;CMAES&#39;, FoM_options: dict = None, reset_config: bool = True, MD_steps: int = None, equilibration_steps: int = 0, previous_history: Union[str, pathlib.Path] = None, verbose: int = 0, print_all_settings: bool = False, file_dump_frequency: MDMC.control.control.DumpFreq = &lt;DumpFreq.NONE: 0&gt;, file_dump_extent: MDMC.control.control.DumpExtent = &lt;DumpExtent.BOTH: 3&gt;, file_dump_loc: pathlib.Path = PosixPath(&#39;.&#39;), file_dump_timestamped: bool = False, file_dump_prefix: str = &#39;trajectory&#39;, **settings: dict)
  |      Initialize self.  See help(type(self)) for accurate signature.
  |
  |  __repr__(self) from MDMC.common.decorators.repr_decorator.&lt;locals&gt;.decorator.&lt;locals&gt;

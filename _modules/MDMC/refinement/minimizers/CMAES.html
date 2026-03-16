@@ -1,0 +1,415 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDMC.refinement.minimizers.CMAES &mdash; MDMC 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=10f1778b"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MDMC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing.html">2. Contributing to MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/Argon-a-to-z.html">Argon A-to-Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/accessing-atom-properties.html">Creating Atoms and Accessing Properties</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/equilibrating-a-simulation.html">Equilibrating simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/running-a-refinement.html">Running a Refinement (in detail)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/understanding-units.html">Understanding scientific units in MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/use-MDMC.html">How to use MDMC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/api/modules.html">MDMC</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/explanation.html">Explanation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer/overview.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MDMC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MDMC.refinement.minimizers.CMAES</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MDMC.refinement.minimizers.CMAES</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Covariance Matrix Adaptation Evolution Strategy minimiser.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">textwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">dedent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">cma</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.refinement.minimizers.minimizer_abs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Minimizer</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.control</span><span class="w"> </span><span class="kn">import</span> <span class="n">Control</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">MDMC.MD</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameters</span>
+
+
+<div class="viewcode-block" id="CMAES">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.CMAES.CMAES">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CMAES</span><span class="p">(</span><span class="n">Minimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Minimiser using CMA-ES, but using it sequentially.</span>
+
+<span class="sd">    Normally, CMA-ES produces several sets of input parameters per batch/generation.</span>
+<span class="sd">    This wrapper executes them one at a time, and asks the CMA-ES optimiser</span>
+<span class="sd">    for a new batch of inputs every time the existing batch has been used up.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    control: Control</span>
+<span class="sd">        The ``Control`` object which uses this Minimizer.</span>
+<span class="sd">    sigma0: float, optional</span>
+<span class="sd">        Initial standard deviation of the generated parameters.</span>
+<span class="sd">    CMA_popsize: int, optional</span>
+<span class="sd">        Population size, overrides the standard CMA-ES settings.</span>
+<span class="sd">    CMA_elitist: bool, optional</span>
+<span class="sd">        Whether to keep the best solution in the next generation of solutions.</span>
+<span class="sd">    conv_tol : float, optional</span>
+<span class="sd">        The relative tolerance of the convergence check. Defaults to `1e-5`</span>
+<span class="sd">    min_steps : int, optional</span>
+<span class="sd">        The number of refinement steps with an accepted state change after which</span>
+<span class="sd">        convergence is checked. If the number of accepted state changes is less than this,</span>
+<span class="sd">        then the refinement is deemed as not converged. Defaults to `2`</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    history_columns: list[str]</span>
+<span class="sd">        list of the column titles for the minimizer history</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">DISTRIBUTION</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uniform&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">control</span><span class="p">:</span> <span class="s2">&quot;Control&quot;</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="s2">&quot;Parameters&quot;</span><span class="p">,</span>
+        <span class="n">previous_history</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">previous_history</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_iteration</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma0</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sigma0&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv_tol</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;conv_tol&quot;</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_steps</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;min_steps&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_history</span> <span class="o">=</span> <span class="n">previous_history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_changed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">opt_bounds</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">constraints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
+                <span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">constraints</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">constraints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="c1"># This change is necessary just to avoid re-writing most of the Control tests:</span>
+        <span class="n">init_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimiser</span> <span class="o">=</span> <span class="n">cma</span><span class="o">.</span><span class="n">CMAEvolutionStrategy</span><span class="p">(</span>
+            <span class="n">init_values</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sigma0</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;bounds&quot;</span><span class="p">:</span> <span class="n">opt_bounds</span><span class="p">,</span>
+                <span class="s2">&quot;CMA_elitist&quot;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CMA_elitist&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                <span class="s2">&quot;popsize&quot;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CMA_popsize&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;tolfun&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv_tol</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+                <span class="s2">&quot;tolx&quot;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CMA_tolx&quot;</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
+                <span class="s2">&quot;tolfunhist&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv_tol</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimiser</span><span class="o">.</span><span class="n">ask</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">used_parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">used_values</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">history_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;list[str]&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns column labels of the history</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[str]</span>
+<span class="sd">            A ``list`` of ``str`` containing all the column labels in the history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;FoM&quot;</span><span class="p">,</span> <span class="s2">&quot;CMA iteration&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CMAES.step">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.CMAES.CMAES.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FoM</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Increments the minimization by a step</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        FoM : float</span>
+<span class="sd">            The current figure of merit value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">FoM</span> <span class="o">=</span> <span class="n">FoM</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">}</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">FoM</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">used_parameters</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">used_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FoM</span><span class="p">)</span>
+
+        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_iteration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FoM_old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FoM</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters_old_values</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">history</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">change_parameters</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CMAES.change_state">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.CMAES.CMAES.change_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">change_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stochastic determination of whether the state should change based on the</span>
+<span class="sd">        FoM</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            `True` if the state should be change</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="CMAES.next_parameter_point">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.CMAES.CMAES.next_parameter_point">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">next_parameter_point</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the next set of simulation parameters.</span>
+
+<span class="sd">        If the current batch has been exhausted, it generates a new batch using CMA-ES.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimiser</span><span class="o">.</span><span class="n">tell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">used_parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">used_values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimiser</span><span class="o">.</span><span class="n">ask</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">used_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">used_values</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_iteration</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CMAES.change_parameters">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.CMAES.CMAES.change_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">change_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign new values to the simulation parameters.&quot;&quot;&quot;</span>
+
+        <span class="n">new_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_parameter_point</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">new_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="CMAES.has_converged">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.CMAES.CMAES.has_converged">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">has_converged</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the refinement process has converged on a stable solution.</span>
+<span class="sd">        Specifically, it checks if the Figure of Merit and the parameters being refined have all</span>
+<span class="sd">        changed less than the relative conversion tolerance (`conv_tol`) between the last two</span>
+<span class="sd">        accepted refinement steps. It also allows specifying a minimum number of refinement</span>
+<span class="sd">        steps (`min_steps`) that must have been accepted before checking for convergence.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Whether or not the minimizer has converged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_steps</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">param_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;CMA iteration&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">converged</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">param_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">param_history</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">rtol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">conv_tol</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimiser</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span> <span class="ow">or</span> <span class="n">converged</span></div>
+
+
+<div class="viewcode-block" id="CMAES.reset_parameters">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.CMAES.CMAES.reset_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Not used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="CMAES.extract_result">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.CMAES.CMAES.extract_result">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_result</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;list[str]&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the result data from the history of the minimizer run</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        output_data: list[str]</span>
+<span class="sd">            A list of: last accepted point coordinates, last accepted point FoM value,</span>
+<span class="sd">            best point coordinates, best point FoM</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_parameters</span><span class="p">()</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span>
+
+        <span class="n">last_param_row</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">last_FoM_value</span> <span class="o">=</span> <span class="n">last_param_row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Find lowest parameters &amp; FoM</span>
+        <span class="n">lowest_FoM_id</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="s2">&quot;FoM&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
+        <span class="n">lowest_FoM_row</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">lowest_FoM_id</span><span class="p">]</span>
+        <span class="n">lowest_FoM_value</span> <span class="o">=</span> <span class="n">lowest_FoM_row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;FoM&quot;</span><span class="p">)</span>
+
+        <span class="n">last_param_row</span> <span class="o">=</span> <span class="n">last_param_row</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;FoM&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;CMA iteration&quot;</span><span class="p">)</span>
+        <span class="n">lowest_FoM_row</span> <span class="o">=</span> <span class="n">lowest_FoM_row</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;FoM&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;CMA iteration&quot;</span><span class="p">)</span>
+
+        <span class="n">last_parameters_found</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">last_param_row</span><span class="p">)</span>
+        <span class="n">lowest_FoM_parameters</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">lowest_FoM_row</span><span class="p">)</span>
+
+        <span class="n">output_data</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">last_parameters_found</span><span class="p">,</span>
+            <span class="n">last_FoM_value</span><span class="p">,</span>
+            <span class="n">lowest_FoM_parameters</span><span class="p">,</span>
+            <span class="n">lowest_FoM_value</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">output_data</span></div>
+
+
+<div class="viewcode-block" id="CMAES.format_result_string">
+<a class="viewcode-back" href="../../../../reference/api/MDMC.refinement.minimizers.html#MDMC.refinement.minimizers.CMAES.CMAES.format_result_string">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_result_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimizer_output</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Formats a string output for the results of an CMAES minimizer run</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        minimizer_output: list</span>
+<span class="sd">            A list of: last accepted point coordinates, last accepted point FoM value,</span>
+<span class="sd">            best point coordinates, best point FoM</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        output_string: str</span>
+<span class="sd">            A string containing the following: whether the minimizer has converged, last parameters,</span>
+<span class="sd">            last FoM value, optimal (lowest FoM) parameters, optimal (lowest) FoM value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_converged</span><span class="p">():</span>
+            <span class="n">converged_message</span> <span class="o">=</span> <span class="s2">&quot;The refinement has converged.&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">converged_message</span> <span class="o">=</span> <span class="s2">&quot;The refinement has not converged.&quot;</span>
+
+        <span class="c1"># as of numpy 2.0.0, np.float64 has repr e.g. &quot;np.float64(3.0)&quot; instead of &quot;3.14&quot;</span>
+        <span class="c1"># we use legacy print options to make the string nicer with less fiddling</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">printoptions</span><span class="p">(</span><span class="n">legacy</span><span class="o">=</span><span class="s2">&quot;1.25&quot;</span><span class="p">):</span>
+            <span class="n">output_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                            </span><span class="si">{</span><span class="n">converged_message</span><span class="si">}</span>
+
+<span class="s2">                            Last accepted point is:</span>
+<span class="s2">                            </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> with a minimum</span>
+<span class="s2">                            FoM of </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span>
+
+<span class="s2">                            Best point measured was:</span>
+<span class="s2">                            </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> for a minimum FoM of</span>
+<span class="s2">                            </span><span class="si">{</span><span class="n">minimizer_output</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span>
+<span class="s2">                            &quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="n">dedent</span><span class="p">(</span><span class="n">output_string</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

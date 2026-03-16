@@ -261,7 +261,7 @@
 <span class="sd">    file_dump_prefix: str, optional</span>
 <span class="sd">        The name the dumped H5MD file should be. Default is ``trajectory``</span>
 <span class="sd">    minimizer_type : str, optional</span>
-<span class="sd">        The ``Minimizer`` type. Default is &#39;MMC&#39;.</span>
+<span class="sd">        The ``Minimizer`` type. Default is &#39;CMAES&#39;.</span>
 <span class="sd">    FoM_options : dict of {str : str}, optional</span>
 <span class="sd">        Defines the details of the ``FigureOfMeritCalculator`` to use. Default is `None`, in which</span>
 <span class="sd">        case the first option for each of the following keys is used:</span>
@@ -310,8 +310,15 @@
 <span class="sd">            blocks as possible (with overlap allowed).</span>
 <span class="sd">        results_filename: str</span>
 <span class="sd">            The name of the file in which the results of the MDMC run will be stored</span>
-<span class="sd">        MC_norm: int</span>
-<span class="sd">            1 if the MMC minimiser is to be used for parameter optimisation.</span>
+<span class="sd">        sigma0: float, optional</span>
+<span class="sd">            Initial standard deviation of the generated parameters.</span>
+<span class="sd">        CMA_popsize: int, optional</span>
+<span class="sd">            Population size, overrides the standard CMA-ES settings.</span>
+<span class="sd">        CMA_elitist: Any, optional</span>
+<span class="sd">            Whether to keep the best solution(s) in the next generation of solutions.</span>
+<span class="sd">            Can be an int, &quot;initial&quot; or True.</span>
+<span class="sd">        CMA_tolx: float, optional</span>
+<span class="sd">            Convergence criterion for the parameter change in consecutive generations. Def. 1e-3</span>
 <span class="sd">        use_average : bool, optional</span>
 <span class="sd">            Optional parameter relevant in case ``MD_steps`` is larger than the minimum required</span>
 <span class="sd">            and the MD ``CompactTrajectory`` is sliced into sub-``CompactTrajectory`` blocks.</span>
@@ -362,7 +369,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">exp_datasets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
                  <span class="n">fit_parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
-                 <span class="n">minimizer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;MMC&#39;</span><span class="p">,</span> <span class="n">FoM_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">minimizer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;CMAES&#39;</span><span class="p">,</span> <span class="n">FoM_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">reset_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">MD_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">equilibration_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="n">previous_history</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
